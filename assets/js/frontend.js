@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.8 - Frontend JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9 - Frontend JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: '2.8.0',
+        version: '2.9.0',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,
@@ -25,7 +25,7 @@
             this.initScrollTriggers();
             this.initResponsiveHandling();
 
-            console.log('Yadore Monetizer Pro v2.7 Frontend - Initialized');
+            console.log('Yadore Monetizer Pro v2.9 Frontend - Initialized');
         },
 
         // Initialize product overlay
@@ -145,7 +145,8 @@
                 nonce: this.settings.nonce,
                 limit: this.settings.limit || 3,
                 page_content: pageContent,
-                page_url: window.location.href
+                page_url: window.location.href,
+                post_id: this.settings.post_id || 0
             })
             .done((response) => {
                 if (response.success && response.data.products && response.data.products.length > 0) {
@@ -182,8 +183,8 @@
             const overlayBody = this.overlay.find('.overlay-body');
             let productsHtml = '<div class="overlay-products">';
 
-            products.forEach((product, index) => {
-                const imageUrl = product.thumbnail?.url || product.image?.url || 'https://via.placeholder.com/200x150';
+            products.forEach((product) => {
+                const imageUrl = product.thumbnail?.url || product.image?.url || '';
                 const title = product.title || 'Product';
                 const price = product.price?.amount || 'N/A';
                 const currency = product.price?.currency || '';
@@ -191,10 +192,14 @@
                 const clickUrl = product.clickUrl || '#';
                 const productId = product.id || '';
 
+                const imageMarkup = imageUrl
+                    ? `<img src="${imageUrl}" alt="${title}" loading="lazy">`
+                    : '<div class="overlay-product-image-placeholder" aria-hidden="true">📦</div>';
+
                 productsHtml += `
                     <div class="overlay-product" data-product-id="${productId}">
                         <div class="overlay-product-image">
-                            <img src="${imageUrl}" alt="${title}" loading="lazy">
+                            ${imageMarkup}
                         </div>
                         <div class="overlay-product-content">
                             <h4 class="overlay-product-title">${title}</h4>
@@ -245,6 +250,17 @@
                     width: 100%;
                     height: 150px;
                     object-fit: cover;
+                }
+
+                .overlay-product-image-placeholder {
+                    width: 100%;
+                    height: 150px;
+                    background: #ecf0f1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 32px;
+                    color: #95a5a6;
                 }
 
                 .overlay-product-content {

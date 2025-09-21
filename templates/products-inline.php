@@ -15,8 +15,15 @@
             <?php foreach (array_slice($offers, 0, 3) as $offer): ?>
                 <div class="inline-product" data-offer-id="<?php echo esc_attr($offer['id'] ?? ''); ?>">
                     <div class="inline-image">
-                        <img src="<?php echo esc_url($offer['thumbnail']['url'] ?? $offer['image']['url'] ?? 'https://via.placeholder.com/80x80'); ?>" 
-                             alt="<?php echo esc_attr($offer['title'] ?? 'Product'); ?>" loading="lazy">
+                        <?php
+                        $image_url = $offer['thumbnail']['url'] ?? $offer['image']['url'] ?? '';
+                        if (!empty($image_url)) :
+                        ?>
+                            <img src="<?php echo esc_url($image_url); ?>"
+                                 alt="<?php echo esc_attr($offer['title'] ?? 'Product'); ?>" loading="lazy">
+                        <?php else : ?>
+                            <div class="yadore-product-image-placeholder" aria-hidden="true">📦</div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="inline-details">
