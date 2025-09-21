@@ -71,6 +71,9 @@ class YadoreMonetizer {
             // Footer hook for overlay
             add_action('wp_footer', array($this, 'render_overlay'));
 
+            // Maintenance
+            add_action('yadore_cleanup_logs', array($this, 'cleanup_logs'));
+
             // Settings link on plugins page
             add_filter('plugin_action_links_' . plugin_basename(YADORE_PLUGIN_FILE), array($this, 'plugin_action_links'));
 
@@ -151,6 +154,400 @@ class YadoreMonetizer {
 
         } catch (Exception $e) {
             $this->log_error('Plugin deactivation failed', $e);
+        }
+    }
+
+    private function get_default_options() {
+        return array(
+            'yadore_api_key' => '',
+            'yadore_overlay_enabled' => 1,
+            'yadore_auto_detection' => 1,
+            'yadore_cache_duration' => 3600,
+            'yadore_debug_mode' => 0,
+            'yadore_ai_enabled' => 0,
+            'yadore_gemini_api_key' => '',
+            'yadore_gemini_model' => 'gemini-2.5-flash',
+            'yadore_ai_cache_duration' => 157680000,
+            'yadore_ai_prompt' => 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.',
+            'yadore_ai_temperature' => '0.3',
+            'yadore_ai_max_tokens' => 50,
+            'yadore_auto_scan_posts' => 1,
+            'yadore_bulk_scan_completed' => 0,
+            'yadore_min_content_words' => 300,
+            'yadore_scan_frequency' => 'daily',
+            'yadore_api_logging_enabled' => 1,
+            'yadore_log_retention_days' => 30,
+            'yadore_error_logging_enabled' => 1,
+            'yadore_error_retention_days' => 90,
+            'yadore_overlay_delay' => 2000,
+            'yadore_overlay_scroll_threshold' => 300,
+            'yadore_overlay_limit' => 3,
+            'yadore_overlay_position' => 'center',
+            'yadore_overlay_animation' => 'fade',
+            'yadore_injection_method' => 'after_paragraph',
+            'yadore_injection_position' => 2,
+            'yadore_performance_mode' => 0,
+            'yadore_analytics_enabled' => 1,
+            'yadore_export_enabled' => 1,
+            'yadore_backup_enabled' => 0,
+            'yadore_multisite_sync' => 0,
+        );
+    }
+
+    private function set_default_options() {
+        try {
+            $defaults = $this->get_default_options();
+
+            foreach ($defaults as $option => $default) {
+                $current = get_option($option, null);
+
+                if ($current === null) {
+                    add_option($option, $default);
+                }
+            }
+
+            $this->log('Default options verified', 'debug');
+
+        } catch (Exception $e) {
+            $this->log_error('Failed to initialize default options', $e);
+        }
+    }
+
+    private function setup_initial_data() {
+        try {
+            $this->set_default_options();
+
+            if (get_option('yadore_plugin_version') !== YADORE_PLUGIN_VERSION) {
+                update_option('yadore_plugin_version', YADORE_PLUGIN_VERSION);
+            }
+
+            if (false === get_option('yadore_install_timestamp', false)) {
+                add_option('yadore_install_timestamp', current_time('mysql'));
+            }
+
+            if (false === get_option('yadore_stats_cache', false)) {
+                add_option('yadore_stats_cache', array(
+                    'total_products' => 0,
+                    'scanned_posts' => 0,
+                    'overlay_views' => 0,
+                    'conversion_rate' => '0%',
+                ), '', 'no');
+            }
+
+        } catch (Exception $e) {
+            $this->log_error('Failed to setup initial data', $e);
+        }
+    }
+
+    private function setup_advanced_features() {
+        try {
+            $this->setup_cron_jobs();
+
+            $schedule_offset = defined('HOUR_IN_SECONDS') ? HOUR_IN_SECONDS : 3600;
+            if (!wp_next_scheduled('yadore_cleanup_logs')) {
+                wp_schedule_event(time() + $schedule_offset, 'daily', 'yadore_cleanup_logs');
+            }
+
+        } catch (Exception $e) {
+            $this->log_error('Failed to setup advanced features', $e);
+        }
+    }
+
+    private function handle_settings_save() {
+        try {
+            if (!current_user_can('manage_options')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $flat_post = array();
+            if (!empty($_POST['yadore_settings']) && is_array($_POST['yadore_settings'])) {
+                foreach (wp_unslash($_POST['yadore_settings']) as $key => $value) {
+                    $flat_post[$key] = $value;
+                }
+            }
+
+            foreach ($_POST as $key => $value) {
+                if ($key === 'yadore_settings') {
+                    continue;
+                }
+
+                $flat_post[$key] = is_array($value) ? $value : wp_unslash($value);
+            }
+
+            if (isset($flat_post['yadore_gemini_enabled'])) {
+                $flat_post['yadore_ai_enabled'] = $flat_post['yadore_gemini_enabled'];
+            }
+
+            $boolean_options = array(
+                'yadore_overlay_enabled',
+                'yadore_auto_detection',
+                'yadore_debug_mode',
+                'yadore_ai_enabled',
+                'yadore_auto_scan_posts',
+                'yadore_bulk_scan_completed',
+                'yadore_api_logging_enabled',
+                'yadore_error_logging_enabled',
+                'yadore_analytics_enabled',
+                'yadore_export_enabled',
+                'yadore_backup_enabled',
+                'yadore_multisite_sync',
+                'yadore_performance_mode',
+            );
+
+            foreach ($boolean_options as $option) {
+                $value = !empty($flat_post[$option]);
+                update_option($option, $this->sanitize_bool($value));
+            }
+
+            $int_options = array(
+                'yadore_overlay_delay',
+                'yadore_overlay_scroll_threshold',
+                'yadore_overlay_limit',
+                'yadore_injection_position',
+                'yadore_cache_duration',
+                'yadore_ai_cache_duration',
+                'yadore_log_retention_days',
+                'yadore_error_retention_days',
+                'yadore_ai_max_tokens',
+                'yadore_min_content_words',
+            );
+
+            foreach ($int_options as $option) {
+                if (isset($flat_post[$option])) {
+                    update_option($option, max(0, intval($flat_post[$option])));
+                }
+            }
+
+            if (isset($flat_post['yadore_ai_temperature'])) {
+                $temperature = floatval($flat_post['yadore_ai_temperature']);
+                $temperature = max(0, min(2, $temperature));
+                update_option('yadore_ai_temperature', (string)$temperature);
+            }
+
+            if (isset($flat_post['yadore_api_key'])) {
+                update_option('yadore_api_key', $this->sanitize_text($flat_post['yadore_api_key']));
+            }
+
+            if (isset($flat_post['yadore_gemini_api_key'])) {
+                update_option('yadore_gemini_api_key', $this->sanitize_text($flat_post['yadore_gemini_api_key']));
+            }
+
+            if (isset($flat_post['yadore_gemini_model'])) {
+                update_option('yadore_gemini_model', $this->sanitize_model($flat_post['yadore_gemini_model']));
+            }
+
+            if (isset($flat_post['yadore_ai_prompt'])) {
+                update_option('yadore_ai_prompt', sanitize_textarea_field($flat_post['yadore_ai_prompt']));
+            }
+
+            $select_mappings = array(
+                'yadore_overlay_position' => array('center', 'bottom-right', 'bottom-left'),
+                'yadore_overlay_animation' => array('fade', 'slide', 'zoom'),
+                'yadore_injection_method' => array('after_paragraph', 'end_of_content', 'before_content'),
+                'yadore_scan_frequency' => array('hourly', 'twicedaily', 'daily', 'weekly'),
+            );
+
+            foreach ($select_mappings as $option => $allowed) {
+                if (isset($flat_post[$option])) {
+                    $value = $this->sanitize_text($flat_post[$option]);
+                    if (!in_array($value, $allowed, true)) {
+                        $value = reset($allowed);
+                    }
+                    update_option($option, $value);
+                }
+            }
+
+            $this->log('Settings saved', 'info');
+
+        } catch (Exception $e) {
+            $this->log_error('Settings save failed', $e);
+        }
+    }
+
+    private function get_page_data($page) {
+        $data = array(
+            'options' => array(
+                'yadore_gemini_enabled' => (bool) get_option('yadore_ai_enabled', false),
+                'yadore_gemini_api_key' => get_option('yadore_gemini_api_key', ''),
+                'yadore_gemini_model' => get_option('yadore_gemini_model', 'gemini-2.5-flash'),
+            ),
+            'version' => YADORE_PLUGIN_VERSION,
+        );
+
+        if ($page === 'dashboard') {
+            $stats = get_option('yadore_stats_cache', array());
+            if (!is_array($stats)) {
+                $stats = array();
+            }
+
+            $data['stats'] = wp_parse_args($stats, array(
+                'total_products' => 0,
+                'scanned_posts' => 0,
+                'overlay_views' => 0,
+                'conversion_rate' => '0%',
+            ));
+        }
+
+        if ($page === 'debug') {
+            $data['debug_log'] = $this->get_debug_log();
+        }
+
+        return array('data' => $data);
+    }
+
+    public function add_dashboard_widgets() {
+        try {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
+
+            wp_add_dashboard_widget(
+                'yadore_monetizer_overview',
+                __('Yadore Monetizer Pro', 'yadore-monetizer'),
+                array($this, 'render_dashboard_widget')
+            );
+
+        } catch (Exception $e) {
+            $this->log_error('Dashboard widget registration failed', $e);
+        }
+    }
+
+    public function render_dashboard_widget() {
+        $stats = get_option('yadore_stats_cache', array());
+        if (!is_array($stats)) {
+            $stats = array();
+        }
+
+        $stats = wp_parse_args($stats, array(
+            'total_products' => 0,
+            'scanned_posts' => 0,
+            'overlay_views' => 0,
+            'conversion_rate' => '0%',
+        ));
+
+        echo '<p>' . esc_html__('Quick overview of your monetization activity.', 'yadore-monetizer') . '</p>';
+        echo '<ul class="yadore-dashboard-widget">';
+        echo '<li><strong>' . esc_html__('Products displayed:', 'yadore-monetizer') . '</strong> ' . esc_html((string) $stats['total_products']) . '</li>';
+        echo '<li><strong>' . esc_html__('Posts scanned:', 'yadore-monetizer') . '</strong> ' . esc_html((string) $stats['scanned_posts']) . '</li>';
+        echo '<li><strong>' . esc_html__('Overlay views:', 'yadore-monetizer') . '</strong> ' . esc_html((string) $stats['overlay_views']) . '</li>';
+        echo '<li><strong>' . esc_html__('Conversion rate:', 'yadore-monetizer') . '</strong> ' . esc_html((string) $stats['conversion_rate']) . '</li>';
+        echo '</ul>';
+    }
+
+    public function add_admin_bar_menu($admin_bar) {
+        try {
+            if (!current_user_can('manage_options') || !$admin_bar instanceof WP_Admin_Bar) {
+                return;
+            }
+
+            $admin_bar->add_node(array(
+                'id' => 'yadore-monetizer',
+                'title' => __('Yadore Monetizer', 'yadore-monetizer'),
+                'href' => admin_url('admin.php?page=yadore-monetizer'),
+                'meta' => array('class' => 'yadore-admin-bar'),
+            ));
+
+            $admin_bar->add_node(array(
+                'id' => 'yadore-monetizer-settings',
+                'parent' => 'yadore-monetizer',
+                'title' => __('Settings', 'yadore-monetizer'),
+                'href' => admin_url('admin.php?page=yadore-settings'),
+            ));
+
+            $admin_bar->add_node(array(
+                'id' => 'yadore-monetizer-debug',
+                'parent' => 'yadore-monetizer',
+                'title' => __('Debug', 'yadore-monetizer'),
+                'href' => admin_url('admin.php?page=yadore-debug'),
+            ));
+
+        } catch (Exception $e) {
+            $this->log_error('Admin bar menu registration failed', $e);
+        }
+    }
+
+    public function add_contextual_help() {
+        try {
+            if (!function_exists('get_current_screen')) {
+                return;
+            }
+
+            $screen = get_current_screen();
+            if (!$screen || strpos($screen->id, 'yadore') === false) {
+                return;
+            }
+
+            $screen->add_help_tab(array(
+                'id' => 'yadore_overview',
+                'title' => __('Overview', 'yadore-monetizer'),
+                'content' => '<p>' . esc_html__('Manage monetization settings, AI analysis and product display options from the tabs on this screen.', 'yadore-monetizer') . '</p>',
+            ));
+
+            $screen->add_help_tab(array(
+                'id' => 'yadore_support',
+                'title' => __('Support', 'yadore-monetizer'),
+                'content' => '<p>' . esc_html__('Need help? Review the documentation in the API Docs section or contact support through your Yadore account.', 'yadore-monetizer') . '</p>',
+            ));
+
+            $screen->set_help_sidebar('<p><strong>' . esc_html__('Helpful Resources', 'yadore-monetizer') . '</strong></p><p><a href="https://yadore.com" target="_blank" rel="noopener">Yadore.com</a></p>');
+
+        } catch (Exception $e) {
+            $this->log_error('Contextual help registration failed', $e);
+        }
+    }
+
+    public function add_screen_options() {
+        try {
+            if (!function_exists('get_current_screen') || !function_exists('add_screen_option')) {
+                return;
+            }
+
+            $screen = get_current_screen();
+            if (!$screen || strpos($screen->id, 'yadore') === false) {
+                return;
+            }
+
+            add_screen_option('per_page', array(
+                'label' => __('Items per page', 'yadore-monetizer'),
+                'default' => 20,
+                'option' => 'yadore_items_per_page',
+            ));
+
+        } catch (Exception $e) {
+            $this->log_error('Screen options registration failed', $e);
+        }
+    }
+
+    public function cleanup_logs() {
+        global $wpdb;
+
+        try {
+            if (!$wpdb instanceof wpdb) {
+                return;
+            }
+
+            $log_retention = max(1, intval(get_option('yadore_log_retention_days', 30)));
+            $error_retention = max(1, intval(get_option('yadore_error_retention_days', 90)));
+
+            $logs_table = $wpdb->prefix . 'yadore_api_logs';
+            $error_table = $wpdb->prefix . 'yadore_error_logs';
+
+            $day_in_seconds = defined('DAY_IN_SECONDS') ? DAY_IN_SECONDS : 86400;
+            $log_threshold = gmdate('Y-m-d H:i:s', time() - ($log_retention * $day_in_seconds));
+            $error_threshold = gmdate('Y-m-d H:i:s', time() - ($error_retention * $day_in_seconds));
+
+            if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $logs_table))) {
+                $wpdb->query($wpdb->prepare("DELETE FROM {$logs_table} WHERE created_at < %s", $log_threshold));
+            }
+
+            if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $error_table))) {
+                $wpdb->query($wpdb->prepare("DELETE FROM {$error_table} WHERE created_at < %s", $error_threshold));
+            }
+
+            $this->log('Scheduled log cleanup executed', 'debug');
+
+        } catch (Exception $e) {
+            $this->log_error('Log cleanup failed', $e);
         }
     }
 
