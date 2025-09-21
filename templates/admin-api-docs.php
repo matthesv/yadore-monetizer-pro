@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.7.0</span>
+        <span class="version-badge">v2.8.0</span>
     </h1>
 
     <div class="yadore-api-container">
@@ -219,7 +219,7 @@
                                 <div class="endpoint-details">
                                     <div class="endpoint-url">
                                         <span class="method">POST</span>
-                                        <code>https://generativelanguage.googleapis.com/v1/models/{model}:generateContent</code>
+                                        <code>https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent</code>
                                     </div>
 
                                     <div class="endpoint-description">
@@ -230,19 +230,29 @@
                                         <h4>Available Models</h4>
                                         <div class="models-list">
                                             <div class="model-item">
-                                                <h5>gemini-2.0-flash-exp</h5>
-                                                <p>Experimental model with fastest response times</p>
+                                                <h5>gemini-2.0-flash</h5>
+                                                <p>Fastest real-time model for production workloads</p>
                                                 <span class="model-badge recommended">Recommended</span>
                                             </div>
                                             <div class="model-item">
-                                                <h5>gemini-1.5-pro</h5>
-                                                <p>Most capable model with highest accuracy</p>
+                                                <h5>gemini-2.0-pro-exp</h5>
+                                                <p>Experimental pro model with the highest reasoning quality</p>
                                                 <span class="model-badge premium">Premium</span>
                                             </div>
                                             <div class="model-item">
-                                                <h5>gemini-1.5-flash</h5>
-                                                <p>Balanced performance and speed</p>
-                                                <span class="model-badge standard">Standard</span>
+                                                <h5>gemini-2.0-flash-lite</h5>
+                                                <p>Cost-efficient 2.0 model optimized for automation tasks</p>
+                                                <span class="model-badge standard">Efficient</span>
+                                            </div>
+                                            <div class="model-item">
+                                                <h5>gemini-1.5-flash-8b</h5>
+                                                <p>Lightweight option for quick content tagging and metadata</p>
+                                                <span class="model-badge standard">Lightweight</span>
+                                            </div>
+                                            <div class="model-item">
+                                                <h5>gemini-1.5-pro</h5>
+                                                <p>Highest accuracy for long-form editorial analysis</p>
+                                                <span class="model-badge premium">Advanced</span>
                                             </div>
                                         </div>
                                     </div>

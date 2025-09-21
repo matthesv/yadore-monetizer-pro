@@ -1,8 +1,23 @@
+<?php
+$available_models = isset($gemini_models) && is_array($gemini_models) ? $gemini_models : array(
+    'gemini-2.0-flash' => array('label' => 'Gemini 2.0 Flash - Fastest'),
+    'gemini-2.0-flash-lite' => array('label' => 'Gemini 2.0 Flash Lite - Efficient'),
+    'gemini-2.0-pro-exp' => array('label' => 'Gemini 2.0 Pro (Experimental) - Highest quality'),
+    'gemini-2.0-flash-exp' => array('label' => 'Gemini 2.0 Flash (Experimental) - Latest features'),
+    'gemini-1.5-pro' => array('label' => 'Gemini 1.5 Pro - Most capable'),
+    'gemini-1.5-flash' => array('label' => 'Gemini 1.5 Flash - Balanced'),
+    'gemini-1.5-flash-8b' => array('label' => 'Gemini 1.5 Flash 8B - Lightweight'),
+);
+$current_model = isset($selected_gemini_model)
+    ? $selected_gemini_model
+    : get_option('yadore_gemini_model', 'gemini-2.0-flash');
+$current_model_label = $available_models[$current_model]['label'] ?? $current_model;
+?>
 <div class="wrap yadore-admin-wrap">
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-generic"></span>
         AI Management & Analysis
-        <span class="version-badge">v2.7.0</span>
+        <span class="version-badge">v2.8.0</span>
     </h1>
 
     <div class="yadore-ai-container">
@@ -81,7 +96,7 @@
                                 <div class="config-group">
                                     <label>Current Model</label>
                                     <div class="model-display">
-                                        <span class="model-name"><?php echo get_option('yadore_gemini_model', 'gemini-2.0-flash-exp'); ?></span>
+                                        <span class="model-name"><?php echo esc_html($current_model_label); ?></span>
                                         <span class="model-status active">Active</span>
                                     </div>
                                 </div>
@@ -107,7 +122,7 @@
                                 <h3><span class="dashicons dashicons-performance"></span> Model Performance Comparison</h3>
                                 <div class="performance-grid">
                                     <div class="performance-card">
-                                        <h4>Gemini 2.0 Flash (Experimental)</h4>
+                                        <h4>Gemini 2.0 Flash</h4>
                                         <div class="performance-metrics">
                                             <div class="metric">
                                                 <span class="metric-label">Speed</span>
@@ -118,37 +133,61 @@
                                             <div class="metric">
                                                 <span class="metric-label">Accuracy</span>
                                                 <div class="metric-bar">
-                                                    <div class="metric-fill" style="width: 85%"></div>
+                                                    <div class="metric-fill" style="width: 88%"></div>
                                                 </div>
                                             </div>
                                             <div class="metric">
                                                 <span class="metric-label">Cost</span>
                                                 <div class="metric-bar">
-                                                    <div class="metric-fill" style="width: 20%"></div>
+                                                    <div class="metric-fill" style="width: 25%"></div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="performance-card">
-                                        <h4>Gemini 1.5 Pro</h4>
+                                        <h4>Gemini 2.0 Pro (Experimental)</h4>
                                         <div class="performance-metrics">
                                             <div class="metric">
                                                 <span class="metric-label">Speed</span>
                                                 <div class="metric-bar">
-                                                    <div class="metric-fill" style="width: 60%"></div>
+                                                    <div class="metric-fill" style="width: 75%"></div>
                                                 </div>
                                             </div>
                                             <div class="metric">
                                                 <span class="metric-label">Accuracy</span>
                                                 <div class="metric-bar">
-                                                    <div class="metric-fill" style="width: 98%"></div>
+                                                    <div class="metric-fill" style="width: 99%"></div>
                                                 </div>
                                             </div>
                                             <div class="metric">
                                                 <span class="metric-label">Cost</span>
                                                 <div class="metric-bar">
+                                                    <div class="metric-fill" style="width: 80%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="performance-card">
+                                        <h4>Gemini 1.5 Flash 8B</h4>
+                                        <div class="performance-metrics">
+                                            <div class="metric">
+                                                <span class="metric-label">Speed</span>
+                                                <div class="metric-bar">
+                                                    <div class="metric-fill" style="width: 85%"></div>
+                                                </div>
+                                            </div>
+                                            <div class="metric">
+                                                <span class="metric-label">Accuracy</span>
+                                                <div class="metric-bar">
                                                     <div class="metric-fill" style="width: 70%"></div>
+                                                </div>
+                                            </div>
+                                            <div class="metric">
+                                                <span class="metric-label">Cost</span>
+                                                <div class="metric-bar">
+                                                    <div class="metric-fill" style="width: 15%"></div>
                                                 </div>
                                             </div>
                                         </div>

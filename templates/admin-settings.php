@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.7.0</span>
+        <span class="version-badge">v2.8.0</span>
     </h1>
 
     <?php
@@ -142,19 +142,37 @@
                                     <span class="required">*</span>
                                 </label>
                                 <div class="input-group">
-                                    <input type="password" 
-                                           name="yadore_gemini_api_key" 
+                                    <input type="password"
+                                           name="yadore_gemini_api_key"
                                            id="yadore_gemini_api_key"
-                                           value="<?php echo esc_attr(get_option('yadore_gemini_api_key', '')); ?>" 
+                                           value="<?php echo esc_attr(get_option('yadore_gemini_api_key', '')); ?>"
                                            class="form-input"
-                                           placeholder="Enter your Gemini API key">
+                                           placeholder="Enter your Gemini API key"
+                                           autocomplete="new-password">
                                     <button type="button" class="button button-secondary" id="test-gemini-api">
                                         <span class="dashicons dashicons-admin-generic"></span> Test AI
                                     </button>
                                 </div>
                                 <p class="form-description">
-                                    Get your free Gemini API key from 
+                                    Get your free Gemini API key from
                                     <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>.
+                                </p>
+                                <?php if (get_option('yadore_gemini_api_key')) : ?>
+                                    <p class="form-description">
+                                        <?php esc_html_e('A Gemini API key is currently stored securely. Leave the field blank to keep the existing key.', 'yadore-monetizer'); ?>
+                                    </p>
+                                <?php else : ?>
+                                    <p class="form-description">
+                                        <?php esc_html_e('Enter your Gemini API key and save the settings to activate AI features.', 'yadore-monetizer'); ?>
+                                    </p>
+                                <?php endif; ?>
+                                <p class="form-description form-checkbox-inline">
+                                    <label>
+                                        <input type="checkbox"
+                                               name="yadore_gemini_api_key_remove"
+                                               value="1">
+                                        <?php esc_html_e('Remove the stored key when saving', 'yadore-monetizer'); ?>
+                                    </label>
                                 </p>
                                 <div id="gemini-api-test-results" class="api-test-results"></div>
                             </div>
@@ -164,25 +182,47 @@
                                     <strong>AI Model</strong>
                                 </label>
                                 <div class="model-selection">
+                                    <?php
+                                    $available_models = isset($gemini_models) && is_array($gemini_models) ? $gemini_models : array(
+                                        'gemini-2.0-flash' => array('label' => 'Gemini 2.0 Flash - Fastest'),
+                                        'gemini-2.0-flash-lite' => array('label' => 'Gemini 2.0 Flash Lite - Efficient'),
+                                        'gemini-2.0-pro-exp' => array('label' => 'Gemini 2.0 Pro (Experimental) - Highest quality'),
+                                        'gemini-2.0-flash-exp' => array('label' => 'Gemini 2.0 Flash (Experimental) - Latest features'),
+                                        'gemini-1.5-pro' => array('label' => 'Gemini 1.5 Pro - Most capable'),
+                                        'gemini-1.5-flash' => array('label' => 'Gemini 1.5 Flash - Balanced'),
+                                        'gemini-1.5-flash-8b' => array('label' => 'Gemini 1.5 Flash 8B - Lightweight'),
+                                    );
+                                    $current_model = isset($selected_gemini_model)
+                                        ? $selected_gemini_model
+                                        : get_option('yadore_gemini_model', 'gemini-2.0-flash');
+                                    ?>
                                     <select name="yadore_gemini_model" id="yadore_gemini_model" class="form-select">
-                                        <option value="gemini-2.0-flash-exp" <?php selected(get_option('yadore_gemini_model', 'gemini-2.0-flash-exp'), 'gemini-2.0-flash-exp'); ?>>
-                                            Gemini 2.0 Flash (Experimental) - Fastest
-                                        </option>
-                                        <option value="gemini-1.5-pro" <?php selected(get_option('yadore_gemini_model', ''), 'gemini-1.5-pro'); ?>>
-                                            Gemini 1.5 Pro - Most Capable
-                                        </option>
-                                        <option value="gemini-1.5-flash" <?php selected(get_option('yadore_gemini_model', ''), 'gemini-1.5-flash'); ?>>
-                                            Gemini 1.5 Flash - Balanced
-                                        </option>
+                                        <?php foreach ($available_models as $model_key => $model_info) : ?>
+                                            <option value="<?php echo esc_attr($model_key); ?>" <?php selected($current_model, $model_key); ?>>
+                                                <?php echo esc_html($model_info['label'] ?? $model_key); ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
+                                    <?php
+                                    $preset_buttons = array(
+                                        'gemini-2.0-flash' => __('Flash 2.0', 'yadore-monetizer'),
+                                        'gemini-2.0-pro-exp' => __('Pro 2.0 (Exp)', 'yadore-monetizer'),
+                                        'gemini-1.5-pro' => __('1.5 Pro', 'yadore-monetizer'),
+                                        'gemini-1.5-flash-8b' => __('1.5 Flash 8B', 'yadore-monetizer'),
+                                    );
+                                    ?>
                                     <div class="model-presets">
-                                        <button type="button" class="button button-small model-preset" data-model="gemini-2.0-flash-exp">Fast</button>
-                                        <button type="button" class="button button-small model-preset" data-model="gemini-1.5-pro">Pro</button>
-                                        <button type="button" class="button button-small model-preset" data-model="gemini-1.5-flash">Balanced</button>
+                                        <?php foreach ($preset_buttons as $model_key => $label) : ?>
+                                            <button type="button"
+                                                    class="button button-small model-preset <?php echo $current_model === $model_key ? 'button-primary' : 'button-secondary'; ?>"
+                                                    data-model="<?php echo esc_attr($model_key); ?>">
+                                                <?php echo esc_html($label); ?>
+                                            </button>
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
                                 <p class="form-description">
-                                    Choose the AI model that best fits your needs. Flash models are faster, Pro models are more accurate.
+                                    Choose from the latest Gemini models. Gemini 2.0 provides the newest capabilities, while Gemini 1.5 models balance performance and cost.
                                 </p>
                             </div>
 

@@ -1,12 +1,12 @@
-# Yadore Monetizer Pro v2.7.0 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.8.0 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.7.0 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.8.0 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
-✅ **AI Content Analysis** - Gemini AI Integration mit intelligenter Keyword-Erkennung  
+✅ **AI Content Analysis** - Gemini 2.0 & 1.5 Model Support mit intelligenter Keyword-Erkennung
 ✅ **Advanced Analytics** - Umfassende Performance-Berichte und Statistiken  
 ✅ **Bulk Post Scanner** - Automatische Content-Analyse für alle Posts  
 ✅ **Product Overlay System** - Intelligente Produktempfehlungen mit Overlay  
@@ -60,7 +60,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.7.0:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.8.0:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -258,7 +258,12 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.7.0 - VOLLSTÄNDIGE FUNKTIONALITÄT WIEDERHERGESTELLT!**
+## 🎉 **v2.8.0 - GEMINI 2.0 READY RELEASE!**
+
+### **Neue Highlights in v2.8.0:**
+- 🔐 Gespeicherte Gemini API Keys bleiben erhalten, solange sie nicht aktiv entfernt werden
+- 🤖 Vollständige Unterstützung der aktuellen Gemini 2.0 Flash/Pro-Modelle inklusive Flash Lite & 1.5 Flash 8B
+- ⚙️ Live-Gemini-Requests direkt im Plugin mit verbessertem Fehler-Handling
 
 **Alle Features sind wieder verfügbar und voll funktional!**
 
@@ -274,11 +279,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING  
 ✅ **Tools:** COMPREHENSIVE UTILITIES  
 
-**Yadore Monetizer Pro v2.7.0 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.8.0 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.7.0** - Complete Feature Set Release  
+**Current Version: 2.8.0** - Gemini 2.0 Ready Release
 **Feature Status: ✅ ALL INTEGRATED**  
 **WordPress Integration: ✅ 100% COMPLETE**  
 **Production Status: ✅ ENTERPRISE READY**
