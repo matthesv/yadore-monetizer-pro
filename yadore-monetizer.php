@@ -1086,15 +1086,24 @@ $wpdb->insert($analytics_table, array(
 }
 
 // Plugin Update Checker laden (GitHub) - optional
-require_once NEWS_TICKER_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
-use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+$update_checker_file = YADORE_PLUGIN_DIR . 'includes/plugin-update-checker/plugin-update-checker.php';
 
-$myUpdateChecker = PucFactory::buildUpdateChecker(
-    'https://github.com/matthesv/yadore-monetizer-pro/',
-    __FILE__,
-    'yadore-monetizer-pro'
-);
-$myUpdateChecker->setBranch('main');
+if (file_exists($update_checker_file)) {
+    require_once $update_checker_file;
+
+    if (class_exists('\\YahnisElsts\\PluginUpdateChecker\\v5\\PucFactory')) {
+        $myUpdateChecker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+            'https://github.com/matthesv/yadore-monetizer-pro/',
+            __FILE__,
+            'yadore-monetizer-pro'
+        );
+        $myUpdateChecker->setBranch('main');
+    }
+} else {
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('Yadore Monetizer Pro: Plugin update checker file not found at ' . $update_checker_file);
+    }
+}
 // Initialize the plugin
 new YadoreMonetizer();
 ?>
