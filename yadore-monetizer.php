@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.7.0
+Version: 2.8.0
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.7.0');
+define('YADORE_PLUGIN_VERSION', '2.8.0');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -81,7 +81,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.7.0 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.8.0 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -166,7 +166,7 @@ class YadoreMonetizer {
             'yadore_debug_mode' => 0,
             'yadore_ai_enabled' => 0,
             'yadore_gemini_api_key' => '',
-            'yadore_gemini_model' => 'gemini-2.5-flash',
+            'yadore_gemini_model' => $this->get_default_gemini_model(),
             'yadore_ai_cache_duration' => 157680000,
             'yadore_ai_prompt' => 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.',
             'yadore_ai_temperature' => '0.3',
@@ -328,8 +328,13 @@ class YadoreMonetizer {
                 update_option('yadore_api_key', $this->sanitize_text($flat_post['yadore_api_key']));
             }
 
-            if (isset($flat_post['yadore_gemini_api_key'])) {
-                update_option('yadore_gemini_api_key', $this->sanitize_text($flat_post['yadore_gemini_api_key']));
+            if (!empty($flat_post['yadore_gemini_api_key_remove'])) {
+                delete_option('yadore_gemini_api_key');
+            } elseif (isset($flat_post['yadore_gemini_api_key'])) {
+                $submitted_key = trim((string) $flat_post['yadore_gemini_api_key']);
+                if ($submitted_key !== '') {
+                    update_option('yadore_gemini_api_key', $this->sanitize_api_key($submitted_key));
+                }
             }
 
             if (isset($flat_post['yadore_gemini_model'])) {
@@ -369,10 +374,12 @@ class YadoreMonetizer {
             'options' => array(
                 'yadore_gemini_enabled' => (bool) get_option('yadore_ai_enabled', false),
                 'yadore_gemini_api_key' => get_option('yadore_gemini_api_key', ''),
-                'yadore_gemini_model' => get_option('yadore_gemini_model', 'gemini-2.5-flash'),
+                'yadore_gemini_model' => get_option('yadore_gemini_model', $this->get_default_gemini_model()),
             ),
             'version' => YADORE_PLUGIN_VERSION,
         );
+
+        $selected_model = $this->sanitize_model($data['options']['yadore_gemini_model']);
 
         if ($page === 'dashboard') {
             $stats = get_option('yadore_stats_cache', array());
@@ -392,7 +399,11 @@ class YadoreMonetizer {
             $data['debug_log'] = $this->get_debug_log();
         }
 
-        return array('data' => $data);
+        return array(
+            'data' => $data,
+            'gemini_models' => $this->get_supported_gemini_models(),
+            'selected_gemini_model' => $selected_model,
+        );
     }
 
     public function add_dashboard_widgets() {
@@ -913,7 +924,7 @@ class YadoreMonetizer {
                 throw new Exception('Gemini API key not configured');
             }
 
-            $model = get_option('yadore_gemini_model', 'gemini-2.0-flash-exp');
+            $model = $this->sanitize_model(get_option('yadore_gemini_model', $this->get_default_gemini_model()));
             $test_content = 'This is a comprehensive test post about smartphone reviews, mobile technology, and the latest iPhone features.';
 
             $result = $this->call_gemini_api('Test Post - Smartphone Review', $test_content, false);
@@ -1186,14 +1197,167 @@ class YadoreMonetizer {
     }
 
     private function call_gemini_api($title, $content, $use_cache = true, $post_id = 0) {
-        // v2.7: Enhanced Gemini API integration with better error handling
-        $api_key = get_option('yadore_gemini_api_key');
-        if (empty($api_key)) {
-            return array('error' => 'Gemini API key not configured');
-        }
+        try {
+            $api_key = trim((string) get_option('yadore_gemini_api_key'));
+            if (empty($api_key)) {
+                return array('error' => __('Gemini API key not configured', 'yadore-monetizer'));
+            }
 
-        // For now, return mock response
-        return 'smartphone';
+            $model = $this->sanitize_model(get_option('yadore_gemini_model', $this->get_default_gemini_model()));
+
+            $prompt_template = (string) get_option(
+                'yadore_ai_prompt',
+                'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.'
+            );
+            if (trim($prompt_template) === '') {
+                $prompt_template = 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.';
+            }
+
+            $prompt = str_replace(
+                array('{title}', '{content}'),
+                array($title, $content),
+                $prompt_template
+            );
+            $prompt = trim($prompt);
+
+            $cache_key = 'yadore_ai_' . md5($model . '|' . $prompt);
+            if ($use_cache) {
+                $cached = get_transient($cache_key);
+                if ($cached !== false) {
+                    return $cached;
+                }
+            }
+
+            $temperature = floatval(get_option('yadore_ai_temperature', '0.3'));
+            $temperature = max(0, min(2, $temperature));
+            $max_tokens = intval(get_option('yadore_ai_max_tokens', 50));
+            if ($max_tokens <= 0) {
+                $max_tokens = 50;
+            }
+
+            $endpoint_base = sprintf(
+                'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent',
+                rawurlencode($model)
+            );
+            $request_url = add_query_arg(array('key' => $api_key), $endpoint_base);
+
+            $request_body = array(
+                'contents' => array(
+                    array(
+                        'parts' => array(
+                            array(
+                                'text' => $prompt,
+                            ),
+                        ),
+                    ),
+                ),
+                'generationConfig' => array(
+                    'temperature' => $temperature,
+                    'maxOutputTokens' => $max_tokens,
+                ),
+            );
+
+            $response = wp_remote_post($request_url, array(
+                'headers' => array(
+                    'Content-Type' => 'application/json',
+                ),
+                'body' => wp_json_encode($request_body),
+                'timeout' => 20,
+            ));
+
+            if (is_wp_error($response)) {
+                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                    'model' => $model,
+                    'message' => $response->get_error_message(),
+                ));
+                return array('error' => sprintf(__('Gemini API request failed: %s', 'yadore-monetizer'), $response->get_error_message()));
+            }
+
+            $status = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+            $decoded = json_decode($body, true);
+
+            if ($status < 200 || $status >= 300) {
+                $message = __('Unexpected response from Gemini API.', 'yadore-monetizer');
+                if (is_array($decoded) && isset($decoded['error']['message'])) {
+                    $message = $decoded['error']['message'];
+                }
+
+                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                    'status' => $status,
+                    'model' => $model,
+                    'response' => $decoded,
+                ));
+
+                return array('error' => $message);
+            }
+
+            if (!is_array($decoded)) {
+                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                    'status' => $status,
+                    'model' => $model,
+                    'response' => $body,
+                ));
+                return array('error' => __('Gemini API returned an invalid response.', 'yadore-monetizer'));
+            }
+
+            if (isset($decoded['promptFeedback']['blockReason'])) {
+                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                    'status' => $status,
+                    'model' => $model,
+                    'response' => $decoded,
+                ));
+
+                return array('error' => sprintf(__('Gemini API blocked the request: %s', 'yadore-monetizer'), $decoded['promptFeedback']['blockReason']));
+            }
+
+            $candidate_text = '';
+            if (!empty($decoded['candidates']) && is_array($decoded['candidates'])) {
+                foreach ($decoded['candidates'] as $candidate) {
+                    if (!empty($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
+                        foreach ($candidate['content']['parts'] as $part) {
+                            if (!empty($part['text'])) {
+                                $candidate_text .= $part['text'] . "\n";
+                            }
+                        }
+                    }
+                }
+            }
+
+            $candidate_text = trim($candidate_text);
+            if ($candidate_text === '') {
+                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                    'status' => $status,
+                    'model' => $model,
+                    'response' => $decoded,
+                ));
+                return array('error' => __('Gemini API returned an empty response.', 'yadore-monetizer'));
+            }
+
+            $lines = preg_split('/[\r\n]+/', $candidate_text);
+            $keyword = trim($lines[0] ?? $candidate_text);
+            if ($keyword === '') {
+                $keyword = $candidate_text;
+            }
+
+            if ($use_cache) {
+                $cache_duration = intval(get_option('yadore_ai_cache_duration', 157680000));
+                if ($cache_duration > 0) {
+                    set_transient($cache_key, $keyword, $cache_duration);
+                }
+            }
+
+            $this->log_api_call('gemini', $endpoint_base, 'success', array(
+                'model' => $model,
+                'post_id' => $post_id,
+                'result' => $keyword,
+            ));
+
+            return $keyword;
+        } catch (Exception $e) {
+            $this->log_error('Gemini API request failed', $e);
+            return array('error' => $e->getMessage());
+        }
     }
 
     // More methods will be implemented in subsequent parts...
@@ -1475,10 +1639,51 @@ $wpdb->insert($analytics_table, array(
     /** Basic sanitize helpers (single authoritative copy) */
     private function sanitize_bool($v){ return $v ? 1 : 0; }
     private function sanitize_text($v){ return sanitize_text_field( (string) $v ); }
+    private function sanitize_api_key($v){
+        $v = trim((string) $v);
+        $v = preg_replace('/\s+/', '', $v);
+        return sanitize_text_field($v);
+    }
     private function sanitize_model($v){
+        $models = $this->get_supported_gemini_models();
         $v = trim((string)$v);
-        if ($v==='') $v = 'gemini-2.5-flash';
-        return preg_replace('/[^a-zA-Z0-9._\-]/', '', $v);
+        $v = preg_replace('/[^a-zA-Z0-9._\-]/', '', $v);
+        if ($v === '' || !isset($models[$v])) {
+            return $this->get_default_gemini_model();
+        }
+        return $v;
+    }
+
+    private function get_supported_gemini_models() {
+        return array(
+            'gemini-2.0-flash' => array(
+                'label' => __('Gemini 2.0 Flash - Fastest', 'yadore-monetizer'),
+            ),
+            'gemini-2.0-flash-lite' => array(
+                'label' => __('Gemini 2.0 Flash Lite - Efficient', 'yadore-monetizer'),
+            ),
+            'gemini-2.0-pro-exp' => array(
+                'label' => __('Gemini 2.0 Pro (Experimental) - Highest quality', 'yadore-monetizer'),
+            ),
+            'gemini-2.0-flash-exp' => array(
+                'label' => __('Gemini 2.0 Flash (Experimental) - Latest features', 'yadore-monetizer'),
+            ),
+            'gemini-1.5-pro' => array(
+                'label' => __('Gemini 1.5 Pro - Most capable', 'yadore-monetizer'),
+            ),
+            'gemini-1.5-flash' => array(
+                'label' => __('Gemini 1.5 Flash - Balanced', 'yadore-monetizer'),
+            ),
+            'gemini-1.5-flash-8b' => array(
+                'label' => __('Gemini 1.5 Flash 8B - Lightweight', 'yadore-monetizer'),
+            ),
+        );
+    }
+
+    private function get_default_gemini_model() {
+        $models = $this->get_supported_gemini_models();
+        $first = array_key_first($models);
+        return $first ?: 'gemini-2.0-flash';
     }
 }
 
