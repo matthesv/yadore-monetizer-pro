@@ -1085,21 +1085,6 @@ $wpdb->insert($analytics_table, array(
     }
 }
 
-
-
-
-}
-
-
-
-
-}
-
-
-
-
-}
-
 // Plugin Update Checker laden (GitHub) - optional
 require_once NEWS_TICKER_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
