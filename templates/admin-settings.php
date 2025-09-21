@@ -12,37 +12,6 @@
     }
     ?>
 
-    \1
-
-<h2><?php echo esc_html__('Gemini AI Konfiguration', 'yadore-monetizer'); ?></h2>
-<table class="form-table" role="presentation">
-  <tbody>
-    <tr>
-      <th scope="row"><?php echo esc_html__('AI-Analyse aktivieren', 'yadore-monetizer'); ?></th>
-      <td>
-        <label>
-          <input type="checkbox" name="yadore_settings[yadore_gemini_enabled]" value="1" <?php checked( !empty($data['options']['yadore_gemini_enabled']) ); ?> />
-          <?php echo esc_html__('Enable AI Content Analysis', 'yadore-monetizer'); ?>
-        </label>
-        <p class="description"><?php echo esc_html__('Verwendet Google Gemini zur Analyse von Beiträgen und zum Extrahieren relevanter Produkt-Keywords.', 'yadore-monetizer'); ?></p>
-      </td>
-    </tr>
-    <tr>
-      <th scope="row"><?php echo esc_html__('Gemini API Key', 'yadore-monetizer'); ?></th>
-      <td>
-        <input type="text" class="regular-text" name="yadore_settings[yadore_gemini_api_key]" value="<?php echo isset($data['options']['yadore_gemini_api_key']) ? esc_attr($data['options']['yadore_gemini_api_key']) : ''; ?>" autocomplete="off" />
-        <p class="description"><?php echo esc_html__('API-Schlüssel von Google AI Studio / Google Cloud (Vertex AI falls verwendet).', 'yadore-monetizer'); ?></p>
-      </td>
-    </tr>
-    <tr>
-      <th scope="row"><?php echo esc_html__('Gemini Modell', 'yadore-monetizer'); ?></th>
-      <td>
-        <input type="text" class="regular-text" name="yadore_settings[yadore_gemini_model]" value="<?php echo isset($data['options']['yadore_gemini_model']) ? esc_attr($data['options']['yadore_gemini_model']) : 'gemini-2.5-flash'; ?>" />
-        <p class="description"><?php echo esc_html__('Beispiel: gemini-2.5-flash (frei wählbar, je nach Konto/Region).', 'yadore-monetizer'); ?></p>
-      </td>
-    </tr>
-  </tbody>
-</table>
 
         <?php wp_nonce_field('yadore_settings', 'yadore_nonce'); ?>
 
