@@ -4,7 +4,7 @@
 
     // Global variables
     window.yadoreAdmin = {
-        version: '2.9.0',
+        version: '2.9.1',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,

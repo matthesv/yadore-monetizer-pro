@@ -4,7 +4,7 @@
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: '2.9.0',
+        version: '2.9.1',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,

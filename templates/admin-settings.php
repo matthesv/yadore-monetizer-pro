@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.0</span>
+        <span class="version-badge">v2.9.1</span>
     </h1>
 
     <?php
