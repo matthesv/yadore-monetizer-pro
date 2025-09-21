@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.8 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: '2.8.0',
+        version: '2.9.0',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -20,7 +20,7 @@
             this.initTools();
             this.initDebug();
 
-            console.log('Yadore Monetizer Pro v2.7 Admin - Fully Initialized');
+            console.log('Yadore Monetizer Pro v2.9 Admin - Fully Initialized');
         },
 
         // Dashboard functionality

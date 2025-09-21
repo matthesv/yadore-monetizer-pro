@@ -3,8 +3,15 @@
         <?php foreach ($offers as $offer): ?>
             <div class="yadore-product-card" data-offer-id="<?php echo esc_attr($offer['id'] ?? ''); ?>">
                 <div class="product-image">
-                    <img src="<?php echo esc_url($offer['thumbnail']['url'] ?? $offer['image']['url'] ?? 'https://via.placeholder.com/200x150'); ?>" 
-                         alt="<?php echo esc_attr($offer['title'] ?? 'Product'); ?>" loading="lazy">
+                    <?php
+                    $image_url = $offer['thumbnail']['url'] ?? $offer['image']['url'] ?? '';
+                    if (!empty($image_url)) :
+                    ?>
+                        <img src="<?php echo esc_url($image_url); ?>"
+                             alt="<?php echo esc_attr($offer['title'] ?? 'Product'); ?>" loading="lazy">
+                    <?php else : ?>
+                        <div class="yadore-product-image-placeholder" aria-hidden="true">📦</div>
+                    <?php endif; ?>
 
                     <?php if (!empty($offer['promoText'])): ?>
                         <div class="product-badge"><?php echo esc_html($offer['promoText']); ?></div>
