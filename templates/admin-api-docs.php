@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.5</span>
+        <span class="version-badge">v2.9.6</span>
     </h1>
 
     <div class="yadore-api-container">
@@ -104,6 +104,13 @@
                     <!-- Yadore API Documentation -->
                     <div class="tab-content active" id="tab-yadore">
                         <div class="api-documentation">
+                            <div class="api-spec-callout">
+                                <p>
+                                    <strong>Yadore Publisher API 2.0.0</strong> (OAS 3.0) &ndash; vollständige Spezifikation unter
+                                    <code>https://api.yadore.com/openapi.yaml</code>. Alle Endpunkte verwenden den Server
+                                    <code>https://api.yadore.com/</code>.
+                                </p>
+                            </div>
                             <div class="endpoint-section">
                                 <h3>Offer Search Endpoint</h3>
                                 <div class="endpoint-details">
