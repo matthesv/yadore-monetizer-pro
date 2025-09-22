@@ -17,7 +17,7 @@ $current_model_label = $available_models[$current_model]['label'] ?? $current_mo
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-generic"></span>
         AI Management & Analysis
-        <span class="version-badge">v2.9.2</span>
+        <span class="version-badge">v2.9.3</span>
     </h1>
 
     <div class="yadore-ai-container">

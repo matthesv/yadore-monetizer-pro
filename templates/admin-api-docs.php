@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.2</span>
+        <span class="version-badge">v2.9.3</span>
     </h1>
 
     <div class="yadore-api-container">
@@ -105,15 +105,15 @@
                     <div class="tab-content active" id="tab-yadore">
                         <div class="api-documentation">
                             <div class="endpoint-section">
-                                <h3>Product Search Endpoint</h3>
+                                <h3>Offer Search Endpoint</h3>
                                 <div class="endpoint-details">
                                     <div class="endpoint-url">
-                                        <span class="method">POST</span>
-                                        <code>https://api.yadore.com/products/search</code>
+                                        <span class="method">GET</span>
+                                        <code>https://api.yadore.com/v2/offer</code>
                                     </div>
 
                                     <div class="endpoint-description">
-                                        <p>Search for products based on keywords and return relevant affiliate offers.</p>
+                                        <p>Search for affiliate-ready offers based on keywords and return enriched pricing and deeplink data.</p>
                                     </div>
 
                                     <div class="endpoint-parameters">
@@ -129,12 +129,6 @@
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td><code>api_key</code></td>
-                                                    <td>string</td>
-                                                    <td>Yes</td>
-                                                    <td>Your Yadore API key</td>
-                                                </tr>
-                                                <tr>
                                                     <td><code>keyword</code></td>
                                                     <td>string</td>
                                                     <td>Yes</td>
@@ -144,13 +138,38 @@
                                                     <td><code>limit</code></td>
                                                     <td>integer</td>
                                                     <td>No</td>
-                                                    <td>Number of products to return (default: 6, max: 50)</td>
+                                                    <td>Number of offers to return (default: 6, max: 50)</td>
                                                 </tr>
                                                 <tr>
-                                                    <td><code>country</code></td>
+                                                    <td><code>market</code></td>
                                                     <td>string</td>
                                                     <td>No</td>
-                                                    <td>Country code for localized results (default: 'US')</td>
+                                                    <td>Market code (e.g. <code>DE</code>, <code>AT</code>) for localized results</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="endpoint-parameters">
+                                        <h4>Headers</h4>
+                                        <table class="params-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Header</th>
+                                                    <th>Required</th>
+                                                    <th>Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><code>API-Key</code></td>
+                                                    <td>Yes</td>
+                                                    <td>Your personal Yadore Publisher API key</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><code>Accept</code></td>
+                                                    <td>No</td>
+                                                    <td>Use <code>application/json</code> to receive JSON responses</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -158,45 +177,30 @@
 
                                     <div class="endpoint-example">
                                         <h4>Example Request</h4>
-                                        <pre><code>POST /products/search HTTP/1.1
+                                        <pre><code>GET /v2/offer?keyword=smartphone&amp;limit=6&amp;market=DE HTTP/1.1
 Host: api.yadore.com
-Authorization: Bearer YOUR_API_KEY
-X-Yadore-Api-Key: YOUR_API_KEY
-Content-Type: application/json
-
-{
-  "keyword": "smartphone",
-  "limit": 6,
-  "country": "US"
-}</code></pre>
+API-Key: YOUR_API_KEY
+Accept: application/json</code></pre>
                                     </div>
 
                                     <div class="endpoint-response">
                                         <h4>Example Response</h4>
                                         <pre><code>{
-  "success": true,
-  "data": [
+  "offers": [
     {
-      "id": "product_123",
-      "title": "iPhone 15 Pro",
+      "offerId": "offer_123",
+      "name": "iPhone 15 Pro",
       "price": {
         "amount": "999.00",
-        "currency": "USD"
+        "currency": "EUR"
       },
-      "image": {
-        "url": "https://example.com/image.jpg"
-      },
-      "merchant": {
-        "name": "Apple Store",
-        "logo": "https://example.com/logo.jpg"
-      },
-      "clickUrl": "https://affiliate.link/123",
-      "rating": 4.8,
-      "reviews": 1250
+      "deeplink": "https://affiliate.link/123",
+      "imageUrl": "https://example.com/image.jpg",
+      "merchantName": "Apple Store"
     }
   ],
   "total": 1,
-  "request_id": "req_abc123"
+  "requestId": "req_abc123"
 }</code></pre>
                                     </div>
 

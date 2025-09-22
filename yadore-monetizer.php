@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.2
+Version: 2.9.3
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.2');
+define('YADORE_PLUGIN_VERSION', '2.9.3');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -81,7 +81,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.2 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.3 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -1414,42 +1414,53 @@ class YadoreMonetizer {
             return array();
         }
 
-        $endpoint = 'https://api.yadore.com/products/search';
+        $endpoint = 'https://api.yadore.com/v2/offer';
 
-        $request_body = array(
-            'api_key' => $api_key,
+        $request_params = array(
             'keyword' => $keyword,
             'limit' => $limit,
         );
 
         if (!empty($country)) {
-            $request_body['country'] = strtoupper($country);
+            $request_params['market'] = strtoupper($country);
         }
 
-        $request_body = apply_filters('yadore_products_request_body', $request_body, $keyword, $limit, $post_id);
+        $request_params = apply_filters('yadore_products_request_body', $request_params, $keyword, $limit, $post_id);
+
+        if (!is_array($request_params)) {
+            $request_params = array();
+        }
+
+        $request_params = array_filter(
+            $request_params,
+            static function ($value) {
+                return $value !== null && $value !== '';
+            }
+        );
+
+        $request_url = add_query_arg($request_params, $endpoint);
 
         $args = array(
             'headers' => array(
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
-                'Authorization' => 'Bearer ' . $api_key,
-                'X-Yadore-Api-Key' => $api_key,
+                'API-Key' => $api_key,
             ),
-            'body' => wp_json_encode($request_body),
             'timeout' => 20,
         );
 
         $args = apply_filters('yadore_products_request_args', $args, $keyword, $limit, $post_id);
 
         $start_time = microtime(true);
-        $response = wp_remote_post($endpoint, $args);
+        $response = wp_remote_get($request_url, $args);
         $duration_ms = (int) round((microtime(true) - $start_time) * 1000);
 
         if (is_wp_error($response)) {
             $this->log_api_call('yadore', $endpoint, 'error', array(
                 'keyword' => $keyword,
                 'limit' => $limit,
+                'url' => $request_url,
                 'message' => $response->get_error_message(),
                 'duration_ms' => $duration_ms,
             ));
@@ -1470,6 +1481,7 @@ class YadoreMonetizer {
             $this->log_api_call('yadore', $endpoint, 'error', array(
                 'keyword' => $keyword,
                 'limit' => $limit,
+                'url' => $request_url,
                 'status' => $status,
                 'response' => $decoded,
                 'duration_ms' => $duration_ms,
@@ -1488,6 +1500,7 @@ class YadoreMonetizer {
             $this->log_api_call('yadore', $endpoint, 'error', array(
                 'keyword' => $keyword,
                 'limit' => $limit,
+                'url' => $request_url,
                 'status' => $status,
                 'response' => $body,
                 'duration_ms' => $duration_ms,
@@ -1507,6 +1520,7 @@ class YadoreMonetizer {
             $this->log_api_call('yadore', $endpoint, 'error', array(
                 'keyword' => $keyword,
                 'limit' => $limit,
+                'url' => $request_url,
                 'response' => $decoded,
                 'duration_ms' => $duration_ms,
             ));
@@ -1520,10 +1534,28 @@ class YadoreMonetizer {
         }
 
         $products = array();
-        if (isset($decoded['data']) && is_array($decoded['data'])) {
-            $products = $decoded['data'];
-        } elseif (isset($decoded['products']) && is_array($decoded['products'])) {
-            $products = $decoded['products'];
+
+        $possible_collections = array(
+            'data',
+            'products',
+            'offers',
+            'items',
+        );
+
+        foreach ($possible_collections as $collection_key) {
+            if (isset($decoded[$collection_key]) && is_array($decoded[$collection_key])) {
+                $products = $decoded[$collection_key];
+                break;
+            }
+        }
+
+        if (empty($products) && isset($decoded['data']) && is_array($decoded['data'])) {
+            foreach (array('offers', 'items', 'products') as $nested_key) {
+                if (isset($decoded['data'][$nested_key]) && is_array($decoded['data'][$nested_key])) {
+                    $products = $decoded['data'][$nested_key];
+                    break;
+                }
+            }
         }
 
         if (!is_array($products)) {
@@ -1537,6 +1569,7 @@ class YadoreMonetizer {
         $this->log_api_call('yadore', $endpoint, 'success', array(
             'keyword' => $keyword,
             'limit' => $limit,
+            'url' => $request_url,
             'count' => count($products),
             'duration_ms' => $duration_ms,
         ));
@@ -1559,7 +1592,17 @@ class YadoreMonetizer {
         $sanitized = $product;
 
         $sanitized['id'] = isset($product['id']) ? sanitize_text_field((string) $product['id']) : '';
+        if (empty($sanitized['id']) && isset($product['offerId'])) {
+            $sanitized['id'] = sanitize_text_field((string) $product['offerId']);
+        }
+
         $sanitized['title'] = isset($product['title']) ? sanitize_text_field((string) $product['title']) : '';
+        if ($sanitized['title'] === '' && isset($product['name'])) {
+            $sanitized['title'] = sanitize_text_field((string) $product['name']);
+        }
+        if ($sanitized['title'] === '' && isset($product['productName'])) {
+            $sanitized['title'] = sanitize_text_field((string) $product['productName']);
+        }
 
         if (isset($product['price']) && is_array($product['price'])) {
             $sanitized['price']['amount'] = isset($product['price']['amount'])
@@ -1568,11 +1611,20 @@ class YadoreMonetizer {
             $sanitized['price']['currency'] = isset($product['price']['currency'])
                 ? sanitize_text_field((string) $product['price']['currency'])
                 : '';
+            if ($sanitized['price']['amount'] === '' && isset($product['price']['value'])) {
+                $sanitized['price']['amount'] = sanitize_text_field((string) $product['price']['value']);
+            }
+            if ($sanitized['price']['currency'] === '' && isset($product['price']['currencyCode'])) {
+                $sanitized['price']['currency'] = sanitize_text_field((string) $product['price']['currencyCode']);
+            }
         } else {
             $sanitized['price'] = array(
                 'amount' => isset($product['price']) ? sanitize_text_field((string) $product['price']) : '',
                 'currency' => '',
             );
+            if ($sanitized['price']['currency'] === '' && isset($product['currency'])) {
+                $sanitized['price']['currency'] = sanitize_text_field((string) $product['currency']);
+            }
         }
 
         if (isset($product['merchant']) && is_array($product['merchant'])) {
@@ -1583,12 +1635,19 @@ class YadoreMonetizer {
             if (isset($product['merchant']['logo'])) {
                 $sanitized['merchant']['logo'] = esc_url_raw($product['merchant']['logo']);
             }
+            if (isset($product['merchant']['logoUrl'])) {
+                $sanitized['merchant']['logo'] = esc_url_raw($product['merchant']['logoUrl']);
+            }
         } elseif (!empty($product['merchant'])) {
             $sanitized['merchant'] = array(
                 'name' => sanitize_text_field((string) $product['merchant']),
             );
         } else {
             $sanitized['merchant'] = array();
+        }
+
+        if (empty($sanitized['merchant']['name']) && isset($product['merchantName'])) {
+            $sanitized['merchant']['name'] = sanitize_text_field((string) $product['merchantName']);
         }
 
         if (isset($product['thumbnail']) && is_array($product['thumbnail'])) {
@@ -1605,16 +1664,32 @@ class YadoreMonetizer {
             $sanitized['image'] = array('url' => esc_url_raw($product['image']));
         } elseif (isset($product['images']) && is_array($product['images']) && !empty($product['images'][0]['url'])) {
             $sanitized['image'] = array('url' => esc_url_raw($product['images'][0]['url']));
+        } elseif (isset($product['imageUrl'])) {
+            $sanitized['image'] = array('url' => esc_url_raw($product['imageUrl']));
+        } elseif (isset($product['imageUrls']) && is_array($product['imageUrls']) && !empty($product['imageUrls'][0])) {
+            $sanitized['image'] = array('url' => esc_url_raw($product['imageUrls'][0]));
         }
 
         if (isset($product['clickUrl'])) {
             $sanitized['clickUrl'] = esc_url_raw($product['clickUrl']);
         } elseif (isset($product['url'])) {
             $sanitized['clickUrl'] = esc_url_raw($product['url']);
+        } elseif (isset($product['deeplink'])) {
+            $sanitized['clickUrl'] = esc_url_raw($product['deeplink']);
+        } elseif (isset($product['deepLink'])) {
+            $sanitized['clickUrl'] = esc_url_raw($product['deepLink']);
+        } elseif (isset($product['trackingUrl'])) {
+            $sanitized['clickUrl'] = esc_url_raw($product['trackingUrl']);
+        } elseif (isset($product['redirectUrl'])) {
+            $sanitized['clickUrl'] = esc_url_raw($product['redirectUrl']);
         }
 
         if (isset($product['description'])) {
             $sanitized['description'] = sanitize_textarea_field((string) $product['description']);
+        }
+
+        if (empty($sanitized['description']) && isset($product['summary'])) {
+            $sanitized['description'] = sanitize_textarea_field((string) $product['summary']);
         }
 
         if (isset($product['promoText'])) {
