@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-cart"></span>
         Yadore Monetizer Pro Dashboard
-        <span class="version-badge">v2.9.2</span>
+        <span class="version-badge">v2.9.3</span>
     </h1>
 
     <?php if (get_transient('yadore_activation_notice')): ?>
@@ -351,7 +351,7 @@
                     <div class="version-info">
                         <div class="info-row">
                             <span class="info-label">Plugin Version:</span>
-                            <span class="info-value version-current">v2.9.2</span>
+                            <span class="info-value version-current">v2.9.3</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">WordPress:</span>

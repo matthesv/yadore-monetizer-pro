@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-tools"></span>
         Debug & Error Analysis
-        <span class="version-badge">v2.9.2</span>
+        <span class="version-badge">v2.9.3</span>
     </h1>
 
     <div class="yadore-debug-container">
@@ -223,7 +223,7 @@
                             <div class="info-items">
                                 <div class="info-item">
                                     <span class="info-label">Version:</span>
-                                    <span class="info-value">2.9.2</span>
+                                    <span class="info-value">2.9.3</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Debug Mode:</span>

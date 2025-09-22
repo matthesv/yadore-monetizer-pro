@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-tools"></span>
         Tools & Utilities
-        <span class="version-badge">v2.9.2</span>
+        <span class="version-badge">v2.9.3</span>
     </h1>
 
     <div class="yadore-tools-container">
