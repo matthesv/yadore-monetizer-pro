@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.13
+Version: 2.9.14
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.13');
+define('YADORE_PLUGIN_VERSION', '2.9.14');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -89,7 +89,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.13 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.14 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -2327,7 +2327,7 @@ class YadoreMonetizer {
             $products = array_map(array($this, 'sanitize_product_payload'), array_slice($products, 0, $limit));
         }
 
-        $this->log_api_call('yadore', $endpoint, 'success', array(
+        $log_payload = array(
             'keyword' => $keyword,
             'limit' => $limit,
             'url' => $request_url,
@@ -2336,7 +2336,45 @@ class YadoreMonetizer {
             'request' => $request_params,
             'precision' => $precision,
             'market' => strtolower($market),
-        ));
+        );
+
+        if (empty($products)) {
+            $trace_context = array(
+                'keyword' => $keyword,
+                'post_id' => $post_id,
+                'request_url' => $request_url,
+                'request_params' => $request_params,
+                'response' => $decoded,
+                'raw_response' => $body,
+                'status' => $status,
+                'duration_ms' => $duration_ms,
+                'precision' => $precision,
+                'market' => strtolower($market),
+                'limit' => $limit,
+            );
+
+            $log_payload['response'] = $decoded;
+            $log_payload['raw_response'] = $body;
+            $log_payload['trace'] = true;
+
+            $this->log_error(
+                sprintf('Yadore API returned no products for keyword "%s"', $keyword),
+                null,
+                'low',
+                $trace_context
+            );
+
+            $this->log(
+                'Yadore API empty response trace: ' . (
+                    function_exists('wp_json_encode')
+                        ? wp_json_encode($trace_context)
+                        : json_encode($trace_context)
+                ),
+                'warning'
+            );
+        }
+
+        $this->log_api_call('yadore', $endpoint, 'success', $log_payload);
 
         $cache_duration = intval(get_option('yadore_cache_duration', 3600));
         if ($use_cache && $cache_duration > 0) {
