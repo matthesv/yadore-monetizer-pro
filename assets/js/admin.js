@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.21 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.22 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: '2.9.21',
+        version: '2.9.22',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -30,7 +30,7 @@
             this.initDebug();
             this.initErrorNotices();
 
-            console.log('Yadore Monetizer Pro v2.9.21 Admin - Fully Initialized');
+            console.log('Yadore Monetizer Pro v2.9.22 Admin - Fully Initialized');
         },
 
         // Dashboard functionality
@@ -658,8 +658,12 @@
                 e.preventDefault();
                 const postId = parseInt($(e.currentTarget).data('post'), 10);
                 if (!Number.isNaN(postId)) {
+                    if (!this.scannerState) {
+                        this.scannerState = {};
+                    }
+
                     this.scannerState.selectedPost = { id: postId };
-                    this.scanSinglePost();
+                    this.scanSinglePost(true);
                 }
             });
         },
@@ -751,12 +755,14 @@
             }
         },
 
-        scanSinglePost: function() {
+        scanSinglePost: function(forceRescan) {
             if (!this.scannerState || !this.scannerState.selectedPost || !this.scannerState.selectedPost.id) {
                 alert('Please select a post to scan.');
                 return;
             }
 
+            const shouldForceRescan = typeof forceRescan === 'boolean' ? forceRescan : false;
+            const forceRescanFlag = shouldForceRescan || $('#single-force-rescan').is(':checked');
             const button = $('#scan-single-post');
             button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Scanning...');
 
@@ -765,7 +771,7 @@
                 nonce: this.nonce,
                 post_id: this.scannerState.selectedPost.id,
                 use_ai: $('#single-use-ai').is(':checked') ? 1 : 0,
-                force_rescan: $('#single-force-rescan').is(':checked') ? 1 : 0,
+                force_rescan: forceRescanFlag ? 1 : 0,
                 validate_products: $('#single-validate-products').is(':checked') ? 1 : 0,
                 min_words: parseInt($('#min-words').val(), 10) || 0
             }, (response) => {
