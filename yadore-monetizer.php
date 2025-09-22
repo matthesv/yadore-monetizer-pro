@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.6
+Version: 2.9.7
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.6');
+define('YADORE_PLUGIN_VERSION', '2.9.7');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -45,8 +45,14 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_test_yadore_api', array($this, 'ajax_test_yadore_api'));
             add_action('wp_ajax_yadore_scan_posts', array($this, 'ajax_scan_posts'));
             add_action('wp_ajax_yadore_bulk_scan_posts', array($this, 'ajax_bulk_scan_posts'));
+            add_action('wp_ajax_yadore_start_bulk_scan', array($this, 'ajax_start_bulk_scan'));
+            add_action('wp_ajax_yadore_get_scan_progress', array($this, 'ajax_get_scan_progress'));
+            add_action('wp_ajax_yadore_get_scanner_overview', array($this, 'ajax_get_scanner_overview'));
+            add_action('wp_ajax_yadore_get_scan_results', array($this, 'ajax_get_scan_results'));
+            add_action('wp_ajax_yadore_search_posts', array($this, 'ajax_search_posts'));
             add_action('wp_ajax_yadore_get_post_stats', array($this, 'ajax_get_post_stats'));
             add_action('wp_ajax_yadore_scan_single_post', array($this, 'ajax_scan_single_post'));
+            add_action('wp_ajax_yadore_get_scanner_analytics', array($this, 'ajax_get_scanner_analytics'));
             add_action('wp_ajax_yadore_get_api_logs', array($this, 'ajax_get_api_logs'));
             add_action('wp_ajax_yadore_clear_api_logs', array($this, 'ajax_clear_api_logs'));
             add_action('wp_ajax_yadore_get_posts_data', array($this, 'ajax_get_posts_data'));
@@ -81,7 +87,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.6 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.7 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -1081,7 +1087,7 @@ class YadoreMonetizer {
                 throw new Exception('Insufficient permissions');
             }
 
-            $keyword = 'smartphone';
+            $keyword = 'Kopfkissen';
             $limit = 3;
 
             $api_key = trim((string) get_option('yadore_api_key'));
@@ -1127,6 +1133,294 @@ class YadoreMonetizer {
         } catch (Exception $e) {
             $this->log_error('Yadore API test failed', $e);
             wp_send_json_error('API test failed: ' . $e->getMessage());
+        }
+    }
+
+    public function ajax_get_scanner_overview() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $overview = $this->get_scanner_overview_stats();
+
+            wp_send_json_success($overview);
+        } catch (Exception $e) {
+            $this->log_error('Failed to load scanner overview', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_scan_posts() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $request = isset($_POST) ? wp_unslash($_POST) : array();
+            $scan_request = $this->prepare_bulk_scan_request($request);
+            $results = $this->execute_bulk_scan_immediately($scan_request['post_ids'], $scan_request['options']);
+
+            wp_send_json_success($results);
+        } catch (Exception $e) {
+            $this->log_error('Legacy scan posts request failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_bulk_scan_posts() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $request = isset($_POST) ? wp_unslash($_POST) : array();
+            $scan_request = $this->prepare_bulk_scan_request($request);
+            $results = $this->execute_bulk_scan_immediately($scan_request['post_ids'], $scan_request['options']);
+
+            wp_send_json_success($results);
+        } catch (Exception $e) {
+            $this->log_error('Legacy bulk scan request failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_start_bulk_scan() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $post_types = $this->sanitize_post_types(isset($_POST['post_types']) ? (array) wp_unslash($_POST['post_types']) : array('post'));
+            $post_status = $this->sanitize_post_statuses(isset($_POST['post_status']) ? (array) wp_unslash($_POST['post_status']) : array('publish'));
+            $scan_options = isset($_POST['scan_options']) ? (array) wp_unslash($_POST['scan_options']) : array();
+            $min_words = isset($_POST['min_words']) ? intval($_POST['min_words']) : 0;
+
+            if (empty($post_types)) {
+                throw new Exception(__('No valid post types supplied for scanning.', 'yadore-monetizer'));
+            }
+
+            if (empty($post_status)) {
+                throw new Exception(__('No valid post status supplied for scanning.', 'yadore-monetizer'));
+            }
+
+            $post_ids = $this->find_posts_for_scanning($post_types, $post_status, $min_words);
+
+            if (empty($post_ids)) {
+                throw new Exception(__('No posts matched the selected criteria.', 'yadore-monetizer'));
+            }
+
+            $scan_id = uniqid('yadore_scan_', true);
+
+            $state = array(
+                'scan_id' => $scan_id,
+                'post_ids' => array_values($post_ids),
+                'current_index' => 0,
+                'total' => count($post_ids),
+                'completed' => 0,
+                'options' => array(
+                    'force_rescan' => in_array('force_rescan', $scan_options, true),
+                    'use_ai' => in_array('use_ai', $scan_options, true),
+                    'validate_products' => in_array('validate_products', $scan_options, true),
+                    'min_words' => max(0, $min_words),
+                ),
+                'last_updated' => time(),
+            );
+
+            $this->store_bulk_scan_state($scan_id, $state);
+
+            wp_send_json_success(array(
+                'scan_id' => $scan_id,
+                'total' => $state['total'],
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to start bulk scan', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_get_scan_progress() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $scan_id = isset($_POST['scan_id']) ? sanitize_text_field(wp_unslash($_POST['scan_id'])) : '';
+            if ($scan_id === '') {
+                throw new Exception(__('Invalid scan identifier.', 'yadore-monetizer'));
+            }
+
+            $state = $this->get_bulk_scan_state($scan_id);
+            if (empty($state)) {
+                wp_send_json_success(array(
+                    'total' => 0,
+                    'completed' => 0,
+                    'percentage' => 100,
+                    'results' => array(),
+                ));
+            }
+
+            $chunk_size = 3;
+            $results = array();
+
+            for ($i = 0; $i < $chunk_size; $i++) {
+                if ($state['current_index'] >= $state['total']) {
+                    break;
+                }
+
+                $post_id = (int) $state['post_ids'][$state['current_index']];
+                $state['current_index']++;
+                $state['completed']++;
+
+                $scan_result = $this->process_post_scan($post_id, $state['options']);
+                $results[] = $scan_result;
+            }
+
+            $percentage = $state['total'] > 0
+                ? min(100, (int) round(($state['completed'] / $state['total']) * 100))
+                : 100;
+
+            if ($state['completed'] >= $state['total']) {
+                $this->delete_bulk_scan_state($scan_id);
+                $this->update_scanned_posts_stat();
+                update_option('yadore_bulk_scan_completed', current_time('mysql'));
+            } else {
+                $state['last_updated'] = time();
+                $this->store_bulk_scan_state($scan_id, $state);
+            }
+
+            wp_send_json_success(array(
+                'total' => $state['total'],
+                'completed' => min($state['completed'], $state['total']),
+                'percentage' => $percentage,
+                'results' => $results,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to process bulk scan progress', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_get_scan_results() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $filter = isset($_POST['filter']) ? sanitize_text_field(wp_unslash($_POST['filter'])) : 'all';
+            $page = isset($_POST['page']) ? max(1, intval($_POST['page'])) : 1;
+            $per_page = isset($_POST['per_page']) ? intval($_POST['per_page']) : 10;
+            $export = !empty($_POST['export']);
+
+            if ($per_page <= 0) {
+                $per_page = 10;
+            }
+
+            if ($export) {
+                $per_page = 500;
+                $page = 1;
+            }
+
+            $per_page = min(1000, max(5, $per_page));
+
+            $results = $this->get_scan_results($filter, $page, $per_page);
+
+            if ($export) {
+                wp_send_json_success(array(
+                    'results' => $results['results'],
+                ));
+            }
+
+            wp_send_json_success($results);
+        } catch (Exception $e) {
+            $this->log_error('Failed to load scan results', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_search_posts() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $query = isset($_POST['query']) ? sanitize_text_field(wp_unslash($_POST['query'])) : '';
+
+            if ($query === '') {
+                wp_send_json_success(array('results' => array()));
+            }
+
+            $results = $this->search_posts_for_scanner($query);
+
+            wp_send_json_success(array('results' => $results));
+        } catch (Exception $e) {
+            $this->log_error('Failed to search posts for scanner', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_scan_single_post() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+            if ($post_id <= 0) {
+                throw new Exception(__('Invalid post selected for scanning.', 'yadore-monetizer'));
+            }
+
+            $options = array(
+                'force_rescan' => !empty($_POST['force_rescan']),
+                'use_ai' => !empty($_POST['use_ai']),
+                'validate_products' => !empty($_POST['validate_products']),
+                'min_words' => isset($_POST['min_words']) ? max(0, intval($_POST['min_words'])) : 0,
+            );
+
+            $result = $this->process_post_scan($post_id, $options);
+            $this->update_scanned_posts_stat();
+
+            if ($result['status'] === 'failed') {
+                throw new Exception($result['message']);
+            }
+
+            wp_send_json_success(array('result' => $result));
+        } catch (Exception $e) {
+            $this->log_error('Single post scan failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_get_scanner_analytics() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $analytics = $this->get_scanner_analytics();
+
+            wp_send_json_success($analytics);
+        } catch (Exception $e) {
+            $this->log_error('Failed to load scanner analytics', $e);
+            wp_send_json_error($e->getMessage());
         }
     }
 
@@ -2057,6 +2351,992 @@ class YadoreMonetizer {
         }
     }
 
+    // Scanner helper methods
+    private function get_scanner_overview_stats() {
+        $total_posts = $this->count_scannable_posts();
+        $scanned_posts = $this->get_scanned_post_count();
+        $validated_keywords = $this->get_validated_keyword_count();
+
+        return array(
+            'total_posts' => $total_posts,
+            'scanned_posts' => $scanned_posts,
+            'pending_posts' => max(0, $total_posts - $scanned_posts),
+            'validated_keywords' => $validated_keywords,
+        );
+    }
+
+    private function get_scannable_post_types() {
+        $types = array('post', 'page');
+        $custom = get_post_types(array('public' => true, '_builtin' => false));
+
+        if (is_array($custom)) {
+            $types = array_merge($types, array_keys($custom));
+        }
+
+        $types = array_unique(array_filter(array_map('sanitize_key', $types)));
+
+        return array_values($types);
+    }
+
+    private function count_scannable_posts($post_types = array()) {
+        $types = empty($post_types) ? $this->get_scannable_post_types() : $post_types;
+        $statuses = array('publish', 'future', 'draft', 'pending', 'private');
+        $total = 0;
+
+        foreach ($types as $type) {
+            $counts = wp_count_posts($type);
+            if (!$counts) {
+                continue;
+            }
+
+            foreach ($statuses as $status) {
+                if (isset($counts->$status)) {
+                    $total += (int) $counts->$status;
+                }
+            }
+        }
+
+        return $total;
+    }
+
+    private function get_scanned_post_count() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if (!$this->table_exists($table)) {
+            return 0;
+        }
+
+        return (int) $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$table} WHERE scan_status IN ('completed', 'completed_manual', 'completed_ai')"
+        );
+    }
+
+    private function get_validated_keyword_count() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if (!$this->table_exists($table)) {
+            return 0;
+        }
+
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE product_validated = 1");
+    }
+
+    private function sanitize_post_types($post_types) {
+        if (!is_array($post_types)) {
+            $post_types = array($post_types);
+        }
+
+        $valid_types = $this->get_scannable_post_types();
+        $filtered = array();
+
+        foreach ($post_types as $type) {
+            $type = sanitize_key((string) $type);
+            if ($type !== '' && in_array($type, $valid_types, true)) {
+                $filtered[] = $type;
+            }
+        }
+
+        return array_values(array_unique($filtered));
+    }
+
+    private function sanitize_post_statuses($post_statuses) {
+        $allowed = array('publish', 'draft', 'pending', 'future', 'private');
+
+        if (!is_array($post_statuses)) {
+            $post_statuses = array($post_statuses);
+        }
+
+        $filtered = array();
+
+        foreach ($post_statuses as $status) {
+            $status = sanitize_key((string) $status);
+            if ($status !== '' && in_array($status, $allowed, true)) {
+                $filtered[] = $status;
+            }
+        }
+
+        if (empty($filtered)) {
+            $filtered[] = 'publish';
+        }
+
+        return array_values(array_unique($filtered));
+    }
+
+    private function find_posts_for_scanning($post_types, $post_statuses, $min_words) {
+        $args = array(
+            'post_type' => $post_types,
+            'post_status' => $post_statuses,
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'orderby' => 'ID',
+            'order' => 'ASC',
+            'suppress_filters' => false,
+        );
+
+        $ids = get_posts($args);
+        if (!is_array($ids)) {
+            $ids = array();
+        }
+
+        $filtered = array();
+
+        foreach ($ids as $post_id) {
+            $post_id = (int) $post_id;
+            if ($post_id <= 0) {
+                continue;
+            }
+
+            if ($min_words > 0) {
+                $post = get_post($post_id);
+                if (!$post) {
+                    continue;
+                }
+
+                $word_count = $this->count_words_in_text($post->post_content);
+                if ($word_count < $min_words) {
+                    continue;
+                }
+            }
+
+            $filtered[] = $post_id;
+        }
+
+        return $filtered;
+    }
+
+    private function count_words_in_text($text) {
+        $clean = wp_strip_all_tags((string) $text);
+        $clean = preg_replace('/\s+/u', ' ', $clean);
+        $clean = trim($clean);
+
+        if ($clean === '') {
+            return 0;
+        }
+
+        $words = preg_split('/\s+/u', $clean);
+        if (!is_array($words)) {
+            $words = explode(' ', $clean);
+        }
+
+        $words = array_filter($words, static function ($word) {
+            return $word !== '';
+        });
+
+        return count($words);
+    }
+
+    private function get_bulk_scan_transient_key($scan_id) {
+        return 'yadore_bulk_scan_' . md5((string) $scan_id);
+    }
+
+    private function store_bulk_scan_state($scan_id, $state) {
+        set_transient($this->get_bulk_scan_transient_key($scan_id), $state, HOUR_IN_SECONDS);
+    }
+
+    private function get_bulk_scan_state($scan_id) {
+        $state = get_transient($this->get_bulk_scan_transient_key($scan_id));
+        return is_array($state) ? $state : array();
+    }
+
+    private function delete_bulk_scan_state($scan_id) {
+        delete_transient($this->get_bulk_scan_transient_key($scan_id));
+    }
+
+    private function prepare_bulk_scan_request($request) {
+        if (!is_array($request)) {
+            $request = array();
+        }
+
+        list($post_types, $post_status, $options) = $this->parse_scan_request($request);
+
+        $post_ids = array();
+        foreach (array('post_ids', 'posts', 'ids') as $key) {
+            if (isset($request[$key])) {
+                $post_ids = $this->sanitize_post_id_list($request[$key]);
+                if (!empty($post_ids)) {
+                    break;
+                }
+            }
+        }
+
+        if (empty($post_ids)) {
+            $post_ids = $this->find_posts_for_scanning($post_types, $post_status, $options['min_words']);
+        }
+
+        if (empty($post_ids)) {
+            throw new Exception(__('No posts matched the selected criteria.', 'yadore-monetizer'));
+        }
+
+        return array(
+            'post_ids' => $post_ids,
+            'options' => $options,
+        );
+    }
+
+    private function parse_scan_request($request) {
+        if (!is_array($request)) {
+            $request = array();
+        }
+
+        $post_types = isset($request['post_types'])
+            ? $this->sanitize_post_types($request['post_types'])
+            : $this->sanitize_post_types(array('post'));
+
+        if (empty($post_types)) {
+            throw new Exception(__('No valid post types supplied for scanning.', 'yadore-monetizer'));
+        }
+
+        $post_status = isset($request['post_status'])
+            ? $this->sanitize_post_statuses($request['post_status'])
+            : $this->sanitize_post_statuses(array('publish'));
+
+        if (empty($post_status)) {
+            throw new Exception(__('No valid post status supplied for scanning.', 'yadore-monetizer'));
+        }
+
+        $min_words = isset($request['min_words']) ? intval($request['min_words']) : 0;
+
+        $option_flags = array();
+        if (isset($request['scan_options'])) {
+            $option_flags = array_merge($option_flags, $this->normalize_scan_options($request['scan_options']));
+        }
+        if (isset($request['options'])) {
+            $option_flags = array_merge($option_flags, $this->normalize_scan_options($request['options']));
+        }
+
+        $option_flags = array_map('sanitize_key', $option_flags);
+
+        $force_rescan = in_array('force_rescan', $option_flags, true);
+        $use_ai = in_array('use_ai', $option_flags, true);
+
+        $validate_products_flag = in_array('validate_products', $option_flags, true);
+        $validate_products = $validate_products_flag;
+
+        if (isset($request['force_rescan'])) {
+            $force_rescan = $this->interpret_boolean_flag($request['force_rescan']);
+        }
+
+        if (isset($request['use_ai'])) {
+            $use_ai = $this->interpret_boolean_flag($request['use_ai']);
+        }
+
+        if (isset($request['validate_products'])) {
+            $validate_products = $this->interpret_boolean_flag($request['validate_products']);
+        } elseif (!$validate_products_flag) {
+            $validate_products = true;
+        }
+
+        $options = array(
+            'force_rescan' => $force_rescan,
+            'use_ai' => $use_ai,
+            'validate_products' => $validate_products,
+            'min_words' => max(0, $min_words),
+        );
+
+        return array($post_types, $post_status, $options);
+    }
+
+    private function normalize_scan_options($raw) {
+        $options = array();
+
+        if (is_array($raw)) {
+            foreach ($raw as $key => $value) {
+                if (is_int($key)) {
+                    if ($value !== null && $value !== '' && $value !== false) {
+                        $options[] = $value;
+                    }
+                } elseif ($this->interpret_boolean_flag($value)) {
+                    $options[] = $key;
+                }
+            }
+        } elseif ($raw !== null && $raw !== '') {
+            $options[] = $raw;
+        }
+
+        return $options;
+    }
+
+    private function interpret_boolean_flag($value) {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return intval($value) === 1;
+        }
+
+        $value = strtolower(trim((string) $value));
+
+        return in_array($value, array('1', 'true', 'yes', 'on'), true);
+    }
+
+    private function sanitize_post_id_list($ids) {
+        if (is_string($ids)) {
+            $ids = preg_split('/[\s,]+/', $ids);
+        } elseif (!is_array($ids)) {
+            $ids = array($ids);
+        }
+
+        $clean = array();
+
+        foreach ($ids as $id) {
+            if ($id === null || $id === '') {
+                continue;
+            }
+
+            $int_id = intval($id);
+
+            if ($int_id > 0) {
+                $clean[$int_id] = $int_id;
+            }
+        }
+
+        return array_values($clean);
+    }
+
+    private function execute_bulk_scan_immediately($post_ids, $options) {
+        $results = array();
+        $summary = array(
+            'success' => 0,
+            'failed' => 0,
+            'skipped' => 0,
+            'ai_used' => 0,
+            'validated_keywords' => 0,
+        );
+
+        foreach ($post_ids as $post_id) {
+            $result = $this->process_post_scan($post_id, $options);
+
+            if (!is_array($result)) {
+                continue;
+            }
+
+            $status = isset($result['status']) ? $result['status'] : '';
+
+            if ($status === 'success') {
+                $summary['success']++;
+            } elseif ($status === 'skipped') {
+                $summary['skipped']++;
+            } else {
+                $summary['failed']++;
+            }
+
+            if (!empty($result['ai_used'])) {
+                $summary['ai_used']++;
+            }
+
+            if (!empty($result['product_validated'])) {
+                $summary['validated_keywords'] += (int) $result['product_validated'];
+            }
+
+            $results[] = $result;
+        }
+
+        $total = count($post_ids);
+        $completed = count($results);
+        $percentage = $total > 0 ? min(100, (int) round(($completed / $total) * 100)) : 100;
+
+        $this->update_scanned_posts_stat();
+        update_option('yadore_bulk_scan_completed', current_time('mysql'));
+
+        $this->log(sprintf('Processed %d posts via immediate bulk scan', $completed), 'debug');
+
+        return array(
+            'total' => $total,
+            'completed' => $completed,
+            'percentage' => $percentage,
+            'results' => $results,
+            'summary' => $summary,
+        );
+    }
+
+    private function process_post_scan($post_id, $options = array()) {
+        $defaults = array(
+            'force_rescan' => false,
+            'use_ai' => false,
+            'validate_products' => true,
+            'min_words' => 0,
+        );
+        $options = wp_parse_args($options, $defaults);
+
+        $post = get_post($post_id);
+        if (!$post || $post->post_status === 'trash') {
+            return array(
+                'status' => 'failed',
+                'message' => __('Post could not be found.', 'yadore-monetizer'),
+                'post_id' => (int) $post_id,
+                'post_title' => '',
+                'primary_keyword' => '',
+                'keyword_confidence' => 0,
+                'product_validated' => 0,
+                'product_count' => 0,
+                'scan_status' => 'failed',
+                'status_label' => $this->get_scan_status_label('failed'),
+                'last_scanned' => current_time('mysql'),
+                'ai_used' => false,
+                'word_count' => 0,
+                'duration_ms' => 0,
+            );
+        }
+
+        $word_count = $this->count_words_in_text($post->post_content);
+
+        if ($options['min_words'] > 0 && $word_count < $options['min_words']) {
+            return array(
+                'status' => 'skipped',
+                'message' => sprintf(__('Skipped (%d words required).', 'yadore-monetizer'), $options['min_words']),
+                'post_id' => (int) $post_id,
+                'post_title' => get_the_title($post_id),
+                'primary_keyword' => '',
+                'keyword_confidence' => 0,
+                'product_validated' => 0,
+                'product_count' => 0,
+                'scan_status' => 'skipped',
+                'status_label' => $this->get_scan_status_label('skipped'),
+                'last_scanned' => current_time('mysql'),
+                'ai_used' => false,
+                'word_count' => $word_count,
+                'duration_ms' => 0,
+            );
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+        $existing = $this->table_exists($table)
+            ? $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE post_id = %d", $post_id), ARRAY_A)
+            : null;
+
+        if (!$options['force_rescan'] && $existing && in_array($existing['scan_status'], array('completed', 'completed_manual', 'completed_ai'), true)) {
+            $formatted = $this->format_scan_result_row($existing);
+            $formatted['status'] = 'skipped';
+            $formatted['message'] = __('Scan skipped (already up to date).', 'yadore-monetizer');
+            return $formatted;
+        }
+
+        $start_time = microtime(true);
+        $ai_used = false;
+        $keyword = '';
+        $confidence = 0.0;
+
+        if ($options['use_ai']) {
+            $ai_result = $this->call_gemini_api($post->post_title, wp_strip_all_tags($post->post_content), true, $post_id);
+            if (is_array($ai_result) && empty($ai_result['error']) && !empty($ai_result['keyword'])) {
+                $keyword = sanitize_text_field((string) $ai_result['keyword']);
+                if (isset($ai_result['confidence'])) {
+                    $confidence = max(0, min(1, (float) $ai_result['confidence']));
+                } else {
+                    $confidence = 0.85;
+                }
+                $ai_used = true;
+            } elseif (is_string($ai_result) && trim($ai_result) !== '') {
+                $keyword = sanitize_text_field($ai_result);
+                $confidence = 0.85;
+                $ai_used = true;
+            }
+        }
+
+        if ($keyword === '') {
+            $keyword = $this->extract_keyword_from_text($post->post_content, $post->post_title);
+            if ($keyword !== '') {
+                $keyword = sanitize_text_field($keyword);
+                if (!$ai_used) {
+                    $confidence = 0.65;
+                }
+            }
+        }
+
+        $fallback_keyword = $this->normalize_keyword_case(wp_trim_words($post->post_title, 6, ''));
+        $fallback_keyword = sanitize_text_field($fallback_keyword);
+
+        $timestamp = current_time('mysql');
+
+        if ($keyword === '') {
+            $keyword = $fallback_keyword;
+
+            if ($keyword === '') {
+                $message = __('No keyword could be detected for this post.', 'yadore-monetizer');
+                $this->record_scan_failure($post_id, $existing, $message);
+
+                return array(
+                    'status' => 'failed',
+                    'message' => $message,
+                    'post_id' => (int) $post_id,
+                    'post_title' => get_the_title($post_id),
+                    'primary_keyword' => '',
+                    'keyword_confidence' => 0,
+                    'product_validated' => 0,
+                    'product_count' => 0,
+                    'scan_status' => 'failed',
+                    'status_label' => $this->get_scan_status_label('failed'),
+                    'last_scanned' => $timestamp,
+                    'ai_used' => $ai_used,
+                    'word_count' => $word_count,
+                    'duration_ms' => (int) round((microtime(true) - $start_time) * 1000),
+                );
+            }
+
+            if (!$ai_used) {
+                $confidence = 0.4;
+            }
+        }
+
+        $product_count = 0;
+        $product_validated = 0;
+
+        if ($options['validate_products']) {
+            $products = $this->get_products($keyword, 3, $post_id);
+            if (is_array($products)) {
+                $product_count = count($products);
+            }
+
+            if ($product_count > 0) {
+                $product_validated = 1;
+            }
+        } elseif ($existing) {
+            $product_count = isset($existing['product_count']) ? (int) $existing['product_count'] : 0;
+            $product_validated = isset($existing['product_validated']) ? (int) $existing['product_validated'] : 0;
+        }
+
+        $duration_ms = (int) round((microtime(true) - $start_time) * 1000);
+        $scan_status = $ai_used ? 'completed_ai' : 'completed_manual';
+
+        if ($this->table_exists($table)) {
+            $data = array(
+                'post_title' => $post->post_title,
+                'primary_keyword' => $keyword,
+                'fallback_keyword' => $fallback_keyword,
+                'keyword_confidence' => $confidence,
+                'product_validated' => $product_validated,
+                'product_count' => $product_count,
+                'word_count' => $word_count,
+                'content_hash' => md5((string) $post->post_content),
+                'last_scanned' => $timestamp,
+                'scan_status' => $scan_status,
+                'scan_error' => '',
+                'scan_attempts' => ($existing ? (int) $existing['scan_attempts'] : 0) + 1,
+                'scan_duration_ms' => $duration_ms,
+            );
+
+            if ($existing) {
+                $wpdb->update(
+                    $table,
+                    $data,
+                    array('post_id' => $post_id),
+                    array('%s', '%s', '%s', '%f', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d'),
+                    array('%d')
+                );
+            } else {
+                $data['post_id'] = $post_id;
+                $wpdb->insert(
+                    $table,
+                    $data,
+                    array('%d', '%s', '%s', '%s', '%f', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d')
+                );
+            }
+        }
+
+        if ($ai_used) {
+            update_post_meta($post_id, '_yadore_scan_ai_used', '1');
+        } else {
+            delete_post_meta($post_id, '_yadore_scan_ai_used');
+        }
+
+        $this->record_scan_event($post_id, $scan_status, array(
+            'keyword' => $keyword,
+            'confidence' => $confidence,
+            'product_count' => $product_count,
+            'ai_used' => $ai_used,
+            'duration_ms' => $duration_ms,
+        ));
+
+        return array(
+            'status' => 'success',
+            'message' => __('Scan completed successfully.', 'yadore-monetizer'),
+            'post_id' => (int) $post_id,
+            'post_title' => get_the_title($post_id),
+            'primary_keyword' => $keyword,
+            'keyword_confidence' => $confidence,
+            'product_validated' => $product_validated,
+            'product_count' => $product_count,
+            'scan_status' => $scan_status,
+            'status_label' => $this->get_scan_status_label($scan_status),
+            'last_scanned' => $timestamp,
+            'ai_used' => $ai_used,
+            'word_count' => $word_count,
+            'duration_ms' => $duration_ms,
+        );
+    }
+
+    private function record_scan_failure($post_id, $existing, $message) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if (!$this->table_exists($table)) {
+            return;
+        }
+
+        $timestamp = current_time('mysql');
+        $attempts = ($existing ? (int) $existing['scan_attempts'] : 0) + 1;
+
+        if ($existing) {
+            $wpdb->update(
+                $table,
+                array(
+                    'scan_status' => 'failed',
+                    'scan_error' => $message,
+                    'last_scanned' => $timestamp,
+                    'scan_attempts' => $attempts,
+                ),
+                array('post_id' => $post_id),
+                array('%s', '%s', '%s', '%d'),
+                array('%d')
+            );
+        } else {
+            $wpdb->insert(
+                $table,
+                array(
+                    'post_id' => $post_id,
+                    'post_title' => get_the_title($post_id),
+                    'primary_keyword' => '',
+                    'fallback_keyword' => '',
+                    'keyword_confidence' => 0,
+                    'product_validated' => 0,
+                    'product_count' => 0,
+                    'word_count' => 0,
+                    'content_hash' => '',
+                    'last_scanned' => $timestamp,
+                    'scan_status' => 'failed',
+                    'scan_error' => $message,
+                    'scan_attempts' => $attempts,
+                    'scan_duration_ms' => 0,
+                ),
+                array('%d', '%s', '%s', '%s', '%f', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d')
+            );
+        }
+    }
+
+    private function record_scan_event($post_id, $status, $data = array()) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_analytics';
+
+        if (!$this->table_exists($table)) {
+            return;
+        }
+
+        $payload = array_merge(
+            array(
+                'status' => $status,
+            ),
+            $data
+        );
+
+        $wpdb->insert(
+            $table,
+            array(
+                'event_type' => 'post_scan',
+                'event_data' => wp_json_encode($payload),
+                'post_id' => $post_id,
+                'user_id' => get_current_user_id(),
+                'created_at' => current_time('mysql'),
+            ),
+            array('%s', '%s', '%d', '%d', '%s')
+        );
+    }
+
+    private function update_scanned_posts_stat() {
+        $stats = get_option('yadore_stats_cache', array());
+        if (!is_array($stats)) {
+            $stats = array();
+        }
+
+        $defaults = array(
+            'total_products' => 0,
+            'scanned_posts' => 0,
+            'overlay_views' => 0,
+            'conversion_rate' => '0%',
+        );
+
+        $stats = wp_parse_args($stats, $defaults);
+        $stats['scanned_posts'] = $this->get_scanned_post_count();
+
+        update_option('yadore_stats_cache', $stats);
+    }
+
+    private function get_scan_results($filter, $page, $per_page) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if (!$this->table_exists($table)) {
+            return array(
+                'results' => array(),
+                'pagination' => array(
+                    'total' => 0,
+                    'per_page' => $per_page,
+                    'current_page' => $page,
+                    'total_pages' => 1,
+                ),
+            );
+        }
+
+        $filter = in_array($filter, array('all', 'successful', 'failed', 'ai_analyzed', 'skipped'), true) ? $filter : 'all';
+
+        $clauses = array('1=1');
+        if ($filter === 'successful') {
+            $clauses[] = "scan_status IN ('completed', 'completed_manual', 'completed_ai')";
+        } elseif ($filter === 'failed') {
+            $clauses[] = "scan_status = 'failed'";
+        } elseif ($filter === 'ai_analyzed') {
+            $clauses[] = "scan_status = 'completed_ai'";
+        } elseif ($filter === 'skipped') {
+            $clauses[] = "scan_status = 'skipped'";
+        }
+
+        $where = 'WHERE ' . implode(' AND ', $clauses);
+        $offset = ($page - 1) * $per_page;
+
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$table} {$where} ORDER BY last_scanned DESC LIMIT %d OFFSET %d",
+                $per_page,
+                $offset
+            ),
+            ARRAY_A
+        );
+
+        if (!is_array($rows)) {
+            $rows = array();
+        }
+
+        $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} {$where}");
+
+        $results = array();
+        foreach ($rows as $row) {
+            $results[] = $this->format_scan_result_row($row);
+        }
+
+        return array(
+            'results' => $results,
+            'pagination' => array(
+                'total' => $total,
+                'per_page' => $per_page,
+                'current_page' => $page,
+                'total_pages' => max(1, (int) ceil($total / $per_page)),
+            ),
+        );
+    }
+
+    private function format_scan_result_row($row) {
+        $post_id = isset($row['post_id']) ? (int) $row['post_id'] : 0;
+        $confidence = isset($row['keyword_confidence']) ? (float) $row['keyword_confidence'] : 0;
+        $status = isset($row['scan_status']) && $row['scan_status'] !== '' ? $row['scan_status'] : 'pending';
+
+        return array(
+            'status' => 'success',
+            'message' => '',
+            'post_id' => $post_id,
+            'post_title' => !empty($row['post_title']) ? $row['post_title'] : get_the_title($post_id),
+            'primary_keyword' => isset($row['primary_keyword']) ? $row['primary_keyword'] : '',
+            'keyword_confidence' => $confidence,
+            'product_validated' => isset($row['product_validated']) ? (int) $row['product_validated'] : 0,
+            'product_count' => isset($row['product_count']) ? (int) $row['product_count'] : 0,
+            'scan_status' => $status,
+            'status_label' => $this->get_scan_status_label($status),
+            'last_scanned' => isset($row['last_scanned']) ? $row['last_scanned'] : '',
+            'ai_used' => $status === 'completed_ai',
+            'word_count' => isset($row['word_count']) ? (int) $row['word_count'] : 0,
+            'duration_ms' => isset($row['scan_duration_ms']) ? (int) $row['scan_duration_ms'] : 0,
+        );
+    }
+
+    private function get_scan_status_label($status) {
+        $map = array(
+            'completed_ai' => __('Completed (AI)', 'yadore-monetizer'),
+            'completed_manual' => __('Completed', 'yadore-monetizer'),
+            'completed' => __('Completed', 'yadore-monetizer'),
+            'failed' => __('Failed', 'yadore-monetizer'),
+            'skipped' => __('Skipped', 'yadore-monetizer'),
+            'pending' => __('Pending', 'yadore-monetizer'),
+        );
+
+        if (isset($map[$status])) {
+            return $map[$status];
+        }
+
+        return ucwords(str_replace('_', ' ', (string) $status));
+    }
+
+    private function search_posts_for_scanner($query) {
+        $args = array(
+            's' => $query,
+            'post_type' => $this->get_scannable_post_types(),
+            'post_status' => array('publish', 'draft', 'pending', 'private'),
+            'posts_per_page' => 10,
+            'orderby' => 'date',
+            'order' => 'DESC',
+        );
+
+        $posts = get_posts($args);
+        if (!is_array($posts)) {
+            return array();
+        }
+
+        $results = array();
+        foreach ($posts as $post) {
+            $record = $this->fetch_scan_record($post->ID);
+            $results[] = $this->prepare_post_for_scanner($post, $record);
+        }
+
+        return $results;
+    }
+
+    private function fetch_scan_record($post_id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if (!$this->table_exists($table)) {
+            return null;
+        }
+
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE post_id = %d", $post_id), ARRAY_A);
+
+        return $row ? $row : null;
+    }
+
+    private function prepare_post_for_scanner($post, $record = null) {
+        $post_id = isset($post->ID) ? (int) $post->ID : (int) $post;
+
+        if (!($post instanceof WP_Post)) {
+            $post = get_post($post_id);
+        }
+
+        if (!$post) {
+            return array();
+        }
+
+        $status_object = get_post_status_object($post->post_status);
+        $status_label = $status_object ? $status_object->label : ucfirst($post->post_status);
+
+        $result = array(
+            'id' => $post_id,
+            'title' => get_the_title($post_id),
+            'date' => mysql2date(get_option('date_format'), $post->post_date),
+            'status' => $status_label,
+            'raw_status' => $post->post_status,
+            'excerpt' => wp_trim_words($post->post_content, 25),
+            'word_count' => $this->count_words_in_text($post->post_content),
+        );
+
+        if ($record) {
+            $result['primary_keyword'] = $record['primary_keyword'];
+            $result['last_scanned'] = $record['last_scanned'];
+            $result['scan_status'] = $record['scan_status'];
+            $result['status_label'] = $this->get_scan_status_label($record['scan_status']);
+            $result['keyword_confidence'] = isset($record['keyword_confidence']) ? (float) $record['keyword_confidence'] : 0;
+            $result['product_validated'] = (int) $record['product_validated'];
+            $result['product_count'] = (int) $record['product_count'];
+        } else {
+            $result['primary_keyword'] = '';
+            $result['last_scanned'] = '';
+            $result['scan_status'] = 'pending';
+            $result['status_label'] = $this->get_scan_status_label('pending');
+            $result['keyword_confidence'] = 0;
+            $result['product_validated'] = 0;
+            $result['product_count'] = 0;
+        }
+
+        return $result;
+    }
+
+    private function get_scanner_analytics() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if (!$this->table_exists($table)) {
+            return array(
+                'charts' => array(
+                    'keywords' => array(
+                        'labels' => array(),
+                        'counts' => array(),
+                    ),
+                    'success' => array(
+                        'labels' => array(
+                            __('Successful', 'yadore-monetizer'),
+                            __('Failed', 'yadore-monetizer'),
+                            __('Skipped', 'yadore-monetizer'),
+                        ),
+                        'counts' => array(0, 0, 0),
+                    ),
+                ),
+                'stats' => array(
+                    'top_keyword' => '',
+                    'average_confidence' => 0,
+                    'ai_usage_rate' => 0,
+                    'success_rate' => 0,
+                    'validated_keywords' => 0,
+                    'total_scans' => 0,
+                ),
+            );
+        }
+
+        $top_keywords = $wpdb->get_results(
+            "SELECT primary_keyword, COUNT(*) AS total FROM {$table} WHERE primary_keyword <> '' GROUP BY primary_keyword ORDER BY total DESC LIMIT 5",
+            ARRAY_A
+        );
+
+        if (!is_array($top_keywords)) {
+            $top_keywords = array();
+        }
+
+        $success_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE scan_status IN ('completed', 'completed_manual', 'completed_ai')");
+        $failed_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE scan_status = 'failed'");
+        $skipped_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE scan_status = 'skipped'");
+        $total_scans = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+        $ai_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE scan_status = 'completed_ai'");
+        $avg_confidence = (float) $wpdb->get_var("SELECT AVG(keyword_confidence) FROM {$table} WHERE keyword_confidence > 0");
+
+        $labels = array();
+        $counts = array();
+        foreach ($top_keywords as $keyword_row) {
+            $labels[] = $keyword_row['primary_keyword'];
+            $counts[] = (int) $keyword_row['total'];
+        }
+
+        $stats = array(
+            'top_keyword' => isset($labels[0]) ? $labels[0] : '',
+            'average_confidence' => $avg_confidence > 0 ? round($avg_confidence * 100, 1) : 0,
+            'ai_usage_rate' => $success_count > 0 ? round(($ai_count / $success_count) * 100, 1) : 0,
+            'success_rate' => $total_scans > 0 ? round(($success_count / $total_scans) * 100, 1) : 0,
+            'validated_keywords' => $this->get_validated_keyword_count(),
+            'total_scans' => $total_scans,
+        );
+
+        return array(
+            'charts' => array(
+                'keywords' => array(
+                    'labels' => $labels,
+                    'counts' => $counts,
+                ),
+                'success' => array(
+                    'labels' => array(
+                        __('Successful', 'yadore-monetizer'),
+                        __('Failed', 'yadore-monetizer'),
+                        __('Skipped', 'yadore-monetizer'),
+                    ),
+                    'counts' => array($success_count, $failed_count, $skipped_count),
+                ),
+            ),
+            'stats' => $stats,
+        );
+    }
+
+    private function table_exists($table_name) {
+        global $wpdb;
+        $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
+        return $result === $table_name;
+    }
+
     // v2.7: Shortcode Implementation (Enhanced)
     public function shortcode_products($atts) {
         $atts = shortcode_atts(array(
@@ -2339,9 +3619,14 @@ $wpdb->insert($analytics_table, array(
                 ? $queued_notice['type']
                 : 'info';
 
+            $classes = 'notice notice-' . esc_attr($type);
+            if (!in_array($type, array('error', 'warning'), true)) {
+                $classes .= ' is-dismissible';
+            }
+
             printf(
-                '<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
-                esc_attr($type),
+                '<div class="%1$s"><p>%2$s</p></div>',
+                $classes,
                 esc_html($queued_notice['message'])
             );
 
