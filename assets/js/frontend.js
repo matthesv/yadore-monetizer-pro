@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.22 - Frontend JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.23 - Frontend JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: '2.9.22',
+        version: '2.9.23',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,
@@ -25,7 +25,7 @@
             this.initScrollTriggers();
             this.initResponsiveHandling();
 
-            console.log('Yadore Monetizer Pro v2.9.22 Frontend - Initialized');
+            console.log('Yadore Monetizer Pro v2.9.23 Frontend - Initialized');
         },
 
         // Initialize product overlay
@@ -55,9 +55,15 @@
             });
 
             // Prevent body scroll when overlay is open
-            this.overlay.on('wheel touchmove', (e) => {
+            $('#yadore-overlay-backdrop').on('wheel touchmove', (e) => {
                 if (this.isOverlayVisible) {
                     e.preventDefault();
+                }
+            });
+
+            $('#yadore-overlay-content').on('touchmove wheel', (e) => {
+                if (this.isOverlayVisible) {
+                    e.stopPropagation();
                 }
             });
         },

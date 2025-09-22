@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.22</span>
+        <span class="version-badge">v2.9.23</span>
     </h1>
 
     <?php
@@ -125,9 +125,9 @@
 
                         <div class="form-group">
                             <label class="form-label">
-                                <input type="checkbox" 
-                                       name="yadore_overlay_enabled" 
-                                       value="1" 
+                                <input type="checkbox"
+                                       name="yadore_overlay_enabled"
+                                       value="1"
                                        <?php checked(get_option('yadore_overlay_enabled', true)); ?>>
                                 <strong>Enable Product Overlay</strong>
                             </label>
@@ -138,14 +138,27 @@
 
                         <div class="form-group">
                             <label class="form-label">
-                                <input type="checkbox" 
-                                       name="yadore_auto_detection" 
-                                       value="1" 
+                                <input type="checkbox"
+                                       name="yadore_auto_detection"
+                                       value="1"
                                        <?php checked(get_option('yadore_auto_detection', true)); ?>>
-                                <strong>Enable Auto Content Detection</strong>
+                                <strong>Enable Automatic Product Injection</strong>
                             </label>
                             <p class="form-description">
                                 Automatically inject relevant products into post content.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox"
+                                       name="yadore_shortcode_enabled"
+                                       value="1"
+                                       <?php checked(get_option('yadore_shortcode_enabled', true)); ?>>
+                                <strong>Enable Manual Shortcode Output</strong>
+                            </label>
+                            <p class="form-description">
+                                Allow the [yadore_products] shortcode to render products wherever it is placed.
                             </p>
                         </div>
 
@@ -748,7 +761,7 @@ jQuery(document).ready(function($) {
     $('#test-gemini-api').on('click', yadoreTestGeminiApi);
     $('#test-yadore-api').on('click', yadoreTestYadoreApi);
 
-    console.log('Yadore Monetizer Pro v2.9.22 Settings - Initialized');
+    console.log('Yadore Monetizer Pro v2.9.23 Settings - Initialized');
 });
 
 function yadoreTestGeminiApi() {
