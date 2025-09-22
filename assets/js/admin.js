@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.14 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.15 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: '2.9.14',
+        version: '2.9.15',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -13,6 +13,10 @@
             keywords: null,
             success: null
         },
+        errorLogFilter: 'all',
+        cachedErrorLogs: [],
+        debugAutoScroll: true,
+        debugWordWrap: true,
 
         // Initialize all admin functionality
         init: function() {
@@ -26,7 +30,7 @@
             this.initDebug();
             this.initErrorNotices();
 
-            console.log('Yadore Monetizer Pro v2.9.14 Admin - Fully Initialized');
+            console.log('Yadore Monetizer Pro v2.9.15 Admin - Fully Initialized');
         },
 
         // Dashboard functionality
@@ -63,40 +67,11 @@
         },
 
         initErrorNotices: function() {
-            const resolveNotice = (errorId, callback) => {
-                if (!errorId) {
-                    if (typeof callback === 'function') {
-                        callback(false);
-                    }
-                    return;
-                }
-
-                $.post(this.ajax_url, {
-                    action: 'yadore_resolve_error',
-                    nonce: this.nonce,
-                    error_id: errorId
-                }).done((response) => {
-                    if (this.debug) {
-                        this.log(`Resolved error notice ${errorId}`, 'info');
-                    }
-                    if (typeof callback === 'function') {
-                        callback(true, response);
-                    }
-                }).fail((xhr) => {
-                    if (this.debug) {
-                        console.error('Failed to resolve Yadore error notice', xhr);
-                    }
-                    if (typeof callback === 'function') {
-                        callback(false, xhr);
-                    }
-                });
-            };
-
             $(document).on('click', '.yadore-error-notice .notice-dismiss', (event) => {
                 const notice = $(event.currentTarget).closest('.yadore-error-notice');
                 const errorId = parseInt(notice.data('error-id'), 10);
                 if (!Number.isNaN(errorId)) {
-                    resolveNotice(errorId);
+                    this.resolveErrorLog(errorId);
                 }
             });
 
@@ -114,14 +89,43 @@
                 const originalText = button.html();
                 button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> ' + (yadore_admin.strings?.processing || 'Processing...'));
 
-                resolveNotice(errorId, (success) => {
-                    if (success) {
+                this.resolveErrorLog(errorId)
+                    .done(() => {
                         notice.fadeOut(200, () => notice.remove());
-                    } else {
+                    })
+                    .fail((xhr) => {
+                        if (this.debug) {
+                            console.error('Failed to resolve Yadore error notice', xhr);
+                        }
                         button.prop('disabled', false).html(originalText);
-                    }
-                });
+                    });
             });
+        },
+
+        resolveErrorLog: function(errorId) {
+            if (!errorId) {
+                return $.Deferred().reject('invalid_error_id').promise();
+            }
+
+            const request = $.post(this.ajax_url, {
+                action: 'yadore_resolve_error',
+                nonce: this.nonce,
+                error_id: errorId
+            });
+
+            request.done(() => {
+                if (this.debug) {
+                    this.log(`Resolved error log entry ${errorId}`, 'info');
+                }
+            });
+
+            request.fail((xhr) => {
+                if (this.debug) {
+                    console.error(`Failed to resolve error log entry ${errorId}`, xhr);
+                }
+            });
+
+            return request;
         },
 
         // Settings functionality
@@ -1116,6 +1120,10 @@
         initDebug: function() {
             if (!$('.yadore-debug-container').length) return;
 
+            this.debugAutoScroll = $('#auto-scroll').is(':checked');
+            this.debugWordWrap = $('#word-wrap').is(':checked');
+            this.errorLogFilter = $('#error-severity-filter').val() || 'all';
+
             // Diagnostic tools
             $('#test-connectivity').on('click', (e) => {
                 e.preventDefault();
@@ -1127,9 +1135,35 @@
                 this.checkDatabase();
             });
 
+            $('#test-performance').on('click', (e) => {
+                e.preventDefault();
+                this.testPerformance();
+            });
+
+            $('#analyze-cache').on('click', (e) => {
+                e.preventDefault();
+                this.analyzeCache();
+            });
+
             $('#run-diagnostics').on('click', (e) => {
                 e.preventDefault();
                 this.runFullDiagnostics();
+            });
+
+            // Error log interactions
+            $('#error-severity-filter').on('change', (e) => {
+                this.errorLogFilter = $(e.target).val();
+                this.loadErrorLogs();
+            });
+
+            $('#clear-errors').on('click', (e) => {
+                e.preventDefault();
+                this.clearErrorLogs();
+            });
+
+            $('#export-errors').on('click', (e) => {
+                e.preventDefault();
+                this.exportErrorLogs();
             });
 
             // Debug log controls
@@ -1141,6 +1175,385 @@
             $('#auto-scroll').on('change', (e) => {
                 this.toggleAutoScroll($(e.target).is(':checked'));
             });
+
+            $('#word-wrap').on('change', (e) => {
+                this.toggleWordWrap($(e.target).is(':checked'));
+            });
+
+            this.bindErrorLogTableEvents();
+            this.loadSystemHealth();
+            this.loadErrorLogs();
+            this.loadDebugLog();
+
+            this.log('Debug interface initialized', 'info');
+        },
+
+        bindErrorLogTableEvents: function() {
+            const tbody = $('#error-logs-body');
+
+            tbody.off('click', '.view-stack-trace');
+            tbody.on('click', '.view-stack-trace', (event) => {
+                event.preventDefault();
+                const button = $(event.currentTarget);
+                const target = $(button.data('target'));
+                if (!target.length) {
+                    return;
+                }
+
+                const isVisible = target.is(':visible');
+                target.slideToggle(150);
+                button.toggleClass('active', !isVisible);
+            });
+
+            tbody.off('click', '.mark-error-resolved');
+            tbody.on('click', '.mark-error-resolved', (event) => {
+                event.preventDefault();
+                const button = $(event.currentTarget);
+                const errorId = parseInt(button.data('error-id'), 10);
+                if (Number.isNaN(errorId)) {
+                    return;
+                }
+
+                const original = button.html();
+                button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span>');
+
+                this.resolveErrorLog(errorId)
+                    .done(() => {
+                        button.closest('tr').addClass('resolved');
+                        button.closest('tr').find('.error-status').text('Resolved');
+                        button.remove();
+                        this.loadErrorLogs();
+                        this.loadDebugLog();
+                    })
+                    .always(() => {
+                        button.prop('disabled', false).html(original);
+                    });
+            });
+        },
+
+        loadSystemHealth: function() {
+            if (!$('#api-health-status').length) {
+                return;
+            }
+
+            $.post(this.ajax_url, {
+                action: 'yadore_get_system_health',
+                nonce: this.nonce
+            }).done((response) => {
+                if (response && response.success && response.data) {
+                    const data = response.data;
+                    $('#api-health-status').text(data.api_status || 'Unknown');
+                    $('#db-health-status').text(data.database_status || 'Unknown');
+                    $('#performance-status').text(data.performance_status || 'Unknown');
+                    $('#last-error-time').text(data.last_error || 'None');
+                    $('#cache-size').text(data.cache_size || 'Unknown');
+                } else {
+                    $('#api-health-status').text('Unavailable');
+                    $('#db-health-status').text('Unavailable');
+                    $('#performance-status').text('Unavailable');
+                }
+            }).fail(() => {
+                $('#api-health-status').text('Unavailable');
+                $('#db-health-status').text('Unavailable');
+                $('#performance-status').text('Unavailable');
+            });
+        },
+
+        loadErrorLogs: function() {
+            const tbody = $('#error-logs-body');
+            if (!tbody.length) {
+                return;
+            }
+
+            tbody.html(`
+                <tr>
+                    <td colspan="7" class="loading-row">
+                        <span class="dashicons dashicons-update-alt spinning"></span> Loading error logs...
+                    </td>
+                </tr>
+            `);
+
+            $.post(this.ajax_url, {
+                action: 'yadore_get_error_logs',
+                nonce: this.nonce,
+                severity: this.errorLogFilter
+            }).done((response) => {
+                if (response && response.success) {
+                    this.cachedErrorLogs = Array.isArray(response.data?.logs) ? response.data.logs : [];
+                    this.renderErrorLogs(this.cachedErrorLogs);
+                    this.updateErrorStats(response.data?.counts, response.data?.open_counts);
+                } else {
+                    this.cachedErrorLogs = [];
+                    this.renderErrorLogs([]);
+                    this.updateErrorStats();
+                }
+            }).fail(() => {
+                this.cachedErrorLogs = [];
+                tbody.html(`
+                    <tr>
+                        <td colspan="7" class="loading-row">
+                            <span class="dashicons dashicons-warning"></span> Failed to load error logs.
+                        </td>
+                    </tr>
+                `);
+                this.updateErrorStats();
+            });
+        },
+
+        updateErrorStats: function(counts = {}, openCounts = {}) {
+            const severities = ['critical', 'high', 'medium', 'low'];
+            severities.forEach((severity) => {
+                const total = counts?.[severity] || 0;
+                const open = openCounts?.[severity] || 0;
+                let label = this.formatNumber(total);
+                if (open > 0) {
+                    label += ` (${this.formatNumber(open)} open)`;
+                }
+                $(`#${severity}-errors`).text(label);
+            });
+        },
+
+        renderErrorLogs: function(logs) {
+            const tbody = $('#error-logs-body');
+            if (!tbody.length) {
+                return;
+            }
+
+            if (!Array.isArray(logs) || !logs.length) {
+                tbody.html(`
+                    <tr>
+                        <td colspan="7" class="loading-row">
+                            <span class="dashicons dashicons-yes"></span> No error logs found for the selected filter.
+                        </td>
+                    </tr>
+                `);
+                return;
+            }
+
+            const rows = logs.map((log) => {
+                const createdAt = log.created_at ? this.escapeHtml(log.created_at) : '';
+                const severityRaw = (log.severity || '').toString();
+                const severity = this.escapeHtml(severityRaw);
+                const severityClass = (severityRaw ? severityRaw.toLowerCase().replace(/[^a-z0-9_-]/g, '') : 'unknown');
+                const severityLabel = severity ? severity.charAt(0).toUpperCase() + severity.slice(1) : '';
+                const type = this.escapeHtml(log.error_type || '');
+                const message = this.escapeHtml(log.error_message || '');
+                const summary = this.formatErrorSummary(log);
+                const status = log.resolved ? 'Resolved' : 'Open';
+                const detailId = `error-trace-${log.id}`;
+
+                return `
+                    <tr data-error-id="${log.id}" class="${log.resolved ? 'resolved' : ''}">
+                        <td>${createdAt}</td>
+                        <td><span class="error-severity severity-${severityClass}">${severityLabel}</span></td>
+                        <td>${type}</td>
+                        <td>${message}</td>
+                        <td>${summary}</td>
+                        <td class="error-status">${status}</td>
+                        <td>
+                            <button class="button button-secondary button-small view-stack-trace" data-target="#${detailId}">Trace</button>
+                            ${log.resolved ? '' : `<button class="button button-link-delete mark-error-resolved" data-error-id="${log.id}">Resolve</button>`}
+                        </td>
+                    </tr>
+                    <tr id="${detailId}" class="error-trace-row" style="display: none;">
+                        <td colspan="7">
+                            <div class="error-trace-details">
+                                <div class="error-trace-meta">
+                                    <strong>Stack Trace:</strong>
+                                    <pre>${this.escapeHtml(log.stack_trace || 'No stack trace recorded.')}</pre>
+                                </div>
+                                ${this.formatContextDetails(log)}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.html(rows);
+        },
+
+        formatErrorSummary: function(log) {
+            const segments = [];
+            if (log.request_uri) {
+                segments.push(`<strong>URI:</strong> ${this.escapeHtml(log.request_uri)}`);
+            }
+            if (log.post_id) {
+                segments.push(`<strong>Post ID:</strong> ${this.escapeHtml(log.post_id)}`);
+            }
+            if (log.user_id) {
+                segments.push(`<strong>User ID:</strong> ${this.escapeHtml(log.user_id)}`);
+            }
+
+            const context = log.context && typeof log.context === 'object' ? log.context : {};
+            const contextKeys = Object.keys(context);
+            if (contextKeys.length) {
+                segments.push(`<strong>Context:</strong> ${this.escapeHtml(contextKeys.slice(0, 3).join(', '))}`);
+            }
+
+            return segments.join('<br>');
+        },
+
+        formatContextDetails: function(log) {
+            const details = [];
+            if (log.error_code) {
+                details.push(`<div><strong>Error Code:</strong> ${this.escapeHtml(log.error_code)}</div>`);
+            }
+            if (log.ip_address) {
+                details.push(`<div><strong>IP:</strong> ${this.escapeHtml(log.ip_address)}</div>`);
+            }
+            if (log.user_agent) {
+                details.push(`<div><strong>User Agent:</strong> ${this.escapeHtml(log.user_agent)}</div>`);
+            }
+            if (log.resolution_notes) {
+                details.push(`<div><strong>Resolution Notes:</strong> ${this.escapeHtml(log.resolution_notes)}</div>`);
+            }
+
+            const context = log.context && typeof log.context === 'object' ? log.context : {};
+            if (Object.keys(context).length) {
+                details.push(`<div><strong>Context Data:</strong><pre>${this.escapeHtml(JSON.stringify(context, null, 2))}</pre></div>`);
+            }
+
+            return details.length ? `<div class="error-context-details">${details.join('')}</div>` : '';
+        },
+
+        loadDebugLog: function() {
+            const container = $('#debug-log-content');
+            if (!container.length) {
+                return;
+            }
+
+            container.html(`
+                <div class="log-loading">
+                    <span class="dashicons dashicons-update-alt spinning"></span> Loading debug information...
+                </div>
+            `);
+
+            $.post(this.ajax_url, {
+                action: 'yadore_get_debug_info',
+                nonce: this.nonce
+            }).done((response) => {
+                if (response && response.success) {
+                    this.renderDebugLog(response.data || {});
+                } else {
+                    container.html('<div class="log-error">No debug information available.</div>');
+                }
+            }).fail(() => {
+                container.html('<div class="log-error">Failed to load debug log information.</div>');
+            });
+        },
+
+        renderDebugLog: function(data) {
+            const container = $('#debug-log-content');
+            if (!container.length) {
+                return;
+            }
+
+            const sections = [];
+
+            if (data.plugin_debug_log) {
+                sections.push('=== Plugin Debug Log ===\n' + data.plugin_debug_log.trim());
+            }
+
+            if (Array.isArray(data.stack_traces) && data.stack_traces.length) {
+                const traceLines = data.stack_traces.map((trace) => {
+                    const timestamp = trace.created_at ? `[${trace.created_at}]` : '';
+                    const severity = trace.severity ? trace.severity.toUpperCase() : '';
+                    return `${timestamp} ${severity} ${trace.error_message || ''}\n${trace.stack_trace || ''}`.trim();
+                });
+                sections.push('=== Recent Stack Traces ===\n' + traceLines.join('\n\n'));
+            }
+
+            if (data.wp_debug_excerpt) {
+                sections.push('=== WP debug.log (tail) ===\n' + data.wp_debug_excerpt.trim());
+            }
+
+            if (!sections.length) {
+                container.html('<div class="log-empty">No debug entries recorded yet.</div>');
+                return;
+            }
+
+            const content = $('<pre/>').text(sections.join('\n\n'));
+            container.empty().append(content);
+
+            if (this.debugWordWrap) {
+                container.removeClass('no-wrap');
+            } else {
+                container.addClass('no-wrap');
+            }
+
+            if (this.debugAutoScroll && container[0]) {
+                container.scrollTop(container[0].scrollHeight);
+            }
+        },
+
+        clearErrorLogs: function() {
+            if (!confirm('Are you sure you want to delete all error logs? This cannot be undone.')) {
+                return;
+            }
+
+            const button = $('#clear-errors');
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Clearing...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_clear_error_log',
+                nonce: this.nonce
+            }).done((response) => {
+                this.showNotice(response?.data?.message || 'Error logs cleared.', 'success');
+                this.loadErrorLogs();
+                this.loadDebugLog();
+            }).fail((xhr) => {
+                this.showNotice(xhr.responseJSON?.data || 'Failed to clear error logs.', 'error');
+            }).always(() => {
+                button.prop('disabled', false).html('<span class="dashicons dashicons-trash"></span> Clear All');
+            });
+        },
+
+        clearDebugLog: function() {
+            if (!confirm('Clear the stored debug log history? This will also remove error log entries.')) {
+                return;
+            }
+
+            $.post(this.ajax_url, {
+                action: 'yadore_clear_error_log',
+                nonce: this.nonce
+            }).done(() => {
+                this.loadErrorLogs();
+                this.loadDebugLog();
+            }).fail(() => {
+                this.showNotice('Failed to clear debug log history.', 'error');
+            });
+        },
+
+        exportErrorLogs: function() {
+            if (!this.cachedErrorLogs.length) {
+                alert('No error logs available to export.');
+                return;
+            }
+
+            const blob = new Blob([JSON.stringify(this.cachedErrorLogs, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'yadore-error-logs.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        },
+
+        toggleAutoScroll: function(enabled) {
+            this.debugAutoScroll = !!enabled;
+            if (enabled) {
+                const container = $('#debug-log-content');
+                if (container.length && container[0]) {
+                    container.scrollTop(container[0].scrollHeight);
+                }
+            }
+        },
+
+        toggleWordWrap: function(enabled) {
+            this.debugWordWrap = !!enabled;
+            $('#debug-log-content').toggleClass('no-wrap', !enabled);
         },
 
         testConnectivity: function() {
@@ -1173,19 +1586,86 @@
             });
         },
 
-        runFullDiagnostics: function() {
-            // Run all diagnostic tools in sequence
-            $('#test-connectivity').click();
-            setTimeout(() => $('#check-database').click(), 1000);
-            setTimeout(() => $('#test-performance').click(), 2000);
-            setTimeout(() => $('#analyze-cache').click(), 3000);
+        checkDatabase: function() {
+            const button = $('#check-database');
+            const resultsDiv = $('#database-results');
 
-            // Show summary after all tests complete
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Checking...');
+            resultsDiv.html('<div class="testing-message">Checking database tables...</div>');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_check_database',
+                nonce: this.nonce
+            }).done((response) => {
+                if (response && response.success) {
+                    resultsDiv.html(`<div class="test-success"><p>${this.escapeHtml(response.data.message || 'Database check passed.')}</p></div>`);
+                } else {
+                    resultsDiv.html(`<div class="test-error"><p>${this.escapeHtml(response?.data || 'Database check failed.')}</p></div>`);
+                }
+            }).fail(() => {
+                resultsDiv.html('<div class="test-error"><p>Database diagnostics are unavailable.</p></div>');
+            }).always(() => {
+                button.prop('disabled', false).html('<span class="dashicons dashicons-database"></span> Check DB');
+            });
+        },
+
+        testPerformance: function() {
+            const button = $('#test-performance');
+            const resultsDiv = $('#performance-results');
+
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Analyzing...');
+            resultsDiv.html('<div class="testing-message">Running performance benchmarks...</div>');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_test_performance',
+                nonce: this.nonce
+            }).done((response) => {
+                if (response && response.success) {
+                    resultsDiv.html(`<div class="test-success"><p>${this.escapeHtml(response.data.message || 'Performance checks completed.')}</p></div>`);
+                } else {
+                    resultsDiv.html(`<div class="test-error"><p>${this.escapeHtml(response?.data || 'Performance check failed.')}</p></div>`);
+                }
+            }).fail(() => {
+                resultsDiv.html('<div class="test-error"><p>Performance diagnostics are unavailable.</p></div>');
+            }).always(() => {
+                button.prop('disabled', false).html('<span class="dashicons dashicons-performance"></span> Analyze');
+            });
+        },
+
+        analyzeCache: function() {
+            const button = $('#analyze-cache');
+            const resultsDiv = $('#cache-results');
+
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Analyzing...');
+            resultsDiv.html('<div class="testing-message">Reviewing cache usage...</div>');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_analyze_cache',
+                nonce: this.nonce
+            }).done((response) => {
+                if (response && response.success) {
+                    resultsDiv.html(`<div class="test-success"><p>${this.escapeHtml(response.data.message || 'Cache analysis completed.')}</p></div>`);
+                } else {
+                    resultsDiv.html(`<div class="test-error"><p>${this.escapeHtml(response?.data || 'Cache analysis failed.')}</p></div>`);
+                }
+            }).fail(() => {
+                resultsDiv.html('<div class="test-error"><p>Cache diagnostics are unavailable.</p></div>');
+            }).always(() => {
+                button.prop('disabled', false).html('<span class="dashicons dashicons-admin-generic"></span> Analyze');
+            });
+        },
+
+        runFullDiagnostics: function() {
+            $('#test-connectivity').trigger('click');
+            setTimeout(() => $('#check-database').trigger('click'), 1000);
+            setTimeout(() => $('#test-performance').trigger('click'), 2000);
+            setTimeout(() => $('#analyze-cache').trigger('click'), 3000);
+
             setTimeout(() => {
                 $('#diagnostic-summary').show().find('.summary-content').html(`
                     <div class="summary-success">
                         <h4><span class="dashicons dashicons-yes-alt"></span> Full System Diagnostics Completed</h4>
-                        <p>All diagnostic tests have been completed. Review the individual results above for detailed information.</p>
+                        <p>All diagnostic tests have been triggered. Review the individual results above for detailed information.</p>
                         <p><strong>Overall Status:</strong> <span class="status-good">System Healthy</span></p>
                     </div>
                 `);

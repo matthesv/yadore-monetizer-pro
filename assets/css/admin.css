@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v2.9.14 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v2.9.15 - Admin CSS (Complete) */
 .yadore-admin-wrap {
     margin: 0;
 }
@@ -713,6 +713,56 @@
     height: 300px;
     overflow-y: auto;
     white-space: pre-wrap;
+}
+
+.debug-log-viewer.no-wrap {
+    white-space: pre;
+}
+
+.error-severity {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.error-severity.severity-critical { background: #b32d2e; }
+.error-severity.severity-high { background: #d72b3f; }
+.error-severity.severity-medium { background: #dba617; }
+.error-severity.severity-low { background: #2b7dbd; }
+.error-severity.severity-unknown { background: #6c757d; }
+
+.error-trace-row {
+    background: #f8f9fa;
+}
+
+.error-trace-details {
+    padding: 16px;
+    border-left: 4px solid #2271b1;
+    background: #fff;
+}
+
+.error-trace-details pre {
+    margin: 8px 0;
+    background: #111;
+    color: #d4d4d4;
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.error-trace-details .error-context-details {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #1d2327;
+}
+
+.error-trace-details .error-context-details pre {
+    background: #f1f5f9;
+    color: #1d2327;
 }
 
 .health-status-grid {

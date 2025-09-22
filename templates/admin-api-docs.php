@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.14</span>
+        <span class="version-badge">v2.9.15</span>
     </h1>
 
     <div class="yadore-api-container">
@@ -453,7 +453,7 @@ function yadoreInitializeApiDocs() {
     $('#clear-logs').on('click', yadoreClearLogs);
     $('#export-logs').on('click', yadoreExportLogs);
 
-    console.log('Yadore API Documentation v2.9.14 - Initialized');
+    console.log('Yadore API Documentation v2.9.15 - Initialized');
 }
 
 function yadoreLoadApiStatus() {
