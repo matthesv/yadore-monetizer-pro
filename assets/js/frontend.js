@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.19 - Frontend JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.20 - Frontend JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: '2.9.19',
+        version: '2.9.20',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,
@@ -25,7 +25,7 @@
             this.initScrollTriggers();
             this.initResponsiveHandling();
 
-            console.log('Yadore Monetizer Pro v2.9.19 Frontend - Initialized');
+            console.log('Yadore Monetizer Pro v2.9.20 Frontend - Initialized');
         },
 
         // Initialize product overlay
@@ -263,22 +263,43 @@
                 post_id: this.settings.post_id || 0
             })
             .done((response) => {
-                if (response.success && response.data.products && response.data.products.length > 0) {
-                    const displayedCount = this.renderOverlayProducts(response.data.products);
-                    this.showOverlay();
+                if (response.success) {
+                    const payload = response.data || {};
+                    const displayCount = parseInt(payload.display_count, 10) || 0;
+                    const html = typeof payload.html === 'string' ? payload.html : '';
 
-                    // Track overlay view
-                    this.trackOverlayView(response.data.keyword, displayedCount);
-                } else {
-                    // No products found
-                    overlayBody.html(`
-                        <div class="overlay-no-products">
-                            <div class="no-products-icon">🔍</div>
-                            <h3>No products found</h3>
-                            <p>We couldn't find any relevant products for this content.</p>
-                        </div>
-                    `);
+                    if (html) {
+                        overlayBody.html(html);
+                    } else if (payload.products && payload.products.length > 0) {
+                        const fallbackCount = this.renderOverlayProducts(payload.products);
+                        this.showOverlay();
+                        this.trackOverlayView(payload.keyword, fallbackCount);
+                        return;
+                    } else {
+                        overlayBody.html(`
+                            <div class="overlay-no-products">
+                                <div class="no-products-icon">🔍</div>
+                                <h3>No products found</h3>
+                                <p>We couldn't find any relevant products for this content.</p>
+                            </div>
+                        `);
+                    }
+
+                    if (displayCount > 0) {
+                        this.showOverlay();
+                        this.trackOverlayView(payload.keyword, displayCount);
+                    }
+
+                    return;
                 }
+
+                overlayBody.html(`
+                    <div class="overlay-no-products">
+                        <div class="no-products-icon">🔍</div>
+                        <h3>No products found</h3>
+                        <p>We couldn't find any relevant products for this content.</p>
+                    </div>
+                `);
             })
             .fail((xhr, status, error) => {
                 console.error('Yadore Monetizer: Failed to load overlay products', error);

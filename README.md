@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.19 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.20 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.19 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.20 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
@@ -16,11 +16,12 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **16 AJAX Endpoints** - Alle korrekt implementiert ohne Konflikte  
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.19**
+## 🌟 **NEU IN VERSION 2.9.20**
 
-- ✅ **Stabile Yadore-Verbindung** – Die Produktsynchronisierung verarbeitet nun verschachtelte Händler-Logos korrekt, sodass gültige API-Keys nicht länger zu Abbrüchen oder „Connection Errors“ führen.
-- ✅ **Robuste Datenaufbereitung** – Produktdaten mit komplexen Strukturen werden zuverlässig bereinigt, wodurch „No products found“-Meldungen bei erfolgreichen API-Antworten verhindert werden.
-- ✅ **Aktualisierte Versionierung** – Alle Admin-Views, Assets und Dokumentationen spiegeln Version 2.9.19 wider.
+- ✅ **Template Manager für Overlays & Shortcodes** – Produkt-Templates lassen sich nun bequem per Custom Post Type verwalten und nach Typ (Overlay oder Shortcode) klassifizieren.
+- ✅ **Flexible Standard-Templates** – Neue Einstellungen für Overlay-, Auto-Injection- und Shortcode-Standardvorlagen inklusive sofort nutzbarer Default-Layouts.
+- ✅ **Shortcode Template-Attribut** – Das `[yadore_products]` Shortcode unterstützt jetzt das Attribut `template="..."`, um individuelle Layouts gezielt aufzurufen.
+- ✅ **Serverseitiges Overlay-Rendering** – Overlay-Produkte werden serverseitig anhand des ausgewählten Templates gerendert, inklusive Integration eigener Designs.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -60,13 +61,14 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 - **format** - Display-Format (grid, list, inline)
 - **cache** - Caching aktivieren (true/false) – `false` lädt frische Daten direkt aus der Yadore API
 - **class** - Custom CSS-Klassen
+- **template** - Optional; wählt ein registriertes Template (z.B. `template="default-grid"` oder `template="custom:mein-template"`)
 
 ### **3 Display-Formate:**
 📱 **Grid Layout** - Responsive Produktkarten mit Hover-Effekten  
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.19:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.20:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -264,14 +266,14 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.19 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.20 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.19:**
-- 🔍 Vollständiger Offer-Trace – Wenn keine Produkte gefunden werden, dokumentiert das Plugin jetzt die komplette Anfrage samt URL, Parametern und Rohantwort für eine präzise Fehleranalyse.
-- 📊 Request- & Response-Logging – Die API-Protokolle enthalten bei leeren Ergebnissen zusätzliche Details, damit Support-Teams schneller reagieren können.
-- 🧾 Aktualisierte Assets, Dokumentation und Versionshinweise für den produktiven Einsatz (2.9.19).
+### **Neue Highlights in v2.9.20:**
+- 🧩 Einheitliches Template-System – Overlay, Shortcode und Auto-Injection greifen auf das zentrale Template-Repository zurück und lassen sich unabhängig konfigurieren.
+- 🛠️ Auswahl im Admin – Neue Dropdowns in den Anzeige-Einstellungen erlauben die komfortable Wahl des Standard-Templates für Overlay, Auto-Injection und Shortcodes.
+- ✨ Verbesserte Overlay-Auslieferung – Produktempfehlungen werden serverseitig gerendert und respektieren individuelle Template-Layouts samt Inline-Styling.
 
-**Alle Features sind wieder verfügbar und voll funktional!**
+**Alle Features sind verfügbar und voll funktional!**
 
 ✅ **Status:** ALLE FUNKTIONEN INTEGRIERT
 ✅ **WordPress Integration:** 100% VOLLSTÄNDIG
@@ -285,11 +287,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.19 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.20 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.19** - Production-Ready Market Release
+**Current Version: 2.9.20** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
