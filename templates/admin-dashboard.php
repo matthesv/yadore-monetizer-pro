@@ -2,12 +2,12 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-cart"></span>
         Yadore Monetizer Pro Dashboard
-        <span class="version-badge">v2.9.11</span>
+        <span class="version-badge">v2.9.12</span>
     </h1>
 
     <?php if (get_transient('yadore_activation_notice')): ?>
     <div class="notice notice-success is-dismissible">
-        <p><strong>Yadore Monetizer Pro v2.9.11 activated successfully!</strong> All features are now available.</p>
+        <p><strong>Yadore Monetizer Pro v2.9.12 activated successfully!</strong> All features are now available.</p>
     </div>
     <?php delete_transient('yadore_activation_notice'); endif; ?>
 
@@ -311,7 +311,7 @@
                             <div class="status-indicator status-active"></div>
                             <div class="status-details">
                                 <strong>WordPress Integration</strong>
-                                <small>v2.9.11 - All systems operational</small>
+                                <small>v2.9.12 - All systems operational</small>
                             </div>
                         </div>
 
@@ -351,7 +351,7 @@
                     <div class="version-info">
                         <div class="info-row">
                             <span class="info-label">Plugin Version:</span>
-                            <span class="info-value version-current">v2.9.11</span>
+                            <span class="info-value version-current">v2.9.12</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">WordPress:</span>
@@ -363,7 +363,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">Database:</span>
-                            <span class="info-value">Enhanced v2.9.11</span>
+                            <span class="info-value">Enhanced v2.9.12</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Features:</span>
@@ -419,7 +419,7 @@ jQuery(document).ready(function($) {
 });
 
 function yadoreInitializeDashboard() {
-    console.log('Yadore Monetizer Pro v2.9.11 Dashboard - Initialized');
+    console.log('Yadore Monetizer Pro v2.9.12 Dashboard - Initialized');
 }
 
 function yadoreLoadDashboardStats() {
