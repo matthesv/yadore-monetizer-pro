@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.22 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.23 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.22 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.23 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
@@ -16,13 +16,11 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **16 AJAX Endpoints** - Alle korrekt implementiert ohne Konflikte  
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.22**
+## 🌟 **NEU IN VERSION 2.9.23**
 
-- ✅ **Editierbare Standard-Templates** – Alle Built-in Layouts (Overlay, Grid, List & Inline) werden automatisch als Custom Templates angelegt und lassen sich sofort im WordPress-Editor anpassen.
-- ✅ **Vorbereitete Platzhalter-Markups** – Fertige HTML-Strukturen mit `{{token}}`-Platzhaltern inklusive `[yadore_product_loop]` machen individuelle Anpassungen ohne PHP-Code möglich.
-- ✅ **Konsistente Button-Icons** – Neue Flexbox-Regeln richten Dashicons in sämtlichen Admin-Buttons exakt auf Texthöhe aus und verbessern die Bedienbarkeit.
-- ✅ **Verfeinerte Frontend-Styles** – Optimierte CSS-Regeln für Overlays, Bild-Platzhalter und Preisangaben sorgen für ein stimmiges Erscheinungsbild auch ohne PHP-Templates.
-- ✅ **Offizielle Autorenangabe** – Das Plugin firmiert nun unter Matthes Vogel als verantwortlichem Autor.
+- ✅ **Kombinierbare Aktivierungsoptionen** – Overlay, automatische Produkt-Injection und manueller Shortcode lassen sich jetzt einzeln oder gemeinsam in den Einstellungen aktivieren.
+- ✅ **Mobile Overlay in Vollbreite** – Das Overlay nutzt auf Smartphones über 90 % der Bildschirmbreite und passt sich dynamisch an kleinere Viewports an.
+- ✅ **Verbesserte Scrollbarkeit** – Optimierte CSS- und JavaScript-Regeln stellen sicher, dass sich lange Produktlisten im Overlay flüssig nach unten scrollen lassen.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -69,7 +67,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.22:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.23:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -135,8 +133,9 @@ wp_yadore_analytics        - Performance Analytics (NEW)
 
 ### **General Settings:**
 - Yadore API Key Configuration
-- Product Overlay Enable/Disable
-- Auto Content Detection
+- Product Overlay Toggle
+- Automatic Product Injection Toggle
+- Manual Shortcode Output Toggle
 - Debug Mode Toggle
 
 ### **AI Settings (Enhanced):**
@@ -267,12 +266,12 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.22 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.23 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.22:**
-- 🧩 Sofort editierbare Standard-Layouts – Built-in Templates werden automatisch als Custom Posts angelegt und können ohne Vorarbeit individuell angepasst werden.
-- 🛠️ Platzhaltergestützte Markups – Die ausgelieferten HTML-Strukturen enthalten vollständige `{{token}}`-Platzhalter und `[yadore_product_loop]`-Blöcke für eigene Designs.
-- ✨ Einheitliche UI & Styles – Dashicons in Buttons sind sauber zentriert und überarbeitete CSS-Regeln verbessern Overlay-, Platzhalter- und Preis-Darstellungen.
+### **Neue Highlights in v2.9.23:**
+- 🔄 Kombinierbare Aktivierungsoptionen – Overlay, automatische Produkt-Injection und manueller Shortcode lassen sich individuell schalten.
+- 📱 Mobile Overlay in Vollbreite – Nutzt auf Smartphones mehr als 90 % der Bildschirmbreite für maximale Sichtbarkeit.
+- 🧭 Verbesserte Scrollbarkeit – Optimierte Scroll-Logik und Layout sorgen für ein angenehmes Nutzererlebnis bei langen Produktlisten.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -288,11 +287,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.22 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.23 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.22** - Production-Ready Market Release
+**Current Version: 2.9.23** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

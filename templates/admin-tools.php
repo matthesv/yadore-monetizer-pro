@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-tools"></span>
         Tools & Utilities
-        <span class="version-badge">v2.9.22</span>
+        <span class="version-badge">v2.9.23</span>
     </h1>
 
     <div class="yadore-tools-container">
@@ -494,7 +494,7 @@ function yadoreInitializeTools() {
         yadoreHandleFileUpload(this.files);
     });
 
-    console.log('Yadore Tools v2.9.22 - Initialized');
+    console.log('Yadore Tools v2.9.23 - Initialized');
 }
 
 function yadoreLoadToolStats() {

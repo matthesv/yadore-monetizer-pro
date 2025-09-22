@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.22
+Version: 2.9.23
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.22');
+define('YADORE_PLUGIN_VERSION', '2.9.23');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -101,7 +101,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.22 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.23 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -183,6 +183,7 @@ class YadoreMonetizer {
             'yadore_market' => $this->get_default_market(),
             'yadore_overlay_enabled' => 1,
             'yadore_auto_detection' => 1,
+            'yadore_shortcode_enabled' => 1,
             'yadore_cache_duration' => 3600,
             'yadore_debug_mode' => 0,
             'yadore_ai_enabled' => 0,
@@ -525,6 +526,7 @@ HTML
             $boolean_options = array(
                 'yadore_overlay_enabled',
                 'yadore_auto_detection',
+                'yadore_shortcode_enabled',
                 'yadore_debug_mode',
                 'yadore_ai_enabled',
                 'yadore_auto_scan_posts',
@@ -1185,6 +1187,7 @@ HTML
             'yadore_market',
             'yadore_overlay_enabled',
             'yadore_auto_detection',
+            'yadore_shortcode_enabled',
             'yadore_cache_duration',
             'yadore_debug_mode',
 
@@ -4645,6 +4648,10 @@ HTML
 
     // v2.7: Shortcode Implementation (Enhanced)
     public function shortcode_products($atts) {
+        if (!get_option('yadore_shortcode_enabled', true)) {
+            return '';
+        }
+
         $atts = shortcode_atts(array(
             'keyword' => '',
             'limit' => 6,
