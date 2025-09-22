@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.7
+Version: 2.9.8
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.7');
+define('YADORE_PLUGIN_VERSION', '2.9.8');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -87,7 +87,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.7 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.8 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -2186,28 +2186,28 @@ class YadoreMonetizer {
                 'generationConfig' => array(
                     'temperature' => $temperature,
                     'maxOutputTokens' => $max_tokens,
-                ),
-                'responseMimeType' => 'application/json',
-                'responseSchema' => array(
-                    'type' => 'object',
-                    'properties' => array(
-                        'keyword' => array(
-                            'type' => 'string',
-                            'description' => 'Primary product keyword describing the best affiliate opportunity.',
+                    'responseMimeType' => 'application/json',
+                    'responseSchema' => array(
+                        'type' => 'OBJECT',
+                        'properties' => array(
+                            'keyword' => array(
+                                'type' => 'STRING',
+                                'description' => 'Primary product keyword describing the best affiliate opportunity.',
+                            ),
+                            'confidence' => array(
+                                'type' => 'NUMBER',
+                                'minimum' => 0,
+                                'maximum' => 1,
+                                'description' => 'Confidence score between 0 and 1 for the extracted keyword.',
+                            ),
+                            'rationale' => array(
+                                'type' => 'STRING',
+                                'description' => 'Optional short explanation for the keyword choice.',
+                            ),
                         ),
-                        'confidence' => array(
-                            'type' => 'number',
-                            'minimum' => 0,
-                            'maximum' => 1,
-                            'description' => 'Confidence score between 0 and 1 for the extracted keyword.',
-                        ),
-                        'rationale' => array(
-                            'type' => 'string',
-                            'description' => 'Optional short explanation for the keyword choice.',
-                        ),
+                        'required' => array('keyword'),
+                        'propertyOrdering' => array('keyword', 'confidence', 'rationale'),
                     ),
-                    'required' => array('keyword'),
-                    'additionalProperties' => false,
                 ),
             );
 
