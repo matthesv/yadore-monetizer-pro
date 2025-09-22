@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.7</span>
+        <span class="version-badge">v2.9.8</span>
     </h1>
 
     <div class="yadore-api-container">
@@ -287,18 +287,28 @@ Accept: application/json</code></pre>
   ],
   "generationConfig": {
     "temperature": 0.3,
-    "maxOutputTokens": 50
-  },
-  "responseMimeType": "application/json",
-  "responseSchema": {
-    "type": "object",
-    "properties": {
-      "keyword": { "type": "string" },
-      "confidence": { "type": "number" },
-      "rationale": { "type": "string" }
-    },
-    "required": ["keyword"],
-    "additionalProperties": false
+    "maxOutputTokens": 50,
+    "responseMimeType": "application/json",
+    "responseSchema": {
+      "type": "OBJECT",
+      "properties": {
+        "keyword": {
+          "type": "STRING",
+          "description": "Primary product keyword describing the best affiliate opportunity."
+        },
+        "confidence": {
+          "type": "NUMBER",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {
+          "type": "STRING",
+          "description": "Optional short explanation for the keyword choice."
+        }
+      },
+      "required": ["keyword"],
+      "propertyOrdering": ["keyword", "confidence", "rationale"]
+    }
   }
 }</code></pre>
                                     </div>
@@ -436,7 +446,7 @@ function yadoreInitializeApiDocs() {
     $('#clear-logs').on('click', yadoreClearLogs);
     $('#export-logs').on('click', yadoreExportLogs);
 
-    console.log('Yadore API Documentation v2.9 - Initialized');
+    console.log('Yadore API Documentation v2.9.8 - Initialized');
 }
 
 function yadoreLoadApiStatus() {
