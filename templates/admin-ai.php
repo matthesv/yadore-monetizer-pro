@@ -17,7 +17,7 @@ $current_model_label = $available_models[$current_model]['label'] ?? $current_mo
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-generic"></span>
         AI Management & Analysis
-        <span class="version-badge">v2.9.9</span>
+        <span class="version-badge">v2.9.10</span>
     </h1>
 
     <div class="yadore-ai-container">
@@ -113,7 +113,7 @@ $current_model_label = $available_models[$current_model]['label'] ?? $current_mo
                                     <label>Max Tokens</label>
                                     <div class="tokens-display">
                                         <span class="token-value"><?php echo get_option('yadore_ai_max_tokens', '50'); ?></span>
-                                        <span class="token-description">tokens per response</span>
+                                        <span class="token-description">tokens per response (max. 10,000)</span>
                                     </div>
                                 </div>
                             </div>
@@ -371,7 +371,7 @@ function yadoreInitializeAiManagement() {
     $('#run-ai-test').on('click', yadoreRunAiTest);
     $('#run-batch-test').on('click', yadoreRunBatchTest);
 
-    console.log('Yadore AI Management v2.9.9 - Initialized');
+    console.log('Yadore AI Management v2.9.10 - Initialized');
 }
 
 function yadoreLoadAiStats() {

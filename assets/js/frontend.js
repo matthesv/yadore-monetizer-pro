@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.9 - Frontend JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.10 - Frontend JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: '2.9.9',
+        version: '2.9.10',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,
@@ -25,7 +25,7 @@
             this.initScrollTriggers();
             this.initResponsiveHandling();
 
-            console.log('Yadore Monetizer Pro v2.9.9 Frontend - Initialized');
+            console.log('Yadore Monetizer Pro v2.9.10 Frontend - Initialized');
         },
 
         // Initialize product overlay
