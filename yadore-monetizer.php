@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.17
+Version: 2.9.18
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.17');
+define('YADORE_PLUGIN_VERSION', '2.9.18');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -91,7 +91,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.17 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.18 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -2620,9 +2620,17 @@ class YadoreMonetizer {
                 : '';
 
             if (isset($product['merchant']['logo'])) {
-                $sanitized['merchant']['logo'] = esc_url_raw($product['merchant']['logo']);
+                $logo_value = $product['merchant']['logo'];
+                if (is_array($logo_value) && isset($logo_value['url'])) {
+                    $logo_value = $logo_value['url'];
+                }
+
+                if (is_string($logo_value) && $logo_value !== '') {
+                    $sanitized['merchant']['logo'] = esc_url_raw($logo_value);
+                }
             }
-            if (isset($product['merchant']['logoUrl'])) {
+
+            if (isset($product['merchant']['logoUrl']) && is_string($product['merchant']['logoUrl'])) {
                 $sanitized['merchant']['logo'] = esc_url_raw($product['merchant']['logoUrl']);
             }
         } elseif (!empty($product['merchant'])) {
