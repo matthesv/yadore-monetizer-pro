@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.12
+Version: 2.9.13
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.12');
+define('YADORE_PLUGIN_VERSION', '2.9.13');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -89,7 +89,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.12 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.13 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -1927,26 +1927,43 @@ class YadoreMonetizer {
             $attempt++;
             $result = $this->fetch_products_for_single_keyword($candidate, $limit, $post_id, $use_cache);
 
-            if ($selected_keyword === '') {
-                $selected_keyword = $candidate;
-            }
-
             if ($result === false) {
                 return array();
             }
 
-            if (!empty($result)) {
-                if ($debug_enabled && $attempt > 1) {
-                    $this->log(sprintf(
-                        'Alternate keyword "%s" used after %d attempt(s) for post %d.',
-                        $candidate,
-                        $attempt,
-                        (int) $post_id
-                    ), 'debug');
+            $resolved_keyword = $candidate;
+            $products = array();
+
+            if (is_array($result) && array_key_exists('products', $result)) {
+                $products = is_array($result['products']) ? $result['products'] : array();
+                if (!empty($result['keyword'])) {
+                    $resolved_keyword = $result['keyword'];
+                }
+            } elseif (is_array($result)) {
+                $products = $result;
+            }
+
+            if ($selected_keyword === '') {
+                $selected_keyword = $resolved_keyword;
+            }
+
+            if (!empty($products)) {
+                if ($debug_enabled) {
+                    $candidate_clean = $this->sanitize_single_keyword($candidate);
+                    $resolved_clean = $this->sanitize_single_keyword($resolved_keyword);
+
+                    if ($attempt > 1 || $candidate_clean !== $resolved_clean) {
+                        $this->log(sprintf(
+                            'Alternate keyword "%s" used after %d attempt(s) for post %d.',
+                            $resolved_keyword,
+                            $attempt,
+                            (int) $post_id
+                        ), 'debug');
+                    }
                 }
 
-                $selected_keyword = $candidate;
-                return $result;
+                $selected_keyword = $resolved_keyword;
+                return $products;
             }
         }
 
@@ -1964,7 +1981,7 @@ class YadoreMonetizer {
     private function fetch_products_for_single_keyword($keyword, $limit, $post_id, $use_cache) {
         $keyword = $this->sanitize_single_keyword($keyword);
         if ($keyword === '') {
-            return array();
+            return array('products' => array(), 'keyword' => '');
         }
 
         $limit = (int) $limit;
@@ -1974,6 +1991,86 @@ class YadoreMonetizer {
         $limit = min(50, max(1, $limit));
 
         $use_cache = (bool) $use_cache;
+
+        $queue = array(
+            array('keyword' => $keyword, 'precision' => null),
+        );
+
+        $attempted = array();
+        $variation_added = array();
+        $results_template = array('products' => array(), 'keyword' => $keyword);
+
+        while (!empty($queue)) {
+            $attempt = array_shift($queue);
+            $attempt_keyword = $this->sanitize_single_keyword($attempt['keyword']);
+            $precision_override = $attempt['precision'];
+
+            if ($attempt_keyword === '') {
+                continue;
+            }
+
+            $attempt_hash_input = function_exists('mb_strtolower')
+                ? mb_strtolower($attempt_keyword, 'UTF-8')
+                : strtolower($attempt_keyword);
+            $attempt_hash = md5($attempt_hash_input . '|' . ($precision_override === null ? 'auto' : $precision_override));
+            if (isset($attempted[$attempt_hash])) {
+                continue;
+            }
+            $attempted[$attempt_hash] = true;
+
+            $query_result = $this->query_yadore_products($attempt_keyword, $limit, $post_id, $use_cache, $precision_override);
+            if ($query_result === false) {
+                return false;
+            }
+
+            $resolved_keyword = isset($query_result['keyword']) ? $this->sanitize_single_keyword($query_result['keyword']) : $attempt_keyword;
+            $used_precision = isset($query_result['precision']) ? $query_result['precision'] : ($precision_override !== null ? $precision_override : 'fuzzy');
+            $products = isset($query_result['products']) && is_array($query_result['products'])
+                ? $query_result['products']
+                : array();
+
+            if (!empty($products)) {
+                return array(
+                    'products' => $products,
+                    'keyword' => $resolved_keyword,
+                );
+            }
+
+            if ($precision_override === null && $used_precision === 'strict') {
+                $queue[] = array(
+                    'keyword' => $resolved_keyword,
+                    'precision' => 'fuzzy',
+                );
+            }
+
+            if ($resolved_keyword === $keyword && !isset($variation_added[$resolved_keyword])) {
+                $variations = $this->generate_keyword_variations($resolved_keyword);
+                if (!empty($variations)) {
+                    foreach ($variations as $variant) {
+                        $queue[] = array(
+                            'keyword' => $variant,
+                            'precision' => null,
+                        );
+                    }
+                }
+                $variation_added[$resolved_keyword] = true;
+            }
+        }
+
+        return $results_template;
+    }
+
+    private function query_yadore_products($keyword, $limit, $post_id, $use_cache, $precision_override = null) {
+        $keyword = $this->sanitize_single_keyword($keyword);
+        if ($keyword === '') {
+            return array('products' => array(), 'keyword' => '', 'precision' => '');
+        }
+
+        $limit = (int) $limit;
+        if ($limit <= 0) {
+            $limit = 6;
+        }
+        $limit = min(100, max(1, $limit));
 
         $market = $this->sanitize_market(get_option('yadore_market', ''));
         if ($market === '') {
@@ -2000,16 +2097,49 @@ class YadoreMonetizer {
             $market = $this->get_default_market();
         }
 
-        $cache_key = 'yadore_products_' . md5(strtolower($keyword) . '|' . $limit . '|' . $market);
+        $precision = apply_filters('yadore_products_precision', 'fuzzy', $keyword, $post_id);
+        if ($precision_override !== null) {
+            $precision = $precision_override;
+        }
+        if (!in_array($precision, array('strict', 'fuzzy'), true)) {
+            $precision = 'fuzzy';
+        }
+
+        $sort = apply_filters('yadore_products_sort', 'rel_desc', $keyword, $post_id);
+        if (!in_array($sort, array('rel_desc', 'price_asc', 'price_desc'), true)) {
+            $sort = 'rel_desc';
+        }
+
+        $is_couponing = apply_filters('yadore_products_is_couponing', false, $keyword, $post_id);
+        $is_couponing = $is_couponing ? 'true' : 'false';
+
+        $cache_components = array(
+            function_exists('mb_strtolower') ? mb_strtolower($keyword, 'UTF-8') : strtolower($keyword),
+            $limit,
+            strtolower($market),
+            $precision,
+            $sort,
+            $is_couponing,
+        );
+        $cache_key = 'yadore_products_' . md5(implode('|', $cache_components));
+
         if ($use_cache && isset($this->api_cache[$cache_key])) {
-            return $this->api_cache[$cache_key];
+            return array(
+                'products' => $this->api_cache[$cache_key],
+                'keyword' => $keyword,
+                'precision' => $precision,
+            );
         }
 
         if ($use_cache && !get_option('yadore_debug_mode', false)) {
             $cached = get_transient($cache_key);
             if ($cached !== false) {
                 $this->api_cache[$cache_key] = $cached;
-                return $cached;
+                return array(
+                    'products' => $cached,
+                    'keyword' => $keyword,
+                    'precision' => $precision,
+                );
             }
         }
 
@@ -2025,19 +2155,6 @@ class YadoreMonetizer {
 
         $endpoint = 'https://api.yadore.com/v2/offer';
 
-        $precision = apply_filters('yadore_products_precision', 'fuzzy', $keyword, $post_id);
-        if (!in_array($precision, array('strict', 'fuzzy'), true)) {
-            $precision = 'fuzzy';
-        }
-
-        $sort = apply_filters('yadore_products_sort', 'rel_desc', $keyword, $post_id);
-        if (!in_array($sort, array('rel_desc', 'price_asc', 'price_desc'), true)) {
-            $sort = 'rel_desc';
-        }
-
-        $is_couponing = apply_filters('yadore_products_is_couponing', false, $keyword, $post_id);
-        $is_couponing = $is_couponing ? 'true' : 'false';
-
         $request_params = array(
             'keyword' => $keyword,
             'limit' => $limit,
@@ -2051,7 +2168,7 @@ class YadoreMonetizer {
         $request_params = $this->normalize_yadore_offer_params($request_params, $keyword, $limit, $market, $precision, $sort, $is_couponing);
 
         if (empty($request_params['keyword'])) {
-            return array();
+            return array('products' => array(), 'keyword' => $keyword, 'precision' => $precision);
         }
 
         $query_string = http_build_query($request_params, '', '&', PHP_QUERY_RFC3986);
@@ -2082,6 +2199,7 @@ class YadoreMonetizer {
                 'url' => $request_url,
                 'message' => $response->get_error_message(),
                 'duration_ms' => $duration_ms,
+                'precision' => $precision,
             ));
 
             $this->log_error('Yadore API request failed: ' . $response->get_error_message(), null, 'high', array(
@@ -2114,6 +2232,7 @@ class YadoreMonetizer {
                 'status' => $status,
                 'response' => is_array($decoded) ? $decoded : $body,
                 'duration_ms' => $duration_ms,
+                'precision' => $precision,
             );
 
             if ($error_details !== '') {
@@ -2148,6 +2267,7 @@ class YadoreMonetizer {
                 'response' => $body,
                 'json_error' => function_exists('json_last_error_msg') ? json_last_error_msg() : '',
                 'duration_ms' => $duration_ms,
+                'precision' => $precision,
             ));
 
             $this->log_error('Yadore API returned an invalid response format.', null, 'high', array(
@@ -2168,6 +2288,7 @@ class YadoreMonetizer {
                 'url' => $request_url,
                 'response' => $decoded,
                 'duration_ms' => $duration_ms,
+                'precision' => $precision,
             ));
 
             $this->log_error('Yadore API error: ' . $message, null, 'medium', array(
@@ -2213,6 +2334,8 @@ class YadoreMonetizer {
             'count' => count($products),
             'duration_ms' => $duration_ms,
             'request' => $request_params,
+            'precision' => $precision,
+            'market' => strtolower($market),
         ));
 
         $cache_duration = intval(get_option('yadore_cache_duration', 3600));
@@ -2222,7 +2345,113 @@ class YadoreMonetizer {
 
         $this->api_cache[$cache_key] = $products;
 
-        return $products;
+        return array(
+            'products' => $products,
+            'keyword' => $keyword,
+            'precision' => $precision,
+        );
+    }
+
+    private function generate_keyword_variations($keyword) {
+        $keyword = $this->sanitize_single_keyword($keyword);
+        if ($keyword === '') {
+            return array();
+        }
+
+        $parts = preg_split('/\s+/u', $keyword);
+        if (!is_array($parts) || count($parts) <= 1) {
+            return array();
+        }
+
+        $stop_words = array(
+            'test', 'tests', 'review', 'reviews', 'guide', 'vergleich', 'preis', 'preise', 'kaufen', 'angebote', 'angebot',
+            'check', 'update', 'erfahrungen', 'erfahrung', 'tipps', 'tricks', '2024', '2025', '2026', '2023', '2022', '2021',
+            '2020', 'beste', 'bester', 'besten', 'top', 'neu', 'neue', 'neues', 'ratgeber', 'kaufberatung', 'handbuch',
+        );
+
+        $filtered_parts = array();
+
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if ($part === '') {
+                continue;
+            }
+
+            $normalized = function_exists('mb_strtolower') ? mb_strtolower($part, 'UTF-8') : strtolower($part);
+            $normalized = preg_replace('/[^\p{L}\p{N}\-]/u', '', $normalized);
+            if ($normalized === '' || in_array($normalized, $stop_words, true)) {
+                continue;
+            }
+
+            $length = function_exists('mb_strlen') ? mb_strlen($normalized, 'UTF-8') : strlen($normalized);
+            if ($length < 3) {
+                continue;
+            }
+
+            $filtered_parts[] = $part;
+        }
+
+        if (empty($filtered_parts)) {
+            return array();
+        }
+
+        $variations = array();
+        $seen = array();
+        $original_key = function_exists('mb_strtolower') ? mb_strtolower($keyword, 'UTF-8') : strtolower($keyword);
+
+        if (count($filtered_parts) !== count($parts)) {
+            $this->append_keyword_variant($variations, $seen, implode(' ', $filtered_parts), $original_key);
+        }
+
+        if (count($filtered_parts) >= 2) {
+            $this->append_keyword_variant($variations, $seen, implode(' ', array_slice($filtered_parts, -2)), $original_key);
+            $this->append_keyword_variant($variations, $seen, implode(' ', array_slice($filtered_parts, 0, 2)), $original_key);
+        }
+
+        $last_part = end($filtered_parts);
+        if ($last_part !== false) {
+            $this->append_keyword_variant($variations, $seen, $last_part, $original_key);
+        }
+        reset($filtered_parts);
+        $first_part = current($filtered_parts);
+        if ($first_part !== false) {
+            $this->append_keyword_variant($variations, $seen, $first_part, $original_key);
+        }
+
+        $count = 0;
+        foreach ($filtered_parts as $part) {
+            if ($count >= 2) {
+                break;
+            }
+            $this->append_keyword_variant($variations, $seen, $part, $original_key);
+            $count++;
+        }
+
+        if (count($variations) > 5) {
+            $variations = array_slice($variations, 0, 5);
+        }
+
+        return $variations;
+    }
+
+    private function append_keyword_variant(array &$collection, array &$seen, $candidate, $original_key) {
+        $candidate = $this->sanitize_single_keyword($candidate);
+        if ($candidate === '') {
+            return;
+        }
+
+        $key = function_exists('mb_strtolower') ? mb_strtolower($candidate, 'UTF-8') : strtolower($candidate);
+        if ($key === '' || $key === $original_key || isset($seen[$key])) {
+            return;
+        }
+
+        $length = function_exists('mb_strlen') ? mb_strlen($candidate, 'UTF-8') : strlen($candidate);
+        if ($length < 3) {
+            return;
+        }
+
+        $seen[$key] = true;
+        $collection[] = $candidate;
     }
 
     private function remember_keyword_candidates($post_id, array $keywords) {
