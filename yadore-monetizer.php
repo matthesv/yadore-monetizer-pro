@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.11
+Version: 2.9.12
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.11');
+define('YADORE_PLUGIN_VERSION', '2.9.12');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -89,7 +89,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.11 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.12 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -2041,30 +2041,27 @@ class YadoreMonetizer {
         $request_params = array(
             'keyword' => $keyword,
             'limit' => $limit,
-            'market' => strtolower($market),
+            'market' => $market,
             'precision' => $precision,
             'sort' => $sort,
             'isCouponing' => $is_couponing,
         );
 
         $request_params = apply_filters('yadore_products_request_body', $request_params, $keyword, $limit, $post_id);
+        $request_params = $this->normalize_yadore_offer_params($request_params, $keyword, $limit, $market, $precision, $sort, $is_couponing);
 
-        if (!is_array($request_params)) {
-            $request_params = array();
+        if (empty($request_params['keyword'])) {
+            return array();
         }
 
-        $request_params = array_filter(
-            $request_params,
-            static function ($value) {
-                return $value !== null && $value !== '';
-            }
-        );
-
-        $request_url = add_query_arg($request_params, $endpoint);
+        $query_string = http_build_query($request_params, '', '&', PHP_QUERY_RFC3986);
+        $request_url = $endpoint;
+        if ($query_string !== '') {
+            $request_url .= (strpos($endpoint, '?') === false ? '?' : '&') . $query_string;
+        }
 
         $args = array(
             'headers' => array(
-                'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
                 'API-Key' => $api_key,
@@ -2097,7 +2094,16 @@ class YadoreMonetizer {
 
         $status = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
+        $body = is_string($body) ? $body : '';
         $decoded = json_decode($body, true);
+
+        if (!is_array($decoded)) {
+            $decompressed_body = $this->maybe_decompress_yadore_body($response, $body);
+            if ($decompressed_body !== $body) {
+                $body = $decompressed_body;
+                $decoded = json_decode($body, true);
+            }
+        }
 
         if ($status < 200 || $status >= 300) {
             $error_details = $this->extract_yadore_error_messages($decoded);
@@ -2106,7 +2112,7 @@ class YadoreMonetizer {
                 'limit' => $limit,
                 'url' => $request_url,
                 'status' => $status,
-                'response' => $decoded,
+                'response' => is_array($decoded) ? $decoded : $body,
                 'duration_ms' => $duration_ms,
             );
 
@@ -2125,7 +2131,7 @@ class YadoreMonetizer {
             $this->log_error($error_message, null, 'high', array(
                 'keyword' => $keyword,
                 'post_id' => $post_id,
-                'response' => $decoded,
+                'response' => is_array($decoded) ? $decoded : $body,
                 'url' => $request_url,
                 'status' => $status,
             ));
@@ -2140,12 +2146,14 @@ class YadoreMonetizer {
                 'url' => $request_url,
                 'status' => $status,
                 'response' => $body,
+                'json_error' => function_exists('json_last_error_msg') ? json_last_error_msg() : '',
                 'duration_ms' => $duration_ms,
             ));
 
             $this->log_error('Yadore API returned an invalid response format.', null, 'high', array(
                 'keyword' => $keyword,
                 'post_id' => $post_id,
+                'json_error' => function_exists('json_last_error_msg') ? json_last_error_msg() : '',
             ));
 
             return false;
@@ -2204,6 +2212,7 @@ class YadoreMonetizer {
             'url' => $request_url,
             'count' => count($products),
             'duration_ms' => $duration_ms,
+            'request' => $request_params,
         ));
 
         $cache_duration = intval(get_option('yadore_cache_duration', 3600));
@@ -2368,6 +2377,145 @@ class YadoreMonetizer {
         }
 
         return apply_filters('yadore_sanitized_product', $sanitized, $product);
+    }
+
+    private function normalize_yadore_offer_params($params, $keyword, $limit, $market, $precision, $sort, $is_couponing) {
+        if (!is_array($params)) {
+            $params = array();
+        }
+
+        $normalized = array();
+
+        $normalized['keyword'] = $this->sanitize_single_keyword(isset($params['keyword']) ? $params['keyword'] : $keyword);
+
+        $limit_value = isset($params['limit']) ? (int) $params['limit'] : (int) $limit;
+        if ($limit_value <= 0) {
+            $limit_value = (int) $limit;
+        }
+        $normalized['limit'] = min(100, max(1, $limit_value));
+
+        $market_value = isset($params['market']) ? $this->sanitize_market($params['market']) : $market;
+        if ($market_value === '') {
+            $market_value = $this->get_default_market();
+        }
+        $normalized['market'] = strtolower($market_value);
+
+        $precision_value = isset($params['precision']) ? strtolower((string) $params['precision']) : $precision;
+        if (!in_array($precision_value, array('strict', 'fuzzy'), true)) {
+            $precision_value = 'fuzzy';
+        }
+        $normalized['precision'] = $precision_value;
+
+        $sort_value = isset($params['sort']) ? strtolower((string) $params['sort']) : $sort;
+        if (!in_array($sort_value, array('rel_desc', 'price_asc', 'price_desc'), true)) {
+            $sort_value = 'rel_desc';
+        }
+        $normalized['sort'] = $sort_value;
+
+        $coupon_flag = ($is_couponing === 'true');
+        if (isset($params['isCouponing'])) {
+            $coupon_flag = $this->interpret_boolean_flag($params['isCouponing']);
+        }
+        $normalized['isCouponing'] = $coupon_flag ? 'true' : 'false';
+
+        if (!empty($params['ean'])) {
+            $ean = preg_replace('/[^0-9]/', '', (string) $params['ean']);
+            if (strlen($ean) === 8 || strlen($ean) === 13) {
+                $normalized['ean'] = $ean;
+            }
+        }
+
+        if (!empty($params['merchantId'])) {
+            $normalized['merchantId'] = sanitize_text_field((string) $params['merchantId']);
+        }
+
+        if (!empty($params['offerId'])) {
+            $normalized['offerId'] = sanitize_text_field((string) $params['offerId']);
+        }
+
+        if (!empty($params['placementId'])) {
+            $placement = sanitize_text_field((string) $params['placementId']);
+            if (strlen($placement) > 128) {
+                $placement = substr($placement, 0, 128);
+            }
+            $normalized['placementId'] = $placement;
+        }
+
+        foreach ($params as $key => $value) {
+            if (isset($normalized[$key])) {
+                continue;
+            }
+
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            if (is_string($key) && preg_match('/^[A-Za-z0-9_]+$/', $key)) {
+                $normalized[$key] = sanitize_text_field((string) $value);
+            }
+        }
+
+        return array_filter($normalized, static function ($value) {
+            return $value !== null && $value !== '';
+        });
+    }
+
+    private function maybe_decompress_yadore_body($response, $body) {
+        if (!is_string($body) || $body === '') {
+            return $body;
+        }
+
+        $encoding = '';
+
+        if (function_exists('wp_remote_retrieve_header')) {
+            $encoding = wp_remote_retrieve_header($response, 'content-encoding');
+        } elseif (is_array($response)) {
+            if (isset($response['headers']['content-encoding'])) {
+                $encoding = $response['headers']['content-encoding'];
+            } elseif (isset($response['headers']) && is_array($response['headers'])) {
+                $headers = $response['headers'];
+                foreach ($headers as $header_key => $header_value) {
+                    if (strtolower((string) $header_key) === 'content-encoding') {
+                        $encoding = $header_value;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (is_array($encoding)) {
+            $encoding = implode(',', $encoding);
+        }
+
+        $encoding = strtolower(trim((string) $encoding));
+
+        if ($encoding === '') {
+            return $body;
+        }
+
+        $attempts = array();
+
+        if (strpos($encoding, 'gzip') !== false && function_exists('gzdecode')) {
+            $attempts[] = 'gzdecode';
+        }
+
+        if (strpos($encoding, 'deflate') !== false) {
+            if (function_exists('gzuncompress')) {
+                $attempts[] = 'gzuncompress';
+            }
+            if (function_exists('gzinflate')) {
+                $attempts[] = 'gzinflate';
+            }
+        }
+
+        foreach ($attempts as $function) {
+            $decoded = @$function($body);
+            if ($decoded !== false && $decoded !== '' && is_string($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return $body;
     }
 
     private function call_gemini_api($title, $content, $use_cache = true, $post_id = 0) {
