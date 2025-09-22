@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.3</span>
+        <span class="version-badge">v2.9.4</span>
     </h1>
 
     <?php
@@ -10,9 +10,18 @@
     if (isset($_POST['submit']) && wp_verify_nonce($_POST['yadore_nonce'], 'yadore_settings')) {
         echo '<div class="notice notice-success is-dismissible"><p>Settings saved successfully!</p></div>';
     }
+    $market_options = isset($available_markets) && is_array($available_markets) ? $available_markets : array();
+    $default_market_code = isset($default_market) ? $default_market : 'de';
+    $current_market = isset($options['yadore_market'])
+        ? $options['yadore_market']
+        : get_option('yadore_market', $default_market_code);
+    $current_market = strtolower((string) $current_market);
+    if ($current_market !== '' && !isset($market_options[$current_market])) {
+        $market_options[$current_market] = esc_html__('Manuell hinterlegt', 'yadore-monetizer');
+    }
     ?>
 
-
+    <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=yadore-settings')); ?>" class="yadore-settings-form">
         <?php wp_nonce_field('yadore_settings', 'yadore_nonce'); ?>
 
         <div class="yadore-settings-container">
@@ -70,6 +79,42 @@
                                 <a href="https://yadore.com/api" target="_blank">Get your API key here</a>.
                             </p>
                             <div id="yadore-api-test-results" class="api-test-results"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="yadore_market" class="form-label">
+                                <strong><?php esc_html_e('Default Market', 'yadore-monetizer'); ?></strong>
+                                <span class="required">*</span>
+                            </label>
+                            <?php if (!empty($market_options)) : ?>
+                                <select name="yadore_market" id="yadore_market" class="form-select">
+                                    <?php foreach ($market_options as $market_id => $market_label) :
+                                        $market_id = is_string($market_id) ? strtolower($market_id) : '';
+                                        if ($market_id === '') {
+                                            continue;
+                                        }
+                                    ?>
+                                        <option value="<?php echo esc_attr($market_id); ?>" <?php selected($current_market, $market_id); ?>>
+                                            <?php echo esc_html(strtoupper($market_id) . ' – ' . $market_label); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <p class="form-description">
+                                    <?php esc_html_e('Choose the market that matches your approved Yadore account. Only markets returned by the Yadore API are listed.', 'yadore-monetizer'); ?>
+                                </p>
+                            <?php else : ?>
+                                <input type="text"
+                                       name="yadore_market"
+                                       id="yadore_market"
+                                       value="<?php echo esc_attr($current_market); ?>"
+                                       class="form-input"
+                                       placeholder="<?php echo esc_attr($default_market_code); ?>"
+                                       pattern="[a-z]{2}"
+                                       title="<?php esc_attr_e('Use the two-letter market code, e.g. de, at, fr.', 'yadore-monetizer'); ?>">
+                                <p class="form-description">
+                                    <?php esc_html_e('Enter the two-letter market code (ISO 3166-1 alpha-2) you are approved for, such as de or at. The value must match a market enabled for your API key.', 'yadore-monetizer'); ?>
+                                </p>
+                            <?php endif; ?>
                         </div>
 
                         <div class="form-group">
