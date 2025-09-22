@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.5</span>
+        <span class="version-badge">v2.9.6</span>
     </h1>
 
     <?php
@@ -11,11 +11,11 @@
         echo '<div class="notice notice-success is-dismissible"><p>Settings saved successfully!</p></div>';
     }
     $market_options = isset($available_markets) && is_array($available_markets) ? $available_markets : array();
-    $default_market_code = isset($default_market) ? $default_market : 'de';
+    $default_market_code = isset($default_market) ? strtoupper($default_market) : 'DE';
     $current_market = isset($options['yadore_market'])
         ? $options['yadore_market']
         : get_option('yadore_market', $default_market_code);
-    $current_market = strtolower((string) $current_market);
+    $current_market = strtoupper((string) $current_market);
     if ($current_market !== '' && !isset($market_options[$current_market])) {
         $market_options[$current_market] = esc_html__('Manuell hinterlegt', 'yadore-monetizer');
     }
@@ -89,13 +89,13 @@
                             <?php if (!empty($market_options)) : ?>
                                 <select name="yadore_market" id="yadore_market" class="form-select">
                                     <?php foreach ($market_options as $market_id => $market_label) :
-                                        $market_id = is_string($market_id) ? strtolower($market_id) : '';
+                                        $market_id = is_string($market_id) ? strtoupper($market_id) : '';
                                         if ($market_id === '') {
                                             continue;
                                         }
                                     ?>
                                         <option value="<?php echo esc_attr($market_id); ?>" <?php selected($current_market, $market_id); ?>>
-                                            <?php echo esc_html(strtoupper($market_id) . ' – ' . $market_label); ?>
+                                            <?php echo esc_html($market_id . ' – ' . $market_label); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -109,10 +109,10 @@
                                        value="<?php echo esc_attr($current_market); ?>"
                                        class="form-input"
                                        placeholder="<?php echo esc_attr($default_market_code); ?>"
-                                       pattern="[a-z]{2}"
-                                       title="<?php esc_attr_e('Use the two-letter market code, e.g. de, at, fr.', 'yadore-monetizer'); ?>">
+                                       pattern="[A-Za-z]{2}"
+                                       title="<?php esc_attr_e('Use the two-letter uppercase market code, e.g. DE, AT, FR.', 'yadore-monetizer'); ?>">
                                 <p class="form-description">
-                                    <?php esc_html_e('Enter the two-letter market code (ISO 3166-1 alpha-2) you are approved for, such as de or at. The value must match a market enabled for your API key.', 'yadore-monetizer'); ?>
+                                    <?php esc_html_e('Enter the two-letter market code (ISO 3166-1 alpha-2) you are approved for, such as DE or AT. The value must match a market enabled for your API key.', 'yadore-monetizer'); ?>
                                 </p>
                             <?php endif; ?>
                         </div>

@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.5 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.6 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.5 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.6 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
@@ -16,13 +16,12 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **16 AJAX Endpoints** - Alle korrekt implementiert ohne Konflikte  
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.5**
+## 🌟 **NEU IN VERSION 2.9.6**
 
-- ✅ **Stabile Einstellungen** – Das Settings-Formular nutzt jetzt ein echtes WordPress-Formular und speichert alle Optionen zuverlässig.
-- ✅ **Marktverwaltung nach API-Spezifikation** – Auswahl des Standard-Marktes mit automatischem Sync über `GET https://api.yadore.com/v2/markets` und strikter ISO-Validierung.
-- ✅ **Konforme Produktabfragen** – Requests an `GET https://api.yadore.com/v2/offer` setzen den Market-Parameter korrekt, respektieren Limits und erfüllen die Publisher API 2.0 Vorgaben.
-- ✅ **Verbesserte Fehlerdiagnose** – Admin-Notices und Logs zeigen die konkreten Fehlermeldungen der Yadore API (z. B. Market- oder Auth-Fehler) und erleichtern die Produktion.
-- ✅ **Aktualisierte Versionierung** – Alle Admin-Views, Assets und Dokumentationen spiegeln Version 2.9.5 wider.
+- ✅ **Publisher API 2.0.0 konform** – Alle Requests folgen der aktuellen Yadore Publisher API (OAS 3.0) samt dokumentiertem `/openapi.yaml`-Verweis in den Admin-Docs.
+- ✅ **Großgeschriebene Markt-Codes** – Standard- und benutzerdefinierte Märkte werden automatisch als ISO-3166-1 Alpha-2 (z. B. `DE`) normalisiert, damit jeder Request akzeptiert wird.
+- ✅ **Optimierte Marktauswahl im Backend** – Dropdowns und Fallback-Felder verarbeiten Großbuchstaben konsistent und markieren manuell hinterlegte Märkte korrekt.
+- ✅ **Aktualisierte Versionierung** – Alle Admin-Views, Assets und Dokumentationen spiegeln Version 2.9.6 wider.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -68,7 +67,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.5:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.6:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -266,14 +265,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.5 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.6 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.5:**
-- 🌍 Automatische Markt-Synchronisation über die Yadore Markets API mit ISO-Validierung und manueller Auswahl im Backend.
-- 💾 Zuverlässige Konfigurationsspeicherung dank überarbeitetem WordPress-Formular und nonce-validiertem Submit.
-- 🧭 Konforme Offer-Abfragen mit korrekt gesetztem `market`-Parameter, sauberem Caching und vollständigen API-Headern.
-- 📣 Detaillierte Admin-Notices und Logs für 4xx-Antworten der Yadore API inklusive Market-/Auth-Hinweisen.
-- 🧾 Aktualisierte Assets, Dokumentation und Versionshinweise für den produktiven Einsatz (2.9.5).
+### **Neue Highlights in v2.9.6:**
+- 🌍 Vollständige Ausrichtung auf die Yadore Publisher API 2.0.0 (OAS 3.0) inklusive dokumentiertem `/openapi.yaml`-Verweis.
+- 🔠 Automatische Großschreibung aller Markt-Codes sorgt für valide Requests und klare Anzeige im Backend.
+- 🧭 Optimierte Marktauswahl im Settings-Interface mit konsistenter Behandlung von API-Rückgaben und manuellen Eingaben.
+- 🧾 Aktualisierte Assets, Dokumentation und Versionshinweise für den produktiven Einsatz (2.9.6).
 
 **Alle Features sind wieder verfügbar und voll funktional!**
 
@@ -289,11 +287,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.5 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.6 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.5** - Production-Ready Market Release
+**Current Version: 2.9.6** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.5
+Version: 2.9.6
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.5');
+define('YADORE_PLUGIN_VERSION', '2.9.6');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -81,7 +81,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.5 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.6 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -198,13 +198,13 @@ class YadoreMonetizer {
     private function get_default_market() {
         $locale = function_exists('get_locale') ? get_locale() : 'de_DE';
         if (is_string($locale) && strlen($locale) >= 2) {
-            $candidate = strtolower(substr($locale, 0, 2));
-            if (preg_match('/^[a-z]{2}$/', $candidate)) {
+            $candidate = strtoupper(substr($locale, 0, 2));
+            if (preg_match('/^[A-Z]{2}$/', $candidate)) {
                 return $candidate;
             }
         }
 
-        return 'de';
+        return 'DE';
     }
 
     private function set_default_options() {
@@ -2462,8 +2462,8 @@ $wpdb->insert($analytics_table, array(
         return $value;
     }
     private function sanitize_market($value) {
-        $value = strtolower(trim((string) $value));
-        if (preg_match('/^[a-z]{2}$/', $value)) {
+        $value = strtoupper(trim((string) $value));
+        if (preg_match('/^[A-Z]{2}$/', $value)) {
             return $value;
         }
 
