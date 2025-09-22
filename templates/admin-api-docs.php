@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.16</span>
+        <span class="version-badge">v2.9.17</span>
     </h1>
 
     <div class="yadore-api-container">
@@ -174,6 +174,16 @@
                                                     <td>Your personal Yadore Publisher API key</td>
                                                 </tr>
                                                 <tr>
+                                                    <td><code>Keyword</code></td>
+                                                    <td>Yes</td>
+                                                    <td>Active keyword transmitted from your plugin configuration</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><code>Limit</code></td>
+                                                    <td>Yes</td>
+                                                    <td>Number of offers requested based on your plugin settings</td>
+                                                </tr>
+                                                <tr>
                                                     <td><code>Accept</code></td>
                                                     <td>No</td>
                                                     <td>Use <code>application/json</code> to receive JSON responses</td>
@@ -187,6 +197,8 @@
                                         <pre><code>GET /v2/offer?keyword=smartphone&amp;limit=6&amp;market=DE HTTP/1.1
 Host: api.yadore.com
 API-Key: YOUR_API_KEY
+Keyword: smartphone
+Limit: 6
 Accept: application/json</code></pre>
                                     </div>
 
@@ -453,7 +465,7 @@ function yadoreInitializeApiDocs() {
     $('#clear-logs').on('click', yadoreClearLogs);
     $('#export-logs').on('click', yadoreExportLogs);
 
-    console.log('Yadore API Documentation v2.9.16 - Initialized');
+    console.log('Yadore API Documentation v2.9.17 - Initialized');
 }
 
 function yadoreLoadApiStatus() {

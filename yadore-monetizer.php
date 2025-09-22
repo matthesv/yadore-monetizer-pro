@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.16
+Version: 2.9.17
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.16');
+define('YADORE_PLUGIN_VERSION', '2.9.17');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -91,7 +91,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.16 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.17 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -2192,16 +2192,35 @@ class YadoreMonetizer {
             $request_url .= (strpos($endpoint, '?') === false ? '?' : '&') . $query_string;
         }
 
+        $keyword_header = isset($request_params['keyword']) ? (string) $request_params['keyword'] : '';
+        $limit_header = isset($request_params['limit']) ? (string) $request_params['limit'] : '';
+
+        $required_headers = array(
+            'Accept' => 'application/json',
+            'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
+            'API-Key' => $api_key,
+        );
+
+        if ($keyword_header !== '') {
+            $required_headers['Keyword'] = $keyword_header;
+        }
+
+        if ($limit_header !== '') {
+            $required_headers['Limit'] = $limit_header;
+        }
+
         $args = array(
-            'headers' => array(
-                'Accept' => 'application/json',
-                'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
-                'API-Key' => $api_key,
-            ),
+            'headers' => $required_headers,
             'timeout' => 20,
         );
 
         $args = apply_filters('yadore_products_request_args', $args, $keyword, $limit, $post_id);
+
+        if (!isset($args['headers']) || !is_array($args['headers'])) {
+            $args['headers'] = array();
+        }
+
+        $args['headers'] = array_merge($args['headers'], $required_headers);
 
         $start_time = microtime(true);
         $response = wp_remote_get($request_url, $args);
