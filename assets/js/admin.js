@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.8 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.9 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: '2.9.8',
+        version: '2.9.9',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -24,8 +24,9 @@
             this.initAnalytics();
             this.initTools();
             this.initDebug();
+            this.initErrorNotices();
 
-            console.log('Yadore Monetizer Pro v2.9.8 Admin - Fully Initialized');
+            console.log('Yadore Monetizer Pro v2.9.9 Admin - Fully Initialized');
         },
 
         // Dashboard functionality
@@ -58,6 +59,68 @@
                     $('#overlay-views').text(data.overlay_views || '0');
                     $('#conversion-rate').text((data.conversion_rate || '0') + '%');
                 }
+            });
+        },
+
+        initErrorNotices: function() {
+            const resolveNotice = (errorId, callback) => {
+                if (!errorId) {
+                    if (typeof callback === 'function') {
+                        callback(false);
+                    }
+                    return;
+                }
+
+                $.post(this.ajax_url, {
+                    action: 'yadore_resolve_error',
+                    nonce: this.nonce,
+                    error_id: errorId
+                }).done((response) => {
+                    if (this.debug) {
+                        this.log(`Resolved error notice ${errorId}`, 'info');
+                    }
+                    if (typeof callback === 'function') {
+                        callback(true, response);
+                    }
+                }).fail((xhr) => {
+                    if (this.debug) {
+                        console.error('Failed to resolve Yadore error notice', xhr);
+                    }
+                    if (typeof callback === 'function') {
+                        callback(false, xhr);
+                    }
+                });
+            };
+
+            $(document).on('click', '.yadore-error-notice .notice-dismiss', (event) => {
+                const notice = $(event.currentTarget).closest('.yadore-error-notice');
+                const errorId = parseInt(notice.data('error-id'), 10);
+                if (!Number.isNaN(errorId)) {
+                    resolveNotice(errorId);
+                }
+            });
+
+            $(document).on('click', '.yadore-error-notice .yadore-resolve-now', (event) => {
+                event.preventDefault();
+
+                const button = $(event.currentTarget);
+                const notice = button.closest('.yadore-error-notice');
+                const errorId = parseInt(button.data('error-id') || notice.data('error-id'), 10);
+
+                if (Number.isNaN(errorId)) {
+                    return;
+                }
+
+                const originalText = button.html();
+                button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> ' + (yadore_admin.strings?.processing || 'Processing...'));
+
+                resolveNotice(errorId, (success) => {
+                    if (success) {
+                        notice.fadeOut(200, () => notice.remove());
+                    } else {
+                        button.prop('disabled', false).html(originalText);
+                    }
+                });
             });
         },
 
@@ -225,19 +288,37 @@
             })
             .done((response) => {
                 if (response.success) {
+                    const data = response.data || {};
+                    let resultMarkup = '';
+
+                    if (typeof data.result === 'object' && data.result !== null) {
+                        const resultString = JSON.stringify(data.result, null, 2);
+                        resultMarkup = `<pre><code>${this.escapeHtml(resultString)}</code></pre>`;
+                    } else {
+                        const resultString = data.result !== undefined && data.result !== null ? String(data.result) : '';
+                        resultMarkup = `<code>${this.escapeHtml(resultString)}</code>`;
+                    }
+
+                    const model = this.escapeHtml(data.model || '');
+                    const timestamp = this.escapeHtml(data.timestamp || '');
+
                     resultsDiv.html(`
                         <div class="api-test-success">
                             <h4><span class="dashicons dashicons-yes-alt"></span> Success!</h4>
-                            <p><strong>Model:</strong> ${response.data.model}</p>
-                            <p><strong>Result:</strong> ${response.data.result}</p>
-                            <p><strong>Timestamp:</strong> ${response.data.timestamp}</p>
+                            <p><strong>Model:</strong> ${model || '—'}</p>
+                            <div class="api-test-result"><strong>Result:</strong> ${resultMarkup}</div>
+                            <p><strong>Timestamp:</strong> ${timestamp || '—'}</p>
                         </div>
                     `);
                 } else {
+                    const errorMessage = typeof response.data === 'string'
+                        ? response.data
+                        : (response.data && response.data.message ? response.data.message : 'Unknown error');
+
                     resultsDiv.html(`
                         <div class="api-test-error">
                             <h4><span class="dashicons dashicons-dismiss"></span> Error</h4>
-                            <p>${response.data}</p>
+                            <p>${this.escapeHtml(errorMessage)}</p>
                         </div>
                     `);
                 }
@@ -246,7 +327,7 @@
                 resultsDiv.html(`
                     <div class="api-test-error">
                         <h4><span class="dashicons dashicons-dismiss"></span> Connection Failed</h4>
-                        <p>${error}</p>
+                        <p>${this.escapeHtml(error)}</p>
                     </div>
                 `);
             })
@@ -1157,6 +1238,14 @@
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        },
+
+        escapeHtml: function(value) {
+            if (value === undefined || value === null) {
+                return '';
+            }
+
+            return $('<div/>').text(String(value)).html();
         },
 
         // Debug logging
