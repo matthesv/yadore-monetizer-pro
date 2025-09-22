@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.3
+Version: 2.9.4
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.3');
+define('YADORE_PLUGIN_VERSION', '2.9.4');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -81,7 +81,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.3 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.4 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -160,6 +160,7 @@ class YadoreMonetizer {
     private function get_default_options() {
         return array(
             'yadore_api_key' => '',
+            'yadore_market' => $this->get_default_market(),
             'yadore_overlay_enabled' => 1,
             'yadore_auto_detection' => 1,
             'yadore_cache_duration' => 3600,
@@ -192,6 +193,18 @@ class YadoreMonetizer {
             'yadore_backup_enabled' => 0,
             'yadore_multisite_sync' => 0,
         );
+    }
+
+    private function get_default_market() {
+        $locale = function_exists('get_locale') ? get_locale() : 'de_DE';
+        if (is_string($locale) && strlen($locale) >= 2) {
+            $candidate = strtolower(substr($locale, 0, 2));
+            if (preg_match('/^[a-z]{2}$/', $candidate)) {
+                return $candidate;
+            }
+        }
+
+        return 'de';
     }
 
     private function set_default_options() {
@@ -325,7 +338,22 @@ class YadoreMonetizer {
             }
 
             if (isset($flat_post['yadore_api_key'])) {
-                update_option('yadore_api_key', $this->sanitize_text($flat_post['yadore_api_key']));
+                $sanitized_key = $this->sanitize_api_key($flat_post['yadore_api_key']);
+                $previous_key = get_option('yadore_api_key', '');
+                update_option('yadore_api_key', $sanitized_key);
+
+                if ($sanitized_key !== $previous_key) {
+                    delete_transient('yadore_available_markets');
+                }
+            }
+
+            if (isset($flat_post['yadore_market'])) {
+                $market_value = $this->sanitize_market($flat_post['yadore_market']);
+                if ($market_value === '') {
+                    $market_value = $this->get_default_market();
+                }
+
+                update_option('yadore_market', $market_value);
             }
 
             if (!empty($flat_post['yadore_gemini_api_key_remove'])) {
@@ -370,16 +398,19 @@ class YadoreMonetizer {
     }
 
     private function get_page_data($page) {
-        $data = array(
-            'options' => array(
-                'yadore_gemini_enabled' => (bool) get_option('yadore_ai_enabled', false),
-                'yadore_gemini_api_key' => get_option('yadore_gemini_api_key', ''),
-                'yadore_gemini_model' => get_option('yadore_gemini_model', $this->get_default_gemini_model()),
-            ),
-            'version' => YADORE_PLUGIN_VERSION,
+        $options = array(
+            'yadore_gemini_enabled' => (bool) get_option('yadore_ai_enabled', false),
+            'yadore_gemini_api_key' => get_option('yadore_gemini_api_key', ''),
+            'yadore_gemini_model' => get_option('yadore_gemini_model', $this->get_default_gemini_model()),
+            'yadore_market' => get_option('yadore_market', $this->get_default_market()),
         );
 
-        $selected_model = $this->sanitize_model($data['options']['yadore_gemini_model']);
+        $data = array(
+            'options' => $options,
+            'version' => YADORE_PLUGIN_VERSION,
+            'selected_gemini_model' => $this->sanitize_model($options['yadore_gemini_model']),
+            'gemini_models' => $this->get_supported_gemini_models(),
+        );
 
         if ($page === 'dashboard') {
             $stats = get_option('yadore_stats_cache', array());
@@ -399,11 +430,83 @@ class YadoreMonetizer {
             $data['debug_log'] = $this->get_debug_log();
         }
 
-        return array(
-            'data' => $data,
-            'gemini_models' => $this->get_supported_gemini_models(),
-            'selected_gemini_model' => $selected_model,
+        if ($page === 'settings') {
+            $data['available_markets'] = $this->get_available_markets();
+            $data['default_market'] = $this->get_default_market();
+        }
+
+        return $data;
+    }
+
+    private function get_available_markets($force_refresh = false) {
+        $transient_key = 'yadore_available_markets';
+
+        if (!$force_refresh) {
+            $cached = get_transient($transient_key);
+            if ($cached !== false) {
+                return is_array($cached) ? $cached : array();
+            }
+        }
+
+        $api_key = trim((string) get_option('yadore_api_key'));
+        if ($api_key === '') {
+            return array();
+        }
+
+        $endpoint = 'https://api.yadore.com/v2/markets';
+        $args = array(
+            'headers' => array(
+                'Accept' => 'application/json',
+                'API-Key' => $api_key,
+                'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
+            ),
+            'timeout' => 15,
         );
+
+        $response = wp_remote_get($endpoint, $args);
+
+        if (is_wp_error($response)) {
+            $this->log_error('Failed to load Yadore markets: ' . $response->get_error_message());
+            set_transient($transient_key, array(), HOUR_IN_SECONDS);
+            return array();
+        }
+
+        $status = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+        $decoded = json_decode($body, true);
+
+        if ($status >= 200 && $status < 300 && is_array($decoded)) {
+            $markets = array();
+
+            if (isset($decoded['markets']) && is_array($decoded['markets'])) {
+                foreach ($decoded['markets'] as $market) {
+                    if (!is_array($market)) {
+                        continue;
+                    }
+
+                    $id = isset($market['id']) ? $this->sanitize_market($market['id']) : '';
+                    if ($id === '') {
+                        continue;
+                    }
+
+                    $label = isset($market['name']) ? sanitize_text_field((string) $market['name']) : strtoupper($id);
+                    $markets[$id] = $label;
+                }
+            }
+
+            if (!empty($markets)) {
+                set_transient($transient_key, $markets, DAY_IN_SECONDS);
+                return $markets;
+            }
+        } else {
+            $this->log_api_call('yadore', $endpoint, 'error', array(
+                'status' => $status,
+                'response' => $decoded,
+            ));
+        }
+
+        set_transient($transient_key, array(), HOUR_IN_SECONDS);
+        return array();
     }
 
     public function add_dashboard_widgets() {
@@ -822,6 +925,7 @@ class YadoreMonetizer {
         $settings = array(
             // Basic settings
             'yadore_api_key',
+            'yadore_market',
             'yadore_overlay_enabled',
             'yadore_auto_detection',
             'yadore_cache_duration',
@@ -1384,15 +1488,27 @@ class YadoreMonetizer {
         }
         $limit = min(50, $limit);
 
-        $locale = function_exists('get_locale') ? get_locale() : 'en_US';
-        $default_country = strtoupper(substr((string) $locale, -2));
-        if (strlen($default_country) !== 2) {
-            $default_country = 'US';
+        $market = $this->sanitize_market(get_option('yadore_market', ''));
+        if ($market === '') {
+            $market = $this->get_default_market();
         }
 
-        $country = apply_filters('yadore_products_country', $default_country, $keyword, $limit, $post_id);
+        $filtered_market = apply_filters('yadore_products_country', $market, $keyword, $limit, $post_id);
+        if (is_string($filtered_market) && $filtered_market !== '') {
+            $market = $filtered_market;
+        }
 
-        $cache_key = 'yadore_products_' . md5(strtolower($keyword) . '|' . $limit . '|' . $country);
+        $filtered_market = apply_filters('yadore_products_market', $market, $keyword, $limit, $post_id);
+        if (is_string($filtered_market) && $filtered_market !== '') {
+            $market = $filtered_market;
+        }
+
+        $market = $this->sanitize_market($market);
+        if ($market === '') {
+            $market = $this->get_default_market();
+        }
+
+        $cache_key = 'yadore_products_' . md5(strtolower($keyword) . '|' . $limit . '|' . $market);
         if (isset($this->api_cache[$cache_key])) {
             return $this->api_cache[$cache_key];
         }
@@ -1421,8 +1537,8 @@ class YadoreMonetizer {
             'limit' => $limit,
         );
 
-        if (!empty($country)) {
-            $request_params['market'] = strtoupper($country);
+        if ($market !== '') {
+            $request_params['market'] = $market;
         }
 
         $request_params = apply_filters('yadore_products_request_body', $request_params, $keyword, $limit, $post_id);
@@ -1478,19 +1594,34 @@ class YadoreMonetizer {
         $decoded = json_decode($body, true);
 
         if ($status < 200 || $status >= 300) {
-            $this->log_api_call('yadore', $endpoint, 'error', array(
+            $error_details = $this->extract_yadore_error_messages($decoded);
+            $log_context = array(
                 'keyword' => $keyword,
                 'limit' => $limit,
                 'url' => $request_url,
                 'status' => $status,
                 'response' => $decoded,
                 'duration_ms' => $duration_ms,
-            ));
+            );
 
-            $this->log_error(sprintf('Yadore API returned an unexpected status: %s', $status), null, 'high', array(
+            if ($error_details !== '') {
+                $log_context['error_details'] = $error_details;
+                $this->queue_admin_notice(sprintf(__('Yadore API error: %s', 'yadore-monetizer'), $error_details));
+            }
+
+            $this->log_api_call('yadore', $endpoint, 'error', $log_context);
+
+            $error_message = sprintf('Yadore API returned an unexpected status: %s', $status);
+            if ($error_details !== '') {
+                $error_message .= ' - ' . $error_details;
+            }
+
+            $this->log_error($error_message, null, 'high', array(
                 'keyword' => $keyword,
                 'post_id' => $post_id,
                 'response' => $decoded,
+                'url' => $request_url,
+                'status' => $status,
             ));
 
             return array();
@@ -2201,10 +2332,84 @@ $wpdb->insert($analytics_table, array(
                 echo '</p></div>';
             }
         }
+
+        $queued_notice = get_transient('yadore_admin_notice_queue');
+        if (is_array($queued_notice) && !empty($queued_notice['message'])) {
+            $type = isset($queued_notice['type']) && in_array($queued_notice['type'], array('error', 'warning', 'success', 'info'), true)
+                ? $queued_notice['type']
+                : 'info';
+
+            printf(
+                '<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
+                esc_attr($type),
+                esc_html($queued_notice['message'])
+            );
+
+            delete_transient('yadore_admin_notice_queue');
+        }
     }
 
     public function show_initialization_error() {
         echo '<div class="notice notice-error"><p><strong>Yadore Monetizer Pro Error:</strong> Plugin initialization failed. Please check the debug log for details.</p></div>';
+    }
+
+    private function queue_admin_notice($message, $type = 'error') {
+        if (!is_string($message) || $message === '') {
+            return;
+        }
+
+        $allowed_types = array('error', 'warning', 'success', 'info');
+        if (!in_array($type, $allowed_types, true)) {
+            $type = 'info';
+        }
+
+        set_transient(
+            'yadore_admin_notice_queue',
+            array(
+                'type' => $type,
+                'message' => wp_strip_all_tags($message),
+                'timestamp' => time(),
+            ),
+            MINUTE_IN_SECONDS * 10
+        );
+    }
+
+    private function extract_yadore_error_messages($response) {
+        if (!is_array($response)) {
+            return '';
+        }
+
+        if (isset($response['errors']) && is_array($response['errors'])) {
+            $messages = array();
+
+            foreach ($response['errors'] as $field => $errors) {
+                if (is_array($errors)) {
+                    $clean = array();
+                    foreach ($errors as $error_message) {
+                        $error_message = trim((string) $error_message);
+                        if ($error_message !== '') {
+                            $clean[] = $error_message;
+                        }
+                    }
+
+                    if (!empty($clean)) {
+                        $messages[] = ucfirst($field) . ': ' . implode(', ', $clean);
+                    }
+                } elseif (is_string($errors) && $errors !== '') {
+                    $messages[] = ucfirst($field) . ': ' . $errors;
+                }
+            }
+
+            if (!empty($messages)) {
+                return implode(' | ', $messages);
+            }
+        }
+
+        if (isset($response['message']) && is_string($response['message']) && $response['message'] !== '') {
+            return $response['message'];
+        }
+
+        return '';
     }
 
     public function plugin_action_links($links) {
@@ -2244,6 +2449,14 @@ $wpdb->insert($analytics_table, array(
         $v = trim((string) $v);
         $v = preg_replace('/\s+/', '', $v);
         return sanitize_text_field($v);
+    }
+    private function sanitize_market($value) {
+        $value = strtolower(trim((string) $value));
+        if (preg_match('/^[a-z]{2}$/', $value)) {
+            return $value;
+        }
+
+        return '';
     }
     private function sanitize_model($v){
         $models = $this->get_supported_gemini_models();

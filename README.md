@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.3 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.4 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.3 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.4 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
@@ -16,13 +16,13 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **16 AJAX Endpoints** - Alle korrekt implementiert ohne Konflikte  
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.3**
+## 🌟 **NEU IN VERSION 2.9.4**
 
-- ✅ **Migration auf die Yadore Publisher API 2.0** – Produktabfragen nutzen jetzt `GET https://api.yadore.com/v2/offer` inklusive Header `API-Key`. Die bisherige 404-Fehlermeldung wird vollständig eliminiert.
-- ✅ **Flexible Offer-Verarbeitung** – Neue Response-Parser akzeptieren `offers`, `items` oder verschachtelte `data`-Container und mappen Felder wie `deeplink`, `imageUrl` oder `merchantName` automatisch.
-- ✅ **Aktualisierte Entwickler-Dokumentation** – Das Admin-Panel zeigt die korrekten API-Parameter, Beispiele und Header für die Offer-Endpunkte der Publisher API 2.0.
-- ✅ **Verbesserte Fehlerprotokolle** – API-Logs speichern nun auch die angefragte URL, damit Status- und Payload-Fehler schneller nachvollzogen werden können.
-- ✅ **Aktualisierte Versionierung** – Alle Admin-Views, Assets und Dokumentationen spiegeln Version 2.9.3 wider.
+- ✅ **Stabile Einstellungen** – Das Settings-Formular nutzt jetzt ein echtes WordPress-Formular und speichert alle Optionen zuverlässig.
+- ✅ **Marktverwaltung nach API-Spezifikation** – Auswahl des Standard-Marktes mit automatischem Sync über `GET https://api.yadore.com/v2/markets` und strikter ISO-Validierung.
+- ✅ **Konforme Produktabfragen** – Requests an `GET https://api.yadore.com/v2/offer` setzen den Market-Parameter korrekt, respektieren Limits und erfüllen die Publisher API 2.0 Vorgaben.
+- ✅ **Verbesserte Fehlerdiagnose** – Admin-Notices und Logs zeigen die konkreten Fehlermeldungen der Yadore API (z. B. Market- oder Auth-Fehler) und erleichtern die Produktion.
+- ✅ **Aktualisierte Versionierung** – Alle Admin-Views, Assets und Dokumentationen spiegeln Version 2.9.4 wider.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -68,7 +68,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.3:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.4:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -266,33 +266,34 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.3 - GEMINI 2.0 READY RELEASE!**
+## 🎉 **v2.9.4 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.3:**
-- 🌐 Direkte Live-Verbindung zur Yadore Publisher API mit Bearer-Authentifizierung, Request-Caching und detailliertem Logging.
-- 🤖 Gemini Structured Output mit JSON-Schema liefert reproduzierbare Keywords samt Confidence-Werten.
-- 🛎️ Neue Admin Notices melden Aktivierung, fehlende API Keys und kritische Fehler unmittelbar im Dashboard.
-- 📊 API-Test-Endpunkte reagieren ohne Demo-Daten, dokumentieren Keyword & Status und geben klare Handlungsempfehlungen.
+### **Neue Highlights in v2.9.4:**
+- 🌍 Automatische Markt-Synchronisation über die Yadore Markets API mit ISO-Validierung und manueller Auswahl im Backend.
+- 💾 Zuverlässige Konfigurationsspeicherung dank überarbeitetem WordPress-Formular und nonce-validiertem Submit.
+- 🧭 Konforme Offer-Abfragen mit korrekt gesetztem `market`-Parameter, sauberem Caching und vollständigen API-Headern.
+- 📣 Detaillierte Admin-Notices und Logs für 4xx-Antworten der Yadore API inklusive Market-/Auth-Hinweisen.
+- 🧾 Aktualisierte Assets, Dokumentation und Versionshinweise für den produktiven Einsatz (2.9.4).
 
 **Alle Features sind wieder verfügbar und voll funktional!**
 
-✅ **Status:** ALLE FUNKTIONEN INTEGRIERT  
-✅ **WordPress Integration:** 100% VOLLSTÄNDIG  
-✅ **Admin Pages:** ALLE 8 SEITEN VERFÜGBAR  
-✅ **Features:** COMPLETE FEATURE SET  
-✅ **AJAX Endpoints:** ALLE 16 FUNKTIONIEREN  
-✅ **Database:** ENHANCED SCHEMA  
-✅ **Performance:** OPTIMIERT  
-✅ **Security:** ENTERPRISE GRADE  
-✅ **Design:** MODERN & RESPONSIVE  
-✅ **Analytics:** ADVANCED REPORTING  
-✅ **Tools:** COMPREHENSIVE UTILITIES  
+✅ **Status:** ALLE FUNKTIONEN INTEGRIERT
+✅ **WordPress Integration:** 100% VOLLSTÄNDIG
+✅ **Admin Pages:** ALLE 8 SEITEN VERFÜGBAR
+✅ **Features:** COMPLETE FEATURE SET
+✅ **AJAX Endpoints:** ALLE 16 FUNKTIONIEREN
+✅ **Database:** ENHANCED SCHEMA
+✅ **Performance:** OPTIMIERT
+✅ **Security:** ENTERPRISE GRADE
+✅ **Design:** MODERN & RESPONSIVE
+✅ **Analytics:** ADVANCED REPORTING
+✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.3 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.4 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.3** - Gemini 2.0 Ready Release
-**Feature Status: ✅ ALL INTEGRATED**  
-**WordPress Integration: ✅ 100% COMPLETE**  
+**Current Version: 2.9.4** - Production-Ready Market Release
+**Feature Status: ✅ ALL INTEGRATED**
+**WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
