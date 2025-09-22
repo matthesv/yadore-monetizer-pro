@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.4</span>
+        <span class="version-badge">v2.9.5</span>
     </h1>
 
     <div class="yadore-api-container">

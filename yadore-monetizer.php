@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.4
+Version: 2.9.5
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.4');
+define('YADORE_PLUGIN_VERSION', '2.9.5');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -81,7 +81,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.4 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.5 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -2445,10 +2445,21 @@ $wpdb->insert($analytics_table, array(
     /** Basic sanitize helpers (single authoritative copy) */
     private function sanitize_bool($v){ return $v ? 1 : 0; }
     private function sanitize_text($v){ return sanitize_text_field( (string) $v ); }
-    private function sanitize_api_key($v){
-        $v = trim((string) $v);
-        $v = preg_replace('/\s+/', '', $v);
-        return sanitize_text_field($v);
+    private function sanitize_api_key($value){
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        $value = preg_replace('/\s+/', '', $value);
+
+        // Preserve all characters allowed by the Yadore Publisher API key format (docs.yadore.com)
+        if (!preg_match('/^[A-Za-z0-9_\-:.=+\/]+$/', $value)) {
+            $value = preg_replace('/[^A-Za-z0-9_\-:.=+\/]/', '', $value);
+        }
+
+        return $value;
     }
     private function sanitize_market($value) {
         $value = strtolower(trim((string) $value));
