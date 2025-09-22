@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.19</span>
+        <span class="version-badge">v2.9.20</span>
     </h1>
 
     <?php
@@ -415,6 +415,28 @@
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="yadore_overlay_template" class="form-label">
+                                        <strong><?php esc_html_e('Overlay Template', 'yadore-monetizer'); ?></strong>
+                                    </label>
+                                    <select name="yadore_overlay_template" id="yadore_overlay_template" class="form-select">
+                                        <?php
+                                        $overlay_template_value = get_option('yadore_overlay_template', 'default-overlay');
+                                        $overlay_choices = isset($overlay_template_choices) && is_array($overlay_template_choices)
+                                            ? $overlay_template_choices
+                                            : array('default-overlay' => __('Modern Overlay (Default)', 'yadore-monetizer'));
+                                        foreach ($overlay_choices as $value => $label) :
+                                        ?>
+                                            <option value="<?php echo esc_attr($value); ?>" <?php selected($overlay_template_value, $value); ?>>
+                                                <?php echo esc_html($label); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <p class="form-description"><?php esc_html_e('Choose which template renders the product overlay.', 'yadore-monetizer'); ?></p>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Auto-Injection Settings -->
@@ -445,6 +467,63 @@
                                            value="<?php echo esc_attr(get_option('yadore_injection_position', '2')); ?>"
                                            class="form-input small">
                                     <p class="form-description">After which paragraph to inject products</p>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="yadore_auto_injection_template" class="form-label">
+                                        <strong><?php esc_html_e('Auto-Injection Template', 'yadore-monetizer'); ?></strong>
+                                    </label>
+                                    <select name="yadore_auto_injection_template" id="yadore_auto_injection_template" class="form-select">
+                                        <?php
+                                        $auto_template_value = get_option('yadore_auto_injection_template', 'default-inline');
+                                        $shortcode_choices = isset($shortcode_template_choices) && is_array($shortcode_template_choices)
+                                            ? $shortcode_template_choices
+                                            : array(
+                                                'default-grid' => __('Product Grid (Default)', 'yadore-monetizer'),
+                                                'default-list' => __('Product List (Default)', 'yadore-monetizer'),
+                                                'default-inline' => __('Inline Highlight (Default)', 'yadore-monetizer'),
+                                            );
+                                        foreach ($shortcode_choices as $value => $label) :
+                                        ?>
+                                            <option value="<?php echo esc_attr($value); ?>" <?php selected($auto_template_value, $value); ?>>
+                                                <?php echo esc_html($label); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <p class="form-description"><?php esc_html_e('Template used when products are automatically inserted into posts.', 'yadore-monetizer'); ?></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3><span class="dashicons dashicons-screenoptions"></span> <?php esc_html_e('Shortcode Display', 'yadore-monetizer'); ?></h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="yadore_default_shortcode_template" class="form-label">
+                                        <strong><?php esc_html_e('Default Shortcode Template', 'yadore-monetizer'); ?></strong>
+                                    </label>
+                                    <select name="yadore_default_shortcode_template" id="yadore_default_shortcode_template" class="form-select">
+                                        <?php
+                                        $default_shortcode_template_value = get_option('yadore_default_shortcode_template', 'default-grid');
+                                        $shortcode_choices = isset($shortcode_template_choices) && is_array($shortcode_template_choices)
+                                            ? $shortcode_template_choices
+                                            : array(
+                                                'default-grid' => __('Product Grid (Default)', 'yadore-monetizer'),
+                                                'default-list' => __('Product List (Default)', 'yadore-monetizer'),
+                                                'default-inline' => __('Inline Highlight (Default)', 'yadore-monetizer'),
+                                            );
+                                        foreach ($shortcode_choices as $value => $label) :
+                                        ?>
+                                            <option value="<?php echo esc_attr($value); ?>" <?php selected($default_shortcode_template_value, $value); ?>>
+                                                <?php echo esc_html($label); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <p class="form-description"><?php esc_html_e('Fallback template when using the shortcode without specifying a template attribute.', 'yadore-monetizer'); ?><br>
+                                        <?php esc_html_e('Override in content with the template attribute, e.g. [yadore_products template="custom:my-template"].', 'yadore-monetizer'); ?></p>
                                 </div>
                             </div>
                         </div>
@@ -669,7 +748,7 @@ jQuery(document).ready(function($) {
     $('#test-gemini-api').on('click', yadoreTestGeminiApi);
     $('#test-yadore-api').on('click', yadoreTestYadoreApi);
 
-    console.log('Yadore Monetizer Pro v2.9.19 Settings - Initialized');
+    console.log('Yadore Monetizer Pro v2.9.20 Settings - Initialized');
 });
 
 function yadoreTestGeminiApi() {
