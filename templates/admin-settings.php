@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.9</span>
+        <span class="version-badge">v2.9.10</span>
     </h1>
 
     <?php
@@ -308,14 +308,14 @@
                                     <label for="yadore_ai_max_tokens" class="form-label">
                                         <strong>Max Tokens</strong>
                                     </label>
-                                    <input type="number" 
-                                           name="yadore_ai_max_tokens" 
+                                    <input type="number"
+                                           name="yadore_ai_max_tokens"
                                            id="yadore_ai_max_tokens"
-                                           min="10" 
-                                           max="1000"
+                                           min="10"
+                                           max="10000"
                                            value="<?php echo esc_attr(get_option('yadore_ai_max_tokens', '50')); ?>"
                                            class="form-input small">
-                                    <p class="form-description">Maximum tokens for AI response</p>
+                                    <p class="form-description">Maximum tokens for AI response (up to 10,000 tokens)</p>
                                 </div>
                             </div>
                         </div>
@@ -652,7 +652,7 @@ jQuery(document).ready(function($) {
     $('#test-gemini-api').on('click', yadoreTestGeminiApi);
     $('#test-yadore-api').on('click', yadoreTestYadoreApi);
 
-    console.log('Yadore Monetizer Pro v2.9.9 Settings - Initialized');
+    console.log('Yadore Monetizer Pro v2.9.10 Settings - Initialized');
 });
 
 function yadoreTestGeminiApi() {

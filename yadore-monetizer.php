@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.9
+Version: 2.9.10
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.9');
+define('YADORE_PLUGIN_VERSION', '2.9.10');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -87,7 +87,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.9 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.10 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -333,7 +333,13 @@ class YadoreMonetizer {
 
             foreach ($int_options as $option) {
                 if (isset($flat_post[$option])) {
-                    update_option($option, max(0, intval($flat_post[$option])));
+                    $value = max(0, intval($flat_post[$option]));
+
+                    if ($option === 'yadore_ai_max_tokens') {
+                        $value = min(10000, $value);
+                    }
+
+                    update_option($option, $value);
                 }
             }
 
@@ -1770,7 +1776,7 @@ class YadoreMonetizer {
         return ucwords($keyword);
     }
 
-    private function get_products($keyword, $limit = 6, $post_id = 0) {
+    private function get_products($keyword, $limit = 6, $post_id = 0, $use_cache = true) {
         $keyword = trim((string) $keyword);
         if ($keyword === '') {
             return array();
@@ -1781,6 +1787,8 @@ class YadoreMonetizer {
             $limit = 6;
         }
         $limit = min(50, $limit);
+
+        $use_cache = (bool) $use_cache;
 
         $market = $this->sanitize_market(get_option('yadore_market', ''));
         if ($market === '') {
@@ -1803,11 +1811,11 @@ class YadoreMonetizer {
         }
 
         $cache_key = 'yadore_products_' . md5(strtolower($keyword) . '|' . $limit . '|' . $market);
-        if (isset($this->api_cache[$cache_key])) {
+        if ($use_cache && isset($this->api_cache[$cache_key])) {
             return $this->api_cache[$cache_key];
         }
 
-        if (!get_option('yadore_debug_mode', false)) {
+        if ($use_cache && !get_option('yadore_debug_mode', false)) {
             $cached = get_transient($cache_key);
             if ($cached !== false) {
                 $this->api_cache[$cache_key] = $cached;
@@ -2000,7 +2008,7 @@ class YadoreMonetizer {
         ));
 
         $cache_duration = intval(get_option('yadore_cache_duration', 3600));
-        if ($cache_duration > 0) {
+        if ($use_cache && $cache_duration > 0) {
             set_transient($cache_key, $products, $cache_duration);
         }
 
@@ -2165,6 +2173,9 @@ class YadoreMonetizer {
             $max_tokens = intval(get_option('yadore_ai_max_tokens', 50));
             if ($max_tokens <= 0) {
                 $max_tokens = 50;
+            }
+            if ($max_tokens > 10000) {
+                $max_tokens = 10000;
             }
 
             $endpoint_base = sprintf(
@@ -2705,7 +2716,10 @@ class YadoreMonetizer {
         $option_flags = array_map('sanitize_key', $option_flags);
 
         $force_rescan = in_array('force_rescan', $option_flags, true);
-        $use_ai = in_array('use_ai', $option_flags, true);
+
+        $scan_options_provided = array_key_exists('scan_options', $request) || array_key_exists('options', $request);
+        $default_use_ai = (bool) apply_filters('yadore_default_scan_use_ai', get_option('yadore_ai_enabled', false), $request);
+        $use_ai = $scan_options_provided ? in_array('use_ai', $option_flags, true) : $default_use_ai;
 
         $validate_products_flag = in_array('validate_products', $option_flags, true);
         $validate_products = $validate_products_flag;
@@ -3063,6 +3077,87 @@ class YadoreMonetizer {
             'word_count' => $word_count,
             'duration_ms' => $duration_ms,
         );
+    }
+
+    public function auto_scan_post_on_save($post_id, $post) {
+        try {
+            if (!get_option('yadore_auto_scan_posts', 1)) {
+                return;
+            }
+
+            if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                return;
+            }
+
+            if (wp_is_post_autosave($post_id) || wp_is_post_revision($post_id)) {
+                return;
+            }
+
+            if (!$post instanceof WP_Post) {
+                $post = get_post($post_id);
+            }
+
+            if (!$post || $post->post_status === 'auto-draft' || $post->post_status === 'trash') {
+                return;
+            }
+
+            if (!in_array($post->post_type, $this->get_scannable_post_types(), true)) {
+                return;
+            }
+
+            $should_run = apply_filters('yadore_auto_scan_should_run', true, $post_id, $post);
+            if (!$should_run) {
+                return;
+            }
+
+            $min_words = intval(get_option('yadore_min_content_words', 0));
+            if ($min_words < 0) {
+                $min_words = 0;
+            }
+
+            $word_count = $this->count_words_in_text($post->post_content);
+            if ($min_words > 0 && $word_count < $min_words) {
+                $this->log(
+                    sprintf(
+                        'Auto scan skipped for post %d due to minimum word requirement (%d < %d).',
+                        $post_id,
+                        $word_count,
+                        $min_words
+                    ),
+                    'debug'
+                );
+                return;
+            }
+
+            $use_ai_default = (bool) get_option('yadore_ai_enabled', false);
+            $use_ai = (bool) apply_filters('yadore_auto_scan_use_ai', $use_ai_default, $post_id, $post);
+
+            $options = array(
+                'force_rescan' => false,
+                'use_ai' => $use_ai,
+                'validate_products' => true,
+                'min_words' => 0,
+            );
+
+            $result = $this->process_post_scan($post_id, $options);
+
+            if (is_array($result) && isset($result['status'])) {
+                if ($result['status'] === 'success') {
+                    $this->update_scanned_posts_stat();
+                    $this->log(
+                        sprintf('Auto scan completed for post %d (%s).', $post_id, $post->post_title),
+                        'debug'
+                    );
+                } elseif (!empty($result['message'])) {
+                    $this->log(
+                        sprintf('Auto scan note for post %d: %s', $post_id, $result['message']),
+                        'debug'
+                    );
+                }
+            }
+        } catch (Exception $e) {
+            $this->log_error('Auto scan on save failed', $e, 'medium', array('post_id' => $post_id));
+        }
     }
 
     private function record_scan_failure($post_id, $existing, $message) {
@@ -3444,18 +3539,55 @@ class YadoreMonetizer {
         ), $atts);
 
         try {
-            if (empty($atts['keyword'])) {
-                return '<div class="yadore-error">Please specify a keyword for the product search.</div>';
+            $keyword = sanitize_text_field((string) $atts['keyword']);
+            $limit = intval($atts['limit']);
+            if ($limit <= 0) {
+                $limit = 6;
+            }
+            $limit = min(50, $limit);
+
+            $format = sanitize_key($atts['format']);
+            if ($format === '') {
+                $format = 'grid';
             }
 
-            $use_cache = $atts['cache'] === 'true';
-            $products = $this->get_products($atts['keyword'], intval($atts['limit']));
+            $use_cache = true;
+            if (array_key_exists('cache', $atts)) {
+                $use_cache = $this->interpret_boolean_flag($atts['cache']);
+            }
+
+            global $post;
+            $post_id = 0;
+            $post_content = '';
+
+            if ($post instanceof WP_Post) {
+                $post_id = (int) $post->ID;
+                $post_content = (string) $post->post_content;
+            }
+
+            if ($keyword === '') {
+                $keyword = $this->resolve_product_keyword($post_id, $post_content);
+            }
+
+            $keyword = sanitize_text_field((string) $keyword);
+
+            if ($keyword === '') {
+                return '<div class="yadore-error">' . esc_html__(
+                    'No keyword available for product search. Run the scanner or provide a keyword attribute.',
+                    'yadore-monetizer'
+                ) . '</div>';
+            }
+
+            $products = $this->get_products($keyword, $limit, $post_id, $use_cache);
 
             if (empty($products)) {
-                return '<div class="yadore-no-results">No products found for "' . esc_html($atts['keyword']) . '".</div>';
+                return '<div class="yadore-no-results">' . sprintf(
+                    esc_html__('No products found for "%s".', 'yadore-monetizer'),
+                    esc_html($keyword)
+                ) . '</div>';
             }
 
-            $template_file = YADORE_PLUGIN_DIR . "templates/products-{$atts['format']}.php";
+            $template_file = YADORE_PLUGIN_DIR . "templates/products-{$format}.php";
 
             if (!file_exists($template_file)) {
                 $template_file = YADORE_PLUGIN_DIR . "templates/products-grid.php";
@@ -3468,13 +3600,16 @@ class YadoreMonetizer {
             $output = ob_get_clean();
 
             // v2.7: Track shortcode usage
-            $this->track_shortcode_usage($atts['keyword'], $atts['limit'], $atts['format']);
+            $this->track_shortcode_usage($keyword, $limit, $format);
 
             return $output;
 
         } catch (Exception $e) {
             $this->log_error('Shortcode rendering failed', $e);
-            return '<div class="yadore-error">Error loading products. Please try again later.</div>';
+            return '<div class="yadore-error">' . esc_html__(
+                'Error loading products. Please try again later.',
+                'yadore-monetizer'
+            ) . '</div>';
         }
     }
 
