@@ -12,6 +12,11 @@ $current_model = isset($selected_gemini_model)
     ? $selected_gemini_model
     : get_option('yadore_gemini_model', 'gemini-2.0-flash');
 $current_model_label = $available_models[$current_model]['label'] ?? $current_model;
+$ai_default_prompt = YadoreMonetizer::DEFAULT_AI_PROMPT;
+$ai_current_prompt = (string) get_option('yadore_ai_prompt', $ai_default_prompt);
+if (trim($ai_current_prompt) === '') {
+    $ai_current_prompt = $ai_default_prompt;
+}
 ?>
 <div class="wrap yadore-admin-wrap">
     <h1 class="yadore-page-title">
@@ -203,7 +208,7 @@ $current_model_label = $available_models[$current_model]['label'] ?? $current_mo
                             <div class="prompt-section">
                                 <h3><span class="dashicons dashicons-editor-code"></span> Current Analysis Prompt</h3>
                                 <div class="prompt-editor">
-                                    <textarea id="ai-prompt-editor" rows="6"><?php echo esc_textarea(get_option('yadore_ai_prompt', 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.')); ?></textarea>
+                                    <textarea id="ai-prompt-editor" rows="6"><?php echo esc_textarea($ai_current_prompt); ?></textarea>
                                     <div class="prompt-actions">
                                         <button class="button button-primary" id="save-prompt">
                                             <span class="dashicons dashicons-saved"></span> Save Prompt

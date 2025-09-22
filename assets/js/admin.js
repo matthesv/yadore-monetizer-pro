@@ -166,6 +166,18 @@
                 $('#temperature-value').text($(this).val());
             });
 
+            $('#reset-ai-prompt').on('click', () => {
+                const $promptField = $('#yadore_ai_prompt');
+                if (!$promptField.length) {
+                    return;
+                }
+
+                const defaultPrompt = $promptField.data('default');
+                if (typeof defaultPrompt === 'string' && defaultPrompt.length) {
+                    $promptField.val(defaultPrompt).trigger('input');
+                }
+            });
+
             // Date range picker
             $('#export-date-range').on('change', function() {
                 if ($(this).val() === 'custom') {
