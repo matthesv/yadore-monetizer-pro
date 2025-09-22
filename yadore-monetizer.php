@@ -2,8 +2,8 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.20
-Author: Yadore AI
+Version: 2.9.21
+Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
 Requires at least: 5.0
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.20');
+define('YADORE_PLUGIN_VERSION', '2.9.21');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -101,7 +101,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.20 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.21 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -276,8 +276,210 @@ class YadoreMonetizer {
                 ), '', 'no');
             }
 
+            $this->ensure_default_templates_editable();
+
         } catch (Exception $e) {
             $this->log_error('Failed to setup initial data', $e);
+        }
+    }
+
+    private function ensure_default_templates_editable() {
+        try {
+            if (!post_type_exists('yadore_template')) {
+                return;
+            }
+
+            $defaults = array(
+                'default-grid' => array(
+                    'slug' => 'default-grid-template',
+                    'title' => __('Product Grid (Editable)', 'yadore-monetizer'),
+                    'type' => 'shortcode',
+                    'option' => 'yadore_default_shortcode_template',
+                    'option_default' => 'default-grid',
+                    'content' => <<<'HTML'
+<div class="yadore-products-grid" data-format="grid">
+    [yadore_product_loop]
+    <div class="yadore-product-card" data-offer-id="{{id}}" data-click-url="{{click_url}}" data-yadore-click="{{id}}" role="link" tabindex="0">
+        <div class="product-image">
+            {{image_tag}}
+            <div class="yadore-product-image-placeholder" aria-hidden="true">📦</div>
+            <div class="product-badge">{{promo_text}}</div>
+        </div>
+        <div class="product-content">
+            <h3 class="product-title">{{title}}</h3>
+            <div class="product-price-section">
+                <div class="product-price">
+                    <span class="price-amount">{{price_amount}}</span>
+                    <span class="price-currency">{{price_currency}}</span>
+                </div>
+            </div>
+            <div class="product-merchant">
+                <span class="merchant-name">{{merchant_name}}</span>
+            </div>
+            <a href="{{click_url}}" class="product-cta-button" target="_blank" rel="nofollow noopener" data-yadore-click="{{id}}">
+                {{button_label}}
+            </a>
+        </div>
+    </div>
+    [/yadore_product_loop]
+</div>
+HTML
+                ),
+                'default-list' => array(
+                    'slug' => 'default-list-template',
+                    'title' => __('Product List (Editable)', 'yadore-monetizer'),
+                    'type' => 'shortcode',
+                    'option' => null,
+                    'option_default' => 'default-list',
+                    'content' => <<<'HTML'
+<div class="yadore-products-list" data-format="list">
+    [yadore_product_loop]
+    <div class="yadore-product-item" data-offer-id="{{id}}" data-click-url="{{click_url}}" data-yadore-click="{{id}}" role="link" tabindex="0">
+        <div class="product-image">
+            {{image_tag}}
+            <div class="yadore-product-image-placeholder" aria-hidden="true">📦</div>
+        </div>
+        <div class="product-details">
+            <h3 class="product-title">{{title}}</h3>
+            <p class="product-description">{{description}}</p>
+        </div>
+        <div class="product-pricing">
+            <div class="price-main">
+                <span class="list-price-amount">{{price_amount}}</span>
+                <span class="list-price-currency">{{price_currency}}</span>
+            </div>
+            <div class="merchant-info">Verfügbar bei {{merchant_name}}</div>
+        </div>
+        <div class="product-action">
+            <a href="{{click_url}}" class="list-cta-button" target="_blank" rel="nofollow noopener" data-yadore-click="{{id}}">
+                {{button_label}}
+            </a>
+        </div>
+    </div>
+    [/yadore_product_loop]
+</div>
+HTML
+                ),
+                'default-inline' => array(
+                    'slug' => 'default-inline-template',
+                    'title' => __('Inline Highlight (Editable)', 'yadore-monetizer'),
+                    'type' => 'shortcode',
+                    'option' => 'yadore_auto_injection_template',
+                    'option_default' => 'default-inline',
+                    'content' => <<<'HTML'
+<div class="yadore-products-inline" data-format="inline">
+    <div class="inline-header">
+        <h3>Empfehlung</h3>
+        <div class="inline-subtitle">Sorgfältig ausgewähltes Angebot zu diesem Beitrag</div>
+    </div>
+    <div class="inline-products">
+        [yadore_product_loop]
+        <div class="inline-product" data-item-index="{{index}}" data-offer-id="{{id}}" data-click-url="{{click_url}}" data-yadore-click="{{id}}">
+            <div class="inline-image">
+                {{image_tag}}
+                <div class="yadore-product-image-placeholder" aria-hidden="true">📦</div>
+            </div>
+            <div class="inline-details">
+                <h4 class="inline-title">{{title}}</h4>
+                <div class="inline-price-row">
+                    <div class="inline-price">
+                        <span class="inline-price-amount">{{price_amount}}</span>
+                        <span class="inline-price-currency">{{price_currency}}</span>
+                    </div>
+                </div>
+                <div class="inline-merchant">{{merchant_name}}</div>
+                <a href="{{click_url}}" class="inline-cta" target="_blank" rel="nofollow noopener" data-yadore-click="{{id}}">
+                    {{button_label}}
+                </a>
+            </div>
+        </div>
+        [/yadore_product_loop]
+    </div>
+    <div class="inline-disclaimer">
+        <small>Als Affiliate-Partner verdienen wir ggf. an qualifizierten Käufen.</small>
+    </div>
+</div>
+HTML
+                ),
+                'default-overlay' => array(
+                    'slug' => 'default-overlay-template',
+                    'title' => __('Modern Overlay (Editable)', 'yadore-monetizer'),
+                    'type' => 'overlay',
+                    'option' => 'yadore_overlay_template',
+                    'option_default' => 'default-overlay',
+                    'content' => <<<'HTML'
+<div class="overlay-products">
+    [yadore_product_loop]
+    <div class="overlay-product" data-product-id="{{id}}" data-click-url="{{click_url}}" data-yadore-click="{{id}}" role="link" tabindex="0">
+        <div class="overlay-product-image">
+            {{image_tag}}
+            <div class="overlay-product-image-placeholder" aria-hidden="true">📦</div>
+            <div class="overlay-product-badge">{{promo_text}}</div>
+        </div>
+        <div class="overlay-product-content">
+            <h4 class="overlay-product-title">{{title}}</h4>
+            <div class="overlay-product-price">
+                <span class="overlay-price-amount">{{price_amount}}</span>
+                <span class="overlay-price-currency">{{price_currency}}</span>
+            </div>
+            <div class="overlay-product-merchant">
+                <span class="overlay-merchant-name">{{merchant_name}}</span>
+            </div>
+            <a href="{{click_url}}" class="overlay-product-button" target="_blank" rel="nofollow noopener" data-yadore-click="{{id}}">
+                {{button_label}}
+            </a>
+        </div>
+    </div>
+    [/yadore_product_loop]
+</div>
+HTML
+                ),
+            );
+
+            foreach ($defaults as $key => $template) {
+                $slug = sanitize_title($template['slug'] ?? $key);
+                $type = $template['type'] ?? 'shortcode';
+
+                if ($slug === '' || !in_array($type, array('shortcode', 'overlay'), true)) {
+                    continue;
+                }
+
+                $existing = $this->get_template_post_by_slug($slug, $type);
+
+                if (!($existing instanceof WP_Post)) {
+                    $post_id = wp_insert_post(array(
+                        'post_title' => $template['title'],
+                        'post_name' => $slug,
+                        'post_content' => $template['content'],
+                        'post_status' => 'publish',
+                        'post_type' => 'yadore_template',
+                        'meta_input' => array(
+                            '_yadore_template_type' => $type,
+                        ),
+                    ), true);
+
+                    if (!is_wp_error($post_id)) {
+                        $existing = get_post($post_id);
+                    }
+                }
+
+                if ($existing instanceof WP_Post) {
+                    $option_name = $template['option'] ?? '';
+                    $option_default = $template['option_default'] ?? $key;
+
+                    if ($option_name) {
+                        $current = get_option($option_name, $option_default);
+                        if ($current === $option_default || $current === '' || $current === $key) {
+                            $storage_key = $this->get_template_storage_key($existing);
+                            if ($storage_key !== '') {
+                                update_option($option_name, $storage_key);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            $this->log_error('Failed to ensure editable templates', $e);
         }
     }
 

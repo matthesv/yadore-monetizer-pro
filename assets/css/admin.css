@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v2.9.20 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v2.9.21 - Admin CSS (Complete) */
 .yadore-admin-wrap {
     margin: 0;
 }
@@ -10,6 +10,20 @@
     margin-bottom: 30px;
     font-size: 24px;
     color: #1d2327;
+}
+
+.yadore-admin-wrap .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.yadore-admin-wrap .button .dashicons {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .version-badge {
