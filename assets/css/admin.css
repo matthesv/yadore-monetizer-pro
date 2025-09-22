@@ -769,6 +769,56 @@
     color: #1d2327;
 }
 
+.chart-fallback {
+    background: #f6f7f7;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.chart-fallback-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.chart-fallback-row:last-child {
+    margin-bottom: 0;
+}
+
+.status-label {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1.4;
+    background: #e5f5ff;
+    color: #1d2327;
+}
+
+.status-label.status-completed_ai,
+.status-label.status-completed_manual,
+.status-label.status-completed {
+    background: #e6f4ea;
+    color: #055d20;
+}
+
+.status-label.status-failed {
+    background: #fde2e1;
+    color: #a42824;
+}
+
+.status-label.status-skipped {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-label.status-pending {
+    background: #f3f4f6;
+    color: #374151;
+}
+
 /* Tools specific */
 .tools-grid {
     display: grid;
@@ -803,6 +853,42 @@
 .mt-20 { margin-top: 20px; }
 .hidden { display: none !important; }
 .loading-row { text-align: center; padding: 40px; color: #646970; }
+
+.post-suggestions {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    margin-top: 4px;
+    max-height: 220px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f1;
+    cursor: pointer;
+}
+
+.suggestion-item:last-child {
+    border-bottom: 0;
+}
+
+.suggestion-item:hover {
+    background: #f0f6fc;
+}
+
+.suggestion-title {
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.suggestion-meta {
+    font-size: 12px;
+    color: #646970;
+}
 
 /* Status colors */
 .status-active { color: #00a32a; }

@@ -1,13 +1,18 @@
-/* Yadore Monetizer Pro v2.9.6 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.7 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: '2.9.6',
+        version: '2.9.7',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
+        scannerState: null,
+        scannerCharts: {
+            keywords: null,
+            success: null
+        },
 
         // Initialize all admin functionality
         init: function() {
@@ -20,7 +25,7 @@
             this.initTools();
             this.initDebug();
 
-            console.log('Yadore Monetizer Pro v2.9.6 Admin - Fully Initialized');
+            console.log('Yadore Monetizer Pro v2.9.7 Admin - Fully Initialized');
         },
 
         // Dashboard functionality
@@ -295,33 +300,84 @@
 
         // Scanner functionality
         initScanner: function() {
-            if (!$('.yadore-scanner-container').length) return;
+            if (!$('.yadore-scanner-container').length) {
+                return;
+            }
 
-            $('#start-bulk-scan').on('click', (e) => {
+            this.scannerState = {
+                selectedPost: null,
+                currentPage: 1,
+                currentFilter: $('#results-filter').val() || 'all',
+                searchTimeout: null
+            };
+
+            $('#start-bulk-scan').off('click').on('click', (e) => {
                 e.preventDefault();
                 this.startBulkScan();
             });
 
-            $('#scan-single-post').on('click', (e) => {
+            $('#scan-single-post').off('click').on('click', (e) => {
                 e.preventDefault();
                 this.scanSinglePost();
             });
 
-            // Post search
-            let searchTimeout;
-            $('#post-search').on('input', (e) => {
-                clearTimeout(searchTimeout);
+            $('#post-search').off('input').on('input', (e) => {
                 const query = $(e.target).val();
+                clearTimeout(this.scannerState.searchTimeout);
 
-                if (query.length < 3) {
-                    $('#post-suggestions').hide();
+                if (query.length < 2) {
+                    $('#post-suggestions').hide().empty();
                     return;
                 }
 
-                searchTimeout = setTimeout(() => {
+                this.scannerState.searchTimeout = setTimeout(() => {
                     this.searchPosts(query);
-                }, 300);
+                }, 250);
             });
+
+            $('#post-suggestions').off('click').on('click', '.suggestion-item', (e) => {
+                e.preventDefault();
+                const item = $(e.currentTarget);
+                const post = item.data('post');
+                if (post) {
+                    this.selectScannerPost(post);
+                }
+            });
+
+            $(document).off('click.yadoreSuggestions').on('click.yadoreSuggestions', (e) => {
+                if (!$(e.target).closest('.post-search-container').length) {
+                    $('#post-suggestions').hide();
+                }
+            });
+
+            $('#results-filter').off('change').on('change', (e) => {
+                this.scannerState.currentFilter = $(e.target).val();
+                this.loadScanResults(1);
+            });
+
+            $('#results-pagination').off('click').on('click', '.page-link', (e) => {
+                e.preventDefault();
+                const page = parseInt($(e.currentTarget).data('page'), 10);
+                if (!Number.isNaN(page)) {
+                    this.loadScanResults(page);
+                }
+            });
+
+            $('#refresh-overview').off('click').on('click', (e) => {
+                if (e) {
+                    e.preventDefault();
+                }
+                this.loadScannerOverview();
+            });
+
+            $('#export-results').off('click').on('click', (e) => {
+                e.preventDefault();
+                this.exportScanResults();
+            });
+
+            this.loadScannerOverview();
+            this.loadScanResults();
+            this.loadScannerAnalytics();
         },
 
         startBulkScan: function() {
@@ -343,6 +399,10 @@
             if (postTypes.length === 0) {
                 alert('Please select at least one post type to scan.');
                 return;
+            }
+
+            if (this.scannerState) {
+                this.scannerState.currentPage = 1;
             }
 
             // Show progress bar
@@ -384,7 +444,21 @@
                         if (progress.completed >= progress.total) {
                             $('#scan-progress').hide();
                             $('#start-bulk-scan').prop('disabled', false);
-                            this.loadScanResults();
+                            if (Array.isArray(progress.results)) {
+                                const lastResult = progress.results[progress.results.length - 1];
+                                if (lastResult && lastResult.message) {
+                                    let noticeType = 'success';
+                                    if (lastResult.status === 'failed') {
+                                        noticeType = 'error';
+                                    } else if (lastResult.status === 'skipped') {
+                                        noticeType = 'info';
+                                    }
+                                    this.showNotice(lastResult.message, noticeType);
+                                }
+                            }
+                            this.loadScannerOverview();
+                            this.loadScanResults(this.scannerState.currentPage || 1);
+                            this.loadScannerAnalytics();
                         } else {
                             setTimeout(checkProgress, 2000);
                         }
@@ -393,6 +467,379 @@
             };
 
             checkProgress();
+        },
+
+        loadScannerOverview: function() {
+            $.post(this.ajax_url, {
+                action: 'yadore_get_scanner_overview',
+                nonce: this.nonce
+            }, (response) => {
+                if (response.success && response.data) {
+                    const data = response.data;
+                    $('#total-posts').text(this.formatNumber(data.total_posts || 0));
+                    $('#scanned-posts').text(this.formatNumber(data.scanned_posts || 0));
+                    $('#pending-posts').text(this.formatNumber(data.pending_posts || 0));
+                    $('#validated-keywords').text(this.formatNumber(data.validated_keywords || 0));
+                }
+            });
+        },
+
+        loadScanResults: function(page = 1) {
+            if (!this.scannerState) {
+                this.scannerState = { currentPage: 1, currentFilter: 'all' };
+            }
+
+            this.scannerState.currentPage = page;
+
+            const filter = this.scannerState.currentFilter || 'all';
+            const tbody = $('#scan-results-body');
+            tbody.html(`
+                <tr>
+                    <td colspan="6" class="loading-row">
+                        <span class="dashicons dashicons-update-alt spinning"></span> ${yadore_admin.strings?.processing || 'Loading results...'}
+                    </td>
+                </tr>
+            `);
+
+            $.post(this.ajax_url, {
+                action: 'yadore_get_scan_results',
+                nonce: this.nonce,
+                filter: filter,
+                page: page,
+                per_page: 10
+            }, (response) => {
+                if (response.success && response.data) {
+                    this.renderScanResults(response.data.results || []);
+                    this.renderResultsPagination(response.data.pagination || {});
+                } else {
+                    this.renderScanResults([]);
+                    this.renderResultsPagination({});
+                    if (response && response.data) {
+                        this.showNotice(response.data, 'error');
+                    }
+                }
+            });
+        },
+
+        renderScanResults: function(results) {
+            const tbody = $('#scan-results-body');
+
+            if (!Array.isArray(results) || results.length === 0) {
+                tbody.html(`
+                    <tr>
+                        <td colspan="6" class="no-results">${yadore_admin.strings?.no_results || 'No scan results available.'}</td>
+                    </tr>
+                `);
+                return;
+            }
+
+            const rows = results.map((item) => {
+                const keyword = item.primary_keyword || '—';
+                const confidence = item.keyword_confidence ? `${Math.round(item.keyword_confidence * 100)}%` : '—';
+                const statusLabel = item.status_label || this.getScanStatusLabel(item.scan_status);
+                const lastScanned = item.last_scanned ? item.last_scanned : '—';
+
+                return `
+                    <tr>
+                        <td>${item.post_title || '—'}</td>
+                        <td>${keyword}</td>
+                        <td>${confidence}</td>
+                        <td><span class="status-label status-${item.scan_status || 'pending'}">${statusLabel}</span></td>
+                        <td>${lastScanned}</td>
+                        <td>
+                            <button type="button" class="button button-small scan-again" data-post="${item.post_id}">
+                                <span class="dashicons dashicons-update"></span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.html(rows);
+
+            tbody.find('.scan-again').on('click', (e) => {
+                e.preventDefault();
+                const postId = parseInt($(e.currentTarget).data('post'), 10);
+                if (!Number.isNaN(postId)) {
+                    this.scannerState.selectedPost = { id: postId };
+                    this.scanSinglePost();
+                }
+            });
+        },
+
+        renderResultsPagination: function(pagination) {
+            const container = $('#results-pagination');
+
+            if (!pagination || !pagination.total_pages || pagination.total_pages <= 1) {
+                container.empty();
+                return;
+            }
+
+            let html = '';
+            for (let i = 1; i <= pagination.total_pages; i += 1) {
+                const activeClass = i === pagination.current_page ? ' active' : '';
+                html += `<a href="#" class="page-link${activeClass}" data-page="${i}">${i}</a>`;
+            }
+
+            container.html(html);
+        },
+
+        getScanStatusLabel: function(status) {
+            const labels = {
+                completed_ai: 'Completed (AI)',
+                completed_manual: 'Completed',
+                completed: 'Completed',
+                failed: 'Failed',
+                skipped: 'Skipped',
+                pending: 'Pending'
+            };
+
+            if (status && labels[status]) {
+                return labels[status];
+            }
+
+            if (!status) {
+                return 'Pending';
+            }
+
+            return status.replace(/_/g, ' ');
+        },
+
+        searchPosts: function(query) {
+            $.post(this.ajax_url, {
+                action: 'yadore_search_posts',
+                nonce: this.nonce,
+                query: query
+            }, (response) => {
+                const container = $('#post-suggestions');
+
+                if (!response.success || !response.data || !Array.isArray(response.data.results) || response.data.results.length === 0) {
+                    container.hide().empty();
+                    return;
+                }
+
+                container.empty();
+
+                response.data.results.forEach((post) => {
+                    const item = $('<div class="suggestion-item"></div>');
+                    item.append(`<div class="suggestion-title">${post.title}</div>`);
+                    item.append(`<div class="suggestion-meta">${post.status} · ${post.date}</div>`);
+                    item.data('post', post);
+                    container.append(item);
+                });
+
+                container.show();
+            });
+        },
+
+        selectScannerPost: function(post) {
+            if (!post) {
+                return;
+            }
+
+            this.scannerState.selectedPost = post;
+            const container = $('#selected-post');
+            container.show();
+
+            container.find('.post-title').text(post.title || '');
+            container.find('.post-date').text(post.date ? `📅 ${post.date}` : '');
+            container.find('.post-status').text(post.status ? `• ${post.status}` : '');
+            container.find('.post-word-count').text(post.word_count ? `${this.formatNumber(post.word_count)} words` : '');
+            container.find('.post-excerpt').text(post.excerpt || '');
+
+            if (post.primary_keyword) {
+                container.find('.current-keywords').html(`<strong>Keyword:</strong> ${post.primary_keyword}`);
+            } else {
+                container.find('.current-keywords').html('<strong>Keyword:</strong> —');
+            }
+        },
+
+        scanSinglePost: function() {
+            if (!this.scannerState || !this.scannerState.selectedPost || !this.scannerState.selectedPost.id) {
+                alert('Please select a post to scan.');
+                return;
+            }
+
+            const button = $('#scan-single-post');
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Scanning...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_scan_single_post',
+                nonce: this.nonce,
+                post_id: this.scannerState.selectedPost.id,
+                use_ai: $('#single-use-ai').is(':checked') ? 1 : 0,
+                force_rescan: $('#single-force-rescan').is(':checked') ? 1 : 0,
+                validate_products: $('#single-validate-products').is(':checked') ? 1 : 0,
+                min_words: parseInt($('#min-words').val(), 10) || 0
+            }, (response) => {
+                if (response.success && response.data && response.data.result) {
+                    this.showNotice('Post scan completed successfully.');
+                    this.selectScannerPost(response.data.result);
+                    this.loadScanResults(this.scannerState.currentPage || 1);
+                    this.loadScannerOverview();
+                    this.loadScannerAnalytics();
+                } else if (response && response.data) {
+                    this.showNotice(response.data, 'error');
+                }
+            }).fail((xhr) => {
+                if (xhr.responseJSON && xhr.responseJSON.data) {
+                    this.showNotice(xhr.responseJSON.data, 'error');
+                } else {
+                    this.showNotice('Scan failed due to an unexpected error.', 'error');
+                }
+            }).always(() => {
+                button.prop('disabled', false).html('<span class="dashicons dashicons-search"></span> Scan This Post');
+            });
+        },
+
+        loadScannerAnalytics: function() {
+            $.post(this.ajax_url, {
+                action: 'yadore_get_scanner_analytics',
+                nonce: this.nonce
+            }, (response) => {
+                if (response.success && response.data) {
+                    const stats = response.data.stats || {};
+                    $('#top-keyword').text(stats.top_keyword || '—');
+                    $('#avg-confidence').text((stats.average_confidence || 0) + '%');
+                    $('#ai-usage-rate').text((stats.ai_usage_rate || 0) + '%');
+                    $('#scan-success-rate').text((stats.success_rate || 0) + '%');
+
+                    this.renderScannerCharts(response.data.charts || {});
+                }
+            });
+        },
+
+        renderScannerCharts: function(charts) {
+            const keywordData = charts.keywords || { labels: [], counts: [] };
+            const successData = charts.success || { labels: [], counts: [] };
+
+            if (typeof Chart !== 'undefined') {
+                const keywordCanvas = document.getElementById('keywords-chart');
+                if (keywordCanvas) {
+                    if (this.scannerCharts.keywords) {
+                        this.scannerCharts.keywords.data.labels = keywordData.labels;
+                        this.scannerCharts.keywords.data.datasets[0].data = keywordData.counts;
+                        this.scannerCharts.keywords.update();
+                    } else {
+                        this.scannerCharts.keywords = new Chart(keywordCanvas, {
+                            type: 'bar',
+                            data: {
+                                labels: keywordData.labels,
+                                datasets: [{
+                                    label: 'Keywords',
+                                    data: keywordData.counts,
+                                    backgroundColor: '#2271b1'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+                }
+
+                const successCanvas = document.getElementById('success-chart');
+                if (successCanvas) {
+                    if (this.scannerCharts.success) {
+                        this.scannerCharts.success.data.labels = successData.labels;
+                        this.scannerCharts.success.data.datasets[0].data = successData.counts;
+                        this.scannerCharts.success.update();
+                    } else {
+                        this.scannerCharts.success = new Chart(successCanvas, {
+                            type: 'doughnut',
+                            data: {
+                                labels: successData.labels,
+                                datasets: [{
+                                    data: successData.counts,
+                                    backgroundColor: ['#00a32a', '#d63638', '#94660c']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: 'bottom' } }
+                            }
+                        });
+                    }
+                }
+            } else {
+                this.renderChartFallback('keywords-chart', keywordData.labels, keywordData.counts);
+                this.renderChartFallback('success-chart', successData.labels, successData.counts);
+            }
+        },
+
+        renderChartFallback: function(canvasId, labels, values) {
+            const canvas = $('#' + canvasId);
+            if (!canvas.length) {
+                return;
+            }
+
+            const container = canvas.parent();
+            container.find('.chart-fallback').remove();
+
+            if (typeof Chart !== 'undefined') {
+                return;
+            }
+
+            if (!labels || labels.length === 0) {
+                container.append('<div class="chart-fallback">No data available.</div>');
+                return;
+            }
+
+            const rows = labels.map((label, index) => {
+                const value = values && values[index] !== undefined ? values[index] : 0;
+                return `<div class="chart-fallback-row"><span>${label}</span><strong>${this.formatNumber(value)}</strong></div>`;
+            }).join('');
+
+            container.append(`<div class="chart-fallback">${rows}</div>`);
+        },
+
+        exportScanResults: function() {
+            const filter = this.scannerState ? this.scannerState.currentFilter : 'all';
+
+            $.post(this.ajax_url, {
+                action: 'yadore_get_scan_results',
+                nonce: this.nonce,
+                filter: filter,
+                export: 1,
+                per_page: 500
+            }, (response) => {
+                if (!response.success || !response.data || !Array.isArray(response.data.results) || response.data.results.length === 0) {
+                    this.showNotice('No scan results available for export.', 'warning');
+                    return;
+                }
+
+                const rows = response.data.results;
+                const csvRows = [];
+                csvRows.push(['Post Title', 'Primary Keyword', 'Confidence', 'Status', 'Product Count', 'Last Scanned'].join(','));
+
+                rows.forEach((row) => {
+                    const confidence = row.keyword_confidence ? `${Math.round(row.keyword_confidence * 100)}%` : '';
+                    const status = row.status_label || row.scan_status || '';
+                    const values = [
+                        (row.post_title || '').replace(/"/g, '""'),
+                        (row.primary_keyword || '').replace(/"/g, '""'),
+                        confidence,
+                        status.replace(/"/g, '""'),
+                        row.product_count || 0,
+                        row.last_scanned || ''
+                    ].map((value) => `"${value}"`);
+
+                    csvRows.push(values.join(','));
+                });
+
+                const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'yadore-scan-results.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            });
         },
 
         // Analytics functionality
@@ -666,18 +1113,37 @@
 
         // Utility functions
         showNotice: function(message, type = 'success') {
-            const noticeClass = type === 'error' ? 'notice-error' : 'notice-success';
-            const notice = $(`
-                <div class="notice ${noticeClass} is-dismissible">
-                    <p>${message}</p>
-                </div>
-            `);
+            const safeMessage = typeof message === 'string' ? message : String(message || '');
+            let classes = 'notice';
 
+            switch (type) {
+                case 'error':
+                    classes += ' notice-error';
+                    break;
+                case 'warning':
+                    classes += ' notice-warning';
+                    break;
+                case 'info':
+                    classes += ' notice-info';
+                    break;
+                default:
+                    classes += ' notice-success';
+                    break;
+            }
+
+            const isPersistent = type === 'error' || type === 'warning';
+            if (!isPersistent) {
+                classes += ' is-dismissible';
+            }
+
+            const notice = $('<div/>', { class: classes }).append($('<p/>').text(safeMessage));
             $('.yadore-admin-wrap').prepend(notice);
 
-            setTimeout(() => {
-                notice.fadeOut(() => notice.remove());
-            }, 5000);
+            if (!isPersistent) {
+                setTimeout(() => {
+                    notice.fadeOut(() => notice.remove());
+                }, 5000);
+            }
         },
 
         formatNumber: function(num) {
@@ -734,4 +1200,20 @@ function yadoreTestGeminiApi() {
 
 function yadoreTestYadoreApi() {
     window.yadoreAdmin.testYadoreApi();
+}
+
+function yadoreInitializeScanner() {
+    window.yadoreAdmin.initScanner();
+}
+
+function yadoreLoadScannerOverview() {
+    window.yadoreAdmin.loadScannerOverview();
+}
+
+function yadoreLoadScanResults(page) {
+    window.yadoreAdmin.loadScanResults(page || 1);
+}
+
+function yadoreLoadScannerAnalytics() {
+    window.yadoreAdmin.loadScannerAnalytics();
 }

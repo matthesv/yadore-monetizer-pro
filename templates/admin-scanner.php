@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-search"></span>
         Post Scanner & Analysis
-        <span class="version-badge">v2.9.6</span>
+        <span class="version-badge">v2.9.7</span>
     </h1>
 
     <div class="yadore-scanner-container">
@@ -298,90 +298,9 @@
 </div>
 
 <script>
-jQuery(document).ready(function($) {
-    // Initialize post scanner
-    yadoreInitializeScanner();
-
-    // Load scanner data
-    yadoreLoadScannerOverview();
-    yadoreLoadScanResults();
-});
-
-function yadoreInitializeScanner() {
-    const $ = jQuery;
-
-    // Bulk scan functionality
-    $('#start-bulk-scan').on('click', yadoreStartBulkScan);
-    $('#preview-scan').on('click', yadorePreviewScan);
-
-    // Single post scanner
-    $('#post-search').on('input', yadoreSearchPosts);
-    $('#scan-single-post').on('click', yadoreScanSinglePost);
-
-    // Results filtering
-    $('#results-filter').on('change', yadoreFilterResults);
-
-    console.log('Yadore Post Scanner v2.9 - Initialized');
-}
-
-function yadoreLoadScannerOverview() {
-    jQuery.post(yadore_admin.ajax_url, {
-        action: 'yadore_get_scanner_overview',
-        nonce: yadore_admin.nonce
-    }, function(response) {
-        if (response.success) {
-            const data = response.data;
-            jQuery('#total-posts').text(data.total_posts);
-            jQuery('#scanned-posts').text(data.scanned_posts);
-            jQuery('#pending-posts').text(data.pending_posts);
-            jQuery('#validated-keywords').text(data.validated_keywords);
-        }
-    });
-}
-
-function yadoreStartBulkScan() {
-    const $ = jQuery;
-
-    // Collect scan options
-    const postTypes = $('input[name="post_types[]"]:checked').map(function() {
-        return this.value;
-    }).get();
-
-    const postStatus = $('input[name="post_status[]"]:checked').map(function() {
-        return this.value;
-    }).get();
-
-    const scanOptions = $('input[name="scan_options[]"]:checked').map(function() {
-        return this.value;
-    }).get();
-
-    const minWords = parseInt($('#min-words').val()) || 0;
-
-    if (postTypes.length === 0) {
-        alert('Please select at least one post type to scan.');
-        return;
+jQuery(function() {
+    if (typeof yadoreInitializeScanner === 'function') {
+        yadoreInitializeScanner();
     }
-
-    // Show progress bar
-    $('#scan-progress').show();
-    $('#start-bulk-scan').prop('disabled', true);
-
-    // Start bulk scan
-    $.post(yadore_admin.ajax_url, {
-        action: 'yadore_start_bulk_scan',
-        nonce: yadore_admin.nonce,
-        post_types: postTypes,
-        post_status: postStatus,
-        scan_options: scanOptions,
-        min_words: minWords
-    }, function(response) {
-        if (response.success) {
-            yadoreMonitorBulkScan(response.data.scan_id);
-        } else {
-            alert('Failed to start bulk scan: ' + response.data);
-            $('#scan-progress').hide();
-            $('#start-bulk-scan').prop('disabled', false);
-        }
-    });
-}
+});
 </script>
