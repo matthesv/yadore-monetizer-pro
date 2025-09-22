@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.1
+Version: 2.9.2
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.1');
+define('YADORE_PLUGIN_VERSION', '2.9.2');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -81,7 +81,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.1 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.2 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -945,6 +945,14 @@ class YadoreMonetizer {
                 throw new Exception($result['error']);
             }
 
+            if (is_string($result) && trim($result) !== '') {
+                $result = array('keyword' => sanitize_text_field($result));
+            }
+
+            if (!is_array($result) || empty($result['keyword'])) {
+                throw new Exception(__('Gemini API did not return a keyword.', 'yadore-monetizer'));
+            }
+
             // v2.7: Log API test
             $this->log_api_call('gemini', 'test', 'success', array('model' => $model, 'result' => $result));
 
@@ -971,61 +979,45 @@ class YadoreMonetizer {
 
             $keyword = 'smartphone';
             $limit = 3;
-            $using_fallback = false;
-            $fallback_reason = '';
 
             $api_key = trim((string) get_option('yadore_api_key'));
-            if ($api_key !== '') {
-                $products = $this->get_products($keyword, $limit);
-            } else {
-                $products = array();
-                $fallback_reason = 'missing_api_key';
+            if ($api_key === '') {
+                throw new Exception(__('No Yadore API key configured. Please add your key in the settings.', 'yadore-monetizer'));
             }
 
+            $products = $this->get_products($keyword, $limit);
             if (!is_array($products)) {
                 $products = array();
             }
 
-            if (empty($products)) {
-                $products = $this->get_fallback_products($keyword, $limit);
-                $using_fallback = true;
-
-                if ($fallback_reason === '') {
-                    $fallback_reason = 'empty_api_response';
-                }
-            }
-
             $product_count = count($products);
-
-            if ($product_count === 0) {
-                throw new Exception('Unable to retrieve products for API test');
-            }
-
             $log_data = array(
                 'product_count' => $product_count,
-                'mode' => $using_fallback ? 'fallback' : 'live',
+                'mode' => 'live',
+                'keyword' => $keyword,
             );
 
-            if ($fallback_reason !== '') {
-                $log_data['reason'] = $fallback_reason;
+            if ($product_count === 0) {
+                $log_data['no_results'] = true;
+                $this->log_api_call('yadore', 'test', 'success', $log_data);
+
+                wp_send_json_success(array(
+                    'message' => __('Yadore API connection successful, but no products were returned for the test keyword. Try another keyword or verify your account configuration.', 'yadore-monetizer'),
+                    'product_count' => 0,
+                    'sample_product' => null,
+                    'timestamp' => current_time('mysql'),
+                    'mode' => 'live',
+                ));
             }
 
             $this->log_api_call('yadore', 'test', 'success', $log_data);
 
-            if ($using_fallback) {
-                $this->log('Yadore API test used fallback products (' . $fallback_reason . ')', 'warning');
-            }
-
-            $message = $using_fallback
-                ? __('Yadore API fallback data used. Please verify your API credentials or connectivity.', 'yadore-monetizer')
-                : __('Yadore API connection successful', 'yadore-monetizer');
-
             wp_send_json_success(array(
-                'message' => $message,
+                'message' => __('Yadore API connection successful', 'yadore-monetizer'),
                 'product_count' => $product_count,
-                'sample_product' => $products[0] ?? null,
+                'sample_product' => $products[0],
                 'timestamp' => current_time('mysql'),
-                'mode' => $using_fallback ? 'fallback' : 'live',
+                'mode' => 'live',
             ));
 
         } catch (Exception $e) {
@@ -1266,7 +1258,15 @@ class YadoreMonetizer {
 
         if (get_option('yadore_ai_enabled', false)) {
             $ai_result = $this->call_gemini_api($post_title, $combined_content, true, $post_id);
-            if (is_string($ai_result) && trim($ai_result) !== '') {
+
+            if (is_array($ai_result)) {
+                if (isset($ai_result['keyword']) && trim((string) $ai_result['keyword']) !== '') {
+                    $ai_keyword = sanitize_text_field((string) $ai_result['keyword']);
+                    $filtered_ai_keyword = apply_filters('yadore_resolved_keyword', $ai_keyword, $post_id, $page_content);
+                    return sanitize_text_field($filtered_ai_keyword);
+                }
+            } elseif (is_string($ai_result) && trim($ai_result) !== '') {
+                // Backward compatibility for cached string responses
                 $ai_keyword = sanitize_text_field($ai_result);
                 $filtered_ai_keyword = apply_filters('yadore_resolved_keyword', $ai_keyword, $post_id, $page_content);
                 return sanitize_text_field($filtered_ai_keyword);
@@ -1433,10 +1433,14 @@ class YadoreMonetizer {
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
+                'Authorization' => 'Bearer ' . $api_key,
+                'X-Yadore-Api-Key' => $api_key,
             ),
             'body' => wp_json_encode($request_body),
             'timeout' => 20,
         );
+
+        $args = apply_filters('yadore_products_request_args', $args, $keyword, $limit, $post_id);
 
         $start_time = microtime(true);
         $response = wp_remote_post($endpoint, $args);
@@ -1545,99 +1549,6 @@ class YadoreMonetizer {
         $this->api_cache[$cache_key] = $products;
 
         return $products;
-    }
-
-    private function get_fallback_products($keyword, $limit = 3) {
-        $keyword = trim((string) $keyword);
-        $limit = max(1, intval($limit));
-
-        $keyword_label = $keyword !== '' ? $keyword : __('Product', 'yadore-monetizer');
-        if (function_exists('mb_convert_case')) {
-            $keyword_label = mb_convert_case($keyword_label, MB_CASE_TITLE, 'UTF-8');
-        } else {
-            $keyword_label = ucwords($keyword_label);
-        }
-
-        $keyword_slug_source = $keyword !== '' ? $keyword : 'product';
-        if (function_exists('sanitize_title')) {
-            $keyword_slug = sanitize_title($keyword_slug_source);
-        } else {
-            $keyword_slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $keyword_slug_source));
-        }
-
-        if ($keyword_slug === '') {
-            $keyword_slug = 'product';
-        }
-
-        $samples = array(
-            array(
-                'id' => 'yadore-demo-' . $keyword_slug . '-bundle',
-                'title' => sprintf(__('Demo %s Bundle', 'yadore-monetizer'), $keyword_label),
-                'description' => __('Demonstration product served when live Yadore API data is unavailable.', 'yadore-monetizer'),
-                'price' => array(
-                    'amount' => '199.90',
-                    'currency' => 'EUR',
-                ),
-                'merchant' => array(
-                    'name' => 'Yadore Demo Store',
-                    'logo' => 'https://via.placeholder.com/80x80.png?text=Yadore',
-                ),
-                'image' => array(
-                    'url' => 'https://via.placeholder.com/600x600.png?text=Yadore',
-                ),
-                'thumbnail' => array(
-                    'url' => 'https://via.placeholder.com/300x300.png?text=Yadore',
-                ),
-                'clickUrl' => 'https://www.yadore.com',
-                'promoText' => __('Experience the monetizer overlay with this curated sample product.', 'yadore-monetizer'),
-            ),
-            array(
-                'id' => 'yadore-demo-' . $keyword_slug . '-premium',
-                'title' => sprintf(__('Premium %s Collection', 'yadore-monetizer'), $keyword_label),
-                'description' => __('High quality demo listing highlighting premium placement in the monetizer widget.', 'yadore-monetizer'),
-                'price' => array(
-                    'amount' => '349.00',
-                    'currency' => 'EUR',
-                ),
-                'merchant' => array(
-                    'name' => 'Yadore Premium Partners',
-                    'logo' => 'https://via.placeholder.com/80x80.png?text=Premium',
-                ),
-                'image' => array(
-                    'url' => 'https://via.placeholder.com/600x600.png?text=Premium',
-                ),
-                'thumbnail' => array(
-                    'url' => 'https://via.placeholder.com/300x300.png?text=Premium',
-                ),
-                'url' => 'https://www.yadore.com/partners',
-                'promoText' => __('Upgrade to premium placements to maximise affiliate revenue.', 'yadore-monetizer'),
-            ),
-            array(
-                'id' => 'yadore-demo-' . $keyword_slug . '-starter',
-                'title' => sprintf(__('Starter %s Deal', 'yadore-monetizer'), $keyword_label),
-                'description' => __('Entry level offer demonstrating the monetizer call-to-action layout.', 'yadore-monetizer'),
-                'price' => array(
-                    'amount' => '89.99',
-                    'currency' => 'EUR',
-                ),
-                'merchant' => array(
-                    'name' => 'Yadore Starter Shop',
-                ),
-                'image' => array(
-                    'url' => 'https://via.placeholder.com/600x600.png?text=Starter',
-                ),
-                'thumbnail' => array(
-                    'url' => 'https://via.placeholder.com/300x300.png?text=Starter',
-                ),
-                'clickUrl' => 'https://www.yadore.com/deals',
-                'promoText' => __('Ideal entry offer to validate your integration.', 'yadore-monetizer'),
-            ),
-        );
-
-        $samples = array_slice($samples, 0, $limit);
-        $sanitized = array_map(array($this, 'sanitize_product_payload'), $samples);
-
-        return apply_filters('yadore_fallback_products', $sanitized, $keyword, $limit);
     }
 
     private function sanitize_product_payload($product) {
@@ -1776,7 +1687,31 @@ class YadoreMonetizer {
                     'temperature' => $temperature,
                     'maxOutputTokens' => $max_tokens,
                 ),
+                'responseMimeType' => 'application/json',
+                'responseSchema' => array(
+                    'type' => 'object',
+                    'properties' => array(
+                        'keyword' => array(
+                            'type' => 'string',
+                            'description' => 'Primary product keyword describing the best affiliate opportunity.',
+                        ),
+                        'confidence' => array(
+                            'type' => 'number',
+                            'minimum' => 0,
+                            'maximum' => 1,
+                            'description' => 'Confidence score between 0 and 1 for the extracted keyword.',
+                        ),
+                        'rationale' => array(
+                            'type' => 'string',
+                            'description' => 'Optional short explanation for the keyword choice.',
+                        ),
+                    ),
+                    'required' => array('keyword'),
+                    'additionalProperties' => false,
+                ),
             );
+
+            $request_body = apply_filters('yadore_gemini_request_body', $request_body, $title, $content, $model);
 
             $response = wp_remote_post($request_url, array(
                 'headers' => array(
@@ -1832,21 +1767,21 @@ class YadoreMonetizer {
                 return array('error' => sprintf(__('Gemini API blocked the request: %s', 'yadore-monetizer'), $decoded['promptFeedback']['blockReason']));
             }
 
-            $candidate_text = '';
+            $structured_text = '';
             if (!empty($decoded['candidates']) && is_array($decoded['candidates'])) {
                 foreach ($decoded['candidates'] as $candidate) {
                     if (!empty($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
                         foreach ($candidate['content']['parts'] as $part) {
                             if (!empty($part['text'])) {
-                                $candidate_text .= $part['text'] . "\n";
+                                $structured_text = trim((string) $part['text']);
+                                break 2;
                             }
                         }
                     }
                 }
             }
 
-            $candidate_text = trim($candidate_text);
-            if ($candidate_text === '') {
+            if ($structured_text === '') {
                 $this->log_api_call('gemini', $endpoint_base, 'error', array(
                     'status' => $status,
                     'model' => $model,
@@ -1855,33 +1790,66 @@ class YadoreMonetizer {
                 return array('error' => __('Gemini API returned an empty response.', 'yadore-monetizer'));
             }
 
-            $lines = preg_split('/[\r\n]+/', $candidate_text);
-            $keyword = trim($lines[0] ?? $candidate_text);
+            $structured_data = json_decode($structured_text, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                    'status' => $status,
+                    'model' => $model,
+                    'response' => $structured_text,
+                    'error' => json_last_error_msg(),
+                ));
+                return array('error' => __('Gemini API returned data that could not be parsed as JSON.', 'yadore-monetizer'));
+            }
+
+            if (!is_array($structured_data) || empty($structured_data['keyword'])) {
+                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                    'status' => $status,
+                    'model' => $model,
+                    'response' => $structured_data,
+                ));
+                return array('error' => __('Gemini API returned data that did not match the expected schema.', 'yadore-monetizer'));
+            }
+
+            $keyword = sanitize_text_field((string) $structured_data['keyword']);
             if ($keyword === '') {
-                $keyword = $candidate_text;
+                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                    'status' => $status,
+                    'model' => $model,
+                    'response' => $structured_data,
+                ));
+                return array('error' => __('Gemini API did not return a usable keyword.', 'yadore-monetizer'));
+            }
+
+            $result = array('keyword' => $keyword);
+
+            if (isset($structured_data['confidence'])) {
+                $confidence = floatval($structured_data['confidence']);
+                $result['confidence'] = max(0, min(1, $confidence));
+            }
+
+            if (!empty($structured_data['rationale'])) {
+                $result['rationale'] = sanitize_textarea_field((string) $structured_data['rationale']);
             }
 
             if ($use_cache) {
                 $cache_duration = intval(get_option('yadore_ai_cache_duration', 157680000));
                 if ($cache_duration > 0) {
-                    set_transient($cache_key, $keyword, $cache_duration);
+                    set_transient($cache_key, $result, $cache_duration);
                 }
             }
 
             $this->log_api_call('gemini', $endpoint_base, 'success', array(
                 'model' => $model,
                 'post_id' => $post_id,
-                'result' => $keyword,
+                'result' => $result,
             ));
 
-            return $keyword;
+            return $result;
         } catch (Exception $e) {
             $this->log_error('Gemini API request failed', $e);
             return array('error' => $e->getMessage());
         }
     }
-
-    // More methods will be implemented in subsequent parts...
 
     // v2.7: Shortcode Implementation (Enhanced)
     public function shortcode_products($atts) {
@@ -2118,9 +2086,46 @@ $wpdb->insert($analytics_table, array(
         return implode("\n", array_merge($this->debug_log, $this->error_log));
     }
 
-    // More placeholder methods to be implemented
     public function admin_notices() {
-        // Implementation in next part
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        if (get_transient('yadore_activation_notice')) {
+            echo '<div class="notice notice-success is-dismissible"><p><strong>' . esc_html__('Yadore Monetizer Pro', 'yadore-monetizer') . '</strong> ' . esc_html__('was activated successfully. Configure your API keys to start monetizing.', 'yadore-monetizer') . '</p></div>';
+            delete_transient('yadore_activation_notice');
+        }
+
+        $api_key = trim((string) get_option('yadore_api_key'));
+        if ($api_key === '') {
+            echo '<div class="notice notice-error"><p>' . esc_html__('Yadore Monetizer Pro requires a valid Yadore API key. Please enter your key in the plugin settings.', 'yadore-monetizer') . '</p></div>';
+        }
+
+        if (get_option('yadore_ai_enabled', false) && trim((string) get_option('yadore_gemini_api_key')) === '') {
+            echo '<div class="notice notice-warning"><p>' . esc_html__('Gemini AI analysis is enabled but no API key is configured. Add a Gemini API key to use AI-powered keyword detection.', 'yadore-monetizer') . '</p></div>';
+        }
+
+        global $wpdb;
+        $error_logs_table = $wpdb->prefix . 'yadore_error_logs';
+        $table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $error_logs_table));
+
+        if ($table_exists === $error_logs_table) {
+            $recent_error = $wpdb->get_row(
+                "SELECT error_message, severity, created_at FROM {$error_logs_table} WHERE resolved = 0 AND severity IN ('high','critical') ORDER BY created_at DESC LIMIT 1"
+            );
+
+            if ($recent_error && !empty($recent_error->error_message)) {
+                $severity_label = strtoupper($recent_error->severity ?? '');
+                $timestamp = $recent_error->created_at ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($recent_error->created_at))) : '';
+                $message = esc_html($recent_error->error_message);
+
+                echo '<div class="notice notice-error"><p><strong>' . esc_html__('Yadore Monetizer Pro Error', 'yadore-monetizer') . '</strong> ' . $message;
+                if ($timestamp !== '') {
+                    echo ' <em>(' . esc_html($severity_label) . ' &ndash; ' . $timestamp . ')</em>';
+                }
+                echo '</p></div>';
+            }
+        }
     }
 
     public function show_initialization_error() {

@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.1 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.2 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.1 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.2 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
@@ -16,14 +16,14 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **16 AJAX Endpoints** - Alle korrekt implementiert ohne Konflikte  
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.1**
+## 🌟 **NEU IN VERSION 2.9.2**
 
-- ✅ **Resiliente Yadore API Tests** – Fallback-Demo-Produkte stellen sicher, dass der Verbindungstest nie fehlschlägt, selbst ohne API-Key. Admins erhalten einen klaren Hinweis auf den Fallback-Modus und sehen sofort Beispielprodukte für die Validierung.
-- ✅ **Native Yadore API Integration** – Direkte Anbindung der Endpoint `https://api.yadore.com/products/search` inkl. Caching, Logging und robuster Fehlerbehandlung.
-- ✅ **Intelligente Keyword-Erkennung** – Automatische Ermittlung relevanter Suchbegriffe über gespeicherte Analysen, optionale Gemini-AI-Auswertung und heuristische Fallbacks.
-- ✅ **Optimiertes Frontend** – Entfernte Placeholder-Grafiken, adaptive Platzhalter-Kachel und verbesserte Overlay-Kommunikation mit Post-ID.
-- ✅ **Stabile Overlay-Empfehlungen** – Präzisere Zuordnung der Produktempfehlungen durch Übergabe von Seiten-URL und Beitrag-ID im AJAX-Workflow.
-- ✅ **Aktualisierte Versionierung** – Alle Admin-Views, Assets und Dokumentationen spiegeln Version 2.9.1 wider.
+- ✅ **Echte Live-Daten** – Entfernt sämtliche Demo- und Placeholder-Produkte. Tests und Shortcodes zeigen ausschließlich Yadore-Ergebnisse, sobald ein API-Key hinterlegt ist.
+- ✅ **Konforme Yadore API-Anbindung** – Authentifizierung über `Authorization: Bearer` & `X-Yadore-Api-Key` gemäß offizieller Publisher-Dokumentation, inklusive robuster Fehlerbehandlung und Logging.
+- ✅ **Gemini Structured Output** – Die AI-Analyse nutzt `responseMimeType` & `responseSchema`, liefert damit reproduzierbare JSON-Ergebnisse mit Keyword & Confidence und kann gecacht werden.
+- ✅ **Verbesserte Admin Notices** – Aktivierungsbestätigung, fehlende API-Keys und kritische Fehler erscheinen direkt im WordPress Backend – ganz ohne Platzhaltertexte.
+- ✅ **Härtete API-Tests & Logs** – Die Test-Endpunkte melden realistische Ergebnisse, protokollieren Keyword, Modus und Latenz und liefern klare Handlungsempfehlungen bei leeren Antworten.
+- ✅ **Aktualisierte Versionierung** – Alle Admin-Views, Assets und Dokumentationen spiegeln Version 2.9.2 wider.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -69,7 +69,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.1:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.2:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -267,13 +267,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.1 - GEMINI 2.0 READY RELEASE!**
+## 🎉 **v2.9.2 - GEMINI 2.0 READY RELEASE!**
 
-### **Neue Highlights in v2.9.1:**
-- 🌐 Ausfallsichere Yadore API Tests mit intelligenten Fallback-Daten und klaren Administrator-Hinweisen
-- 🔐 Gespeicherte Gemini API Keys bleiben erhalten, solange sie nicht aktiv entfernt werden
-- 🤖 Vollständige Unterstützung der aktuellen Gemini 2.0 Flash/Pro-Modelle inklusive Flash Lite & 1.5 Flash 8B
-- ⚙️ Live-Gemini-Requests direkt im Plugin mit verbessertem Fehler-Handling
+### **Neue Highlights in v2.9.2:**
+- 🌐 Direkte Live-Verbindung zur Yadore Publisher API mit Bearer-Authentifizierung, Request-Caching und detailliertem Logging.
+- 🤖 Gemini Structured Output mit JSON-Schema liefert reproduzierbare Keywords samt Confidence-Werten.
+- 🛎️ Neue Admin Notices melden Aktivierung, fehlende API Keys und kritische Fehler unmittelbar im Dashboard.
+- 📊 API-Test-Endpunkte reagieren ohne Demo-Daten, dokumentieren Keyword & Status und geben klare Handlungsempfehlungen.
 
 **Alle Features sind wieder verfügbar und voll funktional!**
 
@@ -289,11 +289,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING  
 ✅ **Tools:** COMPREHENSIVE UTILITIES  
 
-**Yadore Monetizer Pro v2.9.1 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.2 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.1** - Gemini 2.0 Ready Release
+**Current Version: 2.9.2** - Gemini 2.0 Ready Release
 **Feature Status: ✅ ALL INTEGRATED**  
 **WordPress Integration: ✅ 100% COMPLETE**  
 **Production Status: ✅ ENTERPRISE READY**

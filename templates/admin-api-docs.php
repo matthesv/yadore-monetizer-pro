@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.1</span>
+        <span class="version-badge">v2.9.2</span>
     </h1>
 
     <div class="yadore-api-container">
@@ -158,8 +158,13 @@
 
                                     <div class="endpoint-example">
                                         <h4>Example Request</h4>
-                                        <pre><code>{
-  "api_key": "your_api_key_here",
+                                        <pre><code>POST /products/search HTTP/1.1
+Host: api.yadore.com
+Authorization: Bearer YOUR_API_KEY
+X-Yadore-Api-Key: YOUR_API_KEY
+Content-Type: application/json
+
+{
   "keyword": "smartphone",
   "limit": 6,
   "country": "US"
@@ -272,6 +277,17 @@
   "generationConfig": {
     "temperature": 0.3,
     "maxOutputTokens": 50
+  },
+  "responseMimeType": "application/json",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "keyword": { "type": "string" },
+      "confidence": { "type": "number" },
+      "rationale": { "type": "string" }
+    },
+    "required": ["keyword"],
+    "additionalProperties": false
   }
 }</code></pre>
                                     </div>
