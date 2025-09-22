@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v2.9.8 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v2.9.9 - Admin CSS (Complete) */
 .yadore-admin-wrap {
     margin: 0;
 }
@@ -21,6 +21,23 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* Notices */
+.yadore-error-notice .yadore-error-actions {
+    margin: 10px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.yadore-error-notice .yadore-error-hint {
+    color: #646970;
+    font-size: 13px;
+}
+
+.yadore-error-notice .yadore-resolve-now .dashicons {
+    margin-right: 6px;
 }
 
 /* Card System */

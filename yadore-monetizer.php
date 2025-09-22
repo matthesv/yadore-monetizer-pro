@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.8
+Version: 2.9.9
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.8');
+define('YADORE_PLUGIN_VERSION', '2.9.9');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -87,7 +87,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.8 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.9 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -2267,41 +2267,28 @@ class YadoreMonetizer {
                 return array('error' => sprintf(__('Gemini API blocked the request: %s', 'yadore-monetizer'), $decoded['promptFeedback']['blockReason']));
             }
 
-            $structured_text = '';
-            if (!empty($decoded['candidates']) && is_array($decoded['candidates'])) {
-                foreach ($decoded['candidates'] as $candidate) {
-                    if (!empty($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
-                        foreach ($candidate['content']['parts'] as $part) {
-                            if (!empty($part['text'])) {
-                                $structured_text = trim((string) $part['text']);
-                                break 2;
-                            }
-                        }
-                    }
-                }
-            }
+            $raw_structured_text = '';
+            $structured_data = $this->extract_gemini_structured_payload($decoded, $raw_structured_text);
 
-            if ($structured_text === '') {
+            if (!is_array($structured_data)) {
                 $this->log_api_call('gemini', $endpoint_base, 'error', array(
                     'status' => $status,
                     'model' => $model,
                     'response' => $decoded,
-                ));
-                return array('error' => __('Gemini API returned an empty response.', 'yadore-monetizer'));
-            }
-
-            $structured_data = json_decode($structured_text, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->log_api_call('gemini', $endpoint_base, 'error', array(
-                    'status' => $status,
-                    'model' => $model,
-                    'response' => $structured_text,
-                    'error' => json_last_error_msg(),
+                    'raw' => is_string($raw_structured_text) ? substr($raw_structured_text, 0, 500) : $raw_structured_text,
+                    'parse_error' => 'Unable to extract structured keyword data',
                 ));
                 return array('error' => __('Gemini API returned data that could not be parsed as JSON.', 'yadore-monetizer'));
             }
 
-            if (!is_array($structured_data) || empty($structured_data['keyword'])) {
+            if (!isset($structured_data['keyword'])) {
+                $lower_keys = array_change_key_case($structured_data, CASE_LOWER);
+                if (isset($lower_keys['keyword'])) {
+                    $structured_data['keyword'] = $lower_keys['keyword'];
+                }
+            }
+
+            if (!isset($structured_data['keyword']) || $structured_data['keyword'] === '') {
                 $this->log_api_call('gemini', $endpoint_base, 'error', array(
                     'status' => $status,
                     'model' => $model,
@@ -2349,6 +2336,115 @@ class YadoreMonetizer {
             $this->log_error('Gemini API request failed', $e);
             return array('error' => $e->getMessage());
         }
+    }
+
+    private function extract_gemini_structured_payload($response, &$raw_text = '') {
+        $raw_text = '';
+
+        if (!is_array($response)) {
+            return null;
+        }
+
+        if (!empty($response['candidates']) && is_array($response['candidates'])) {
+            foreach ($response['candidates'] as $candidate) {
+                if (!empty($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
+                    foreach ($candidate['content']['parts'] as $part) {
+                        if (isset($part['functionCall']['args']) && is_array($part['functionCall']['args'])) {
+                            $raw_text = wp_json_encode($part['functionCall']['args']);
+                            return $part['functionCall']['args'];
+                        }
+
+                        if (isset($part['structValue']) && is_array($part['structValue'])) {
+                            $raw_text = wp_json_encode($part['structValue']);
+                            return $part['structValue'];
+                        }
+
+                        if (isset($part['text'])) {
+                            $raw_text = (string) $part['text'];
+                            $parsed = $this->decode_gemini_json_string($raw_text);
+                            if (is_array($parsed)) {
+                                return $parsed;
+                            }
+                        }
+                    }
+                }
+
+                if (isset($candidate['content']) && is_string($candidate['content'])) {
+                    $raw_text = (string) $candidate['content'];
+                    $parsed = $this->decode_gemini_json_string($raw_text);
+                    if (is_array($parsed)) {
+                        return $parsed;
+                    }
+                }
+            }
+        }
+
+        if (isset($response['result']) && is_array($response['result'])) {
+            $raw_text = wp_json_encode($response['result']);
+            return $response['result'];
+        }
+
+        if (isset($response['text']) && is_string($response['text'])) {
+            $raw_text = (string) $response['text'];
+            $parsed = $this->decode_gemini_json_string($raw_text);
+            if (is_array($parsed)) {
+                return $parsed;
+            }
+        }
+
+        return null;
+    }
+
+    private function decode_gemini_json_string($text) {
+        if (!is_string($text)) {
+            return null;
+        }
+
+        $normalized = trim($text);
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (preg_match('/^```[a-zA-Z0-9_-]*\s*(.+?)\s*```$/s', $normalized, $matches)) {
+            $normalized = trim($matches[1]);
+        }
+
+        $decoded = json_decode($normalized, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        $candidates = array();
+
+        $object_start = strpos($normalized, '{');
+        $object_end = strrpos($normalized, '}');
+        if ($object_start !== false && $object_end !== false && $object_end > $object_start) {
+            $candidates[] = substr($normalized, $object_start, $object_end - $object_start + 1);
+        }
+
+        $array_start = strpos($normalized, '[');
+        $array_end = strrpos($normalized, ']');
+        if ($array_start !== false && $array_end !== false && $array_end > $array_start) {
+            $candidates[] = substr($normalized, $array_start, $array_end - $array_start + 1);
+        }
+
+        foreach ($candidates as $candidate) {
+            $candidate = trim((string) $candidate);
+            if ($candidate === '') {
+                continue;
+            }
+
+            $decoded = json_decode($candidate, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        if (strpos($normalized, '{') === false && strpos($normalized, '[') === false) {
+            return array('keyword' => $normalized);
+        }
+
+        return null;
     }
 
     // Scanner helper methods
@@ -3597,19 +3693,31 @@ $wpdb->insert($analytics_table, array(
 
         if ($table_exists === $error_logs_table) {
             $recent_error = $wpdb->get_row(
-                "SELECT error_message, severity, created_at FROM {$error_logs_table} WHERE resolved = 0 AND severity IN ('high','critical') ORDER BY created_at DESC LIMIT 1"
+                "SELECT id, error_message, severity, created_at FROM {$error_logs_table} WHERE resolved = 0 AND severity IN ('high','critical') ORDER BY created_at DESC LIMIT 1"
             );
 
             if ($recent_error && !empty($recent_error->error_message)) {
                 $severity_label = strtoupper($recent_error->severity ?? '');
-                $timestamp = $recent_error->created_at ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($recent_error->created_at))) : '';
+                $timestamp_raw = $recent_error->created_at ? strtotime($recent_error->created_at) : false;
+                $timestamp = $timestamp_raw ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $timestamp_raw)) : '';
                 $message = esc_html($recent_error->error_message);
+                $error_id = isset($recent_error->id) ? (int) $recent_error->id : 0;
 
-                echo '<div class="notice notice-error"><p><strong>' . esc_html__('Yadore Monetizer Pro Error', 'yadore-monetizer') . '</strong> ' . $message;
+                echo '<div class="notice notice-error yadore-error-notice is-dismissible" data-error-id="' . esc_attr($error_id) . '">';
+                echo '<p><strong>' . esc_html__('Yadore Monetizer Pro Error', 'yadore-monetizer') . '</strong> ' . $message;
                 if ($timestamp !== '') {
                     echo ' <em>(' . esc_html($severity_label) . ' &ndash; ' . $timestamp . ')</em>';
                 }
-                echo '</p></div>';
+                echo '</p>';
+
+                echo '<p class="yadore-error-actions">';
+                echo '<button type="button" class="button button-secondary yadore-resolve-now" data-error-id="' . esc_attr($error_id) . '">';
+                echo esc_html__('Mark as resolved', 'yadore-monetizer');
+                echo '</button>';
+                echo '<span class="yadore-error-hint">' . esc_html__('Dismiss this alert after confirming the issue is fixed. The error log history is available in the Tools panel.', 'yadore-monetizer') . '</span>';
+                echo '</p>';
+
+                echo '</div>';
             }
         }
 
@@ -3636,6 +3744,55 @@ $wpdb->insert($analytics_table, array(
 
     public function show_initialization_error() {
         echo '<div class="notice notice-error"><p><strong>Yadore Monetizer Pro Error:</strong> Plugin initialization failed. Please check the debug log for details.</p></div>';
+    }
+
+    public function ajax_resolve_error() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions to resolve error logs.', 'yadore-monetizer'));
+            }
+
+            $error_id = isset($_POST['error_id']) ? absint($_POST['error_id']) : 0;
+            if ($error_id <= 0) {
+                throw new Exception(__('Invalid error reference supplied.', 'yadore-monetizer'));
+            }
+
+            global $wpdb;
+            $table = $wpdb->prefix . 'yadore_error_logs';
+
+            if (!$this->table_exists($table)) {
+                throw new Exception(__('Error log table not found.', 'yadore-monetizer'));
+            }
+
+            $updated = $wpdb->update(
+                $table,
+                array(
+                    'resolved' => 1,
+                    'resolved_at' => current_time('mysql'),
+                ),
+                array(
+                    'id' => $error_id,
+                    'resolved' => 0,
+                ),
+                array('%d', '%s'),
+                array('%d', '%d')
+            );
+
+            if ($updated === false) {
+                throw new Exception(__('Failed to update error status. Please try again.', 'yadore-monetizer'));
+            }
+
+            wp_send_json_success(array(
+                'message' => __('Error entry marked as resolved.', 'yadore-monetizer'),
+                'error_id' => $error_id,
+            ));
+
+        } catch (Exception $e) {
+            $this->log_error('Failed to resolve error log entry', $e, 'medium');
+            wp_send_json_error($e->getMessage());
+        }
     }
 
     private function queue_admin_notice($message, $type = 'error') {
