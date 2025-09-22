@@ -21,6 +21,10 @@ define('YADORE_PLUGIN_FILE', __FILE__);
 
 class YadoreMonetizer {
 
+    public const DEFAULT_AI_PROMPT = 'Analyze the title and content to find the most relevant purchase-ready product keyword (brand + model when available). Provide up to three alternate keywords for backup searches and return JSON that matches the schema (keyword, alternate_keywords, confidence, rationale).';
+
+    public const LEGACY_AI_PROMPT = 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.';
+
     private $debug_log = [];
     private $error_log = [];
     private $api_cache = [];
@@ -179,7 +183,7 @@ class YadoreMonetizer {
             'yadore_gemini_api_key' => '',
             'yadore_gemini_model' => $this->get_default_gemini_model(),
             'yadore_ai_cache_duration' => 157680000,
-            'yadore_ai_prompt' => 'Analyze the title and content to find the most relevant purchase-ready product keyword (brand + model when available). Provide up to three alternate keywords for backup searches and return JSON that matches the schema (keyword, alternate_keywords, confidence, rationale).',
+            'yadore_ai_prompt' => self::DEFAULT_AI_PROMPT,
             'yadore_ai_temperature' => '0.3',
             'yadore_ai_max_tokens' => 50,
             'yadore_auto_scan_posts' => 1,
@@ -244,10 +248,10 @@ class YadoreMonetizer {
                 update_option('yadore_plugin_version', YADORE_PLUGIN_VERSION);
             }
 
-            $legacy_prompt = 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.';
+            $legacy_prompt = self::LEGACY_AI_PROMPT;
             $stored_prompt = get_option('yadore_ai_prompt', '');
             if ($stored_prompt === $legacy_prompt) {
-                update_option('yadore_ai_prompt', 'Analyze the title and content to find the most relevant purchase-ready product keyword (brand + model when available). Provide up to three alternate keywords for backup searches and return JSON that matches the schema (keyword, alternate_keywords, confidence, rationale).');
+                update_option('yadore_ai_prompt', self::DEFAULT_AI_PROMPT);
             }
 
             if (false === get_option('yadore_install_timestamp', false)) {
@@ -2848,10 +2852,10 @@ class YadoreMonetizer {
 
             $prompt_template = (string) get_option(
                 'yadore_ai_prompt',
-                'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.'
+                self::DEFAULT_AI_PROMPT
             );
             if (trim($prompt_template) === '') {
-                $prompt_template = 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.';
+                $prompt_template = self::DEFAULT_AI_PROMPT;
             }
 
             $prompt = str_replace(

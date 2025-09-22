@@ -19,6 +19,12 @@
     if ($current_market !== '' && !isset($market_options[$current_market])) {
         $market_options[$current_market] = esc_html__('Manuell hinterlegt', 'yadore-monetizer');
     }
+    $default_ai_prompt = YadoreMonetizer::DEFAULT_AI_PROMPT;
+    $current_ai_prompt = (string) get_option('yadore_ai_prompt', $default_ai_prompt);
+    if (trim($current_ai_prompt) === '') {
+        $current_ai_prompt = $default_ai_prompt;
+    }
+
     ?>
 
     <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=yadore-settings')); ?>" class="yadore-settings-form">
@@ -275,14 +281,25 @@
                                 <label for="yadore_ai_prompt" class="form-label">
                                     <strong>AI Analysis Prompt</strong>
                                 </label>
-                                <textarea name="yadore_ai_prompt" 
-                                          id="yadore_ai_prompt" 
-                                          class="form-textarea" 
+                                <textarea name="yadore_ai_prompt"
+                                          id="yadore_ai_prompt"
+                                          class="form-textarea"
                                           rows="4"
-                                          placeholder="Enter the prompt for AI content analysis"><?php echo esc_textarea(get_option('yadore_ai_prompt', 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.')); ?></textarea>
+                                          placeholder="<?php echo esc_attr($default_ai_prompt); ?>"
+                                          data-default="<?php echo esc_attr($default_ai_prompt); ?>"><?php echo esc_textarea($current_ai_prompt); ?></textarea>
                                 <p class="form-description">
-                                    Customize the prompt sent to the AI for content analysis. Use {title} and {content} as placeholders.
+                                    <?php esc_html_e('Customize the instruction the AI uses to determine the best product keyword for your content.', 'yadore-monetizer'); ?>
                                 </p>
+                                <p class="form-description">
+                                    <?php esc_html_e('Available placeholders:', 'yadore-monetizer'); ?> <code>{title}</code>, <code>{content}</code>
+                                </p>
+                                <p class="form-description">
+                                    <?php esc_html_e('Use these placeholders to automatically inject the post title and body into your prompt.', 'yadore-monetizer'); ?>
+                                </p>
+                                <button type="button" class="button button-secondary" id="reset-ai-prompt">
+                                    <span class="dashicons dashicons-update-alt"></span>
+                                    <?php esc_html_e('Reset to default prompt', 'yadore-monetizer'); ?>
+                                </button>
                             </div>
 
                             <div class="form-row">
