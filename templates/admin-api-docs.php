@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.10</span>
+        <span class="version-badge">v2.9.11</span>
     </h1>
 
     <div class="yadore-api-container">
@@ -296,6 +296,13 @@ Accept: application/json</code></pre>
           "type": "STRING",
           "description": "Primary product keyword describing the best affiliate opportunity."
         },
+        "alternate_keywords": {
+          "type": "ARRAY",
+          "description": "Up to three alternate keyword candidates for backup product searches.",
+          "items": {
+            "type": "STRING"
+          }
+        },
         "confidence": {
           "type": "NUMBER",
           "minimum": 0,
@@ -307,7 +314,7 @@ Accept: application/json</code></pre>
         }
       },
       "required": ["keyword"],
-      "propertyOrdering": ["keyword", "confidence", "rationale"]
+      "propertyOrdering": ["keyword", "alternate_keywords", "confidence", "rationale"]
     }
   }
 }</code></pre>
@@ -446,7 +453,7 @@ function yadoreInitializeApiDocs() {
     $('#clear-logs').on('click', yadoreClearLogs);
     $('#export-logs').on('click', yadoreExportLogs);
 
-    console.log('Yadore API Documentation v2.9.10 - Initialized');
+    console.log('Yadore API Documentation v2.9.11 - Initialized');
 }
 
 function yadoreLoadApiStatus() {
