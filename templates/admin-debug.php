@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-tools"></span>
         Debug & Error Analysis
-        <span class="version-badge">v2.9.14</span>
+        <span class="version-badge">v2.9.15</span>
     </h1>
 
     <div class="yadore-debug-container">
@@ -223,7 +223,7 @@
                             <div class="info-items">
                                 <div class="info-item">
                                     <span class="info-label">Version:</span>
-                                    <span class="info-value">2.9.14</span>
+                                    <span class="info-value">2.9.15</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Debug Mode:</span>
@@ -358,109 +358,3 @@
         </div>
     </div>
 </div>
-
-<script>
-jQuery(document).ready(function($) {
-    // Initialize debug system
-    yadoreInitializeDebug();
-
-    // Load system health
-    yadoreLoadSystemHealth();
-
-    // Load error logs
-    yadoreLoadErrorLogs();
-
-    // Load debug log
-    yadoreLoadDebugLog();
-});
-
-function yadoreInitializeDebug() {
-    const $ = jQuery;
-
-    // Diagnostic tools
-    $('#test-connectivity').on('click', yadoreTestConnectivity);
-    $('#check-database').on('click', yadoreCheckDatabase);
-    $('#test-performance').on('click', yadoreTestPerformance);
-    $('#analyze-cache').on('click', yadoreAnalyzeCache);
-    $('#run-diagnostics').on('click', yadoreRunFullDiagnostics);
-
-    // Error logs management
-    $('#error-severity-filter').on('change', yadoreFilterErrors);
-    $('#clear-errors').on('click', yadoreClearErrors);
-
-    // Debug log controls
-    $('#clear-debug-log').on('click', yadoreClearDebugLog);
-    $('#auto-scroll').on('change', yadoreToggleAutoScroll);
-    $('#word-wrap').on('change', yadoreToggleWordWrap);
-
-    console.log('Yadore Debug System v2.9.14 - Initialized');
-}
-
-function yadoreLoadSystemHealth() {
-    jQuery.post(yadore_admin.ajax_url, {
-        action: 'yadore_get_system_health',
-        nonce: yadore_admin.nonce
-    }, function(response) {
-        if (response.success) {
-            const data = response.data;
-            jQuery('#api-health-status').text(data.api_status);
-            jQuery('#db-health-status').text(data.database_status);
-            jQuery('#performance-status').text(data.performance_status);
-            jQuery('#last-error-time').text(data.last_error || 'None');
-            jQuery('#cache-size').text(data.cache_size);
-        }
-    });
-}
-
-function yadoreTestConnectivity() {
-    const $ = jQuery;
-    const button = $('#test-connectivity');
-    const resultsDiv = $('#connectivity-results');
-
-    button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Testing...');
-    resultsDiv.html('<div class="testing-message">Testing API connections...</div>');
-
-    $.post(yadore_admin.ajax_url, {
-        action: 'yadore_test_connectivity',
-        nonce: yadore_admin.nonce
-    }, function(response) {
-        if (response.success) {
-            resultsDiv.html(`
-                <div class="test-success">
-                    <h5>Connectivity Test Results</h5>
-                    <ul>
-                        <li>Yadore API: ${response.data.yadore_api}</li>
-                        <li>Gemini AI: ${response.data.gemini_api}</li>
-                        <li>External Services: ${response.data.external_services}</li>
-                    </ul>
-                </div>
-            `);
-        } else {
-            resultsDiv.html(`<div class="test-error"><p>${response.data}</p></div>`);
-        }
-    }).always(function() {
-        button.prop('disabled', false).html('<span class="dashicons dashicons-admin-network"></span> Run Test');
-    });
-}
-
-function yadoreRunFullDiagnostics() {
-    const $ = jQuery;
-
-    // Run all diagnostic tools in sequence
-    $('#test-connectivity').click();
-    setTimeout(() => $('#check-database').click(), 1000);
-    setTimeout(() => $('#test-performance').click(), 2000);
-    setTimeout(() => $('#analyze-cache').click(), 3000);
-
-    // Show summary after all tests complete
-    setTimeout(() => {
-        $('#diagnostic-summary').show().find('.summary-content').html(`
-            <div class="summary-success">
-                <h4><span class="dashicons dashicons-yes-alt"></span> Full System Diagnostics Completed</h4>
-                <p>All diagnostic tests have been completed. Review the individual results above for detailed information.</p>
-                <p><strong>Overall Status:</strong> <span class="status-good">System Healthy</span></p>
-            </div>
-        `);
-    }, 5000);
-}
-</script>

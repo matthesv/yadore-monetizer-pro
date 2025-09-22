@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.14
+Version: 2.9.15
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.14');
+define('YADORE_PLUGIN_VERSION', '2.9.15');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -26,6 +26,8 @@ class YadoreMonetizer {
     private $api_cache = [];
     private $keyword_candidate_cache = [];
     private $last_product_keyword = '';
+    private $latest_error_notice = null;
+    private $latest_error_notice_checked = false;
 
     public function __construct() {
         try {
@@ -89,7 +91,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.14 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.15 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -842,20 +844,23 @@ class YadoreMonetizer {
     // v2.7: Enhanced Script and Style Enqueuing
     public function admin_enqueue_scripts($hook) {
         try {
-            // Only load on our admin pages
-            if (strpos($hook, 'yadore') === false) {
+            $is_plugin_screen = strpos($hook, 'yadore') !== false;
+            $recent_error = $this->get_latest_unresolved_error();
+            $needs_notice_assets = $recent_error !== null;
+
+            if (!$is_plugin_screen && !$needs_notice_assets) {
                 return;
             }
 
-            // Admin CSS
-            wp_enqueue_style(
-                'yadore-admin-css',
-                YADORE_PLUGIN_URL . 'assets/css/admin.css',
-                array(),
-                YADORE_PLUGIN_VERSION
-            );
+            if ($is_plugin_screen) {
+                wp_enqueue_style(
+                    'yadore-admin-css',
+                    YADORE_PLUGIN_URL . 'assets/css/admin.css',
+                    array(),
+                    YADORE_PLUGIN_VERSION
+                );
+            }
 
-            // Admin JavaScript
             wp_enqueue_script(
                 'yadore-admin-js',
                 YADORE_PLUGIN_URL . 'assets/js/admin.js',
@@ -864,16 +869,16 @@ class YadoreMonetizer {
                 true
             );
 
-            // v2.7: Chart.js for analytics
-            wp_enqueue_script(
-                'yadore-charts',
-                YADORE_PLUGIN_URL . 'assets/js/chart.min.js',
-                array(),
-                '3.9.1',
-                true
-            );
+            if ($is_plugin_screen) {
+                wp_enqueue_script(
+                    'yadore-charts',
+                    YADORE_PLUGIN_URL . 'assets/js/chart.min.js',
+                    array(),
+                    '3.9.1',
+                    true
+                );
+            }
 
-            // Localize script for AJAX
             wp_localize_script('yadore-admin-js', 'yadore_admin', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('yadore_admin_nonce'),
@@ -4630,38 +4635,29 @@ $wpdb->insert($analytics_table, array(
             echo '<div class="notice notice-warning"><p>' . esc_html__('Gemini AI analysis is enabled but no API key is configured. Add a Gemini API key to use AI-powered keyword detection.', 'yadore-monetizer') . '</p></div>';
         }
 
-        global $wpdb;
-        $error_logs_table = $wpdb->prefix . 'yadore_error_logs';
-        $table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $error_logs_table));
+        $recent_error = $this->get_latest_unresolved_error();
+        if ($recent_error && !empty($recent_error->error_message)) {
+            $severity_label = strtoupper($recent_error->severity ?? '');
+            $timestamp_raw = $recent_error->created_at ? strtotime($recent_error->created_at) : false;
+            $timestamp = $timestamp_raw ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $timestamp_raw)) : '';
+            $message = esc_html($recent_error->error_message);
+            $error_id = isset($recent_error->id) ? (int) $recent_error->id : 0;
 
-        if ($table_exists === $error_logs_table) {
-            $recent_error = $wpdb->get_row(
-                "SELECT id, error_message, severity, created_at FROM {$error_logs_table} WHERE resolved = 0 AND severity IN ('high','critical') ORDER BY created_at DESC LIMIT 1"
-            );
-
-            if ($recent_error && !empty($recent_error->error_message)) {
-                $severity_label = strtoupper($recent_error->severity ?? '');
-                $timestamp_raw = $recent_error->created_at ? strtotime($recent_error->created_at) : false;
-                $timestamp = $timestamp_raw ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $timestamp_raw)) : '';
-                $message = esc_html($recent_error->error_message);
-                $error_id = isset($recent_error->id) ? (int) $recent_error->id : 0;
-
-                echo '<div class="notice notice-error yadore-error-notice is-dismissible" data-error-id="' . esc_attr($error_id) . '">';
-                echo '<p><strong>' . esc_html__('Yadore Monetizer Pro Error', 'yadore-monetizer') . '</strong> ' . $message;
-                if ($timestamp !== '') {
-                    echo ' <em>(' . esc_html($severity_label) . ' &ndash; ' . $timestamp . ')</em>';
-                }
-                echo '</p>';
-
-                echo '<p class="yadore-error-actions">';
-                echo '<button type="button" class="button button-secondary yadore-resolve-now" data-error-id="' . esc_attr($error_id) . '">';
-                echo esc_html__('Mark as resolved', 'yadore-monetizer');
-                echo '</button>';
-                echo '<span class="yadore-error-hint">' . esc_html__('Dismiss this alert after confirming the issue is fixed. The error log history is available in the Tools panel.', 'yadore-monetizer') . '</span>';
-                echo '</p>';
-
-                echo '</div>';
+            echo '<div class="notice notice-error yadore-error-notice is-dismissible" data-error-id="' . esc_attr($error_id) . '">';
+            echo '<p><strong>' . esc_html__('Yadore Monetizer Pro Error', 'yadore-monetizer') . '</strong> ' . $message;
+            if ($timestamp !== '') {
+                echo ' <em>(' . esc_html($severity_label) . ' &ndash; ' . $timestamp . ')</em>';
             }
+            echo '</p>';
+
+            echo '<p class="yadore-error-actions">';
+            echo '<button type="button" class="button button-secondary yadore-resolve-now" data-error-id="' . esc_attr($error_id) . '">';
+            echo esc_html__('Mark as resolved', 'yadore-monetizer');
+            echo '</button>';
+            echo '<span class="yadore-error-hint">' . esc_html__('Dismiss this alert after confirming the issue is fixed. The error log history is available in the Tools panel.', 'yadore-monetizer') . '</span>';
+            echo '</p>';
+
+            echo '</div>';
         }
 
         $queued_notice = get_transient('yadore_admin_notice_queue');
@@ -4687,6 +4683,107 @@ $wpdb->insert($analytics_table, array(
 
     public function show_initialization_error() {
         echo '<div class="notice notice-error"><p><strong>Yadore Monetizer Pro Error:</strong> Plugin initialization failed. Please check the debug log for details.</p></div>';
+    }
+
+    private function get_latest_unresolved_error($severities = array('high', 'critical')) {
+        if ($this->latest_error_notice_checked) {
+            return $this->latest_error_notice;
+        }
+
+        $this->latest_error_notice_checked = true;
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_error_logs';
+
+        if (!$this->table_exists($table)) {
+            $this->latest_error_notice = null;
+            return null;
+        }
+
+        $allowed = array('critical', 'high', 'medium', 'low');
+        $filtered = array();
+
+        foreach ((array) $severities as $severity) {
+            $severity = strtolower((string) $severity);
+            if (in_array($severity, $allowed, true)) {
+                $filtered[] = $severity;
+            }
+        }
+
+        if (empty($filtered)) {
+            $filtered = array('high', 'critical');
+        }
+
+        $placeholders = implode(',', array_fill(0, count($filtered), '%s'));
+        $sql = "SELECT id, error_message, severity, created_at FROM {$table} WHERE resolved = 0 AND severity IN ({$placeholders}) ORDER BY created_at DESC LIMIT 1";
+        $prepared = $wpdb->prepare($sql, $filtered);
+        $this->latest_error_notice = $wpdb->get_row($prepared);
+
+        return $this->latest_error_notice;
+    }
+
+    private function reset_error_notice_cache() {
+        $this->latest_error_notice = null;
+        $this->latest_error_notice_checked = false;
+    }
+
+    private function get_wp_debug_log_path() {
+        if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+            if (is_string(WP_DEBUG_LOG) && WP_DEBUG_LOG !== '') {
+                return WP_DEBUG_LOG;
+            }
+
+            if (defined('WP_CONTENT_DIR')) {
+                return WP_CONTENT_DIR . '/debug.log';
+            }
+        }
+
+        return '';
+    }
+
+    private function read_wp_debug_excerpt($length = 50000) {
+        $path = $this->get_wp_debug_log_path();
+        if ($path === '' || !@file_exists($path) || !@is_readable($path)) {
+            return '';
+        }
+
+        $length = max(1024, (int) $length);
+        $size = @filesize($path);
+
+        if ($size === false || $size <= $length) {
+            $contents = @file_get_contents($path);
+            return is_string($contents) ? $contents : '';
+        }
+
+        $handle = @fopen($path, 'r');
+        if (!$handle) {
+            return '';
+        }
+
+        $offset = $size - $length;
+        if ($offset < 0) {
+            $offset = 0;
+        }
+
+        if ($offset > 0) {
+            fseek($handle, $offset);
+            fgets($handle);
+        }
+
+        $contents = stream_get_contents($handle);
+        fclose($handle);
+
+        if (!is_string($contents)) {
+            return '';
+        }
+
+        $contents = ltrim($contents, "\r\n");
+
+        if ($offset > 0) {
+            $contents = "...(truncated)...\n" . $contents;
+        }
+
+        return $contents;
     }
 
     public function ajax_resolve_error() {
@@ -4727,6 +4824,8 @@ $wpdb->insert($analytics_table, array(
                 throw new Exception(__('Failed to update error status. Please try again.', 'yadore-monetizer'));
             }
 
+            $this->reset_error_notice_cache();
+
             wp_send_json_success(array(
                 'message' => __('Error entry marked as resolved.', 'yadore-monetizer'),
                 'error_id' => $error_id,
@@ -4734,6 +4833,191 @@ $wpdb->insert($analytics_table, array(
 
         } catch (Exception $e) {
             $this->log_error('Failed to resolve error log entry', $e, 'medium');
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_get_error_logs() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions to view error logs.', 'yadore-monetizer'));
+            }
+
+            global $wpdb;
+            $table = $wpdb->prefix . 'yadore_error_logs';
+
+            if (!$this->table_exists($table)) {
+                wp_send_json_success(array(
+                    'logs' => array(),
+                    'counts' => array(
+                        'critical' => 0,
+                        'high' => 0,
+                        'medium' => 0,
+                        'low' => 0,
+                    ),
+                    'open_counts' => array(
+                        'critical' => 0,
+                        'high' => 0,
+                        'medium' => 0,
+                        'low' => 0,
+                    ),
+                ));
+            }
+
+            $severity = isset($_POST['severity']) ? sanitize_key(wp_unslash($_POST['severity'])) : 'all';
+            $allowed = array('all', 'critical', 'high', 'medium', 'low');
+            if (!in_array($severity, $allowed, true)) {
+                $severity = 'all';
+            }
+
+            $limit = isset($_POST['limit']) ? absint($_POST['limit']) : 50;
+            if ($limit <= 0) {
+                $limit = 50;
+            }
+            $limit = min($limit, 200);
+
+            $where = '';
+            $params = array();
+            if ($severity !== 'all') {
+                $where = 'WHERE severity = %s';
+                $params[] = $severity;
+            }
+
+            $query = "SELECT id, error_type, error_message, error_code, stack_trace, context_data, post_id, user_id, ip_address, user_agent, request_uri, severity, resolved, resolution_notes, created_at, resolved_at FROM {$table}";
+            if ($where !== '') {
+                $query .= ' ' . $where;
+            }
+            $query .= ' ORDER BY created_at DESC LIMIT %d';
+            $params[] = $limit;
+
+            $prepared = $wpdb->prepare($query, $params);
+            $results = $wpdb->get_results($prepared, ARRAY_A);
+
+            $logs = array();
+            foreach ($results as $row) {
+                $context = array();
+                if (!empty($row['context_data'])) {
+                    $decoded = json_decode($row['context_data'], true);
+                    if (is_array($decoded)) {
+                        $context = $decoded;
+                    }
+                }
+
+                $logs[] = array(
+                    'id' => isset($row['id']) ? (int) $row['id'] : 0,
+                    'error_type' => isset($row['error_type']) ? (string) $row['error_type'] : '',
+                    'error_message' => isset($row['error_message']) ? (string) $row['error_message'] : '',
+                    'error_code' => isset($row['error_code']) ? (string) $row['error_code'] : '',
+                    'stack_trace' => isset($row['stack_trace']) ? (string) $row['stack_trace'] : '',
+                    'context' => $context,
+                    'post_id' => isset($row['post_id']) ? (int) $row['post_id'] : 0,
+                    'user_id' => isset($row['user_id']) ? (int) $row['user_id'] : 0,
+                    'ip_address' => isset($row['ip_address']) ? (string) $row['ip_address'] : '',
+                    'user_agent' => isset($row['user_agent']) ? (string) $row['user_agent'] : '',
+                    'request_uri' => isset($row['request_uri']) ? (string) $row['request_uri'] : '',
+                    'severity' => isset($row['severity']) ? (string) $row['severity'] : '',
+                    'resolved' => !empty($row['resolved']),
+                    'resolution_notes' => isset($row['resolution_notes']) ? (string) $row['resolution_notes'] : '',
+                    'created_at' => isset($row['created_at']) ? (string) $row['created_at'] : '',
+                    'resolved_at' => isset($row['resolved_at']) ? (string) $row['resolved_at'] : '',
+                );
+            }
+
+            $counts = array('critical' => 0, 'high' => 0, 'medium' => 0, 'low' => 0);
+            $totals = $wpdb->get_results("SELECT severity, COUNT(*) AS total FROM {$table} GROUP BY severity", ARRAY_A);
+            foreach ($totals as $total) {
+                $severity_key = isset($total['severity']) ? strtolower((string) $total['severity']) : '';
+                if (isset($counts[$severity_key])) {
+                    $counts[$severity_key] = (int) $total['total'];
+                }
+            }
+
+            $open_counts = array('critical' => 0, 'high' => 0, 'medium' => 0, 'low' => 0);
+            $open_totals = $wpdb->get_results("SELECT severity, COUNT(*) AS total FROM {$table} WHERE resolved = 0 GROUP BY severity", ARRAY_A);
+            foreach ($open_totals as $total) {
+                $severity_key = isset($total['severity']) ? strtolower((string) $total['severity']) : '';
+                if (isset($open_counts[$severity_key])) {
+                    $open_counts[$severity_key] = (int) $total['total'];
+                }
+            }
+
+            wp_send_json_success(array(
+                'logs' => $logs,
+                'counts' => $counts,
+                'open_counts' => $open_counts,
+            ));
+
+        } catch (Exception $e) {
+            $this->log_error('Failed to load error logs', $e, 'medium');
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_clear_error_log() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions to clear error logs.', 'yadore-monetizer'));
+            }
+
+            global $wpdb;
+            $table = $wpdb->prefix . 'yadore_error_logs';
+
+            if ($this->table_exists($table)) {
+                $wpdb->query("DELETE FROM {$table}");
+            }
+
+            $this->reset_error_notice_cache();
+
+            wp_send_json_success(array(
+                'message' => __('Error logs cleared successfully.', 'yadore-monetizer'),
+            ));
+
+        } catch (Exception $e) {
+            $this->log_error('Failed to clear error logs', $e, 'medium');
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_get_debug_info() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions to access debug information.', 'yadore-monetizer'));
+            }
+
+            $plugin_log = $this->get_debug_log();
+            $stack_traces = array();
+
+            global $wpdb;
+            $table = $wpdb->prefix . 'yadore_error_logs';
+            if ($this->table_exists($table)) {
+                $trace_rows = $wpdb->get_results("SELECT id, error_message, severity, stack_trace, created_at FROM {$table} ORDER BY created_at DESC LIMIT 10", ARRAY_A);
+                foreach ($trace_rows as $trace_row) {
+                    $stack_traces[] = array(
+                        'id' => isset($trace_row['id']) ? (int) $trace_row['id'] : 0,
+                        'error_message' => isset($trace_row['error_message']) ? (string) $trace_row['error_message'] : '',
+                        'severity' => isset($trace_row['severity']) ? (string) $trace_row['severity'] : '',
+                        'stack_trace' => isset($trace_row['stack_trace']) ? (string) $trace_row['stack_trace'] : '',
+                        'created_at' => isset($trace_row['created_at']) ? (string) $trace_row['created_at'] : '',
+                    );
+                }
+            }
+
+            $wp_debug_excerpt = $this->read_wp_debug_excerpt();
+
+            wp_send_json_success(array(
+                'plugin_debug_log' => $plugin_log,
+                'stack_traces' => $stack_traces,
+                'wp_debug_excerpt' => $wp_debug_excerpt,
+            ));
+
+        } catch (Exception $e) {
+            $this->log_error('Failed to load debug information', $e, 'medium');
             wp_send_json_error($e->getMessage());
         }
     }
