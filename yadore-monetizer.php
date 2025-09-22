@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.15
+Version: 2.9.16
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.15');
+define('YADORE_PLUGIN_VERSION', '2.9.16');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -91,7 +91,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.15 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.16 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -2129,22 +2129,32 @@ class YadoreMonetizer {
         $cache_key = 'yadore_products_' . md5(implode('|', $cache_components));
 
         if ($use_cache && isset($this->api_cache[$cache_key])) {
-            return array(
-                'products' => $this->api_cache[$cache_key],
-                'keyword' => $keyword,
-                'precision' => $precision,
-            );
+            $memory_cached = $this->api_cache[$cache_key];
+
+            if (is_array($memory_cached) && !empty($memory_cached)) {
+                return array(
+                    'products' => $memory_cached,
+                    'keyword' => $keyword,
+                    'precision' => $precision,
+                );
+            }
+
+            unset($this->api_cache[$cache_key]);
         }
 
         if ($use_cache && !get_option('yadore_debug_mode', false)) {
             $cached = get_transient($cache_key);
             if ($cached !== false) {
-                $this->api_cache[$cache_key] = $cached;
-                return array(
-                    'products' => $cached,
-                    'keyword' => $keyword,
-                    'precision' => $precision,
-                );
+                if (is_array($cached) && !empty($cached)) {
+                    $this->api_cache[$cache_key] = $cached;
+                    return array(
+                        'products' => $cached,
+                        'keyword' => $keyword,
+                        'precision' => $precision,
+                    );
+                }
+
+                delete_transient($cache_key);
             }
         }
 
@@ -2382,11 +2392,21 @@ class YadoreMonetizer {
         $this->log_api_call('yadore', $endpoint, 'success', $log_payload);
 
         $cache_duration = intval(get_option('yadore_cache_duration', 3600));
-        if ($use_cache && $cache_duration > 0) {
-            set_transient($cache_key, $products, $cache_duration);
-        }
+        if (!empty($products)) {
+            if ($use_cache && $cache_duration > 0) {
+                set_transient($cache_key, $products, $cache_duration);
+            }
 
-        $this->api_cache[$cache_key] = $products;
+            $this->api_cache[$cache_key] = $products;
+        } else {
+            if ($use_cache) {
+                delete_transient($cache_key);
+            }
+
+            if (isset($this->api_cache[$cache_key])) {
+                unset($this->api_cache[$cache_key]);
+            }
+        }
 
         return array(
             'products' => $products,
