@@ -1,7 +1,20 @@
 <div class="yadore-products-list" data-format="list">
     <?php if (!empty($offers)): ?>
         <?php foreach ($offers as $offer): ?>
-            <div class="yadore-product-item" data-offer-id="<?php echo esc_attr($offer['id'] ?? ''); ?>">
+            <?php
+            $price_parts = yadore_get_formatted_price_parts($offer['price'] ?? []);
+            $price_amount = $price_parts['amount'] !== '' ? $price_parts['amount'] : 'N/A';
+            $price_currency = $price_parts['currency'];
+            if ($price_amount === 'N/A') {
+                $price_currency = '';
+            }
+            $click_url = esc_url($offer['clickUrl'] ?? '#');
+            ?>
+            <div class="yadore-product-item"
+                 data-offer-id="<?php echo esc_attr($offer['id'] ?? ''); ?>"
+                 data-click-url="<?php echo $click_url; ?>"
+                 role="link"
+                 tabindex="0">
                 <div class="product-image">
                     <?php
                     $image_url = $offer['thumbnail']['url'] ?? $offer['image']['url'] ?? '';
@@ -23,15 +36,20 @@
                 </div>
 
                 <div class="product-pricing">
-                    <div class="price-main"><?php echo esc_html($offer['price']['amount'] ?? 'N/A'); ?> <?php echo esc_html($offer['price']['currency'] ?? ''); ?></div>
-                    <div class="merchant-info">at <?php echo esc_html($offer['merchant']['name'] ?? 'Online Store'); ?></div>
+                    <div class="price-main">
+                        <span class="list-price-amount"><?php echo esc_html($price_amount); ?></span>
+                        <?php if (!empty($price_currency)): ?>
+                            <span class="list-price-currency"><?php echo esc_html($price_currency); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="merchant-info">Verfügbar bei <?php echo esc_html($offer['merchant']['name'] ?? 'Online Store'); ?></div>
                 </div>
 
                 <div class="product-action">
-                    <a href="<?php echo esc_url($offer['clickUrl'] ?? '#'); ?>" 
+                    <a href="<?php echo $click_url; ?>"
                        class="list-cta-button" target="_blank" rel="nofollow noopener"
                        data-yadore-click="<?php echo esc_attr($offer['id'] ?? ''); ?>">
-                        Buy Now
+                        Zum Angebot
                     </a>
                 </div>
             </div>

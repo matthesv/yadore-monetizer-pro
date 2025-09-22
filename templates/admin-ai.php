@@ -17,7 +17,7 @@ $current_model_label = $available_models[$current_model]['label'] ?? $current_mo
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-generic"></span>
         AI Management & Analysis
-        <span class="version-badge">v2.9.18</span>
+        <span class="version-badge">v2.9.19</span>
     </h1>
 
     <div class="yadore-ai-container">
@@ -371,7 +371,7 @@ function yadoreInitializeAiManagement() {
     $('#run-ai-test').on('click', yadoreRunAiTest);
     $('#run-batch-test').on('click', yadoreRunBatchTest);
 
-    console.log('Yadore AI Management v2.9.18 - Initialized');
+    console.log('Yadore AI Management v2.9.19 - Initialized');
 }
 
 function yadoreLoadAiStats() {

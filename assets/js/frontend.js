@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.18 - Frontend JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.19 - Frontend JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: '2.9.18',
+        version: '2.9.19',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,
@@ -25,7 +25,7 @@
             this.initScrollTriggers();
             this.initResponsiveHandling();
 
-            console.log('Yadore Monetizer Pro v2.9.18 Frontend - Initialized');
+            console.log('Yadore Monetizer Pro v2.9.19 Frontend - Initialized');
         },
 
         // Initialize product overlay
@@ -69,8 +69,120 @@
                 this.trackProductClick(productId);
             });
 
+            this.bindProductCardClicks();
+
             // Track product views
             this.trackProductViews();
+        },
+
+        // Make entire product cards behave like links
+        bindProductCardClicks: function() {
+            const clickableSelector = '.inline-product[data-click-url], .yadore-product-card[data-click-url], .yadore-product-item[data-click-url], .overlay-product[data-click-url]';
+
+            $(document).on('click', clickableSelector, (event) => {
+                const $target = $(event.target);
+
+                if ($target.closest('a').length) {
+                    return;
+                }
+
+                const $currentTarget = $(event.currentTarget);
+                let url = $currentTarget.data('click-url');
+
+                if (typeof url === 'string') {
+                    url = url.trim();
+                    url = this.decodeHtmlEntities(url);
+                }
+
+                if (!url || url === '#') {
+                    return;
+                }
+
+                event.preventDefault();
+
+                this.openProductInNewTab(url);
+
+                const productId = $currentTarget.data('offer-id') ||
+                    $currentTarget.data('product-id') ||
+                    $currentTarget.data('yadore-click');
+
+                if (productId) {
+                    this.trackProductClick(productId);
+                }
+            });
+
+            $(document).on('keydown', clickableSelector, (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    $(event.currentTarget).trigger('click');
+                }
+            });
+        },
+
+        openProductInNewTab: function(url) {
+            const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+
+            if (newWindow && typeof newWindow.focus === 'function') {
+                newWindow.focus();
+            }
+        },
+
+        formatPriceForDisplay: function(price, currency) {
+            let amountValue = price;
+            let currencyValue = currency || '';
+
+            if (price && typeof price === 'object') {
+                amountValue = price.amount ?? '';
+                if (!currencyValue && price.currency) {
+                    currencyValue = price.currency;
+                }
+            }
+
+            currencyValue = (currencyValue || '').toString().trim().toUpperCase();
+            let formattedAmount = '';
+
+            if (amountValue !== undefined && amountValue !== null && amountValue !== '') {
+                const rawAmount = amountValue.toString();
+                const sanitizedAmount = rawAmount.replace(/[^0-9,.-]/g, '');
+                const normalizedAmount = sanitizedAmount.replace(',', '.');
+                const numericAmount = parseFloat(normalizedAmount);
+
+                if (!Number.isNaN(numericAmount)) {
+                    try {
+                        formattedAmount = new Intl.NumberFormat('de-DE', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }).format(numericAmount);
+                    } catch (err) {
+                        formattedAmount = numericAmount.toFixed(2).replace('.', ',');
+                    }
+                } else {
+                    formattedAmount = rawAmount;
+                }
+            }
+
+            if (!formattedAmount) {
+                formattedAmount = 'N/A';
+            }
+
+            if (formattedAmount === 'N/A') {
+                currencyValue = '';
+            }
+
+            return {
+                amount: formattedAmount,
+                currency: currencyValue
+            };
+        },
+
+        decodeHtmlEntities: function(value) {
+            if (typeof value !== 'string' || value.indexOf('&') === -1) {
+                return value;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = value;
+            return textarea.value;
         },
 
         // Initialize scroll-based triggers
@@ -139,22 +251,24 @@
 
             // Get page content for analysis
             const pageContent = this.extractPageContent();
+            const requestedLimit = parseInt(this.settings.limit, 10);
+            const productLimit = Number.isNaN(requestedLimit) || requestedLimit < 1 ? 1 : requestedLimit;
 
             $.post(this.settings.ajax_url, {
                 action: 'yadore_get_overlay_products',
                 nonce: this.settings.nonce,
-                limit: this.settings.limit || 3,
+                limit: productLimit,
                 page_content: pageContent,
                 page_url: window.location.href,
                 post_id: this.settings.post_id || 0
             })
             .done((response) => {
                 if (response.success && response.data.products && response.data.products.length > 0) {
-                    this.renderOverlayProducts(response.data.products);
+                    const displayedCount = this.renderOverlayProducts(response.data.products);
                     this.showOverlay();
 
                     // Track overlay view
-                    this.trackOverlayView(response.data.keyword, response.data.products.length);
+                    this.trackOverlayView(response.data.keyword, displayedCount);
                 } else {
                     // No products found
                     overlayBody.html(`
@@ -181,41 +295,50 @@
         // Render products in overlay
         renderOverlayProducts: function(products) {
             const overlayBody = this.overlay.find('.overlay-body');
+            const displayProducts = Array.isArray(products) ? products.slice(0, 1) : [];
             let productsHtml = '<div class="overlay-products">';
 
-            products.forEach((product) => {
+            const sanitize = (value) => $('<div/>').text(value || '').html();
+
+            displayProducts.forEach((product) => {
                 const imageUrl = product.thumbnail?.url || product.image?.url || '';
-                const title = product.title || 'Product';
-                const price = product.price?.amount || 'N/A';
-                const currency = product.price?.currency || '';
-                const merchantName = product.merchant?.name || 'Online Store';
-                const clickUrl = product.clickUrl || '#';
-                const productId = product.id || '';
+                const productId = sanitize(product.id || '');
+                const clickUrlRaw = product.clickUrl || '#';
+                const clickUrl = sanitize(clickUrlRaw);
+                const priceParts = this.formatPriceForDisplay(product.price);
+                const priceAmount = sanitize(priceParts.amount);
+                const priceCurrency = sanitize(priceParts.currency);
+                const title = sanitize(product.title || 'Produkt');
+                const merchantName = sanitize(product.merchant?.name || 'Online Store');
 
                 const imageMarkup = imageUrl
-                    ? `<img src="${imageUrl}" alt="${title}" loading="lazy">`
+                    ? `<img src="${sanitize(imageUrl)}" alt="${title}" loading="lazy">`
                     : '<div class="overlay-product-image-placeholder" aria-hidden="true">📦</div>';
 
                 productsHtml += `
-                    <div class="overlay-product" data-product-id="${productId}">
+                    <div class="overlay-product"
+                         data-product-id="${productId}"
+                         data-click-url="${clickUrl}"
+                         role="link"
+                         tabindex="0">
                         <div class="overlay-product-image">
                             ${imageMarkup}
                         </div>
                         <div class="overlay-product-content">
                             <h4 class="overlay-product-title">${title}</h4>
                             <div class="overlay-product-price">
-                                <span class="overlay-price-amount">${price}</span>
-                                <span class="overlay-price-currency">${currency}</span>
+                                <span class="overlay-price-amount">${priceAmount}</span>
+                                ${priceCurrency ? `<span class="overlay-price-currency">${priceCurrency}</span>` : ''}
                             </div>
                             <div class="overlay-product-merchant">
-                                <span class="overlay-merchant-name">${merchantName}</span>
+                                <span class="overlay-merchant-name">Verfügbar bei ${merchantName}</span>
                             </div>
-                            <a href="${clickUrl}" 
-                               class="overlay-product-button" 
-                               target="_blank" 
+                            <a href="${clickUrl}"
+                               class="overlay-product-button"
+                               target="_blank"
                                rel="nofollow noopener"
                                data-yadore-click="${productId}">
-                                View Product →
+                                Zum Angebot →
                             </a>
                         </div>
                     </div>
@@ -224,14 +347,13 @@
 
             productsHtml += '</div>';
 
-            // Add CSS for overlay products
             productsHtml += `
                 <style>
                 .overlay-products {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    grid-template-columns: 1fr;
                     gap: 20px;
-                    max-width: 600px;
+                    max-width: 420px;
                     margin: 0 auto;
                 }
 
@@ -239,22 +361,31 @@
                     background: #f9f9f9;
                     border-radius: 12px;
                     overflow: hidden;
-                    transition: transform 0.3s ease;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    border: 1px solid #e9ecef;
+                    cursor: pointer;
                 }
 
                 .overlay-product:hover {
                     transform: translateY(-4px);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                }
+
+                .overlay-product:focus-within,
+                .overlay-product:focus {
+                    outline: 2px solid #3498db;
+                    outline-offset: 3px;
                 }
 
                 .overlay-product-image img {
                     width: 100%;
-                    height: 150px;
+                    height: 160px;
                     object-fit: cover;
                 }
 
                 .overlay-product-image-placeholder {
                     width: 100%;
-                    height: 150px;
+                    height: 160px;
                     background: #ecf0f1;
                     display: flex;
                     align-items: center;
@@ -264,15 +395,15 @@
                 }
 
                 .overlay-product-content {
-                    padding: 16px;
+                    padding: 18px 20px;
                 }
 
                 .overlay-product-title {
-                    font-size: 14px;
+                    font-size: 16px;
                     font-weight: 600;
                     color: #2c3e50;
-                    margin: 0 0 8px 0;
-                    line-height: 1.3;
+                    margin: 0 0 10px 0;
+                    line-height: 1.4;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
@@ -280,42 +411,46 @@
                 }
 
                 .overlay-product-price {
-                    margin-bottom: 8px;
+                    margin-bottom: 10px;
                 }
 
                 .overlay-price-amount {
-                    font-size: 18px;
+                    font-size: 20px;
                     font-weight: 700;
                     color: #27ae60;
                 }
 
                 .overlay-price-currency {
                     font-size: 14px;
+                    font-weight: 600;
+                    margin-left: 6px;
                     color: #27ae60;
+                    text-transform: uppercase;
                 }
 
                 .overlay-product-merchant {
-                    font-size: 12px;
+                    font-size: 13px;
                     color: #7f8c8d;
-                    margin-bottom: 12px;
+                    margin-bottom: 16px;
                 }
 
                 .overlay-product-button {
                     display: block;
                     width: 100%;
-                    padding: 10px;
-                    background: #3498db;
+                    padding: 12px 16px;
+                    background: linear-gradient(135deg, #3498db, #2980b9);
                     color: white;
                     text-decoration: none;
-                    border-radius: 6px;
+                    border-radius: 8px;
                     font-weight: 600;
-                    font-size: 13px;
+                    font-size: 14px;
                     text-align: center;
-                    transition: background-color 0.3s ease;
+                    transition: background 0.3s ease, transform 0.3s ease;
                 }
 
                 .overlay-product-button:hover {
-                    background: #2980b9;
+                    background: linear-gradient(135deg, #2980b9, #21618c);
+                    transform: translateY(-2px);
                     color: white;
                     text-decoration: none;
                 }
@@ -345,14 +480,20 @@
                 }
 
                 @media (max-width: 480px) {
-                    .overlay-products {
-                        grid-template-columns: 1fr;
+                    .overlay-product-content {
+                        padding: 16px;
+                    }
+
+                    .overlay-product-title {
+                        font-size: 15px;
                     }
                 }
                 </style>
             `;
 
             overlayBody.html(productsHtml);
+
+            return displayProducts.length;
         },
 
         // Show overlay
