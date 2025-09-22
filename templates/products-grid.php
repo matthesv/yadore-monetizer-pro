@@ -1,7 +1,20 @@
 <div class="yadore-products-grid" data-format="grid">
     <?php if (!empty($offers)): ?>
         <?php foreach ($offers as $offer): ?>
-            <div class="yadore-product-card" data-offer-id="<?php echo esc_attr($offer['id'] ?? ''); ?>">
+            <?php
+            $price_parts = yadore_get_formatted_price_parts($offer['price'] ?? []);
+            $price_amount = $price_parts['amount'] !== '' ? $price_parts['amount'] : 'N/A';
+            $price_currency = $price_parts['currency'];
+            if ($price_amount === 'N/A') {
+                $price_currency = '';
+            }
+            $click_url = esc_url($offer['clickUrl'] ?? '#');
+            ?>
+            <div class="yadore-product-card"
+                 data-offer-id="<?php echo esc_attr($offer['id'] ?? ''); ?>"
+                 data-click-url="<?php echo $click_url; ?>"
+                 role="link"
+                 tabindex="0">
                 <div class="product-image">
                     <?php
                     $image_url = $offer['thumbnail']['url'] ?? $offer['image']['url'] ?? '';
@@ -23,19 +36,21 @@
 
                     <div class="product-price-section">
                         <div class="product-price">
-                            <span class="price-amount"><?php echo esc_html($offer['price']['amount'] ?? 'N/A'); ?></span>
-                            <span class="price-currency"><?php echo esc_html($offer['price']['currency'] ?? ''); ?></span>
+                            <span class="price-amount"><?php echo esc_html($price_amount); ?></span>
+                            <?php if (!empty($price_currency)): ?>
+                                <span class="price-currency"><?php echo esc_html($price_currency); ?></span>
+                            <?php endif; ?>
                         </div>
                     </div>
 
                     <div class="product-merchant">
-                        <span class="merchant-name"><?php echo esc_html($offer['merchant']['name'] ?? 'Online Store'); ?></span>
+                        <span class="merchant-name">Verfügbar bei <?php echo esc_html($offer['merchant']['name'] ?? 'Online Store'); ?></span>
                     </div>
 
-                    <a href="<?php echo esc_url($offer['clickUrl'] ?? '#'); ?>" 
+                    <a href="<?php echo $click_url; ?>"
                        class="product-cta-button" target="_blank" rel="nofollow noopener"
                        data-yadore-click="<?php echo esc_attr($offer['id'] ?? ''); ?>">
-                        View Product →
+                        Zum Angebot →
                     </a>
                 </div>
             </div>

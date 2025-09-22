@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.18
+Version: 2.9.19
 Author: Yadore AI
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.18');
+define('YADORE_PLUGIN_VERSION', '2.9.19');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -91,7 +91,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.18 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.19 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -5225,6 +5225,50 @@ $wpdb->insert($analytics_table, array(
         $models = $this->get_supported_gemini_models();
         $first = array_key_first($models);
         return $first ?: 'gemini-2.0-flash';
+    }
+}
+
+if (!function_exists('yadore_get_formatted_price_parts')) {
+    /**
+     * Format price information for consistent display across templates.
+     *
+     * @param mixed  $price    Price array or raw value from API response.
+     * @param string $currency Optional explicit currency code.
+     *
+     * @return array{amount:string,currency:string}
+     */
+    function yadore_get_formatted_price_parts($price, $currency = '') {
+        $amount = $price;
+
+        if (is_array($price)) {
+            $amount = $price['amount'] ?? '';
+            if ($currency === '' && isset($price['currency'])) {
+                $currency = $price['currency'];
+            }
+        }
+
+        $currency = strtoupper(sanitize_text_field((string) $currency));
+        $formatted_amount = '';
+
+        if ($amount !== null && $amount !== '') {
+            $raw_amount = preg_replace('/[^0-9,\.]/', '', (string) $amount);
+            $normalized_amount = str_replace(',', '.', $raw_amount);
+
+            if ($normalized_amount !== '' && is_numeric($normalized_amount)) {
+                $formatted_amount = number_format((float) $normalized_amount, 2, ',', '.');
+            } else {
+                $formatted_amount = sanitize_text_field((string) $amount);
+            }
+        }
+
+        if (strtoupper($formatted_amount) === 'N/A') {
+            $currency = '';
+        }
+
+        return array(
+            'amount' => $formatted_amount,
+            'currency' => $currency,
+        );
     }
 }
 

@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v2.9.18 - Frontend CSS (Complete) */
+/* Yadore Monetizer Pro v2.9.19 - Frontend CSS (Complete) */
 .yadore-products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -15,11 +15,17 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     position: relative;
+    cursor: pointer;
 }
 
 .yadore-product-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.yadore-product-card:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 3px;
 }
 
 .product-image {
@@ -174,11 +180,17 @@
     border: 1px solid #e9ecef;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .yadore-product-item:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     transform: translateY(-2px);
+}
+
+.yadore-product-item:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 3px;
 }
 
 .yadore-product-item .product-image {
@@ -219,14 +231,30 @@
 }
 
 .product-pricing {
+    display: grid;
+    gap: 8px;
     text-align: right;
 }
 
 .price-main {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 4px;
     font-size: 18px;
     font-weight: 700;
     color: #27ae60;
-    margin-bottom: 4px;
+}
+
+.list-price-amount {
+    display: inline-block;
+}
+
+.list-price-currency {
+    display: inline-block;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #27ae60;
 }
 
 .merchant-info {
@@ -280,9 +308,10 @@
 
 .inline-products {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
     margin-bottom: 20px;
+    justify-items: center;
 }
 
 .inline-product {
@@ -292,11 +321,19 @@
     border: 1px solid #e9ecef;
     transition: all 0.3s ease;
     text-align: center;
+    width: 100%;
+    max-width: 360px;
+    cursor: pointer;
 }
 
 .inline-product:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     transform: translateY(-4px);
+}
+
+.inline-product:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 3px;
 }
 
 .inline-image {
@@ -336,6 +373,18 @@
 .inline-price {
     font-size: 16px;
     font-weight: 700;
+    color: #27ae60;
+}
+
+.inline-price-amount {
+    display: inline-block;
+}
+
+.inline-price-currency {
+    display: inline-block;
+    margin-left: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
     color: #27ae60;
 }
 
@@ -562,6 +611,10 @@
         grid-template-columns: 1fr;
     }
 
+    .inline-product {
+        max-width: 100%;
+    }
+
     .product-cta-button {
         padding: 12px 16px;
         font-size: 13px;
@@ -595,6 +648,10 @@
 
     .product-pricing {
         text-align: center;
+    }
+
+    .price-main {
+        justify-content: center;
     }
 
     .stat-card {

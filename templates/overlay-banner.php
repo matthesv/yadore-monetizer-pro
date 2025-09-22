@@ -8,16 +8,16 @@ if (!get_option('yadore_overlay_enabled', true) || is_admin()) {
     <div id="yadore-overlay-backdrop"></div>
     <div id="yadore-overlay-content">
         <div class="overlay-header">
-            <h3>Product Recommendations</h3>
+            <h3>Empfehlung</h3>
             <button id="yadore-overlay-close" aria-label="Close">&times;</button>
         </div>
 
         <div class="overlay-body">
             <div class="overlay-loading">
                 <div class="loading-spinner"></div>
-                <p>Finding products...</p>
+                <p>Empfehlungen werden geladen...</p>
                 <?php if (get_option('yadore_ai_enabled', false)): ?>
-                    <small>AI analyzing content for relevant products</small>
+                    <small>KI analysiert den Inhalt für die beste Empfehlung</small>
                 <?php endif; ?>
             </div>
         </div>
