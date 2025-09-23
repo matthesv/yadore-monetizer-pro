@@ -1,22 +1,21 @@
-# Yadore Monetizer Pro v2.9.28 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.29 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.28 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.29 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
-✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
+✅ **6 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
 ✅ **AI Content Analysis** - Gemini 2.5 & Live Preview Model Support mit intelligenter Keyword-Erkennung
 ✅ **Advanced Analytics** - Umfassende Performance-Berichte und Statistiken  
 ✅ **Bulk Post Scanner** - Automatische Content-Analyse für alle Posts  
-✅ **Product Overlay System** - Intelligente Produktempfehlungen mit Overlay  
-✅ **API Documentation** - Live API-Testing und Request-Monitoring  
+✅ **Product Overlay System** - Intelligente Produktempfehlungen mit Overlay
 ✅ **Debug & Error Analysis** - Vollständige Systemdiagnose und Fehlerbehebung  
 ✅ **Data Management Tools** - Export/Import, Backup und Migration  
 ✅ **19 AJAX Endpoints** - Alle korrekt implementiert inkl. Cache-Tools & Diagnostics
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.28**
+## 🌟 **NEU IN VERSION 2.9.29**
 
 - ✅ **Gemini 2.5 Model Suite** – Flash, Pro, Flash Lite und Live Flash Preview stehen jetzt vollständig im Backend zur Verfügung.
 - ✅ **Aktualisierte AI-Presets** – Die Modell-Presets wurden auf die 2.5-Generation umgestellt und erleichtern die schnelle Auswahl.
@@ -26,7 +25,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
 ### **WordPress Admin Integration (Alle Features):**
-✅ **WordPress Admin Menu** - 8 Admin-Seiten vollständig verfügbar  
+✅ **WordPress Admin Menu** - 6 Admin-Seiten vollständig verfügbar
 ✅ **Plugin Lifecycle** - Proper activation/deactivation mit Setup  
 ✅ **Settings Management** - WordPress-native Einstellungen mit 5 Tabs  
 ✅ **AJAX Security** - WordPress nonces für alle 19 Endpoints
@@ -38,13 +37,11 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **Custom Post Types** - Erweiterte WordPress-Features  
 ✅ **Cron Jobs** - Automatische Maintenance-Tasks  
 
-### **8 WordPress Admin Pages (Alle verfügbar):**
+### **6 WordPress Admin Pages (Alle verfügbar):**
 🏠 **Dashboard** - Enhanced mit Stats, Shortcode Generator, System Status  
 ⚙️ **Settings** - 5 Tabs: General, AI, Display, Performance, Advanced  
-🤖 **AI Management** - Model Comparison, Prompt Templates, Testing Tools  
-📄 **Post Scanner** - Bulk Scanner, Single Post Scanner, Results Analytics  
-📋 **API Documentation** - Live Testing, Request Logs, Endpoint Docs  
-🔍 **Debug & Errors** - System Health, Error Logs, Diagnostic Tools  
+📄 **Post Scanner** - Bulk Scanner, Single Post Scanner, Results Analytics
+🔍 **Debug & Errors** - System Health, Error Logs, Diagnostic Tools
 📊 **Analytics** - Performance Reports, Traffic Analysis, Revenue Metrics  
 🛠️ **Tools** - Data Export/Import, Maintenance, Configuration Tools  
 
@@ -68,7 +65,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.28:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.29:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -78,8 +75,8 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 - **Translation Ready:** Ja (Text Domain: yadore-monetizer)
 
 ### **Plugin Architecture:**
-- **Plugin Files:** 15 Dateien
-- **Templates:** 8 Admin + 4 Frontend Templates
+- **Plugin Files:** Modular Core inklusive Update-Checker-Bibliothek
+- **Templates:** 6 Admin + 4 Frontend Templates
 - **Database Tables:** 5 enhanced tables
 - **AJAX Endpoints:** 19 vollständig implementiert (inkl. Cache-Verwaltung)
 - **CSS Files:** 2 (Admin + Frontend)
@@ -121,12 +118,12 @@ wp_yadore_analytics        - Performance Analytics (NEW)
 1. **Plugin hochladen:** Upload nach `/wp-content/plugins/yadore-monetizer-pro/`
 2. **Plugin aktivieren:** Über WordPress Admin aktivieren
 3. **✅ Alle Features verfügbar** - Vollständige Funktionalität sofort
-4. **Admin Menu:** "Yadore Monetizer" mit 8 Seiten verfügbar
+4. **Admin Menu:** "Yadore Monetizer" mit 6 Seiten verfügbar
 5. **Konfiguration:** API-Keys in Settings einrichten
 
 ### **Verifikation (Alle Features funktional):**
 ✅ "Yadore Monetizer" erscheint im WordPress Admin Menu  
-✅ Alle 8 Admin-Seiten sind ohne Fehler erreichbar  
+✅ Alle 6 Admin-Seiten sind ohne Fehler erreichbar
 ✅ Dashboard zeigt vollständige System-Übersicht  
 ✅ Shortcode funktioniert: `[yadore_products keyword="smartphone"]`  
 ✅ AI Analysis verfügbar (nach Gemini API Key Setup)  
@@ -270,9 +267,9 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.28 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.29 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.28:**
+### **Neue Highlights in v2.9.29:**
 - 🤖 Gemini 2.5 Flash & Pro – Höchste Performance und Qualität für deine AI-Analysen.
 - ⚡ Gemini 2.5 Flash Lite – Effiziente Variante für kostensensitive Automationen.
 - 📡 Gemini Live 2.5 Flash Preview – Live-Vorschau für interaktive Sessions.
@@ -282,7 +279,7 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ✅ **Status:** ALLE FUNKTIONEN INTEGRIERT
 ✅ **WordPress Integration:** 100% VOLLSTÄNDIG
-✅ **Admin Pages:** ALLE 8 SEITEN VERFÜGBAR
+✅ **Admin Pages:** ALLE 6 SEITEN VERFÜGBAR
 ✅ **Features:** COMPLETE FEATURE SET
 ✅ **AJAX Endpoints:** ALLE 19 FUNKTIONIEREN
 ✅ **Database:** ENHANCED SCHEMA
@@ -292,11 +289,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.28 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.29 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.28** - Production-Ready Market Release
+**Current Version: 2.9.29** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

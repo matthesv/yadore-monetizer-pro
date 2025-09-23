@@ -388,14 +388,6 @@
                             </button>
                         </div>
 
-                        <!-- API Tester -->
-                        <div class="utility-tool">
-                            <h3><span class="dashicons dashicons-admin-network"></span> API Tester</h3>
-                            <p>Test API connections and debug API-related issues.</p>
-                            <button class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-api-docs'); ?>'">
-                                <span class="dashicons dashicons-admin-network"></span> Open Tester
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
