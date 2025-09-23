@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-chart-area"></span>
         Analytics & Performance Reports
-        <span class="version-badge">v2.9.26</span>
+        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
     <div class="yadore-analytics-container">
@@ -319,7 +319,10 @@ function yadoreInitializeAnalytics() {
         yadoreLoadPerformanceTable($(this).val());
     });
 
-    console.log('Yadore Analytics v2.9.26 - Initialized');
+    const analyticsVersion = (typeof yadore_admin !== 'undefined' && yadore_admin.version)
+        ? yadore_admin.version
+        : '<?php echo esc_js(YADORE_PLUGIN_VERSION); ?>';
+    console.log(`Yadore Analytics v${analyticsVersion} - Initialized`);
 }
 
 function yadoreLoadAnalyticsData(period = 30) {

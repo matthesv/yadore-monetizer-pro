@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-media-document"></span>
         API Documentation & Monitoring
-        <span class="version-badge">v2.9.26</span>
+        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
     <div class="yadore-api-container">
@@ -258,29 +258,24 @@ Accept: application/json</code></pre>
                                         <h4>Available Models</h4>
                                         <div class="models-list">
                                             <div class="model-item">
-                                                <h5>gemini-2.0-flash</h5>
-                                                <p>Fastest real-time model for production workloads</p>
+                                                <h5>gemini-2.5-flash</h5>
+                                                <p>Fastest 2.5 generation model for real-time product discovery</p>
                                                 <span class="model-badge recommended">Recommended</span>
                                             </div>
                                             <div class="model-item">
-                                                <h5>gemini-2.0-pro-exp</h5>
-                                                <p>Experimental pro model with the highest reasoning quality</p>
+                                                <h5>gemini-2.5-pro</h5>
+                                                <p>Highest quality reasoning for premium editorial automation</p>
                                                 <span class="model-badge premium">Premium</span>
                                             </div>
                                             <div class="model-item">
-                                                <h5>gemini-2.0-flash-lite</h5>
-                                                <p>Cost-efficient 2.0 model optimized for automation tasks</p>
+                                                <h5>gemini-2.5-flash-lite</h5>
+                                                <p>Cost-optimized 2.5 model balancing speed and efficiency</p>
                                                 <span class="model-badge standard">Efficient</span>
                                             </div>
                                             <div class="model-item">
-                                                <h5>gemini-1.5-flash-8b</h5>
-                                                <p>Lightweight option for quick content tagging and metadata</p>
-                                                <span class="model-badge standard">Lightweight</span>
-                                            </div>
-                                            <div class="model-item">
-                                                <h5>gemini-1.5-pro</h5>
-                                                <p>Highest accuracy for long-form editorial analysis</p>
-                                                <span class="model-badge premium">Advanced</span>
+                                                <h5>gemini-live-2.5-flash-preview</h5>
+                                                <p>Live preview variant enabling streaming-based interactions</p>
+                                                <span class="model-badge beta">Live Preview</span>
                                             </div>
                                         </div>
                                     </div>
@@ -465,7 +460,10 @@ function yadoreInitializeApiDocs() {
     $('#clear-logs').on('click', yadoreClearLogs);
     $('#export-logs').on('click', yadoreExportLogs);
 
-    console.log('Yadore API Documentation v2.9.26 - Initialized');
+    const docsVersion = (typeof yadore_admin !== 'undefined' && yadore_admin.version)
+        ? yadore_admin.version
+        : '<?php echo esc_js(YADORE_PLUGIN_VERSION); ?>';
+    console.log(`Yadore API Documentation v${docsVersion} - Initialized`);
 }
 
 function yadoreLoadApiStatus() {

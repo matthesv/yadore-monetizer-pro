@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-search"></span>
         Post Scanner & Analysis
-        <span class="version-badge">v2.9.26</span>
+        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
     <div class="yadore-scanner-container">

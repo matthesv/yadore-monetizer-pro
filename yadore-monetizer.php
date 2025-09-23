@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.26
+Version: 2.9.27
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.26');
+define('YADORE_PLUGIN_VERSION', '2.9.27');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -107,7 +107,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.26 initialized successfully with complete feature set', 'info');
+            $this->log(sprintf('Plugin v%s initialized successfully with complete feature set', YADORE_PLUGIN_VERSION), 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -1440,6 +1440,7 @@ HTML
                     'limit' => get_option('yadore_overlay_limit', 3),
                     'auto_detection' => get_option('yadore_auto_detection', true),
                     'post_id' => get_queried_object_id(),
+                    'version' => YADORE_PLUGIN_VERSION,
                 ));
             }
 
@@ -6622,26 +6623,17 @@ $wpdb->insert($analytics_table, array(
 
     private function get_supported_gemini_models() {
         return array(
-            'gemini-2.0-flash' => array(
-                'label' => __('Gemini 2.0 Flash - Fastest', 'yadore-monetizer'),
+            'gemini-2.5-flash' => array(
+                'label' => __('Gemini 2.5 Flash - Fastest next-gen', 'yadore-monetizer'),
             ),
-            'gemini-2.0-flash-lite' => array(
-                'label' => __('Gemini 2.0 Flash Lite - Efficient', 'yadore-monetizer'),
+            'gemini-2.5-pro' => array(
+                'label' => __('Gemini 2.5 Pro - Highest quality', 'yadore-monetizer'),
             ),
-            'gemini-2.0-pro-exp' => array(
-                'label' => __('Gemini 2.0 Pro (Experimental) - Highest quality', 'yadore-monetizer'),
+            'gemini-2.5-flash-lite' => array(
+                'label' => __('Gemini 2.5 Flash Lite - Efficient', 'yadore-monetizer'),
             ),
-            'gemini-2.0-flash-exp' => array(
-                'label' => __('Gemini 2.0 Flash (Experimental) - Latest features', 'yadore-monetizer'),
-            ),
-            'gemini-1.5-pro' => array(
-                'label' => __('Gemini 1.5 Pro - Most capable', 'yadore-monetizer'),
-            ),
-            'gemini-1.5-flash' => array(
-                'label' => __('Gemini 1.5 Flash - Balanced', 'yadore-monetizer'),
-            ),
-            'gemini-1.5-flash-8b' => array(
-                'label' => __('Gemini 1.5 Flash 8B - Lightweight', 'yadore-monetizer'),
+            'gemini-live-2.5-flash-preview' => array(
+                'label' => __('Gemini Live 2.5 Flash Preview - Live preview capabilities', 'yadore-monetizer'),
             ),
         );
     }
@@ -6649,7 +6641,7 @@ $wpdb->insert($analytics_table, array(
     private function get_default_gemini_model() {
         $models = $this->get_supported_gemini_models();
         $first = array_key_first($models);
-        return $first ?: 'gemini-2.0-flash';
+        return $first ?: 'gemini-2.5-flash';
     }
 }
 

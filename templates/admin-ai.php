@@ -1,16 +1,13 @@
 <?php
 $available_models = isset($gemini_models) && is_array($gemini_models) ? $gemini_models : array(
-    'gemini-2.0-flash' => array('label' => 'Gemini 2.0 Flash - Fastest'),
-    'gemini-2.0-flash-lite' => array('label' => 'Gemini 2.0 Flash Lite - Efficient'),
-    'gemini-2.0-pro-exp' => array('label' => 'Gemini 2.0 Pro (Experimental) - Highest quality'),
-    'gemini-2.0-flash-exp' => array('label' => 'Gemini 2.0 Flash (Experimental) - Latest features'),
-    'gemini-1.5-pro' => array('label' => 'Gemini 1.5 Pro - Most capable'),
-    'gemini-1.5-flash' => array('label' => 'Gemini 1.5 Flash - Balanced'),
-    'gemini-1.5-flash-8b' => array('label' => 'Gemini 1.5 Flash 8B - Lightweight'),
+    'gemini-2.5-flash' => array('label' => 'Gemini 2.5 Flash - Fastest next-gen'),
+    'gemini-2.5-pro' => array('label' => 'Gemini 2.5 Pro - Highest quality'),
+    'gemini-2.5-flash-lite' => array('label' => 'Gemini 2.5 Flash Lite - Efficient'),
+    'gemini-live-2.5-flash-preview' => array('label' => 'Gemini Live 2.5 Flash Preview - Live preview capabilities'),
 );
 $current_model = isset($selected_gemini_model)
     ? $selected_gemini_model
-    : get_option('yadore_gemini_model', 'gemini-2.0-flash');
+    : get_option('yadore_gemini_model', 'gemini-2.5-flash');
 $current_model_label = $available_models[$current_model]['label'] ?? $current_model;
 $ai_default_prompt = YadoreMonetizer::DEFAULT_AI_PROMPT;
 $ai_current_prompt = (string) get_option('yadore_ai_prompt', $ai_default_prompt);
@@ -22,7 +19,7 @@ if (trim($ai_current_prompt) === '') {
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-generic"></span>
         AI Management & Analysis
-        <span class="version-badge">v2.9.26</span>
+        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
     <div class="yadore-ai-container">
@@ -376,7 +373,10 @@ function yadoreInitializeAiManagement() {
     $('#run-ai-test').on('click', yadoreRunAiTest);
     $('#run-batch-test').on('click', yadoreRunBatchTest);
 
-    console.log('Yadore AI Management v2.9.26 - Initialized');
+    const aiVersion = (typeof yadore_admin !== 'undefined' && yadore_admin.version)
+        ? yadore_admin.version
+        : '<?php echo esc_js(YADORE_PLUGIN_VERSION); ?>';
+    console.log(`Yadore AI Management v${aiVersion} - Initialized`);
 }
 
 function yadoreLoadAiStats() {

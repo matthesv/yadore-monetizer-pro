@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.26</span>
+        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
     <?php
@@ -310,17 +310,14 @@
                                 <div class="model-selection">
                                     <?php
                                     $available_models = isset($gemini_models) && is_array($gemini_models) ? $gemini_models : array(
-                                        'gemini-2.0-flash' => array('label' => 'Gemini 2.0 Flash - Fastest'),
-                                        'gemini-2.0-flash-lite' => array('label' => 'Gemini 2.0 Flash Lite - Efficient'),
-                                        'gemini-2.0-pro-exp' => array('label' => 'Gemini 2.0 Pro (Experimental) - Highest quality'),
-                                        'gemini-2.0-flash-exp' => array('label' => 'Gemini 2.0 Flash (Experimental) - Latest features'),
-                                        'gemini-1.5-pro' => array('label' => 'Gemini 1.5 Pro - Most capable'),
-                                        'gemini-1.5-flash' => array('label' => 'Gemini 1.5 Flash - Balanced'),
-                                        'gemini-1.5-flash-8b' => array('label' => 'Gemini 1.5 Flash 8B - Lightweight'),
+                                        'gemini-2.5-flash' => array('label' => 'Gemini 2.5 Flash - Fastest next-gen'),
+                                        'gemini-2.5-pro' => array('label' => 'Gemini 2.5 Pro - Highest quality'),
+                                        'gemini-2.5-flash-lite' => array('label' => 'Gemini 2.5 Flash Lite - Efficient'),
+                                        'gemini-live-2.5-flash-preview' => array('label' => 'Gemini Live 2.5 Flash Preview - Live preview capabilities'),
                                     );
                                     $current_model = isset($selected_gemini_model)
                                         ? $selected_gemini_model
-                                        : get_option('yadore_gemini_model', 'gemini-2.0-flash');
+                                        : get_option('yadore_gemini_model', 'gemini-2.5-flash');
                                     ?>
                                     <select name="yadore_gemini_model" id="yadore_gemini_model" class="form-select">
                                         <?php foreach ($available_models as $model_key => $model_info) : ?>
@@ -331,10 +328,10 @@
                                     </select>
                                     <?php
                                     $preset_buttons = array(
-                                        'gemini-2.0-flash' => __('Flash 2.0', 'yadore-monetizer'),
-                                        'gemini-2.0-pro-exp' => __('Pro 2.0 (Exp)', 'yadore-monetizer'),
-                                        'gemini-1.5-pro' => __('1.5 Pro', 'yadore-monetizer'),
-                                        'gemini-1.5-flash-8b' => __('1.5 Flash 8B', 'yadore-monetizer'),
+                                        'gemini-2.5-flash' => __('Flash 2.5', 'yadore-monetizer'),
+                                        'gemini-2.5-pro' => __('Pro 2.5', 'yadore-monetizer'),
+                                        'gemini-2.5-flash-lite' => __('Flash Lite 2.5', 'yadore-monetizer'),
+                                        'gemini-live-2.5-flash-preview' => __('Live 2.5 Flash Preview', 'yadore-monetizer'),
                                     );
                                     ?>
                                     <div class="model-presets">
@@ -348,7 +345,7 @@
                                     </div>
                                 </div>
                                 <p class="form-description">
-                                    Choose from the latest Gemini models. Gemini 2.0 provides the newest capabilities, while Gemini 1.5 models balance performance and cost.
+                                    Choose from the latest Gemini 2.5 family. Flash is ideal for speed, Pro delivers the highest quality, Flash Lite optimizes for efficiency, and Live Flash Preview enables real-time interactions.
                                 </p>
                             </div>
 
@@ -916,7 +913,10 @@ jQuery(document).ready(function($) {
     $('#test-gemini-api').on('click', yadoreTestGeminiApi);
     $('#test-yadore-api').on('click', yadoreTestYadoreApi);
 
-    console.log('Yadore Monetizer Pro v2.9.26 Settings - Initialized');
+    const settingsVersion = (typeof yadore_admin !== 'undefined' && yadore_admin.version)
+        ? yadore_admin.version
+        : '<?php echo esc_js(YADORE_PLUGIN_VERSION); ?>';
+    console.log(`Yadore Monetizer Pro v${settingsVersion} Settings - Initialized`);
 });
 
 function yadoreTestGeminiApi() {

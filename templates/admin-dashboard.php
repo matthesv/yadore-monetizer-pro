@@ -2,12 +2,12 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-cart"></span>
         Yadore Monetizer Pro Dashboard
-        <span class="version-badge">v2.9.26</span>
+        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
     <?php if (get_transient('yadore_activation_notice')): ?>
     <div class="notice notice-success is-dismissible">
-        <p><strong>Yadore Monetizer Pro v2.9.26 activated successfully!</strong> All features are now available.</p>
+        <p><strong>Yadore Monetizer Pro v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?> activated successfully!</strong> All features are now available.</p>
     </div>
     <?php delete_transient('yadore_activation_notice'); endif; ?>
 
@@ -311,7 +311,7 @@
                             <div class="status-indicator status-active"></div>
                             <div class="status-details">
                                 <strong>WordPress Integration</strong>
-                                <small>v2.9.26 - All systems operational</small>
+                                <small><?php echo esc_html(sprintf('v%s - All systems operational', YADORE_PLUGIN_VERSION)); ?></small>
                             </div>
                         </div>
 
@@ -351,7 +351,7 @@
                     <div class="version-info">
                         <div class="info-row">
                             <span class="info-label">Plugin Version:</span>
-                            <span class="info-value version-current">v2.9.26</span>
+                            <span class="info-value version-current">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">WordPress:</span>
@@ -363,7 +363,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">Database:</span>
-                            <span class="info-value">Enhanced v2.9.26</span>
+                            <span class="info-value"><?php echo esc_html(sprintf('Enhanced v%s', YADORE_PLUGIN_VERSION)); ?></span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Features:</span>
@@ -419,7 +419,10 @@ jQuery(document).ready(function($) {
 });
 
 function yadoreInitializeDashboard() {
-    console.log('Yadore Monetizer Pro v2.9.26 Dashboard - Initialized');
+    const dashboardVersion = (typeof yadore_admin !== 'undefined' && yadore_admin.version)
+        ? yadore_admin.version
+        : '<?php echo esc_js(YADORE_PLUGIN_VERSION); ?>';
+    console.log(`Yadore Monetizer Pro v${dashboardVersion} Dashboard - Initialized`);
 }
 
 function yadoreLoadDashboardStats() {
