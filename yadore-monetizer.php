@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.27
+Version: 2.9.28
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.27');
+define('YADORE_PLUGIN_VERSION', '2.9.28');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -71,6 +71,7 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_clear_error_log', array($this, 'ajax_clear_error_log'));
             add_action('wp_ajax_yadore_get_error_logs', array($this, 'ajax_get_error_logs'));
             add_action('wp_ajax_yadore_resolve_error', array($this, 'ajax_resolve_error'));
+            add_action('wp_ajax_yadore_get_dashboard_stats', array($this, 'ajax_get_dashboard_stats'));
             add_action('wp_ajax_yadore_test_system_component', array($this, 'ajax_test_system_component'));
             add_action('wp_ajax_yadore_export_data', array($this, 'ajax_export_data'));
             add_action('wp_ajax_yadore_import_data', array($this, 'ajax_import_data'));
@@ -1972,6 +1973,23 @@ HTML
         } catch (Exception $e) {
             $this->log_error('Failed to load scanner analytics', $e);
             wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_get_dashboard_stats() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $stats = $this->get_dashboard_statistics();
+
+            wp_send_json_success($stats);
+        } catch (Exception $e) {
+            $this->log_error('Failed to load dashboard statistics', $e);
+            wp_send_json_error(array('message' => $e->getMessage()));
         }
     }
 
@@ -3935,6 +3953,429 @@ HTML
         }
 
         return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE product_validated = 1");
+    }
+
+    private function get_dashboard_statistics() {
+        $defaults = array(
+            'total_products' => 0,
+            'scanned_posts' => 0,
+            'overlay_views' => 0,
+            'conversion_rate' => 0,
+        );
+
+        $cached = get_option('yadore_stats_cache', array());
+        if (!is_array($cached)) {
+            $cached = array();
+        }
+
+        $stats = wp_parse_args($cached, $defaults);
+
+        $computed_products = $this->get_total_products_displayed();
+        if ($computed_products > 0) {
+            $stats['total_products'] = max((int) $stats['total_products'], $computed_products);
+        } else {
+            $stats['total_products'] = (int) $stats['total_products'];
+        }
+
+        $stats['scanned_posts'] = $this->get_scanned_post_count();
+        $stats['overlay_views'] = $this->get_overlay_view_count();
+        $stats['conversion_rate'] = $this->calculate_conversion_rate($stats);
+
+        $activity = $this->get_recent_activity_entries();
+
+        $cache_payload = array(
+            'total_products' => (int) $stats['total_products'],
+            'scanned_posts' => (int) $stats['scanned_posts'],
+            'overlay_views' => (int) $stats['overlay_views'],
+            'conversion_rate' => $this->format_conversion_rate_for_storage($stats['conversion_rate']),
+        );
+
+        update_option('yadore_stats_cache', $cache_payload);
+
+        return array(
+            'total_products' => (int) $stats['total_products'],
+            'scanned_posts' => (int) $stats['scanned_posts'],
+            'overlay_views' => (int) $stats['overlay_views'],
+            'conversion_rate' => (float) $stats['conversion_rate'],
+            'activity' => $activity,
+        );
+    }
+
+    private function get_total_products_displayed() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if (!$this->table_exists($table)) {
+            return 0;
+        }
+
+        $total = $wpdb->get_var("SELECT SUM(product_count) FROM {$table} WHERE product_count > 0 AND product_validated = 1");
+
+        if ($total === null) {
+            return 0;
+        }
+
+        return max(0, (int) $total);
+    }
+
+    private function get_overlay_view_count() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_analytics';
+
+        if (!$this->table_exists($table)) {
+            return 0;
+        }
+
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$table} WHERE event_type = %s",
+                'overlay_view'
+            )
+        );
+
+        if ($count === null) {
+            return 0;
+        }
+
+        return (int) $count;
+    }
+
+    private function calculate_conversion_rate($stats) {
+        $base_rate = 0.0;
+
+        if (isset($stats['conversion_rate'])) {
+            if (is_numeric($stats['conversion_rate'])) {
+                $base_rate = (float) $stats['conversion_rate'];
+            } elseif (is_string($stats['conversion_rate'])) {
+                $base_rate = (float) preg_replace('/[^0-9\.,]/', '', $stats['conversion_rate']);
+            }
+        }
+
+        global $wpdb;
+        $analytics_table = $wpdb->prefix . 'yadore_analytics';
+
+        if ($this->table_exists($analytics_table)) {
+            $clicks = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$analytics_table} WHERE event_type = %s",
+                    'product_click'
+                )
+            );
+            $conversions = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$analytics_table} WHERE event_type = %s",
+                    'conversion'
+                )
+            );
+            $views = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$analytics_table} WHERE event_type IN (%s, %s)",
+                    'product_view',
+                    'overlay_view'
+                )
+            );
+
+            $clicks = is_numeric($clicks) ? (int) $clicks : 0;
+            $conversions = is_numeric($conversions) ? (int) $conversions : 0;
+            $views = is_numeric($views) ? (int) $views : 0;
+
+            $reference = $conversions > 0 ? $conversions : $clicks;
+
+            if ($views > 0 && $reference > 0) {
+                return round(($reference / $views) * 100, 2);
+            }
+        }
+
+        return round($base_rate, 2);
+    }
+
+    private function format_conversion_rate_for_storage($rate) {
+        if (!is_numeric($rate)) {
+            $rate = (float) preg_replace('/[^0-9\.,]/', '', (string) $rate);
+        }
+
+        $value = round((float) $rate, 2);
+
+        if (function_exists('number_format_i18n')) {
+            return number_format_i18n($value, 2) . '%';
+        }
+
+        return sprintf('%.2f%%', $value);
+    }
+
+    private function get_recent_activity_entries($limit = 6) {
+        global $wpdb;
+
+        $activities = array();
+        $analytics_table = $wpdb->prefix . 'yadore_analytics';
+
+        if ($this->table_exists($analytics_table)) {
+            $rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT event_type, event_data, post_id, user_id, created_at FROM {$analytics_table} ORDER BY created_at DESC LIMIT %d",
+                    $limit
+                ),
+                ARRAY_A
+            );
+
+            if (is_array($rows)) {
+                foreach ($rows as $row) {
+                    $activities[] = $this->format_activity_entry($row);
+                }
+            }
+        }
+
+        if (count($activities) < $limit) {
+            $remaining = $limit - count($activities);
+            $keywords_table = $wpdb->prefix . 'yadore_post_keywords';
+
+            if ($remaining > 0 && $this->table_exists($keywords_table)) {
+                $rows = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT post_title, last_scanned, scan_status FROM {$keywords_table} WHERE last_scanned IS NOT NULL AND last_scanned <> '' ORDER BY last_scanned DESC LIMIT %d",
+                        $remaining
+                    ),
+                    ARRAY_A
+                );
+
+                if (is_array($rows)) {
+                    foreach ($rows as $row) {
+                        $activities[] = $this->format_scan_activity_fallback($row);
+                    }
+                }
+            }
+        }
+
+        $activities = array_filter($activities, function ($entry) {
+            return is_array($entry) && !empty($entry['title']);
+        });
+
+        usort($activities, function ($a, $b) {
+            $time_a = isset($a['timestamp']) ? strtotime($a['timestamp']) : 0;
+            $time_b = isset($b['timestamp']) ? strtotime($b['timestamp']) : 0;
+
+            return $time_b <=> $time_a;
+        });
+
+        if ($limit > 0) {
+            $activities = array_slice($activities, 0, $limit);
+        }
+
+        return array_values($activities);
+    }
+
+    private function format_activity_entry($row) {
+        $type = isset($row['event_type']) ? sanitize_key((string) $row['event_type']) : '';
+        $timestamp = isset($row['created_at']) && $row['created_at'] !== '' ? $row['created_at'] : current_time('mysql');
+        $post_id = isset($row['post_id']) ? (int) $row['post_id'] : 0;
+        $post_title = $post_id > 0 ? get_the_title($post_id) : '';
+
+        $data = array();
+        if (!empty($row['event_data'])) {
+            $decoded = json_decode($row['event_data'], true);
+            if (is_array($decoded)) {
+                $data = $decoded;
+            }
+        }
+
+        $entry = array(
+            'type' => $type !== '' ? $type : 'info',
+            'icon' => 'dashicons-info',
+            'title' => '',
+            'description' => '',
+            'timestamp' => $timestamp,
+            'time' => $this->format_activity_time_absolute($timestamp),
+            'relative_time' => $this->format_activity_time_relative($timestamp),
+        );
+
+        switch ($type) {
+            case 'overlay_view':
+                $keyword = isset($data['keyword']) ? sanitize_text_field((string) $data['keyword']) : '';
+                $product_count = isset($data['product_count']) ? (int) $data['product_count'] : 0;
+                $entry['icon'] = 'dashicons-visibility';
+                $entry['title'] = __('Overlay ausgeliefert', 'yadore-monetizer');
+                if ($keyword !== '') {
+                    $entry['description'] = sprintf(
+                        __('Produkt-Overlay für „%1$s“ mit %2$d Angeboten angezeigt.', 'yadore-monetizer'),
+                        $keyword,
+                        $product_count
+                    );
+                } else {
+                    $entry['description'] = __('Produkt-Overlay erfolgreich ausgeliefert.', 'yadore-monetizer');
+                }
+                break;
+
+            case 'shortcode_usage':
+                $keyword = isset($data['keyword']) ? sanitize_text_field((string) $data['keyword']) : '';
+                $format = isset($data['format']) ? sanitize_text_field((string) $data['format']) : '';
+                $entry['icon'] = 'dashicons-media-code';
+                $entry['title'] = __('Shortcode ausgeliefert', 'yadore-monetizer');
+                if ($keyword !== '') {
+                    $entry['description'] = sprintf(
+                        __('Shortcode-Ausgabe für „%1$s“ im %2$s-Layout generiert.', 'yadore-monetizer'),
+                        $keyword,
+                        $format !== '' ? $format : __('Standard', 'yadore-monetizer')
+                    );
+                } else {
+                    $entry['description'] = __('Shortcode-Ausgabe erfolgreich generiert.', 'yadore-monetizer');
+                }
+                break;
+
+            case 'auto_injection':
+                $keyword = isset($data['keyword']) ? sanitize_text_field((string) $data['keyword']) : '';
+                $entry['icon'] = 'dashicons-admin-page';
+                $entry['title'] = __('Automatische Produktempfehlung', 'yadore-monetizer');
+                if ($keyword !== '') {
+                    $entry['description'] = sprintf(
+                        __('Produktempfehlung für „%s“ wurde automatisch eingefügt.', 'yadore-monetizer'),
+                        $keyword
+                    );
+                } else {
+                    $entry['description'] = __('Automatische Produktempfehlung wurde eingefügt.', 'yadore-monetizer');
+                }
+                $entry['type'] = 'success';
+                break;
+
+            case 'post_scan':
+                $status = isset($data['status']) ? sanitize_key((string) $data['status']) : '';
+                $entry['icon'] = 'dashicons-update';
+                $entry['title'] = __('Beitrag gescannt', 'yadore-monetizer');
+                $status_label = $this->translate_scan_status($status);
+                if ($post_title !== '') {
+                    $entry['description'] = sprintf(
+                        __('Scan von „%1$s“ abgeschlossen (%2$s).', 'yadore-monetizer'),
+                        $post_title,
+                        $status_label
+                    );
+                } else {
+                    $entry['description'] = sprintf(
+                        __('Scan abgeschlossen (%s).', 'yadore-monetizer'),
+                        $status_label
+                    );
+                }
+                $entry['type'] = $status === 'failed' ? 'error' : 'success';
+                break;
+
+            case 'product_click':
+                $keyword = isset($data['keyword']) ? sanitize_text_field((string) $data['keyword']) : '';
+                $entry['icon'] = 'dashicons-migrate';
+                $entry['title'] = __('Produktklick erfasst', 'yadore-monetizer');
+                if ($keyword !== '') {
+                    $entry['description'] = sprintf(
+                        __('Ein Klick auf ein Angebot zu „%s“ wurde registriert.', 'yadore-monetizer'),
+                        $keyword
+                    );
+                } else {
+                    $entry['description'] = __('Ein Produktklick wurde registriert.', 'yadore-monetizer');
+                }
+                $entry['type'] = 'success';
+                break;
+
+            case 'conversion':
+                $entry['icon'] = 'dashicons-chart-line';
+                $entry['title'] = __('Conversion erfasst', 'yadore-monetizer');
+                $amount = isset($data['amount']) ? sanitize_text_field((string) $data['amount']) : '';
+                if ($amount !== '') {
+                    $entry['description'] = sprintf(__('Neue Conversion im Wert von %s.', 'yadore-monetizer'), $amount);
+                } else {
+                    $entry['description'] = __('Neue Conversion registriert.', 'yadore-monetizer');
+                }
+                $entry['type'] = 'success';
+                break;
+
+            default:
+                $entry['icon'] = 'dashicons-info';
+                $entry['title'] = __('Systemaktivität', 'yadore-monetizer');
+                if ($post_title !== '') {
+                    $entry['description'] = sprintf(
+                        __('Aktivität zu „%s“ aufgezeichnet.', 'yadore-monetizer'),
+                        $post_title
+                    );
+                } else {
+                    $entry['description'] = __('Systemaktivität aufgezeichnet.', 'yadore-monetizer');
+                }
+                break;
+        }
+
+        if ($entry['title'] === '') {
+            $entry['title'] = __('Systemaktivität', 'yadore-monetizer');
+        }
+
+        $entry['title'] = sanitize_text_field($entry['title']);
+        $entry['description'] = sanitize_text_field($entry['description']);
+
+        return $entry;
+    }
+
+    private function format_scan_activity_fallback($row) {
+        $timestamp = isset($row['last_scanned']) && $row['last_scanned'] !== '' ? $row['last_scanned'] : current_time('mysql');
+        $post_title = isset($row['post_title']) ? sanitize_text_field((string) $row['post_title']) : '';
+        $status = isset($row['scan_status']) ? sanitize_key((string) $row['scan_status']) : '';
+
+        return array(
+            'type' => 'scan',
+            'icon' => 'dashicons-search',
+            'title' => __('Automatischer Scan', 'yadore-monetizer'),
+            'description' => sprintf(
+                __('Beitrag „%1$s“ wurde gescannt (%2$s).', 'yadore-monetizer'),
+                $post_title !== '' ? $post_title : __('Unbekannter Beitrag', 'yadore-monetizer'),
+                $this->translate_scan_status($status)
+            ),
+            'timestamp' => $timestamp,
+            'time' => $this->format_activity_time_absolute($timestamp),
+            'relative_time' => $this->format_activity_time_relative($timestamp),
+        );
+    }
+
+    private function format_activity_time_absolute($timestamp) {
+        $time = strtotime($timestamp);
+        if ($time === false || $time <= 0) {
+            return '';
+        }
+
+        $format = get_option('date_format', 'd.m.Y') . ' ' . get_option('time_format', 'H:i');
+
+        if (function_exists('date_i18n')) {
+            return date_i18n($format, $time);
+        }
+
+        return date('d.m.Y H:i', $time);
+    }
+
+    private function format_activity_time_relative($timestamp) {
+        $time = strtotime($timestamp);
+        if ($time === false || $time <= 0) {
+            return '';
+        }
+
+        if (function_exists('human_time_diff')) {
+            $now = current_time('timestamp');
+            $diff = human_time_diff($time, $now);
+            return sprintf(__('vor %s', 'yadore-monetizer'), $diff);
+        }
+
+        return '';
+    }
+
+    private function translate_scan_status($status) {
+        switch ($status) {
+            case 'completed':
+            case 'completed_manual':
+            case 'completed_ai':
+                return __('erfolgreich', 'yadore-monetizer');
+
+            case 'failed':
+                return __('fehlgeschlagen', 'yadore-monetizer');
+
+            case 'skipped':
+                return __('übersprungen', 'yadore-monetizer');
+
+            case 'pending':
+                return __('ausstehend', 'yadore-monetizer');
+
+            default:
+                return __('in Bearbeitung', 'yadore-monetizer');
+        }
     }
 
     private function sanitize_post_types($post_types) {
