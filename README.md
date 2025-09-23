@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.25 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.26 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.25 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.26 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
@@ -16,11 +16,13 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **19 AJAX Endpoints** - Alle korrekt implementiert inkl. Cache-Tools & Diagnostics
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.25**
+## 🌟 **NEU IN VERSION 2.9.26**
 
-- ✅ **Cache-Dashboard & Statistiken** – Tools- und Debug-Seiten zeigen jetzt Cache-Größe, Einträge und Hit-Rate aus dem neuen Telemetrie-System.
-- ✅ **Neue Cache-AJAX-Endpunkte** – `yadore_get_tool_stats`, `yadore_clear_cache` und `yadore_analyze_cache` arbeiten vollständig per AJAX ohne Seitenreload.
-- ✅ **Automatisches Hit/Miss-Tracking** – Produkt- und AI-Anfragen aktualisieren die Cache-Telemetrie inklusive Reset bei Aktivierung oder manueller Bereinigung.
+- ✅ **Palette-basierte Template-Farben** – Alle Overlay- und Shortcode-Layouts lassen sich jetzt direkt im Backend mit einer festen Farbpalette branden.
+- ✅ **Intuitive Farbwähler im Backend** – Hex-Werte, Vorschau und Palette-Swatches sorgen für konsistente Markenfarben ohne eigenes CSS.
+- ✅ **Globale CSS-Variablen** – Frontend-Templates nutzen dynamische Variablen für Buttons, Badges, Platzhalter und Dark-Mode-Anpassungen.
+- ✅ **Cache-Dashboard & Statistiken** – Telemetrie zu Cache-Größe, Einträgen und Hit-Rate bleibt erhalten und wurde auf Version 2.9.26 abgestimmt.
+- ✅ **Cache-AJAX-Endpunkte** – `yadore_get_tool_stats`, `yadore_clear_cache` und `yadore_analyze_cache` arbeiten weiterhin vollständig per AJAX.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -67,7 +69,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.25:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.26:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -269,12 +271,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.25 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.26 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.25:**
-- 📊 Cache-Dashboard im Admin – Tools- und Debug-Seiten liefern Live-Statistiken zu Größe, Einträgen und Hit-Rate.
-- 🧼 Ein-Klick-Cache-Bereinigung – `yadore_clear_cache` leert Produkt-, AI- und Transient-Caches inklusive Telemetrie-Reset.
-- 🤖 Automatisches Hit/Miss-Tracking – Jede Produkt- und AI-Abfrage aktualisiert die Cache-Metriken für präzisere Analysen.
+### **Neue Highlights in v2.9.26:**
+- 🎨 Palette-basierte Template-Farben – Branding für alle Overlay- und Shortcode-Layouts direkt aus dem Backend.
+- 🖌️ Farbpaletten & Hex-Ausgabe – Farbwähler mit Vorschau und Palette sorgen für konsistente Markenfarben ohne Custom-CSS.
+- 🌓 CSS-Variablen & Dark-Mode – Buttons, Badges und Platzhalter reagieren automatisch auf deine Palette und den Dark-Mode.
+- 📊 Cache-Dashboard & Telemetrie – Live-Statistiken zu Cache-Größe, Einträgen und Hit/Miss-Verhältnis bleiben auf 2.9.26 optimiert.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -290,11 +293,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.25 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.26 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.25** - Production-Ready Market Release
+**Current Version: 2.9.26** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.25</span>
+        <span class="version-badge">v2.9.26</span>
     </h1>
 
     <?php
@@ -24,6 +24,68 @@
     if (trim($current_ai_prompt) === '') {
         $current_ai_prompt = $default_ai_prompt;
     }
+
+    $plugin_instance = class_exists('YadoreMonetizer') ? YadoreMonetizer::get_instance() : null;
+    $color_palette = isset($color_palette) && is_array($color_palette)
+        ? $color_palette
+        : ($plugin_instance instanceof YadoreMonetizer ? $plugin_instance->get_color_palette() : array());
+    $shortcode_colors = isset($shortcode_colors) && is_array($shortcode_colors)
+        ? $shortcode_colors
+        : ($plugin_instance instanceof YadoreMonetizer ? $plugin_instance->get_template_colors('shortcode') : array());
+    $overlay_colors = isset($overlay_colors) && is_array($overlay_colors)
+        ? $overlay_colors
+        : ($plugin_instance instanceof YadoreMonetizer ? $plugin_instance->get_template_colors('overlay') : array());
+
+    $color_field_definitions = array(
+        'primary' => array(
+            'label' => esc_html__('Primary color', 'yadore-monetizer'),
+            'description' => esc_html__('Used for buttons, highlights and interactive elements.', 'yadore-monetizer'),
+        ),
+        'button_text' => array(
+            'label' => esc_html__('Primary text', 'yadore-monetizer'),
+            'description' => esc_html__('Text color for primary buttons and overlays.', 'yadore-monetizer'),
+        ),
+        'accent' => array(
+            'label' => esc_html__('Accent color', 'yadore-monetizer'),
+            'description' => esc_html__('Applies to prices and emphasis text.', 'yadore-monetizer'),
+        ),
+        'text' => array(
+            'label' => esc_html__('Heading text', 'yadore-monetizer'),
+            'description' => esc_html__('Used for product titles and main copy.', 'yadore-monetizer'),
+        ),
+        'muted' => array(
+            'label' => esc_html__('Muted text', 'yadore-monetizer'),
+            'description' => esc_html__('Secondary information such as merchants or disclaimers.', 'yadore-monetizer'),
+        ),
+        'border' => array(
+            'label' => esc_html__('Borders', 'yadore-monetizer'),
+            'description' => esc_html__('Card outlines, separators and focus rings.', 'yadore-monetizer'),
+        ),
+        'background' => array(
+            'label' => esc_html__('Template background', 'yadore-monetizer'),
+            'description' => esc_html__('Wrapper background for template containers.', 'yadore-monetizer'),
+        ),
+        'card_background' => array(
+            'label' => esc_html__('Card surface', 'yadore-monetizer'),
+            'description' => esc_html__('Individual product cards and overlays.', 'yadore-monetizer'),
+        ),
+        'placeholder' => array(
+            'label' => esc_html__('Placeholder background', 'yadore-monetizer'),
+            'description' => esc_html__('Image placeholders and loading states.', 'yadore-monetizer'),
+        ),
+        'placeholder_text' => array(
+            'label' => esc_html__('Placeholder icon', 'yadore-monetizer'),
+            'description' => esc_html__('Icon color for placeholders and subtle text.', 'yadore-monetizer'),
+        ),
+        'badge' => array(
+            'label' => esc_html__('Badge background', 'yadore-monetizer'),
+            'description' => esc_html__('Promo badges and highlight ribbons.', 'yadore-monetizer'),
+        ),
+        'badge_text' => array(
+            'label' => esc_html__('Badge text', 'yadore-monetizer'),
+            'description' => esc_html__('Text color for promotional badges.', 'yadore-monetizer'),
+        ),
+    );
 
     ?>
 
@@ -540,6 +602,99 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="form-section">
+                            <h3><span class="dashicons dashicons-art"></span> <?php esc_html_e('Template Colors', 'yadore-monetizer'); ?></h3>
+                            <p class="form-description"><?php esc_html_e('Fine-tune the colors used by the built-in templates. Select a tone from the palette or enter custom hex values.', 'yadore-monetizer'); ?></p>
+                            <div class="color-settings-grid">
+                                <div class="color-settings-card">
+                                    <h4><?php esc_html_e('Shortcode Templates', 'yadore-monetizer'); ?></h4>
+                                    <?php foreach ($color_field_definitions as $color_key => $definition) :
+                                        $field_id = 'yadore_shortcode_colors_' . $color_key;
+                                        $field_value = isset($shortcode_colors[$color_key]) ? (string) $shortcode_colors[$color_key] : '';
+                                        if ($field_value === '') {
+                                            $field_value = '#000000';
+                                        }
+                                        ?>
+                                        <div class="color-field">
+                                            <label for="<?php echo esc_attr($field_id); ?>">
+                                                <?php echo esc_html($definition['label']); ?>
+                                            </label>
+                                            <div class="color-input-wrapper">
+                                                <input type="color"
+                                                       id="<?php echo esc_attr($field_id); ?>"
+                                                       name="yadore_shortcode_colors[<?php echo esc_attr($color_key); ?>]"
+                                                       value="<?php echo esc_attr($field_value); ?>"
+                                                       class="color-picker-input">
+                                                <input type="text" class="color-value-display" value="<?php echo esc_attr($field_value); ?>" readonly>
+                                            </div>
+                                            <?php if (!empty($definition['description'])) : ?>
+                                                <p class="form-description"><?php echo esc_html($definition['description']); ?></p>
+                                            <?php endif; ?>
+                                            <?php if (!empty($color_palette)) : ?>
+                                                <div class="color-palette-swatches" role="group" aria-label="<?php esc_attr_e('Available colors', 'yadore-monetizer'); ?>">
+                                                    <?php foreach ($color_palette as $palette_value => $palette_label) :
+                                                        $palette_value = (string) $palette_value;
+                                                        ?>
+                                                        <button type="button"
+                                                                class="color-swatch"
+                                                                data-target="<?php echo esc_attr($field_id); ?>"
+                                                                data-color="<?php echo esc_attr($palette_value); ?>"
+                                                                style="background-color: <?php echo esc_attr($palette_value); ?>;"
+                                                                title="<?php echo esc_attr($palette_label . ' (' . strtoupper($palette_value) . ')'); ?>">
+                                                            <span class="screen-reader-text"><?php echo esc_html($palette_label); ?></span>
+                                                        </button>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="color-settings-card">
+                                    <h4><?php esc_html_e('Overlay Template', 'yadore-monetizer'); ?></h4>
+                                    <?php foreach ($color_field_definitions as $color_key => $definition) :
+                                        $field_id = 'yadore_overlay_colors_' . $color_key;
+                                        $field_value = isset($overlay_colors[$color_key]) ? (string) $overlay_colors[$color_key] : '';
+                                        if ($field_value === '') {
+                                            $field_value = '#000000';
+                                        }
+                                        ?>
+                                        <div class="color-field">
+                                            <label for="<?php echo esc_attr($field_id); ?>">
+                                                <?php echo esc_html($definition['label']); ?>
+                                            </label>
+                                            <div class="color-input-wrapper">
+                                                <input type="color"
+                                                       id="<?php echo esc_attr($field_id); ?>"
+                                                       name="yadore_overlay_colors[<?php echo esc_attr($color_key); ?>]"
+                                                       value="<?php echo esc_attr($field_value); ?>"
+                                                       class="color-picker-input">
+                                                <input type="text" class="color-value-display" value="<?php echo esc_attr($field_value); ?>" readonly>
+                                            </div>
+                                            <?php if (!empty($definition['description'])) : ?>
+                                                <p class="form-description"><?php echo esc_html($definition['description']); ?></p>
+                                            <?php endif; ?>
+                                            <?php if (!empty($color_palette)) : ?>
+                                                <div class="color-palette-swatches" role="group" aria-label="<?php esc_attr_e('Available colors', 'yadore-monetizer'); ?>">
+                                                    <?php foreach ($color_palette as $palette_value => $palette_label) :
+                                                        $palette_value = (string) $palette_value;
+                                                        ?>
+                                                        <button type="button"
+                                                                class="color-swatch"
+                                                                data-target="<?php echo esc_attr($field_id); ?>"
+                                                                data-color="<?php echo esc_attr($palette_value); ?>"
+                                                                style="background-color: <?php echo esc_attr($palette_value); ?>;"
+                                                                title="<?php echo esc_attr($palette_label . ' (' . strtoupper($palette_value) . ')'); ?>">
+                                                            <span class="screen-reader-text"><?php echo esc_html($palette_label); ?></span>
+                                                        </button>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -761,7 +916,7 @@ jQuery(document).ready(function($) {
     $('#test-gemini-api').on('click', yadoreTestGeminiApi);
     $('#test-yadore-api').on('click', yadoreTestYadoreApi);
 
-    console.log('Yadore Monetizer Pro v2.9.25 Settings - Initialized');
+    console.log('Yadore Monetizer Pro v2.9.26 Settings - Initialized');
 });
 
 function yadoreTestGeminiApi() {

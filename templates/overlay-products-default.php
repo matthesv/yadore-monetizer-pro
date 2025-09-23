@@ -5,6 +5,13 @@ if (!defined('ABSPATH')) {
 
 $products = isset($products) && is_array($products) ? $products : array();
 $button_label = isset($button_label) ? (string) $button_label : __('Zum Angebot →', 'yadore-monetizer');
+$color_style = '';
+if (class_exists('YadoreMonetizer')) {
+    $instance = YadoreMonetizer::get_instance();
+    if ($instance instanceof YadoreMonetizer) {
+        $color_style = $instance->get_template_color_style('overlay');
+    }
+}
 
 if (empty($products)) :
     ?>
@@ -17,7 +24,7 @@ if (empty($products)) :
     return;
 endif;
 ?>
-<div class="overlay-products">
+<div class="overlay-products" <?php if ($color_style !== '') : ?>style="<?php echo esc_attr($color_style); ?>"<?php endif; ?>>
     <?php foreach ($products as $product) :
         $price_parts = yadore_get_formatted_price_parts($product['price'] ?? array());
         $price_amount = $price_parts['amount'] !== '' ? $price_parts['amount'] : 'N/A';
@@ -85,14 +92,15 @@ endif;
     gap: 20px;
     max-width: 420px;
     margin: 0 auto;
+    background-color: var(--yadore-background, transparent);
 }
 
 .overlay-product {
-    background: #f9f9f9;
+    background: var(--yadore-card-bg, #f9f9f9);
     border-radius: 12px;
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--yadore-border, #e9ecef);
     cursor: pointer;
 }
 
@@ -103,7 +111,7 @@ endif;
 
 .overlay-product:focus-within,
 .overlay-product:focus {
-    outline: 2px solid #3498db;
+    outline: 2px solid var(--yadore-primary, #3498db);
     outline-offset: 3px;
 }
 
@@ -120,12 +128,12 @@ endif;
 .overlay-product-image-placeholder {
     width: 100%;
     height: 160px;
-    background: #ecf0f1;
+    background: var(--yadore-placeholder, #ecf0f1);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 32px;
-    color: #95a5a6;
+    color: var(--yadore-placeholder-text, #95a5a6);
 }
 
 .overlay-product-content {
@@ -135,7 +143,7 @@ endif;
 .overlay-product-title {
     font-size: 16px;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--yadore-text, #2c3e50);
     margin: 0 0 10px 0;
     line-height: 1.4;
     display: -webkit-box;
@@ -151,20 +159,20 @@ endif;
 .overlay-price-amount {
     font-size: 20px;
     font-weight: 700;
-    color: #27ae60;
+    color: var(--yadore-accent, #27ae60);
 }
 
 .overlay-price-currency {
     font-size: 14px;
     font-weight: 600;
     margin-left: 6px;
-    color: #27ae60;
+    color: var(--yadore-accent, #27ae60);
     text-transform: uppercase;
 }
 
 .overlay-product-merchant {
     font-size: 13px;
-    color: #7f8c8d;
+    color: var(--yadore-muted, #7f8c8d);
     margin-bottom: 16px;
 }
 
@@ -172,8 +180,8 @@ endif;
     display: block;
     width: 100%;
     padding: 12px 16px;
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
+    background: linear-gradient(135deg, var(--yadore-primary-light, #5dade2), var(--yadore-primary-dark, #2980b9));
+    color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
     border-radius: 8px;
     font-weight: 600;
@@ -183,9 +191,9 @@ endif;
 }
 
 .overlay-product-button:hover {
-    background: linear-gradient(135deg, #2980b9, #21618c);
+    background: linear-gradient(135deg, var(--yadore-primary-dark, #2980b9), var(--yadore-primary-darker, #21618c));
     transform: translateY(-2px);
-    color: white;
+    color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
 }
 
@@ -193,8 +201,8 @@ endif;
     position: absolute;
     top: 12px;
     left: 12px;
-    background: rgba(52, 152, 219, 0.95);
-    color: #ffffff;
+    background: var(--yadore-badge-rgba, rgba(52, 152, 219, 0.95));
+    color: var(--yadore-badge-text, #ffffff);
     padding: 6px 10px;
     border-radius: 20px;
     font-size: 12px;
