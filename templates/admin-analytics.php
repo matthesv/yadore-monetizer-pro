@@ -1,7 +1,7 @@
 <div class="wrap yadore-admin-wrap">
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-chart-area"></span>
-        Analytics & Performance Reports
+        Analysen & Leistungsberichte
         <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
