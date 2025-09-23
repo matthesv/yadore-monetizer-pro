@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.30
+Version: 2.9.31
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.30');
+define('YADORE_PLUGIN_VERSION', '2.9.31');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -72,6 +72,7 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_get_error_logs', array($this, 'ajax_get_error_logs'));
             add_action('wp_ajax_yadore_resolve_error', array($this, 'ajax_resolve_error'));
             add_action('wp_ajax_yadore_get_dashboard_stats', array($this, 'ajax_get_dashboard_stats'));
+            add_action('wp_ajax_yadore_get_analytics_data', array($this, 'ajax_get_analytics_data'));
             add_action('wp_ajax_yadore_test_system_component', array($this, 'ajax_test_system_component'));
             add_action('wp_ajax_yadore_export_data', array($this, 'ajax_export_data'));
             add_action('wp_ajax_yadore_import_data', array($this, 'ajax_import_data'));
@@ -1964,6 +1965,24 @@ HTML
             wp_send_json_success($stats);
         } catch (Exception $e) {
             $this->log_error('Failed to load dashboard statistics', $e);
+            wp_send_json_error(array('message' => $e->getMessage()));
+        }
+    }
+
+    public function ajax_get_analytics_data() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $period = isset($_POST['period']) ? intval($_POST['period']) : 30;
+            $report = $this->build_analytics_report($period);
+
+            wp_send_json_success($report);
+        } catch (Exception $e) {
+            $this->log_error('Failed to load analytics data', $e);
             wp_send_json_error(array('message' => $e->getMessage()));
         }
     }
@@ -4172,6 +4191,735 @@ HTML
 
         return sprintf('%.2f%%', $value);
     }
+
+    private function build_analytics_report($period_days) {
+        global $wpdb;
+
+        $period = max(1, min(365, (int) $period_days));
+
+        $timezone = $this->get_wp_timezone_object();
+        $end = new \DateTime('now', $timezone);
+        $end->setTime(23, 59, 59);
+
+        $start = clone $end;
+        $start->setTime(0, 0, 0);
+        if ($period > 1) {
+            $start->modify(sprintf('-%d days', $period - 1));
+        }
+
+        $start_string = $start->format('Y-m-d H:i:s');
+        $start_timestamp = $start->getTimestamp();
+
+        $date_map = $this->generate_analytics_date_map($start, $end);
+        $labels = array();
+        $date_index = array();
+        $position = 0;
+        foreach ($date_map as $key => $date) {
+            $date_index[$key] = $position++;
+            $labels[] = $this->format_chart_date_label($date);
+        }
+
+        $label_count = count($labels);
+
+        $summary = array(
+            'product_views' => 0,
+            'overlay_displays' => 0,
+            'average_ctr' => 0,
+            'ai_analyses' => 0,
+        );
+
+        $traffic = array(
+            'daily_average' => 0,
+            'product_pages' => 0,
+            'bounce_rate' => 0,
+            'session_duration' => $this->format_duration_label(0),
+            'chart' => array(
+                'labels' => $labels,
+                'visitors' => $label_count > 0 ? array_fill(0, $label_count, 0) : array(),
+                'views' => $label_count > 0 ? array_fill(0, $label_count, 0) : array(),
+            ),
+        );
+
+        $funnel = array(
+            'page_views' => 0,
+            'product_displays' => 0,
+            'product_clicks' => 0,
+            'conversions' => 0,
+            'display_rate' => 0,
+            'click_rate' => 0,
+            'conversion_rate' => 0,
+        );
+
+        $revenue = array(
+            'monthly_estimate' => 0.0,
+            'revenue_per_click' => 0.0,
+            'top_category' => __('No data', 'yadore-monetizer'),
+            'category_earnings' => 0.0,
+            'trend' => array(
+                'labels' => $labels,
+                'values' => $label_count > 0 ? array_fill(0, $label_count, 0.0) : array(),
+            ),
+        );
+
+        $performance_chart = array(
+            'labels' => $labels,
+            'views' => $label_count > 0 ? array_fill(0, $label_count, 0) : array(),
+            'clicks' => $label_count > 0 ? array_fill(0, $label_count, 0) : array(),
+        );
+
+        $performance_table = array(
+            'views' => array(),
+            'clicks' => array(),
+            'ctr' => array(),
+            'revenue' => array(),
+        );
+
+        $keyword_overview = array(
+            'total' => 0,
+            'active' => 0,
+            'ai' => 0,
+        );
+        $keyword_cloud = array();
+        $keyword_performance = array();
+
+        $page_views_total = 0;
+        $clicks_total = 0;
+        $conversions_total = 0;
+        $session_count = 0;
+        $session_duration_sum = 0;
+        $revenue_total = 0.0;
+        $category_totals = array();
+        $revenue_by_post = array();
+        $post_metrics = array();
+        $keyword_map = array();
+
+        $analytics_table = $wpdb->prefix . 'yadore_analytics';
+        $keywords_table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if ($this->table_exists($analytics_table)) {
+            $event_totals = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT event_type, COUNT(*) AS total FROM {$analytics_table} WHERE created_at >= %s GROUP BY event_type",
+                    $start_string
+                ),
+                ARRAY_A
+            );
+
+            if (is_array($event_totals)) {
+                foreach ($event_totals as $row) {
+                    $type = isset($row['event_type']) ? sanitize_key((string) $row['event_type']) : '';
+                    $total = isset($row['total']) ? (int) $row['total'] : 0;
+
+                    switch ($type) {
+                        case 'product_view':
+                            $summary['product_views'] += $total;
+                            break;
+                        case 'overlay_view':
+                            $summary['overlay_displays'] += $total;
+                            break;
+                        case 'product_click':
+                            $clicks_total += $total;
+                            break;
+                        case 'conversion':
+                            $conversions_total += $total;
+                            break;
+                    }
+                }
+            }
+
+            $daily_rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT DATE(created_at) AS event_day,
+                            SUM(CASE WHEN event_type IN ('product_view','overlay_view') THEN 1 ELSE 0 END) AS views,
+                            SUM(CASE WHEN event_type = 'product_click' THEN 1 ELSE 0 END) AS clicks
+                     FROM {$analytics_table}
+                     WHERE created_at >= %s
+                     GROUP BY DATE(created_at)
+                     ORDER BY DATE(created_at) ASC",
+                    $start_string
+                ),
+                ARRAY_A
+            );
+
+            if (is_array($daily_rows)) {
+                foreach ($daily_rows as $row) {
+                    $day = isset($row['event_day']) ? $row['event_day'] : '';
+                    if (!isset($date_index[$day])) {
+                        continue;
+                    }
+
+                    $index = $date_index[$day];
+                    $views = isset($row['views']) ? (int) $row['views'] : 0;
+                    $clicks = isset($row['clicks']) ? (int) $row['clicks'] : 0;
+
+                    if (isset($performance_chart['views'][$index])) {
+                        $performance_chart['views'][$index] = $views;
+                    }
+                    if (isset($performance_chart['clicks'][$index])) {
+                        $performance_chart['clicks'][$index] = $clicks;
+                    }
+                    if (isset($traffic['chart']['views'][$index])) {
+                        $traffic['chart']['views'][$index] = $views;
+                    }
+
+                    $page_views_total += $views;
+                }
+            }
+
+            $session_rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT session_id, MIN(created_at) AS first_event, MAX(created_at) AS last_event
+                     FROM {$analytics_table}
+                     WHERE created_at >= %s AND session_id IS NOT NULL AND session_id <> ''
+                     GROUP BY session_id",
+                    $start_string
+                ),
+                ARRAY_A
+            );
+
+            if (is_array($session_rows)) {
+                foreach ($session_rows as $session) {
+                    $session_id = isset($session['session_id']) ? (string) $session['session_id'] : '';
+                    if ($session_id === '') {
+                        continue;
+                    }
+
+                    $first = isset($session['first_event']) ? strtotime($session['first_event']) : 0;
+                    $last = isset($session['last_event']) ? strtotime($session['last_event']) : 0;
+
+                    if ($first > 0 && $last >= $first) {
+                        $session_duration_sum += ($last - $first);
+                    }
+
+                    $session_count++;
+                }
+            }
+
+            if (!empty($date_index)) {
+                $visitor_rows = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT DATE(created_at) AS event_day, COUNT(DISTINCT session_id) AS sessions
+                         FROM {$analytics_table}
+                         WHERE created_at >= %s AND session_id IS NOT NULL AND session_id <> ''
+                         GROUP BY DATE(created_at)",
+                        $start_string
+                    ),
+                    ARRAY_A
+                );
+
+                if (is_array($visitor_rows)) {
+                    foreach ($visitor_rows as $row) {
+                        $day = isset($row['event_day']) ? $row['event_day'] : '';
+                        if (!isset($date_index[$day])) {
+                            continue;
+                        }
+
+                        $index = $date_index[$day];
+                        $sessions = isset($row['sessions']) ? (int) $row['sessions'] : 0;
+
+                        if (isset($traffic['chart']['visitors'][$index])) {
+                            $traffic['chart']['visitors'][$index] = $sessions;
+                        }
+                    }
+                }
+            }
+
+            $product_pages = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(DISTINCT post_id) FROM {$analytics_table} WHERE created_at >= %s AND post_id IS NOT NULL AND post_id > 0",
+                    $start_string
+                )
+            );
+            $traffic['product_pages'] = is_numeric($product_pages) ? (int) $product_pages : 0;
+
+            $conversion_rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT DATE(created_at) AS event_day, post_id, event_data FROM {$analytics_table} WHERE created_at >= %s AND event_type = %s",
+                    $start_string,
+                    'conversion'
+                ),
+                ARRAY_A
+            );
+
+            if (is_array($conversion_rows)) {
+                foreach ($conversion_rows as $row) {
+                    $amount = $this->extract_amount_from_event_data($row['event_data']);
+                    if ($amount !== 0.0) {
+                        $revenue_total += $amount;
+                    }
+
+                    $day = isset($row['event_day']) ? $row['event_day'] : '';
+                    if (isset($date_index[$day], $revenue['trend']['values'][$date_index[$day]])) {
+                        $revenue['trend']['values'][$date_index[$day]] += round($amount, 2);
+                    }
+
+                    $post_id = isset($row['post_id']) ? (int) $row['post_id'] : 0;
+                    if ($post_id > 0) {
+                        if (!isset($revenue_by_post[$post_id])) {
+                            $revenue_by_post[$post_id] = 0.0;
+                        }
+                        $revenue_by_post[$post_id] += $amount;
+                    }
+
+                    $category = $this->extract_category_from_event_data($row['event_data']);
+                    if ($category !== '') {
+                        if (!isset($category_totals[$category])) {
+                            $category_totals[$category] = 0.0;
+                        }
+                        $category_totals[$category] += $amount;
+                    }
+                }
+            }
+
+            $performance_rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT post_id,
+                            SUM(CASE WHEN event_type IN ('product_view','overlay_view') THEN 1 ELSE 0 END) AS views,
+                            SUM(CASE WHEN event_type = 'product_click' THEN 1 ELSE 0 END) AS clicks,
+                            SUM(CASE WHEN event_type = 'conversion' THEN 1 ELSE 0 END) AS conversions
+                     FROM {$analytics_table}
+                     WHERE created_at >= %s AND post_id IS NOT NULL AND post_id > 0
+                     GROUP BY post_id",
+                    $start_string
+                ),
+                ARRAY_A
+            );
+
+            if (is_array($performance_rows)) {
+                foreach ($performance_rows as $row) {
+                    $post_id = isset($row['post_id']) ? (int) $row['post_id'] : 0;
+                    if ($post_id <= 0) {
+                        continue;
+                    }
+
+                    $views = isset($row['views']) ? (int) $row['views'] : 0;
+                    $clicks = isset($row['clicks']) ? (int) $row['clicks'] : 0;
+                    $conversions = isset($row['conversions']) ? (int) $row['conversions'] : 0;
+                    $ctr = $views > 0 ? round(($clicks / $views) * 100, 2) : 0.0;
+                    $revenue_amount = isset($revenue_by_post[$post_id]) ? (float) $revenue_by_post[$post_id] : 0.0;
+
+                    $post_metrics[$post_id] = array(
+                        'post_id' => $post_id,
+                        'views' => $views,
+                        'clicks' => $clicks,
+                        'conversions' => $conversions,
+                        'ctr' => $ctr,
+                        'revenue' => $revenue_amount,
+                        'title' => '',
+                        'keyword' => '',
+                    );
+                }
+            }
+        }
+
+        if ($this->table_exists($keywords_table)) {
+            $keyword_rows = $wpdb->get_results(
+                "SELECT post_id, primary_keyword, keyword_confidence, scan_status, product_count, product_validated, last_scanned
+                 FROM {$keywords_table}
+                 WHERE primary_keyword <> ''",
+                ARRAY_A
+            );
+
+            if (is_array($keyword_rows)) {
+                foreach ($keyword_rows as $row) {
+                    $keyword = isset($row['primary_keyword']) ? sanitize_text_field((string) $row['primary_keyword']) : '';
+                    if ($keyword === '') {
+                        continue;
+                    }
+
+                    $post_id = isset($row['post_id']) ? (int) $row['post_id'] : 0;
+                    $scan_status = isset($row['scan_status']) ? sanitize_key((string) $row['scan_status']) : '';
+                    $confidence = isset($row['keyword_confidence']) ? (float) $row['keyword_confidence'] : 0.0;
+                    $product_count = isset($row['product_count']) ? (int) $row['product_count'] : 0;
+                    $validated = isset($row['product_validated']) ? (int) $row['product_validated'] : 0;
+                    $last_scanned = isset($row['last_scanned']) ? strtotime($row['last_scanned']) : 0;
+
+                    $keyword_map[$post_id] = array(
+                        'keyword' => $keyword,
+                        'confidence' => $confidence,
+                        'scan_status' => $scan_status,
+                        'validated' => $validated,
+                    );
+
+                    if (!isset($keyword_cloud[$keyword])) {
+                        $keyword_cloud[$keyword] = 0;
+                    }
+                    $keyword_cloud[$keyword]++;
+
+                    $keyword_overview['total']++;
+
+                    if ($scan_status === 'completed_ai') {
+                        $keyword_overview['ai']++;
+                    }
+
+                    if ($validated || $product_count > 0 || in_array($scan_status, array('completed', 'completed_ai', 'completed_manual'), true)) {
+                        $keyword_overview['active']++;
+                    }
+
+                    if ($last_scanned && $last_scanned >= $start_timestamp && in_array($scan_status, array('completed', 'completed_manual', 'completed_ai'), true)) {
+                        $summary['ai_analyses']++;
+                    }
+                }
+            }
+        }
+
+        if (!empty($post_metrics)) {
+            foreach ($post_metrics as $post_id => $metrics) {
+                $title = get_the_title($post_id);
+                if (!is_string($title) || $title === '') {
+                    $title = sprintf(__('Post #%d', 'yadore-monetizer'), $post_id);
+                } else {
+                    $title = wp_strip_all_tags($title);
+                }
+
+                $keyword = isset($keyword_map[$post_id]['keyword']) ? $keyword_map[$post_id]['keyword'] : '';
+
+                $post_metrics[$post_id]['title'] = $title;
+                $post_metrics[$post_id]['keyword'] = $keyword;
+            }
+
+            $performance_table['views'] = $this->prepare_performance_table($post_metrics, 'views');
+            $performance_table['clicks'] = $this->prepare_performance_table($post_metrics, 'clicks');
+            $performance_table['ctr'] = $this->prepare_performance_table($post_metrics, 'ctr');
+            $performance_table['revenue'] = $this->prepare_performance_table($post_metrics, 'revenue');
+        }
+
+        if (!empty($keyword_map)) {
+            $keyword_stats = array();
+
+            foreach ($keyword_map as $post_id => $meta) {
+                $keyword = $meta['keyword'];
+                if ($keyword === '') {
+                    continue;
+                }
+
+                if (!isset($keyword_stats[$keyword])) {
+                    $keyword_stats[$keyword] = array(
+                        'keyword' => $keyword,
+                        'usage' => 0,
+                        'confidence_sum' => 0.0,
+                        'ai_count' => 0,
+                        'views' => 0,
+                        'clicks' => 0,
+                        'conversions' => 0,
+                    );
+                }
+
+                $keyword_stats[$keyword]['usage']++;
+
+                if ($meta['confidence'] > 0) {
+                    $keyword_stats[$keyword]['confidence_sum'] += (float) $meta['confidence'];
+                }
+
+                if ($meta['scan_status'] === 'completed_ai') {
+                    $keyword_stats[$keyword]['ai_count']++;
+                }
+
+                if (isset($post_metrics[$post_id])) {
+                    $keyword_stats[$keyword]['views'] += (int) $post_metrics[$post_id]['views'];
+                    $keyword_stats[$keyword]['clicks'] += (int) $post_metrics[$post_id]['clicks'];
+                    $keyword_stats[$keyword]['conversions'] += (int) $post_metrics[$post_id]['conversions'];
+                }
+            }
+
+            foreach ($keyword_stats as $keyword => $info) {
+                $usage = max(1, (int) $info['usage']);
+                $avg_confidence = $info['confidence_sum'] > 0 ? round(($info['confidence_sum'] / $usage) * 100, 1) : 0;
+                $ctr = $info['views'] > 0 ? round(($info['clicks'] / $info['views']) * 100, 2) : 0.0;
+                $source = $info['ai_count'] >= ($usage / 2)
+                    ? __('AI', 'yadore-monetizer')
+                    : __('Manual', 'yadore-monetizer');
+
+                $keyword_performance[] = array(
+                    'keyword' => $keyword,
+                    'usage' => $usage,
+                    'ctr' => $ctr,
+                    'clicks' => (int) $info['clicks'],
+                    'confidence' => $avg_confidence,
+                    'source' => $source,
+                );
+            }
+        }
+
+        $view_reference = $summary['product_views'] > 0 ? $summary['product_views'] : $page_views_total;
+        if ($view_reference > 0 && $clicks_total > 0) {
+            $summary['average_ctr'] = round(($clicks_total / $view_reference) * 100, 2);
+        } else {
+            $summary['average_ctr'] = 0;
+        }
+
+        $summary['product_views'] = max($summary['product_views'], $page_views_total);
+
+        $funnel['page_views'] = $page_views_total;
+        $funnel['product_displays'] = $summary['overlay_displays'];
+        $funnel['product_clicks'] = $clicks_total;
+        $funnel['conversions'] = $conversions_total;
+        $funnel['display_rate'] = ($funnel['page_views'] > 0 && $funnel['product_displays'] > 0)
+            ? min(100, round(($funnel['product_displays'] / $funnel['page_views']) * 100, 2))
+            : 0;
+        $funnel['click_rate'] = ($funnel['product_displays'] > 0 && $funnel['product_clicks'] > 0)
+            ? min(100, round(($funnel['product_clicks'] / $funnel['product_displays']) * 100, 2))
+            : 0;
+        $funnel['conversion_rate'] = ($funnel['product_clicks'] > 0 && $funnel['conversions'] > 0)
+            ? min(100, round(($funnel['conversions'] / $funnel['product_clicks']) * 100, 2))
+            : 0;
+
+        $sessions_for_average = $session_count > 0 ? $session_count : $page_views_total;
+        $traffic['daily_average'] = $period > 0 ? round($sessions_for_average / $period, 1) : 0;
+        $traffic['session_duration'] = $this->format_duration_label(
+            $session_count > 0 ? ($session_duration_sum / max(1, $session_count)) : 0
+        );
+
+        if ($session_count > 0) {
+            $sessions_with_click = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(DISTINCT session_id) FROM {$analytics_table} WHERE created_at >= %s AND session_id IS NOT NULL AND session_id <> '' AND event_type = %s",
+                    $start_string,
+                    'product_click'
+                )
+            );
+            $sessions_with_click = is_numeric($sessions_with_click) ? (int) $sessions_with_click : 0;
+
+            $reference = $sessions_with_click > 0 ? $sessions_with_click : ($clicks_total > 0 ? $clicks_total : 0);
+            if ($reference > 0) {
+                $traffic['bounce_rate'] = max(0, min(100, round(100 - (($reference / $session_count) * 100), 2)));
+            } else {
+                $traffic['bounce_rate'] = 100;
+            }
+
+            if (!empty($traffic['chart']['visitors'])) {
+                foreach ($traffic['chart']['visitors'] as $index => $value) {
+                    if ($value === 0 && isset($traffic['chart']['views'][$index])) {
+                        $traffic['chart']['visitors'][$index] = $traffic['chart']['views'][$index];
+                    }
+                }
+            }
+        } elseif ($view_reference > 0 && $clicks_total > 0) {
+            $traffic['bounce_rate'] = max(0, min(100, round(100 - (($clicks_total / $view_reference) * 100), 2)));
+        } else {
+            $traffic['bounce_rate'] = 0;
+        }
+
+        if (!empty($traffic['chart']['views'])) {
+            $has_visitors = false;
+            foreach ($traffic['chart']['visitors'] as $value) {
+                if ($value > 0) {
+                    $has_visitors = true;
+                    break;
+                }
+            }
+            if (!$has_visitors) {
+                $traffic['chart']['visitors'] = $traffic['chart']['views'];
+            }
+        }
+
+        if ($revenue_total > 0) {
+            $revenue['monthly_estimate'] = round(($revenue_total / $period) * 30, 2);
+            $revenue['revenue_per_click'] = $clicks_total > 0 ? round($revenue_total / $clicks_total, 2) : 0.0;
+        }
+
+        if (!empty($category_totals)) {
+            arsort($category_totals);
+            $top_category = key($category_totals);
+            $revenue['top_category'] = sanitize_text_field((string) $top_category);
+            $revenue['category_earnings'] = round((float) current($category_totals), 2);
+        }
+
+        if (!empty($keyword_cloud)) {
+            $cloud_items = array();
+            foreach ($keyword_cloud as $keyword => $count) {
+                $cloud_items[] = array(
+                    'keyword' => $keyword,
+                    'count' => (int) $count,
+                );
+            }
+            usort($cloud_items, function ($a, $b) {
+                return $b['count'] <=> $a['count'];
+            });
+            $keyword_cloud = array_slice($cloud_items, 0, 30);
+        } else {
+            $keyword_cloud = array();
+        }
+
+        if (!empty($keyword_performance)) {
+            usort($keyword_performance, function ($a, $b) {
+                return $b['clicks'] <=> $a['clicks'];
+            });
+            $keyword_performance = array_slice($keyword_performance, 0, 20);
+        }
+
+        return array(
+            'summary' => $summary,
+            'traffic' => $traffic,
+            'funnel' => $funnel,
+            'revenue' => $revenue,
+            'performance' => array(
+                'chart' => $performance_chart,
+                'table' => $performance_table,
+            ),
+            'keywords' => array(
+                'overview' => $keyword_overview,
+                'cloud' => $keyword_cloud,
+                'performance' => $keyword_performance,
+            ),
+        );
+    }
+
+    private function prepare_performance_table($metrics, $metric_key, $limit = 10) {
+        if (!is_array($metrics) || empty($metrics)) {
+            return array();
+        }
+
+        $items = array_values($metrics);
+        usort($items, function ($a, $b) use ($metric_key) {
+            $value_a = isset($a[$metric_key]) ? $a[$metric_key] : 0;
+            $value_b = isset($b[$metric_key]) ? $b[$metric_key] : 0;
+
+            if ($value_a === $value_b) {
+                return 0;
+            }
+
+            return ($value_b <=> $value_a);
+        });
+
+        $items = array_slice($items, 0, $limit);
+        $rows = array();
+
+        foreach ($items as $item) {
+            $rows[] = array(
+                'title' => isset($item['title']) ? $item['title'] : '',
+                'keyword' => isset($item['keyword']) ? $item['keyword'] : '',
+                'views' => isset($item['views']) ? (int) $item['views'] : 0,
+                'clicks' => isset($item['clicks']) ? (int) $item['clicks'] : 0,
+                'ctr' => isset($item['ctr']) ? (float) $item['ctr'] : 0,
+                'revenue' => isset($item['revenue']) ? round((float) $item['revenue'], 2) : 0.0,
+            );
+        }
+
+        return $rows;
+    }
+
+    private function get_wp_timezone_object() {
+        if (function_exists('wp_timezone')) {
+            return wp_timezone();
+        }
+
+        $timezone_string = get_option('timezone_string');
+        if (!empty($timezone_string)) {
+            try {
+                return new \DateTimeZone($timezone_string);
+            } catch (Exception $e) {
+                // Fallback to offset handling below.
+            }
+        }
+
+        $offset = get_option('gmt_offset', 0);
+        $hours = (int) $offset;
+        $minutes = (int) round(abs($offset - $hours) * 60);
+        $sign = $offset >= 0 ? '+' : '-';
+        $formatted = sprintf('%s%02d:%02d', $sign, abs($hours), $minutes);
+
+        try {
+            return new \DateTimeZone($formatted);
+        } catch (Exception $e) {
+            return new \DateTimeZone('UTC');
+        }
+    }
+
+    private function generate_analytics_date_map(\DateTime $start, \DateTime $end) {
+        $dates = array();
+        $period = new \DatePeriod(
+            clone $start,
+            new \DateInterval('P1D'),
+            (clone $end)->modify('+1 day')
+        );
+
+        foreach ($period as $date) {
+            $dates[$date->format('Y-m-d')] = clone $date;
+        }
+
+        return $dates;
+    }
+
+    private function format_chart_date_label(\DateTime $date) {
+        $timestamp = $date->getTimestamp();
+
+        if (function_exists('wp_date')) {
+            return wp_date('M j', $timestamp);
+        }
+
+        if (function_exists('date_i18n')) {
+            return date_i18n('M j', $timestamp);
+        }
+
+        return date('M j', $timestamp);
+    }
+
+    private function format_duration_label($seconds) {
+        $seconds = max(0, (int) round($seconds));
+        $minutes = (int) floor($seconds / 60);
+        $remaining = $seconds % 60;
+
+        if ($minutes > 0) {
+            return sprintf('%dm %02ds', $minutes, $remaining);
+        }
+
+        return sprintf('%ds', $remaining);
+    }
+
+    private function extract_amount_from_event_data($event_data) {
+        if (is_array($event_data)) {
+            $data = $event_data;
+        } else {
+            $decoded = json_decode((string) $event_data, true);
+            $data = is_array($decoded) ? $decoded : null;
+        }
+
+        if (is_array($data)) {
+            foreach (array('amount', 'value', 'revenue', 'total') as $key) {
+                if (isset($data[$key])) {
+                    $value = $data[$key];
+                    if (is_numeric($value)) {
+                        return (float) $value;
+                    }
+                    if (is_string($value)) {
+                        $numeric = preg_replace('/[^0-9\.\-]/', '', $value);
+                        if ($numeric !== '' && is_numeric($numeric)) {
+                            return (float) $numeric;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (is_string($event_data)) {
+            if (preg_match('/-?[0-9]+(?:\.[0-9]+)?/', $event_data, $matches)) {
+                return (float) $matches[0];
+            }
+        }
+
+        return 0.0;
+    }
+
+    private function extract_category_from_event_data($event_data) {
+        if (is_array($event_data)) {
+            $data = $event_data;
+        } else {
+            $decoded = json_decode((string) $event_data, true);
+            $data = is_array($decoded) ? $decoded : null;
+        }
+
+        if (is_array($data)) {
+            foreach (array('category', 'segment', 'keyword', 'label') as $key) {
+                if (isset($data[$key]) && is_string($data[$key]) && $data[$key] !== '') {
+                    return sanitize_text_field($data[$key]);
+                }
+            }
+        }
+
+        return '';
+    }
+
 
     private function get_recent_activity_entries($limit = 6) {
         global $wpdb;

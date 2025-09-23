@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.30 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.31 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '2.9.30',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '2.9.31',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -13,6 +13,12 @@
             keywords: null,
             success: null
         },
+        analyticsData: null,
+        performanceChart: null,
+        trafficChart: null,
+        revenueChart: null,
+        performanceTableData: null,
+        keywordData: null,
         errorLogFilter: 'all',
         cachedErrorLogs: [],
         debugAutoScroll: true,
@@ -1076,6 +1082,17 @@
                 this.loadPerformanceTable($(e.target).val());
             });
 
+            // Refresh button
+            $('#refresh-analytics').on('click', (e) => {
+                e.preventDefault();
+                const period = parseInt($('#analytics-period').val(), 10) || 30;
+                this.loadAnalyticsData(period);
+            });
+
+            this.performanceTableData = null;
+            this.keywordData = null;
+            this.analyticsData = null;
+
             // Initialize charts
             this.initAnalyticsCharts();
 
@@ -1084,9 +1101,23 @@
         },
 
         initAnalyticsCharts: function() {
-            // Initialize Chart.js charts
+            if (typeof Chart === 'undefined') {
+                return;
+            }
+
+            if (this.performanceChart && typeof this.performanceChart.destroy === 'function') {
+                this.performanceChart.destroy();
+            }
+            if (this.trafficChart && typeof this.trafficChart.destroy === 'function') {
+                this.trafficChart.destroy();
+            }
+            if (this.revenueChart && typeof this.revenueChart.destroy === 'function') {
+                this.revenueChart.destroy();
+            }
+
+            // Performance chart
             const performanceCtx = document.getElementById('performance-chart');
-            if (performanceCtx && typeof Chart !== 'undefined') {
+            if (performanceCtx) {
                 this.performanceChart = new Chart(performanceCtx, {
                     type: 'line',
                     data: {
@@ -1096,13 +1127,77 @@
                             data: [],
                             borderColor: '#2271b1',
                             backgroundColor: 'rgba(34, 113, 177, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            fill: true
                         }, {
                             label: 'Clicks',
                             data: [],
                             borderColor: '#00a32a',
                             backgroundColor: 'rgba(0, 163, 42, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Traffic chart
+            const trafficCtx = document.getElementById('traffic-chart');
+            if (trafficCtx) {
+                this.trafficChart = new Chart(trafficCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Visitors',
+                            data: [],
+                            borderColor: '#d63638',
+                            backgroundColor: 'rgba(214, 54, 56, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }, {
+                            label: 'Product Views',
+                            data: [],
+                            borderColor: '#2271b1',
+                            backgroundColor: 'rgba(34, 113, 177, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Revenue chart
+            const revenueCtx = document.getElementById('revenue-chart');
+            if (revenueCtx) {
+                this.revenueChart = new Chart(revenueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: [],
+                            backgroundColor: 'rgba(0, 163, 42, 0.2)',
+                            borderColor: '#00a32a',
+                            borderWidth: 1
                         }]
                     },
                     options: {
@@ -1123,25 +1218,283 @@
                 action: 'yadore_get_analytics_data',
                 nonce: this.nonce,
                 period: period
-            }, (response) => {
-                if (response.success) {
-                    const data = response.data;
-
-                    // Update summary stats
-                    $('#total-product-views').text(data.summary?.product_views?.toLocaleString() || '0');
-                    $('#total-overlays').text(data.summary?.overlay_displays?.toLocaleString() || '0');
-                    $('#average-ctr').text((data.summary?.average_ctr || '0') + '%');
-                    $('#ai-analyses').text(data.summary?.ai_analyses?.toLocaleString() || '0');
-
-                    // Update charts if available
-                    if (this.performanceChart && data.charts && data.charts.performance) {
-                        this.performanceChart.data.labels = data.charts.performance.labels;
-                        this.performanceChart.data.datasets[0].data = data.charts.performance.views;
-                        this.performanceChart.data.datasets[1].data = data.charts.performance.clicks;
-                        this.performanceChart.update();
-                    }
+            }).done((response) => {
+                if (!response || !response.success || !response.data) {
+                    const message = response?.data?.message || null;
+                    this.showAnalyticsError(message);
+                    return;
                 }
+
+                const data = response.data || {};
+                this.analyticsData = data;
+                this.performanceTableData = data.performance?.table || {};
+                this.keywordData = data.keywords || {};
+
+                this.updateAnalyticsSummary(data.summary);
+                this.updateTrafficMetrics(data.traffic);
+                this.updateConversionFunnel(data.funnel);
+                this.updateRevenueMetrics(data.revenue);
+                this.updateAnalyticsCharts(data);
+
+                const metric = $('#performance-metric').val() || 'views';
+                this.loadPerformanceTable(metric);
+
+                this.renderKeywordOverview(this.keywordData);
+                this.renderKeywordCloud(this.keywordData?.cloud);
+                this.renderKeywordPerformance(this.keywordData?.performance);
+            }).fail(() => {
+                this.showAnalyticsError();
             });
+        },
+
+        showAnalyticsError: function(message) {
+            const errorMessage = message || (yadore_admin.strings?.error || 'Failed to load analytics data.');
+
+            this.updateAnalyticsSummary({});
+            this.updateTrafficMetrics({});
+            this.updateConversionFunnel({});
+            this.updateRevenueMetrics({});
+            this.updateAnalyticsCharts({});
+
+            this.performanceTableData = { views: [], clicks: [], ctr: [], revenue: [] };
+            this.keywordData = { overview: { total: 0, active: 0, ai: 0 }, cloud: [], performance: [] };
+
+            const metric = $('#performance-metric').val() || 'views';
+            this.loadPerformanceTable(metric, errorMessage);
+            this.renderKeywordOverview(this.keywordData);
+
+            const $keywordBody = $('#keyword-performance-body');
+            if ($keywordBody.length) {
+                $keywordBody.html(
+                    $('<tr/>').append(
+                        $('<td/>', {
+                            colspan: 6,
+                            'class': 'loading-row'
+                        }).text(errorMessage)
+                    )
+                );
+            }
+
+            const $cloud = $('#keyword-cloud');
+            if ($cloud.length) {
+                $cloud.empty().append(
+                    $('<div/>', { 'class': 'cloud-empty' }).text(errorMessage)
+                );
+            }
+        },
+
+        updateAnalyticsSummary: function(summary = {}) {
+            const views = Number(summary?.product_views) || 0;
+            const overlays = Number(summary?.overlay_displays) || 0;
+            const ctr = Number(summary?.average_ctr) || 0;
+            const aiAnalyses = Number(summary?.ai_analyses) || 0;
+
+            $('#total-product-views').text(this.formatNumber(views));
+            $('#total-overlays').text(this.formatNumber(overlays));
+            $('#average-ctr').text(`${this.formatRate(ctr)}%`);
+            $('#ai-analyses').text(this.formatNumber(aiAnalyses));
+        },
+
+        updateTrafficMetrics: function(traffic = {}) {
+            const dailyAverage = Number(traffic?.daily_average) || 0;
+            const productPages = Number(traffic?.product_pages) || 0;
+            const bounceRate = Number(traffic?.bounce_rate) || 0;
+            const duration = this.formatDuration(traffic?.session_duration);
+
+            $('#daily-visitors').text(this.formatNumber(dailyAverage));
+            $('#product-pages').text(this.formatNumber(productPages));
+            $('#bounce-rate').text(`${this.formatRate(bounceRate)}%`);
+            $('#session-duration').text(duration);
+        },
+
+        updateConversionFunnel: function(funnel = {}) {
+            const pageViews = Number(funnel?.page_views) || 0;
+            const displays = Number(funnel?.product_displays) || 0;
+            const clicks = Number(funnel?.product_clicks) || 0;
+            const conversions = Number(funnel?.conversions) || 0;
+
+            $('#funnel-views').text(this.formatNumber(pageViews));
+            $('#funnel-displays').text(this.formatNumber(displays));
+            $('#funnel-clicks').text(this.formatNumber(clicks));
+            $('#funnel-conversions').text(this.formatNumber(conversions));
+
+            $('#display-rate').text(`${this.formatRate(Number(funnel?.display_rate) || 0)}%`);
+            $('#click-rate').text(`${this.formatRate(Number(funnel?.click_rate) || 0)}%`);
+            $('#conversion-rate').text(`${this.formatRate(Number(funnel?.conversion_rate) || 0)}%`);
+        },
+
+        updateRevenueMetrics: function(revenue = {}) {
+            const monthly = Number(revenue?.monthly_estimate) || 0;
+            const rpc = Number(revenue?.revenue_per_click) || 0;
+            const topCategory = revenue?.top_category || 'No data';
+            const categoryEarnings = Number(revenue?.category_earnings) || 0;
+
+            $('#monthly-revenue').text(this.formatCurrency(monthly));
+            $('#rpc').text(this.formatCurrency(rpc));
+            $('#top-category').text(topCategory);
+            $('#category-earnings').text(`${this.formatCurrency(categoryEarnings)} earned`);
+        },
+
+        updateAnalyticsCharts: function(data = {}) {
+            const performance = data?.performance?.chart || {};
+            if (this.performanceChart) {
+                this.performanceChart.data.labels = Array.isArray(performance.labels) ? performance.labels : [];
+                this.performanceChart.data.datasets[0].data = Array.isArray(performance.views) ? performance.views : [];
+                this.performanceChart.data.datasets[1].data = Array.isArray(performance.clicks) ? performance.clicks : [];
+                this.performanceChart.update();
+            }
+
+            const traffic = data?.traffic?.chart || {};
+            if (this.trafficChart) {
+                this.trafficChart.data.labels = Array.isArray(traffic.labels) ? traffic.labels : [];
+                this.trafficChart.data.datasets[0].data = Array.isArray(traffic.visitors) ? traffic.visitors : [];
+                this.trafficChart.data.datasets[1].data = Array.isArray(traffic.views) ? traffic.views : [];
+                this.trafficChart.update();
+            }
+
+            const revenue = data?.revenue?.trend || {};
+            if (this.revenueChart) {
+                this.revenueChart.data.labels = Array.isArray(revenue.labels) ? revenue.labels : [];
+                this.revenueChart.data.datasets[0].data = Array.isArray(revenue.values) ? revenue.values : [];
+                this.revenueChart.update();
+            }
+        },
+
+        loadPerformanceTable: function(metric = 'views', emptyMessage = null) {
+            const $tbody = $('#performance-table-body');
+            if (!$tbody.length) {
+                return;
+            }
+
+            const rows = (this.performanceTableData && this.performanceTableData[metric]) || [];
+            $tbody.empty();
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+                const message = emptyMessage || 'No performance data available.';
+                $tbody.append(
+                    $('<tr/>').append(
+                        $('<td/>', { colspan: 6, 'class': 'loading-row' }).text(message)
+                    )
+                );
+                return;
+            }
+
+            rows.forEach((row) => {
+                const $tr = $('<tr/>');
+                $tr.append($('<td/>').text(row.title || '—'));
+                $tr.append($('<td/>').text(row.keyword || '—'));
+                $tr.append($('<td/>').text(this.formatNumber(row.views || 0)));
+                $tr.append($('<td/>').text(this.formatNumber(row.clicks || 0)));
+                $tr.append($('<td/>').text(`${this.formatRate(row.ctr || 0)}%`));
+                $tr.append($('<td/>').text(this.formatCurrency(row.revenue || 0)));
+                $tbody.append($tr);
+            });
+        },
+
+        renderKeywordOverview: function(keywords = {}) {
+            const overview = keywords?.overview || {};
+            $('#total-keywords').text(this.formatNumber(Number(overview.total) || 0));
+            $('#active-keywords').text(this.formatNumber(Number(overview.active) || 0));
+            $('#ai-keywords').text(this.formatNumber(Number(overview.ai) || 0));
+        },
+
+        renderKeywordCloud: function(items) {
+            const $container = $('#keyword-cloud');
+            if (!$container.length) {
+                return;
+            }
+
+            $container.empty();
+
+            if (!Array.isArray(items) || items.length === 0) {
+                $container.append(
+                    $('<div/>', { 'class': 'cloud-empty' }).text('No keyword data available.')
+                );
+                return;
+            }
+
+            const counts = items.map((item) => Number(item?.count) || 0);
+            const maxCount = Math.max(...counts, 1);
+
+            items.forEach((item) => {
+                const keyword = (item && item.keyword) ? String(item.keyword) : '';
+                if (!keyword) {
+                    return;
+                }
+                const count = Number(item.count) || 0;
+                const weight = count / maxCount;
+                const fontSize = 0.9 + (weight * 1.1);
+
+                $('<span/>', { 'class': 'keyword-cloud-item' })
+                    .text(keyword)
+                    .attr('data-count', count)
+                    .css('font-size', `${(fontSize * 100).toFixed(0)}%`)
+                    .appendTo($container);
+            });
+        },
+
+        renderKeywordPerformance: function(rows) {
+            const $tbody = $('#keyword-performance-body');
+            if (!$tbody.length) {
+                return;
+            }
+
+            $tbody.empty();
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+                $tbody.append(
+                    $('<tr/>').append(
+                        $('<td/>', { colspan: 6, 'class': 'loading-row' }).text('No keyword performance data available.')
+                    )
+                );
+                return;
+            }
+
+            rows.forEach((row) => {
+                const $tr = $('<tr/>');
+                $tr.append($('<td/>').text(row.keyword || '—'));
+                $tr.append($('<td/>').text(this.formatNumber(row.usage || 0)));
+                $tr.append($('<td/>').text(`${this.formatRate(row.ctr || 0)}%`));
+                $tr.append($('<td/>').text(this.formatNumber(row.clicks || 0)));
+                $tr.append($('<td/>').text(`${this.formatRate(row.confidence || 0)}%`));
+                $tr.append($('<td/>').text(row.source || '—'));
+                $tbody.append($tr);
+            });
+        },
+
+        formatCurrency: function(value) {
+            const numeric = Number.parseFloat(value);
+            if (Number.isFinite(numeric)) {
+                return numeric.toLocaleString(undefined, {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            return '$0.00';
+        },
+
+        formatDuration: function(value) {
+            if (typeof value === 'string' && value.trim() !== '') {
+                return value;
+            }
+
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric)) {
+                return '0s';
+            }
+
+            const totalSeconds = Math.max(0, Math.round(numeric));
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+
+            if (minutes > 0) {
+                return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
+            }
+
+            return `${seconds}s`;
         },
 
         // Tools functionality
