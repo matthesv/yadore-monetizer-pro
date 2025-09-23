@@ -1,13 +1,23 @@
 <div class="wrap yadore-admin-wrap">
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-cart"></span>
-        Yadore Monetizer Pro Dashboard
+        <?php echo esc_html__('Yadore Monetizer Pro – Übersicht', 'yadore-monetizer'); ?>
         <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
     <?php if (get_transient('yadore_activation_notice')): ?>
     <div class="notice notice-success is-dismissible">
-        <p><strong>Yadore Monetizer Pro v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?> activated successfully!</strong> All features are now available.</p>
+        <p>
+            <strong>
+                <?php
+                printf(
+                    esc_html__('Yadore Monetizer Pro v%s wurde erfolgreich aktiviert!', 'yadore-monetizer'),
+                    esc_html(YADORE_PLUGIN_VERSION)
+                );
+                ?>
+            </strong>
+            <?php esc_html_e('Alle Funktionen stehen jetzt zur Verfügung.', 'yadore-monetizer'); ?>
+        </p>
     </div>
     <?php delete_transient('yadore_activation_notice'); endif; ?>
 
@@ -21,8 +31,8 @@
                         <span class="dashicons dashicons-products"></span>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number" id="total-products">Loading...</div>
-                        <div class="stat-label">Products Displayed</div>
+                        <div class="stat-number" id="total-products"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
+                        <div class="stat-label"><?php echo esc_html__('Ausgespielte Produkte', 'yadore-monetizer'); ?></div>
                     </div>
                 </div>
 
@@ -31,8 +41,8 @@
                         <span class="dashicons dashicons-admin-post"></span>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number" id="scanned-posts">Loading...</div>
-                        <div class="stat-label">Posts Scanned</div>
+                        <div class="stat-number" id="scanned-posts"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
+                        <div class="stat-label"><?php echo esc_html__('Gescannte Beiträge', 'yadore-monetizer'); ?></div>
                     </div>
                 </div>
 
@@ -41,8 +51,8 @@
                         <span class="dashicons dashicons-visibility"></span>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number" id="overlay-views">Loading...</div>
-                        <div class="stat-label">Overlay Views</div>
+                        <div class="stat-number" id="overlay-views"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
+                        <div class="stat-label"><?php echo esc_html__('Overlay-Aufrufe', 'yadore-monetizer'); ?></div>
                     </div>
                 </div>
 
@@ -51,8 +61,8 @@
                         <span class="dashicons dashicons-performance"></span>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number" id="conversion-rate">Loading...</div>
-                        <div class="stat-label">Conversion Rate</div>
+                        <div class="stat-number" id="conversion-rate"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
+                        <div class="stat-label"><?php echo esc_html__('Konversionsrate', 'yadore-monetizer'); ?></div>
                     </div>
                 </div>
             </div>
@@ -60,10 +70,10 @@
             <!-- Feature Status -->
             <div class="yadore-card">
                 <div class="card-header">
-                    <h2><span class="dashicons dashicons-admin-settings"></span> Feature Status</h2>
+                    <h2><span class="dashicons dashicons-admin-settings"></span> <?php echo esc_html__('Funktionsstatus', 'yadore-monetizer'); ?></h2>
                     <div class="card-actions">
                         <button class="button button-secondary" id="refresh-status">
-                            <span class="dashicons dashicons-update"></span> Refresh
+                            <span class="dashicons dashicons-update"></span> <?php echo esc_html__('Aktualisieren', 'yadore-monetizer'); ?>
                         </button>
                     </div>
                 </div>
@@ -74,9 +84,9 @@
                                 <span class="dashicons dashicons-wordpress-alt"></span>
                             </div>
                             <div class="feature-details">
-                                <h4>WordPress Integration</h4>
-                                <p>Complete WordPress integration with 8 admin pages</p>
-                                <span class="status-badge status-active">Active</span>
+                                <h4><?php echo esc_html__('WordPress-Integration', 'yadore-monetizer'); ?></h4>
+                                <p><?php echo esc_html__('Umfassende WordPress-Integration mit acht Admin-Seiten', 'yadore-monetizer'); ?></p>
+                                <span class="status-badge status-active"><?php echo esc_html__('Aktiv', 'yadore-monetizer'); ?></span>
                             </div>
                         </div>
 
@@ -85,10 +95,10 @@
                                 <span class="dashicons dashicons-admin-generic"></span>
                             </div>
                             <div class="feature-details">
-                                <h4>AI Content Analysis</h4>
-                                <p>Gemini AI integration for intelligent product detection</p>
+                                <h4><?php echo esc_html__('KI-Inhaltsanalyse', 'yadore-monetizer'); ?></h4>
+                                <p><?php echo esc_html__('Gemini-KI-Integration zur intelligenten Produkterkennung', 'yadore-monetizer'); ?></p>
                                 <span class="status-badge <?php echo get_option('yadore_ai_enabled', false) ? 'status-active' : 'status-inactive'; ?>">
-                                    <?php echo get_option('yadore_ai_enabled', false) ? 'Active' : 'Inactive'; ?>
+                                    <?php echo get_option('yadore_ai_enabled', false) ? esc_html__('Aktiv', 'yadore-monetizer') : esc_html__('Inaktiv', 'yadore-monetizer'); ?>
                                 </span>
                             </div>
                         </div>
@@ -98,10 +108,10 @@
                                 <span class="dashicons dashicons-visibility"></span>
                             </div>
                             <div class="feature-details">
-                                <h4>Product Overlay</h4>
-                                <p>Dynamic product recommendations overlay</p>
+                                <h4><?php echo esc_html__('Produkt-Overlay', 'yadore-monetizer'); ?></h4>
+                                <p><?php echo esc_html__('Dynamische Produktempfehlungen als Overlay', 'yadore-monetizer'); ?></p>
                                 <span class="status-badge <?php echo get_option('yadore_overlay_enabled', true) ? 'status-active' : 'status-inactive'; ?>">
-                                    <?php echo get_option('yadore_overlay_enabled', true) ? 'Active' : 'Inactive'; ?>
+                                    <?php echo get_option('yadore_overlay_enabled', true) ? esc_html__('Aktiv', 'yadore-monetizer') : esc_html__('Inaktiv', 'yadore-monetizer'); ?>
                                 </span>
                             </div>
                         </div>
@@ -111,10 +121,10 @@
                                 <span class="dashicons dashicons-search"></span>
                             </div>
                             <div class="feature-details">
-                                <h4>Auto Post Scanning</h4>
-                                <p>Automatic content analysis and product detection</p>
+                                <h4><?php echo esc_html__('Automatischer Beitrags-Scan', 'yadore-monetizer'); ?></h4>
+                                <p><?php echo esc_html__('Automatische Inhaltsanalyse und Produkterkennung', 'yadore-monetizer'); ?></p>
                                 <span class="status-badge <?php echo get_option('yadore_auto_scan_posts', true) ? 'status-active' : 'status-inactive'; ?>">
-                                    <?php echo get_option('yadore_auto_scan_posts', true) ? 'Active' : 'Inactive'; ?>
+                                    <?php echo get_option('yadore_auto_scan_posts', true) ? esc_html__('Aktiv', 'yadore-monetizer') : esc_html__('Inaktiv', 'yadore-monetizer'); ?>
                                 </span>
                             </div>
                         </div>
@@ -124,10 +134,10 @@
                                 <span class="dashicons dashicons-chart-area"></span>
                             </div>
                             <div class="feature-details">
-                                <h4>Analytics & Tracking</h4>
-                                <p>Comprehensive analytics and performance tracking</p>
+                                <h4><?php echo esc_html__('Analysen & Tracking', 'yadore-monetizer'); ?></h4>
+                                <p><?php echo esc_html__('Umfassende Analysen und Leistungsüberwachung', 'yadore-monetizer'); ?></p>
                                 <span class="status-badge <?php echo get_option('yadore_analytics_enabled', true) ? 'status-active' : 'status-inactive'; ?>">
-                                    <?php echo get_option('yadore_analytics_enabled', true) ? 'Active' : 'Inactive'; ?>
+                                    <?php echo get_option('yadore_analytics_enabled', true) ? esc_html__('Aktiv', 'yadore-monetizer') : esc_html__('Inaktiv', 'yadore-monetizer'); ?>
                                 </span>
                             </div>
                         </div>
@@ -137,9 +147,9 @@
                                 <span class="dashicons dashicons-shortcode"></span>
                             </div>
                             <div class="feature-details">
-                                <h4>Shortcode System</h4>
-                                <p>[yadore_products] shortcode with advanced features</p>
-                                <span class="status-badge status-active">Active</span>
+                                <h4><?php echo esc_html__('Shortcode-System', 'yadore-monetizer'); ?></h4>
+                                <p><?php echo esc_html__('[yadore_products]-Shortcode mit erweiterten Funktionen', 'yadore-monetizer'); ?></p>
+                                <span class="status-badge status-active"><?php echo esc_html__('Aktiv', 'yadore-monetizer'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -149,69 +159,69 @@
             <!-- Shortcode Generator -->
             <div class="yadore-card">
                 <div class="card-header">
-                    <h2><span class="dashicons dashicons-shortcode"></span> Advanced Shortcode Generator</h2>
+                    <h2><span class="dashicons dashicons-shortcode"></span> <?php echo esc_html__('Erweiterter Shortcode-Generator', 'yadore-monetizer'); ?></h2>
                 </div>
                 <div class="card-content">
                     <div class="shortcode-generator-v27">
                         <div class="generator-row">
                             <div class="generator-col">
-                                <label for="shortcode-keyword">Product Keyword *</label>
-                                <input type="text" id="shortcode-keyword" placeholder="e.g., smartphone, laptop, headphones" value="smartphone" required>
-                                <small>Enter the main product category or specific product name</small>
+                                <label for="shortcode-keyword"><?php echo esc_html__('Produkt-Keyword *', 'yadore-monetizer'); ?></label>
+                                <input type="text" id="shortcode-keyword" placeholder="z. B. Smartphone, Laptop, Kopfhörer" value="smartphone" required>
+                                <small><?php echo esc_html__('Gib die wichtigste Produktkategorie oder einen konkreten Produktnamen ein.', 'yadore-monetizer'); ?></small>
                             </div>
 
                             <div class="generator-col">
-                                <label for="shortcode-limit">Number of Products</label>
+                                <label for="shortcode-limit"><?php echo esc_html__('Anzahl der Produkte', 'yadore-monetizer'); ?></label>
                                 <select id="shortcode-limit">
-                                    <option value="3">3 products</option>
-                                    <option value="6" selected>6 products</option>
-                                    <option value="9">9 products</option>
-                                    <option value="12">12 products</option>
+                                    <option value="3">3 <?php echo esc_html__('Produkte', 'yadore-monetizer'); ?></option>
+                                    <option value="6" selected>6 <?php echo esc_html__('Produkte', 'yadore-monetizer'); ?></option>
+                                    <option value="9">9 <?php echo esc_html__('Produkte', 'yadore-monetizer'); ?></option>
+                                    <option value="12">12 <?php echo esc_html__('Produkte', 'yadore-monetizer'); ?></option>
                                 </select>
                             </div>
 
                             <div class="generator-col">
-                                <label for="shortcode-format">Display Format</label>
+                                <label for="shortcode-format"><?php echo esc_html__('Darstellungsformat', 'yadore-monetizer'); ?></label>
                                 <select id="shortcode-format">
-                                    <option value="grid" selected>Grid Layout</option>
-                                    <option value="list">List View</option>
-                                    <option value="inline">Inline Integration</option>
+                                    <option value="grid" selected><?php echo esc_html__('Rasterdarstellung', 'yadore-monetizer'); ?></option>
+                                    <option value="list"><?php echo esc_html__('Listenansicht', 'yadore-monetizer'); ?></option>
+                                    <option value="inline"><?php echo esc_html__('Inline-Integration', 'yadore-monetizer'); ?></option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="generator-row">
                             <div class="generator-col">
-                                <label for="shortcode-cache">Enable Caching</label>
+                                <label for="shortcode-cache"><?php echo esc_html__('Caching aktivieren', 'yadore-monetizer'); ?></label>
                                 <select id="shortcode-cache">
-                                    <option value="true" selected>Yes (Recommended)</option>
-                                    <option value="false">No</option>
+                                    <option value="true" selected><?php echo esc_html__('Ja (empfohlen)', 'yadore-monetizer'); ?></option>
+                                    <option value="false"><?php echo esc_html__('Nein', 'yadore-monetizer'); ?></option>
                                 </select>
                             </div>
 
                             <div class="generator-col">
-                                <label for="shortcode-class">Custom CSS Class</label>
+                                <label for="shortcode-class"><?php echo esc_html__('Eigene CSS-Klasse', 'yadore-monetizer'); ?></label>
                                 <input type="text" id="shortcode-class" placeholder="my-custom-class">
-                                <small>Optional: Add custom CSS class for styling</small>
+                                <small><?php echo esc_html__('Optional: Eigene CSS-Klasse für individuelles Styling hinzufügen.', 'yadore-monetizer'); ?></small>
                             </div>
                         </div>
 
                         <div class="generator-result">
-                            <label for="generated-shortcode">Generated Shortcode:</label>
+                            <label for="generated-shortcode"><?php echo esc_html__('Generierter Shortcode:', 'yadore-monetizer'); ?></label>
                             <div class="shortcode-output">
                                 <textarea id="generated-shortcode" readonly>[yadore_products keyword="smartphone" limit="6" format="grid" cache="true"]</textarea>
                                 <button type="button" id="copy-shortcode" class="button button-primary">
-                                    <span class="dashicons dashicons-clipboard"></span> Copy
+                                    <span class="dashicons dashicons-clipboard"></span> <?php echo esc_html__('Kopieren', 'yadore-monetizer'); ?>
                                 </button>
                             </div>
                         </div>
 
                         <div class="generator-preview">
-                            <h4><span class="dashicons dashicons-visibility"></span> Preview</h4>
+                            <h4><span class="dashicons dashicons-visibility"></span> <?php echo esc_html__('Vorschau', 'yadore-monetizer'); ?></h4>
                             <div class="preview-container" id="shortcode-preview">
                                 <div class="preview-loading">
                                     <span class="dashicons dashicons-update-alt spinning"></span>
-                                    <span>Generating preview...</span>
+                                    <span><?php echo esc_html__('Vorschau wird erstellt...', 'yadore-monetizer'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -222,10 +232,10 @@
             <!-- Recent Activity -->
             <div class="yadore-card">
                 <div class="card-header">
-                    <h2><span class="dashicons dashicons-clock"></span> Recent Activity</h2>
+                    <h2><span class="dashicons dashicons-clock"></span> <?php echo esc_html__('Aktuelle Aktivitäten', 'yadore-monetizer'); ?></h2>
                     <div class="card-actions">
                         <button class="button button-secondary" id="refresh-activity">
-                            <span class="dashicons dashicons-update"></span> Refresh
+                            <span class="dashicons dashicons-update"></span> <?php echo esc_html__('Aktualisieren', 'yadore-monetizer'); ?>
                         </button>
                     </div>
                 </div>
@@ -233,7 +243,7 @@
                     <div class="activity-list" id="recent-activity">
                         <div class="activity-loading">
                             <span class="dashicons dashicons-update-alt spinning"></span>
-                            <span>Loading recent activity...</span>
+                            <span><?php echo esc_html__('Aktuelle Aktivitäten werden geladen...', 'yadore-monetizer'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -245,55 +255,55 @@
             <!-- Quick Actions -->
             <div class="yadore-card">
                 <div class="card-header">
-                    <h3><span class="dashicons dashicons-admin-tools"></span> Quick Actions</h3>
+                    <h3><span class="dashicons dashicons-admin-tools"></span> <?php echo esc_html__('Schnellaktionen', 'yadore-monetizer'); ?></h3>
                 </div>
                 <div class="card-content">
                     <div class="quick-actions">
                         <a href="<?php echo admin_url('admin.php?page=yadore-settings'); ?>" class="action-button action-primary">
                             <span class="dashicons dashicons-admin-settings"></span>
                             <div class="action-content">
-                                <strong>Plugin Settings</strong>
-                                <small>Configure all plugin options</small>
+                                <strong><?php echo esc_html__('Plugin-Einstellungen', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo esc_html__('Alle Plugin-Optionen konfigurieren', 'yadore-monetizer'); ?></small>
                             </div>
                         </a>
 
                         <a href="<?php echo admin_url('admin.php?page=yadore-ai'); ?>" class="action-button action-ai">
                             <span class="dashicons dashicons-admin-generic"></span>
                             <div class="action-content">
-                                <strong>AI Management</strong>
-                                <small>Configure Gemini AI integration</small>
+                                <strong><?php echo esc_html__('KI-Verwaltung', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo esc_html__('Gemini-KI-Integration konfigurieren', 'yadore-monetizer'); ?></small>
                             </div>
                         </a>
 
                         <a href="<?php echo admin_url('admin.php?page=yadore-scanner'); ?>" class="action-button action-scanner">
                             <span class="dashicons dashicons-search"></span>
                             <div class="action-content">
-                                <strong>Post Scanner</strong>
-                                <small>Scan and analyze posts</small>
+                                <strong><?php echo esc_html__('Beitrags-Scanner', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo esc_html__('Beiträge scannen und analysieren', 'yadore-monetizer'); ?></small>
                             </div>
                         </a>
 
                         <a href="<?php echo admin_url('admin.php?page=yadore-analytics'); ?>" class="action-button action-analytics">
                             <span class="dashicons dashicons-chart-area"></span>
                             <div class="action-content">
-                                <strong>Analytics</strong>
-                                <small>View performance reports</small>
+                                <strong><?php echo esc_html__('Analysen', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo esc_html__('Leistungsberichte anzeigen', 'yadore-monetizer'); ?></small>
                             </div>
                         </a>
 
                         <a href="<?php echo admin_url('admin.php?page=yadore-debug'); ?>" class="action-button action-debug">
                             <span class="dashicons dashicons-admin-tools"></span>
                             <div class="action-content">
-                                <strong>Debug & Errors</strong>
-                                <small>System diagnostics</small>
+                                <strong><?php echo esc_html__('Debug & Fehler', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo esc_html__('Systemdiagnose', 'yadore-monetizer'); ?></small>
                             </div>
                         </a>
 
                         <a href="<?php echo admin_url('admin.php?page=yadore-tools'); ?>" class="action-button action-tools">
                             <span class="dashicons dashicons-admin-tools"></span>
                             <div class="action-content">
-                                <strong>Tools</strong>
-                                <small>Import/Export & Utilities</small>
+                                <strong><?php echo esc_html__('Werkzeuge', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo esc_html__('Import/Export & Werkzeuge', 'yadore-monetizer'); ?></small>
                             </div>
                         </a>
                     </div>
@@ -303,39 +313,39 @@
             <!-- System Status -->
             <div class="yadore-card">
                 <div class="card-header">
-                    <h3><span class="dashicons dashicons-dashboard"></span> System Status</h3>
+                    <h3><span class="dashicons dashicons-dashboard"></span> <?php echo esc_html__('Systemstatus', 'yadore-monetizer'); ?></h3>
                 </div>
                 <div class="card-content">
                     <div class="system-status">
                         <div class="status-item">
                             <div class="status-indicator status-active"></div>
                             <div class="status-details">
-                                <strong>WordPress Integration</strong>
-                                <small><?php echo esc_html(sprintf('v%s - All systems operational', YADORE_PLUGIN_VERSION)); ?></small>
+                                <strong><?php echo esc_html__('WordPress-Integration', 'yadore-monetizer'); ?></strong>
+                                <small><?php printf(esc_html__('v%s – Alle Systeme betriebsbereit', 'yadore-monetizer'), esc_html(YADORE_PLUGIN_VERSION)); ?></small>
                             </div>
                         </div>
 
                         <div class="status-item">
                             <div class="status-indicator <?php echo get_option('yadore_api_key') ? 'status-active' : 'status-warning'; ?>"></div>
                             <div class="status-details">
-                                <strong>Yadore API</strong>
-                                <small><?php echo get_option('yadore_api_key') ? 'Connected' : 'API key required'; ?></small>
+                                <strong><?php echo esc_html__('Yadore-API', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo get_option('yadore_api_key') ? esc_html__('Verbunden', 'yadore-monetizer') : esc_html__('API-Schlüssel erforderlich', 'yadore-monetizer'); ?></small>
                             </div>
                         </div>
 
                         <div class="status-item">
                             <div class="status-indicator <?php echo get_option('yadore_gemini_api_key') ? 'status-active' : 'status-inactive'; ?>"></div>
                             <div class="status-details">
-                                <strong>Gemini AI</strong>
-                                <small><?php echo get_option('yadore_gemini_api_key') ? 'Connected' : 'Not configured'; ?></small>
+                                <strong><?php echo esc_html__('Gemini-KI', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo get_option('yadore_gemini_api_key') ? esc_html__('Verbunden', 'yadore-monetizer') : esc_html__('Nicht konfiguriert', 'yadore-monetizer'); ?></small>
                             </div>
                         </div>
 
                         <div class="status-item">
                             <div class="status-indicator status-active"></div>
                             <div class="status-details">
-                                <strong>Database</strong>
-                                <small>All tables operational</small>
+                                <strong><?php echo esc_html__('Datenbank', 'yadore-monetizer'); ?></strong>
+                                <small><?php echo esc_html__('Alle Tabellen funktionsfähig', 'yadore-monetizer'); ?></small>
                             </div>
                         </div>
                     </div>
@@ -390,11 +400,11 @@
                         </a>
                         <a href="#" class="help-link" onclick="yadoreShowTutorial()">
                             <span class="dashicons dashicons-video-alt3"></span>
-                            <span>Video Tutorial</span>
+                            <span><?php echo esc_html__('Video-Tutorial', 'yadore-monetizer'); ?></span>
                         </a>
                         <a href="#" class="help-link" onclick="yadoreShowShortcuts()">
                             <span class="dashicons dashicons-keyboard-hide"></span>
-                            <span>Keyboard Shortcuts</span>
+                            <span><?php echo esc_html__('Tastenkürzel', 'yadore-monetizer'); ?></span>
                         </a>
                     </div>
                 </div>
@@ -405,40 +415,40 @@
 
 <script>
 jQuery(document).ready(function($) {
-    // Initialize dashboard
+    // Dashboard initialisieren
     yadoreInitializeDashboard();
 
-    // Load dashboard stats
+    // Statistiken laden
     yadoreLoadDashboardStats();
 
-    // Shortcode generator
+    // Shortcode-Generator starten
     yadoreInitializeShortcodeGenerator();
 
-    // Auto-refresh every 30 seconds
+    // Alle 30 Sekunden aktualisieren
     setInterval(yadoreLoadDashboardStats, 30000);
 });
+
+const yadoreDashboardStrings = {
+    copied: '<?php echo esc_js(esc_html__('Kopiert!', 'yadore-monetizer')); ?>',
+    copy: '<?php echo esc_js(esc_html__('Kopieren', 'yadore-monetizer')); ?>',
+    previewLoading: '<?php echo esc_js(esc_html__('Vorschau wird erstellt...', 'yadore-monetizer')); ?>',
+    previewHeading: '<?php echo esc_js(esc_html__('Vorschau', 'yadore-monetizer')); ?>',
+    previewInfo: '<?php echo esc_js(esc_html__('Dies ist eine vereinfachte Vorschau. Der tatsächliche Shortcode zeigt reale Produkte.', 'yadore-monetizer')); ?>',
+    productLabel: '<?php echo esc_js(esc_html__('Produkt', 'yadore-monetizer')); ?>',
+    dashboardInitialized: '<?php echo esc_js(esc_html__('Dashboard gestartet', 'yadore-monetizer')); ?>'
+};
 
 function yadoreInitializeDashboard() {
     const dashboardVersion = (typeof yadore_admin !== 'undefined' && yadore_admin.version)
         ? yadore_admin.version
         : '<?php echo esc_js(YADORE_PLUGIN_VERSION); ?>';
-    console.log(`Yadore Monetizer Pro v${dashboardVersion} Dashboard - Initialized`);
+    console.log(`Yadore Monetizer Pro v${dashboardVersion} – ${yadoreDashboardStrings.dashboardInitialized}`);
 }
 
 function yadoreLoadDashboardStats() {
-    // Load stats via AJAX
-    jQuery.post(yadore_admin.ajax_url, {
-        action: 'yadore_get_dashboard_stats',
-        nonce: yadore_admin.nonce
-    }, function(response) {
-        if (response.success) {
-            const data = response.data;
-            jQuery('#total-products').text(data.total_products || '0');
-            jQuery('#scanned-posts').text(data.scanned_posts || '0');
-            jQuery('#overlay-views').text(data.overlay_views || '0');
-            jQuery('#conversion-rate').text((data.conversion_rate || '0') + '%');
-        }
-    });
+    if (window.yadoreAdmin && typeof window.yadoreAdmin.loadDashboardStats === 'function') {
+        window.yadoreAdmin.loadDashboardStats();
+    }
 }
 
 function yadoreInitializeShortcodeGenerator() {
@@ -475,9 +485,9 @@ function yadoreInitializeShortcodeGenerator() {
         shortcode.setSelectionRange(0, 99999);
         document.execCommand('copy');
 
-        $(this).addClass('copied').html('<span class="dashicons dashicons-yes"></span> Copied!');
+        $(this).addClass('copied').html(`<span class="dashicons dashicons-yes"></span> ${yadoreDashboardStrings.copied}`);
         setTimeout(() => {
-            $(this).removeClass('copied').html('<span class="dashicons dashicons-clipboard"></span> Copy');
+            $(this).removeClass('copied').html(`<span class="dashicons dashicons-clipboard"></span> ${yadoreDashboardStrings.copy}`);
         }, 2000);
     });
 
@@ -487,19 +497,19 @@ function yadoreInitializeShortcodeGenerator() {
 
 function yadoreGeneratePreview(shortcode) {
     const previewContainer = jQuery('#shortcode-preview');
-    previewContainer.html('<div class="preview-loading"><span class="dashicons dashicons-update-alt spinning"></span><span>Generating preview...</span></div>');
+    previewContainer.html(`<div class="preview-loading"><span class="dashicons dashicons-update-alt spinning"></span><span>${yadoreDashboardStrings.previewLoading}</span></div>`);
 
     // Simulate preview generation
     setTimeout(() => {
         previewContainer.html(`
             <div class="shortcode-preview-result">
-                <h4>Preview: ${shortcode}</h4>
+                <h4>${yadoreDashboardStrings.previewHeading}: ${shortcode}</h4>
                 <div class="preview-grid">
-                    <div class="preview-product">Product 1</div>
-                    <div class="preview-product">Product 2</div>
-                    <div class="preview-product">Product 3</div>
+                    <div class="preview-product">${yadoreDashboardStrings.productLabel} 1</div>
+                    <div class="preview-product">${yadoreDashboardStrings.productLabel} 2</div>
+                    <div class="preview-product">${yadoreDashboardStrings.productLabel} 3</div>
                 </div>
-                <p><em>This is a simplified preview. Actual shortcode will display real products.</em></p>
+                <p><em>${yadoreDashboardStrings.previewInfo}</em></p>
             </div>
         `);
     }, 1000);

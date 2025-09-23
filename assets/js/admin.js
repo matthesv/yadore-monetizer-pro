@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.27 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.28 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '2.9.27',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '2.9.28',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -56,13 +56,104 @@
                 action: 'yadore_get_dashboard_stats',
                 nonce: this.nonce
             }, (response) => {
-                if (response.success) {
+                if (response && response.success && response.data) {
                     const data = response.data;
-                    $('#total-products').text(data.total_products || '0');
-                    $('#scanned-posts').text(data.scanned_posts || '0');
-                    $('#overlay-views').text(data.overlay_views || '0');
-                    $('#conversion-rate').text((data.conversion_rate || '0') + '%');
+                    $('#total-products').text(this.formatNumber(data.total_products));
+                    $('#scanned-posts').text(this.formatNumber(data.scanned_posts));
+                    $('#overlay-views').text(this.formatNumber(data.overlay_views));
+
+                    const formattedRate = this.formatRate(data.conversion_rate);
+                    $('#conversion-rate').text(`${formattedRate}%`);
+
+                    this.renderRecentActivity(Array.isArray(data.activity) ? data.activity : []);
+                } else {
+                    const message = (response && response.data && response.data.message)
+                        ? response.data.message
+                        : (yadore_admin.strings?.error || 'Fehler beim Laden der Statistiken.');
+
+                    $('#total-products').text('0');
+                    $('#scanned-posts').text('0');
+                    $('#overlay-views').text('0');
+                    $('#conversion-rate').text('0,00%');
+
+                    const $container = $('#recent-activity');
+                    if ($container.length) {
+                        $container.empty().append(
+                            $('<div/>', { 'class': 'activity-empty' }).text(message)
+                        );
+                    }
                 }
+            });
+        },
+
+        formatNumber: function(value) {
+            const numeric = Number(value);
+            if (Number.isFinite(numeric)) {
+                return numeric.toLocaleString();
+            }
+            return '0';
+        },
+
+        formatRate: function(value) {
+            const numeric = Number.parseFloat(value);
+            if (Number.isFinite(numeric)) {
+                return numeric.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+            }
+            return '0,00';
+        },
+
+        renderRecentActivity: function(items) {
+            const $container = $('#recent-activity');
+            if (!$container.length) {
+                return;
+            }
+
+            if (!Array.isArray(items) || items.length === 0) {
+                $container.html(
+                    $('<div/>', { 'class': 'activity-empty' }).text('Keine Aktivitäten vorhanden.')
+                );
+                return;
+            }
+
+            $container.empty();
+
+            items.forEach((item) => {
+                const itemType = (typeof item.type === 'string' && item.type !== '') ? item.type : 'info';
+                const classes = ['activity-item', `activity-${itemType}`];
+
+                if (!['success', 'error', 'warning', 'info'].includes(itemType)) {
+                    classes.push('activity-info');
+                }
+
+                const $entry = $('<div/>', { 'class': classes.join(' ') });
+
+                const iconClass = (typeof item.icon === 'string' && item.icon !== '')
+                    ? item.icon
+                    : 'dashicons-info';
+
+                $('<div/>', { 'class': 'activity-icon' })
+                    .append($('<span/>', { 'class': `dashicons ${iconClass}` }))
+                    .appendTo($entry);
+
+                const $content = $('<div/>', { 'class': 'activity-content' }).appendTo($entry);
+
+                if (item.title) {
+                    $('<div/>', { 'class': 'activity-title' }).text(item.title).appendTo($content);
+                }
+
+                if (item.description) {
+                    $('<div/>', { 'class': 'activity-description' }).text(item.description).appendTo($content);
+                }
+
+                const timeText = item.relative_time || item.time;
+                if (timeText) {
+                    $('<div/>', { 'class': 'activity-meta' }).text(timeText).appendTo($content);
+                }
+
+                $container.append($entry);
             });
         },
 
