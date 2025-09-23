@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.29
+Version: 2.9.30
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.29');
+define('YADORE_PLUGIN_VERSION', '2.9.30');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -77,6 +77,9 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_import_data', array($this, 'ajax_import_data'));
             add_action('wp_ajax_yadore_clear_cache', array($this, 'ajax_clear_cache'));
             add_action('wp_ajax_yadore_get_tool_stats', array($this, 'ajax_get_tool_stats'));
+            add_action('wp_ajax_yadore_test_connectivity', array($this, 'ajax_test_connectivity'));
+            add_action('wp_ajax_yadore_check_database', array($this, 'ajax_check_database'));
+            add_action('wp_ajax_yadore_test_performance', array($this, 'ajax_test_performance'));
             add_action('wp_ajax_yadore_analyze_cache', array($this, 'ajax_analyze_cache'));
 
             // Content integration
@@ -2039,12 +2042,107 @@ HTML
                 $cleared_message
             );
 
+            $status = 'healthy';
+            if ($entries === 0) {
+                $status = 'warning';
+            } elseif ($hit_rate < 10) {
+                $status = 'critical';
+            } elseif ($hit_rate < 30) {
+                $status = 'warning';
+            }
+
             wp_send_json_success(array(
+                'status' => $status,
                 'message' => $message,
                 'stats' => $stats,
             ));
         } catch (Exception $e) {
             $this->log_error('Cache analysis failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_test_connectivity() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $results = $this->run_connectivity_checks();
+
+            $message = __('Connectivity diagnostics completed successfully.', 'yadore-monetizer');
+            if (!empty($results['services'])) {
+                $critical = array_filter($results['services'], function ($service) {
+                    return isset($service['status']) && $service['status'] === 'critical';
+                });
+                $warnings = array_filter($results['services'], function ($service) {
+                    return isset($service['status']) && $service['status'] === 'warning';
+                });
+
+                if (!empty($critical)) {
+                    $message = __('Connectivity issues detected. Review the service breakdown below.', 'yadore-monetizer');
+                } elseif (!empty($warnings)) {
+                    $message = __('Connectivity checks completed with warnings. Review the service breakdown below.', 'yadore-monetizer');
+                }
+            }
+
+            wp_send_json_success(array(
+                'status' => $results['status'],
+                'message' => $message,
+                'services' => $results['services'],
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Connectivity diagnostics failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_check_database() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $results = $this->run_database_diagnostics();
+            $message = isset($results['message']) && $results['message'] !== ''
+                ? $results['message']
+                : __('Database diagnostics completed.', 'yadore-monetizer');
+
+            wp_send_json_success(array(
+                'status' => $results['status'],
+                'message' => $message,
+                'details' => $results['details'],
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Database diagnostics failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_test_performance() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $results = $this->run_performance_diagnostics();
+            $message = isset($results['message']) && $results['message'] !== ''
+                ? $results['message']
+                : __('Performance diagnostics completed.', 'yadore-monetizer');
+
+            wp_send_json_success(array(
+                'status' => $results['status'],
+                'message' => $message,
+                'details' => $results['details'],
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Performance diagnostics failed', $e);
             wp_send_json_error($e->getMessage());
         }
     }
@@ -6882,6 +6980,613 @@ $wpdb->insert($analytics_table, array(
             'records' => $records,
             'overhead' => $this->format_bytes($overhead_bytes),
         );
+    }
+
+    private function run_connectivity_checks() {
+        $services = array(
+            $this->check_yadore_api_status(),
+            $this->check_gemini_api_status(),
+            $this->check_external_services_status(),
+        );
+
+        $overall = 'healthy';
+
+        foreach ($services as $service) {
+            if (!is_array($service)) {
+                continue;
+            }
+
+            $status = isset($service['status']) ? $service['status'] : 'healthy';
+            if ($status === 'critical') {
+                $overall = 'critical';
+                break;
+            }
+
+            if ($status === 'warning' && $overall !== 'critical') {
+                $overall = 'warning';
+            }
+        }
+
+        return array(
+            'status' => $overall,
+            'services' => $services,
+        );
+    }
+
+    private function check_yadore_api_status() {
+        $label = __('Yadore API', 'yadore-monetizer');
+
+        $service = array(
+            'key' => 'yadore_api',
+            'label' => $label,
+            'status' => 'healthy',
+            'message' => '',
+        );
+
+        $api_key = trim((string) get_option('yadore_api_key'));
+        if ($api_key === '') {
+            $service['status'] = 'warning';
+            $service['message'] = __('API key missing. Add your Yadore publisher key in the settings.', 'yadore-monetizer');
+            return $service;
+        }
+
+        $endpoint = 'https://api.yadore.com/v2/markets';
+        $args = array(
+            'headers' => array(
+                'Accept' => 'application/json',
+                'API-Key' => $api_key,
+                'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
+            ),
+            'timeout' => 12,
+        );
+
+        $response = wp_remote_get($endpoint, $args);
+        if (is_wp_error($response)) {
+            $service['status'] = 'critical';
+            $service['message'] = sprintf(
+                __('Connection failed: %s', 'yadore-monetizer'),
+                $response->get_error_message()
+            );
+
+            return $service;
+        }
+
+        $status_code = (int) wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+        $response_message = wp_remote_retrieve_response_message($response);
+
+        if ($status_code >= 200 && $status_code < 300) {
+            $decoded = json_decode($body, true);
+            $market_count = 0;
+
+            if (is_array($decoded)) {
+                if (isset($decoded['markets']) && is_array($decoded['markets'])) {
+                    $market_count = count($decoded['markets']);
+                } elseif (isset($decoded['data']) && is_array($decoded['data'])) {
+                    $market_count = count($decoded['data']);
+                }
+            }
+
+            if ($market_count > 0) {
+                $service['message'] = sprintf(
+                    __('Online – %d markets available.', 'yadore-monetizer'),
+                    $market_count
+                );
+            } else {
+                $service['message'] = __('Online – response received successfully.', 'yadore-monetizer');
+            }
+
+            return $service;
+        }
+
+        if (in_array($status_code, array(401, 403), true)) {
+            $service['status'] = 'warning';
+        } else {
+            $service['status'] = 'critical';
+        }
+
+        $error_detail = $this->extract_error_message_from_body($body);
+        if ($error_detail !== '') {
+            $service['message'] = sprintf(
+                __('HTTP %1$d: %2$s', 'yadore-monetizer'),
+                $status_code,
+                $error_detail
+            );
+        } else {
+            $service['message'] = sprintf(
+                __('HTTP %1$d %2$s', 'yadore-monetizer'),
+                $status_code,
+                $response_message
+            );
+        }
+
+        return $service;
+    }
+
+    private function check_gemini_api_status() {
+        $label = __('Gemini AI API', 'yadore-monetizer');
+
+        $service = array(
+            'key' => 'gemini_api',
+            'label' => $label,
+            'status' => 'healthy',
+            'message' => '',
+        );
+
+        $api_key = trim((string) get_option('yadore_gemini_api_key'));
+        if ($api_key === '') {
+            $service['status'] = 'warning';
+            $service['message'] = __('API key missing. Configure your Gemini API key to enable AI features.', 'yadore-monetizer');
+            return $service;
+        }
+
+        $model = $this->sanitize_model(get_option('yadore_gemini_model', $this->get_default_gemini_model()));
+        $endpoint = sprintf(
+            'https://generativelanguage.googleapis.com/v1beta/models/%s',
+            rawurlencode($model)
+        );
+        $request_url = add_query_arg('key', $api_key, $endpoint);
+
+        $response = wp_remote_get($request_url, array(
+            'timeout' => 12,
+            'headers' => array(
+                'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
+            ),
+        ));
+
+        if (is_wp_error($response)) {
+            $service['status'] = 'critical';
+            $service['message'] = sprintf(
+                __('Connection failed: %s', 'yadore-monetizer'),
+                $response->get_error_message()
+            );
+
+            return $service;
+        }
+
+        $status_code = (int) wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+
+        if ($status_code >= 200 && $status_code < 300) {
+            $decoded = json_decode($body, true);
+            $display_name = '';
+
+            if (is_array($decoded) && isset($decoded['displayName'])) {
+                $display_name = sanitize_text_field((string) $decoded['displayName']);
+            }
+
+            if ($display_name !== '') {
+                $service['message'] = sprintf(
+                    __('Online – %1$s model reachable.', 'yadore-monetizer'),
+                    $display_name
+                );
+            } else {
+                $service['message'] = sprintf(
+                    __('Online – %1$s model verified.', 'yadore-monetizer'),
+                    $model
+                );
+            }
+
+            return $service;
+        }
+
+        if (in_array($status_code, array(401, 403), true)) {
+            $service['status'] = 'warning';
+        } else {
+            $service['status'] = 'critical';
+        }
+
+        $error_detail = $this->extract_error_message_from_body($body);
+        if ($error_detail !== '') {
+            $service['message'] = sprintf(
+                __('HTTP %1$d: %2$s', 'yadore-monetizer'),
+                $status_code,
+                $error_detail
+            );
+        } else {
+            $service['message'] = sprintf(
+                __('HTTP %d response received.', 'yadore-monetizer'),
+                $status_code
+            );
+        }
+
+        return $service;
+    }
+
+    private function check_external_services_status() {
+        $label = __('External Services', 'yadore-monetizer');
+
+        $service = array(
+            'key' => 'external_services',
+            'label' => $label,
+            'status' => 'healthy',
+            'message' => '',
+        );
+
+        $targets = array(
+            __('WordPress.org API', 'yadore-monetizer') => 'https://api.wordpress.org/core/version-check/1.7/',
+            __('GitHub API', 'yadore-monetizer') => 'https://api.github.com/',
+        );
+
+        $reachable = 0;
+        $issues = array();
+
+        foreach ($targets as $target_label => $url) {
+            $response = wp_remote_head($url, array(
+                'timeout' => 10,
+                'user-agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
+            ));
+
+            if (is_wp_error($response)) {
+                $issues[] = sprintf('%s: %s', $target_label, $response->get_error_message());
+                continue;
+            }
+
+            $code = (int) wp_remote_retrieve_response_code($response);
+            if ($code >= 200 && $code < 400) {
+                $reachable++;
+            } else {
+                $issues[] = sprintf('%s: HTTP %d', $target_label, $code);
+            }
+        }
+
+        $total_targets = count($targets);
+
+        if (empty($issues)) {
+            $service['message'] = sprintf(
+                __('All monitored services reachable (%1$d/%2$d).', 'yadore-monetizer'),
+                $reachable,
+                $total_targets
+            );
+
+            return $service;
+        }
+
+        if ($reachable > 0) {
+            $service['status'] = 'warning';
+            $service['message'] = sprintf(
+                __('Partial connectivity – %1$d of %2$d services reachable. %3$s', 'yadore-monetizer'),
+                $reachable,
+                $total_targets,
+                implode(' | ', $issues)
+            );
+        } else {
+            $service['status'] = 'critical';
+            $service['message'] = sprintf(
+                __('No external services reachable: %s', 'yadore-monetizer'),
+                implode(' | ', $issues)
+            );
+        }
+
+        return $service;
+    }
+
+    private function run_database_diagnostics() {
+        global $wpdb;
+
+        $tables = array(
+            'yadore_ai_cache' => array('id', 'content_hash', 'post_id', 'ai_keywords', 'extracted_keywords', 'ai_confidence', 'api_cost', 'token_count', 'model_used', 'processing_time_ms', 'created_at', 'expires_at'),
+            'yadore_post_keywords' => array('id', 'post_id', 'post_title', 'primary_keyword', 'fallback_keyword', 'keyword_confidence', 'product_validated', 'product_count', 'word_count', 'content_hash', 'last_scanned', 'scan_status', 'scan_error', 'scan_attempts', 'scan_duration_ms'),
+            'yadore_api_logs' => array('id', 'api_type', 'endpoint_url', 'request_method', 'request_headers', 'request_body', 'response_code', 'response_headers', 'response_body', 'response_time_ms', 'success', 'error_message', 'post_id', 'user_id', 'ip_address', 'user_agent', 'created_at'),
+            'yadore_error_logs' => array('id', 'error_type', 'error_message', 'error_code', 'stack_trace', 'context_data', 'post_id', 'user_id', 'ip_address', 'user_agent', 'request_uri', 'severity', 'resolved', 'resolution_notes', 'created_at', 'resolved_at'),
+            'yadore_analytics' => array('id', 'event_type', 'event_data', 'post_id', 'user_id', 'session_id', 'ip_address', 'user_agent', 'created_at'),
+        );
+
+        $details = array();
+        $missing_tables = array();
+        $column_issues = array();
+        $totals = array(
+            'records' => 0,
+            'size_bytes' => 0,
+            'overhead_bytes' => 0,
+        );
+
+        foreach ($tables as $suffix => $expected_columns) {
+            $table_name = $wpdb->prefix . $suffix;
+            $table_safe = str_replace('`', '``', $table_name);
+
+            $table_detail = array(
+                'name' => $table_name,
+                'exists' => false,
+                'records' => 0,
+                'size_bytes' => 0,
+                'overhead_bytes' => 0,
+                'missing_columns' => array(),
+            );
+
+            if (!$this->table_exists($table_name)) {
+                $missing_tables[] = $table_name;
+                $details[] = $table_detail;
+                continue;
+            }
+
+            $table_detail['exists'] = true;
+
+            $columns = $wpdb->get_col("SHOW COLUMNS FROM `{$table_safe}`");
+            if (is_array($columns)) {
+                $missing = array_values(array_diff($expected_columns, $columns));
+                if (!empty($missing)) {
+                    $table_detail['missing_columns'] = $missing;
+                    $column_issues[$table_name] = $missing;
+                }
+            }
+
+            $count = (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table_safe}`");
+            $table_detail['records'] = $count;
+            $totals['records'] += $count;
+
+            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $table_name), ARRAY_A);
+            if (is_array($status)) {
+                $data_length = (int) ($status['Data_length'] ?? 0);
+                $index_length = (int) ($status['Index_length'] ?? 0);
+                $data_free = (int) ($status['Data_free'] ?? 0);
+
+                $table_detail['size_bytes'] = $data_length + $index_length;
+                $table_detail['overhead_bytes'] = $data_free;
+
+                $totals['size_bytes'] += $table_detail['size_bytes'];
+                $totals['overhead_bytes'] += $table_detail['overhead_bytes'];
+            }
+
+            $details[] = $table_detail;
+        }
+
+        $messages = array();
+        $status_flag = 'healthy';
+
+        if (!empty($missing_tables)) {
+            $status_flag = 'critical';
+            $messages[] = sprintf(
+                __('Missing tables: %s.', 'yadore-monetizer'),
+                implode(', ', $missing_tables)
+            );
+        }
+
+        foreach ($column_issues as $table_name => $missing_columns) {
+            if ($status_flag !== 'critical') {
+                $status_flag = 'warning';
+            }
+
+            $messages[] = sprintf(
+                __('Table %1$s missing columns: %2$s.', 'yadore-monetizer'),
+                $table_name,
+                implode(', ', $missing_columns)
+            );
+        }
+
+        $totals['size'] = $this->format_bytes($totals['size_bytes']);
+        $totals['overhead'] = $this->format_bytes($totals['overhead_bytes']);
+        $totals['overhead_ratio'] = $totals['size_bytes'] > 0
+            ? (int) round(($totals['overhead_bytes'] / max(1, $totals['size_bytes'])) * 100)
+            : 0;
+
+        if (empty($messages)) {
+            $messages[] = sprintf(
+                __('All %1$d plugin tables are healthy (%2$d records, %3$s storage).', 'yadore-monetizer'),
+                count($tables),
+                $totals['records'],
+                $totals['size']
+            );
+        } else {
+            $messages[] = sprintf(
+                __('Current footprint: %1$d records using %2$s with %3$s overhead.', 'yadore-monetizer'),
+                $totals['records'],
+                $totals['size'],
+                $totals['overhead']
+            );
+        }
+
+        return array(
+            'status' => $status_flag,
+            'message' => implode(' ', $messages),
+            'details' => array(
+                'tables' => $details,
+                'missing_tables' => $missing_tables,
+                'totals' => $totals,
+            ),
+        );
+    }
+
+    private function run_performance_diagnostics() {
+        $cache_stats = $this->get_cache_statistics();
+        $database_results = $this->run_database_diagnostics();
+        $cron_health = $this->get_cron_health_snapshot();
+
+        $status_flag = 'healthy';
+        $messages = array();
+
+        $hit_rate = isset($cache_stats['hit_rate']) ? (int) $cache_stats['hit_rate'] : 0;
+        $entries = isset($cache_stats['entries']) ? (int) $cache_stats['entries'] : 0;
+
+        if ($entries === 0) {
+            $status_flag = 'warning';
+            $messages[] = __('Cache is empty – warm-up scans recommended for optimal performance.', 'yadore-monetizer');
+        } elseif ($hit_rate < 20) {
+            $status_flag = 'warning';
+            $messages[] = sprintf(
+                __('Cache hit rate is %1$d%% across %2$d entries. Consider clearing stale caches or running additional scans.', 'yadore-monetizer'),
+                $hit_rate,
+                $entries
+            );
+        } else {
+            $messages[] = sprintf(
+                __('Cache hit rate at %1$d%% across %2$d entries.', 'yadore-monetizer'),
+                $hit_rate,
+                $entries
+            );
+        }
+
+        $totals = isset($database_results['details']['totals']) ? $database_results['details']['totals'] : array();
+        $db_status = isset($database_results['status']) ? $database_results['status'] : 'healthy';
+        if ($db_status === 'critical') {
+            $status_flag = 'critical';
+        } elseif ($db_status === 'warning' && $status_flag !== 'critical') {
+            $status_flag = 'warning';
+        }
+
+        $records = isset($totals['records']) ? (int) $totals['records'] : 0;
+        $size = isset($totals['size']) ? $totals['size'] : '0 KB';
+        $overhead = isset($totals['overhead']) ? $totals['overhead'] : '0 KB';
+        $overhead_ratio = isset($totals['overhead_ratio']) ? (int) $totals['overhead_ratio'] : 0;
+
+        if ($db_status !== 'healthy' && !empty($database_results['message'])) {
+            $messages[] = $database_results['message'];
+        }
+
+        if ($overhead_ratio > 25) {
+            if ($status_flag !== 'critical') {
+                $status_flag = 'warning';
+            }
+            $messages[] = sprintf(
+                __('Database overhead is %1$s (%2$d%%). Run an optimize operation to reclaim space.', 'yadore-monetizer'),
+                $overhead,
+                $overhead_ratio
+            );
+        } elseif ($db_status === 'healthy') {
+            $messages[] = sprintf(
+                __('Database footprint %1$s across %2$d records with %3$s overhead.', 'yadore-monetizer'),
+                $size,
+                $records,
+                $overhead
+            );
+        }
+
+        if (!$cron_health['healthy']) {
+            if (!empty($cron_health['missing'])) {
+                $status_flag = 'critical';
+            } elseif ($status_flag !== 'critical') {
+                $status_flag = 'warning';
+            }
+
+            $messages[] = $cron_health['message'];
+        } else {
+            $messages[] = $cron_health['message'];
+        }
+
+        return array(
+            'status' => $status_flag,
+            'message' => implode(' ', $messages),
+            'details' => array(
+                'cache' => $cache_stats,
+                'database' => $database_results['details'],
+                'cron' => $cron_health,
+            ),
+        );
+    }
+
+    private function get_cron_health_snapshot() {
+        $hooks = array(
+            'yadore_daily_maintenance' => __('Daily maintenance', 'yadore-monetizer'),
+            'yadore_weekly_reports' => __('Weekly reports', 'yadore-monetizer'),
+        );
+
+        $now = function_exists('current_time') ? current_time('timestamp') : time();
+        $events = array();
+        $missing = array();
+        $overdue = array();
+        $messages = array();
+
+        foreach ($hooks as $hook => $label) {
+            $timestamp = wp_next_scheduled($hook);
+
+            if ($timestamp === false) {
+                $missing[] = $label;
+                $events[] = array(
+                    'hook' => $hook,
+                    'label' => $label,
+                    'scheduled' => false,
+                );
+                continue;
+            }
+
+            $events[] = array(
+                'hook' => $hook,
+                'label' => $label,
+                'scheduled' => $timestamp,
+            );
+
+            if ($timestamp < $now) {
+                $overdue[] = $label;
+                $diff = human_time_diff($timestamp, $now);
+                $messages[] = sprintf(
+                    __('%1$s is overdue by %2$s.', 'yadore-monetizer'),
+                    $label,
+                    $diff
+                );
+            } else {
+                $diff = human_time_diff($now, $timestamp);
+                $messages[] = sprintf(
+                    __('Next %1$s run in %2$s.', 'yadore-monetizer'),
+                    $label,
+                    $diff
+                );
+            }
+        }
+
+        $healthy = empty($missing) && empty($overdue);
+
+        if (!empty($missing)) {
+            $messages[] = sprintf(
+                __('Missing schedules: %s.', 'yadore-monetizer'),
+                implode(', ', $missing)
+            );
+        }
+
+        if (!empty($overdue)) {
+            $messages[] = sprintf(
+                __('Overdue schedules: %s.', 'yadore-monetizer'),
+                implode(', ', $overdue)
+            );
+        }
+
+        if ($healthy && empty($messages)) {
+            $messages[] = __('All scheduled maintenance tasks are queued.', 'yadore-monetizer');
+        }
+
+        return array(
+            'healthy' => $healthy,
+            'message' => implode(' ', $messages),
+            'events' => $events,
+            'missing' => $missing,
+            'overdue' => $overdue,
+        );
+    }
+
+    private function extract_error_message_from_body($body) {
+        if (!is_string($body) || trim($body) === '') {
+            return '';
+        }
+
+        $decoded = json_decode($body, true);
+        if (is_array($decoded)) {
+            if (isset($decoded['message']) && is_string($decoded['message'])) {
+                return trim($decoded['message']);
+            }
+
+            if (isset($decoded['error'])) {
+                if (is_string($decoded['error'])) {
+                    return trim($decoded['error']);
+                }
+
+                if (is_array($decoded['error'])) {
+                    if (isset($decoded['error']['message']) && is_string($decoded['error']['message'])) {
+                        return trim($decoded['error']['message']);
+                    }
+
+                    if (isset($decoded['error']['status']) && is_string($decoded['error']['status'])) {
+                        return trim($decoded['error']['status']);
+                    }
+                }
+            }
+        }
+
+        $stripper = function_exists('wp_strip_all_tags') ? 'wp_strip_all_tags' : 'strip_tags';
+        $stripped = trim($stripper($body));
+        if ($stripped !== '' && function_exists('mb_strlen') ? mb_strlen($stripped, 'UTF-8') <= 160 : strlen($stripped) <= 160) {
+            return $stripped;
+        }
+
+        return '';
     }
 
     private function get_log_statistics() {
