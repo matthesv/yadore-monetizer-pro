@@ -1,12 +1,12 @@
-# Yadore Monetizer Pro v2.9.26 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.27 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.26 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.27 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
-✅ **AI Content Analysis** - Gemini 2.0 & 1.5 Model Support mit intelligenter Keyword-Erkennung
+✅ **AI Content Analysis** - Gemini 2.5 & Live Preview Model Support mit intelligenter Keyword-Erkennung
 ✅ **Advanced Analytics** - Umfassende Performance-Berichte und Statistiken  
 ✅ **Bulk Post Scanner** - Automatische Content-Analyse für alle Posts  
 ✅ **Product Overlay System** - Intelligente Produktempfehlungen mit Overlay  
@@ -16,13 +16,12 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **19 AJAX Endpoints** - Alle korrekt implementiert inkl. Cache-Tools & Diagnostics
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.26**
+## 🌟 **NEU IN VERSION 2.9.27**
 
-- ✅ **Palette-basierte Template-Farben** – Alle Overlay- und Shortcode-Layouts lassen sich jetzt direkt im Backend mit einer festen Farbpalette branden.
-- ✅ **Intuitive Farbwähler im Backend** – Hex-Werte, Vorschau und Palette-Swatches sorgen für konsistente Markenfarben ohne eigenes CSS.
-- ✅ **Globale CSS-Variablen** – Frontend-Templates nutzen dynamische Variablen für Buttons, Badges, Platzhalter und Dark-Mode-Anpassungen.
-- ✅ **Cache-Dashboard & Statistiken** – Telemetrie zu Cache-Größe, Einträgen und Hit-Rate bleibt erhalten und wurde auf Version 2.9.26 abgestimmt.
-- ✅ **Cache-AJAX-Endpunkte** – `yadore_get_tool_stats`, `yadore_clear_cache` und `yadore_analyze_cache` arbeiten weiterhin vollständig per AJAX.
+- ✅ **Gemini 2.5 Model Suite** – Flash, Pro, Flash Lite und Live Flash Preview stehen jetzt vollständig im Backend zur Verfügung.
+- ✅ **Aktualisierte AI-Presets** – Die Modell-Presets wurden auf die 2.5-Generation umgestellt und erleichtern die schnelle Auswahl.
+- ✅ **Dashboard Version Sync** – Alle Badges und Systemkarten laden die Plugin-Version automatisch aus dem Core.
+- ✅ **Version-aware Assets** – Admin- und Frontend-Skripte erhalten die aktuelle Versionsnummer über Localize Scripts für Logging & Debugging.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -69,7 +68,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.26:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.27:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -271,13 +270,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.26 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.27 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.26:**
-- 🎨 Palette-basierte Template-Farben – Branding für alle Overlay- und Shortcode-Layouts direkt aus dem Backend.
-- 🖌️ Farbpaletten & Hex-Ausgabe – Farbwähler mit Vorschau und Palette sorgen für konsistente Markenfarben ohne Custom-CSS.
-- 🌓 CSS-Variablen & Dark-Mode – Buttons, Badges und Platzhalter reagieren automatisch auf deine Palette und den Dark-Mode.
-- 📊 Cache-Dashboard & Telemetrie – Live-Statistiken zu Cache-Größe, Einträgen und Hit/Miss-Verhältnis bleiben auf 2.9.26 optimiert.
+### **Neue Highlights in v2.9.27:**
+- 🤖 Gemini 2.5 Flash & Pro – Höchste Performance und Qualität für deine AI-Analysen.
+- ⚡ Gemini 2.5 Flash Lite – Effiziente Variante für kostensensitive Automationen.
+- 📡 Gemini Live 2.5 Flash Preview – Live-Vorschau für interaktive Sessions.
+- 🧭 Dynamische Dashboard-Angaben – Versionen & Statusinformationen werden jetzt automatisch geladen.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -293,11 +292,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.26 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.27 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.26** - Production-Ready Market Release
+**Current Version: 2.9.27** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
