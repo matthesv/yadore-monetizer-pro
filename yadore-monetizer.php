@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.28
+Version: 2.9.29
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.28');
+define('YADORE_PLUGIN_VERSION', '2.9.29');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -1227,16 +1227,6 @@ HTML
                 array($this, 'admin_settings_page')
             );
 
-            // AI Management page (enhanced)
-            add_submenu_page(
-                'yadore-monetizer',
-                'AI Management',
-                'AI Management',
-                'manage_options',
-                'yadore-ai',
-                array($this, 'admin_ai_page')
-            );
-
             // Post Scanner page (complete)
             add_submenu_page(
                 'yadore-monetizer',
@@ -1245,16 +1235,6 @@ HTML
                 'manage_options',
                 'yadore-scanner',
                 array($this, 'admin_scanner_page')
-            );
-
-            // API Documentation page (enhanced)
-            add_submenu_page(
-                'yadore-monetizer',
-                'API Documentation',
-                'API Documentation',
-                'manage_options',
-                'yadore-api-docs',
-                array($this, 'admin_api_docs_page')
             );
 
             // Debug & Error Analysis page (complete)
@@ -1303,16 +1283,8 @@ HTML
         $this->render_admin_page('settings');
     }
 
-    public function admin_ai_page() {
-        $this->render_admin_page('ai');
-    }
-
     public function admin_scanner_page() {
         $this->render_admin_page('scanner');
-    }
-
-    public function admin_api_docs_page() {
-        $this->render_admin_page('api-docs');
     }
 
     public function admin_debug_page() {

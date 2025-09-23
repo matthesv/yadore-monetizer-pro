@@ -85,7 +85,7 @@
                             </div>
                             <div class="feature-details">
                                 <h4><?php echo esc_html__('WordPress-Integration', 'yadore-monetizer'); ?></h4>
-                                <p><?php echo esc_html__('Umfassende WordPress-Integration mit acht Admin-Seiten', 'yadore-monetizer'); ?></p>
+                                <p><?php echo esc_html__('Umfassende WordPress-Integration mit sechs Admin-Seiten', 'yadore-monetizer'); ?></p>
                                 <span class="status-badge status-active"><?php echo esc_html__('Aktiv', 'yadore-monetizer'); ?></span>
                             </div>
                         </div>
@@ -267,14 +267,6 @@
                             </div>
                         </a>
 
-                        <a href="<?php echo admin_url('admin.php?page=yadore-ai'); ?>" class="action-button action-ai">
-                            <span class="dashicons dashicons-admin-generic"></span>
-                            <div class="action-content">
-                                <strong><?php echo esc_html__('KI-Verwaltung', 'yadore-monetizer'); ?></strong>
-                                <small><?php echo esc_html__('Gemini-KI-Integration konfigurieren', 'yadore-monetizer'); ?></small>
-                            </div>
-                        </a>
-
                         <a href="<?php echo admin_url('admin.php?page=yadore-scanner'); ?>" class="action-button action-scanner">
                             <span class="dashicons dashicons-search"></span>
                             <div class="action-content">
@@ -394,10 +386,6 @@
                 </div>
                 <div class="card-content">
                     <div class="help-links">
-                        <a href="<?php echo admin_url('admin.php?page=yadore-api-docs'); ?>" class="help-link">
-                            <span class="dashicons dashicons-media-document"></span>
-                            <span>API Documentation</span>
-                        </a>
                         <a href="#" class="help-link" onclick="yadoreShowTutorial()">
                             <span class="dashicons dashicons-video-alt3"></span>
                             <span><?php echo esc_html__('Video-Tutorial', 'yadore-monetizer'); ?></span>
