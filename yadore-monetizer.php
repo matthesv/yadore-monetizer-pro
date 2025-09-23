@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.23
+Version: 2.9.24
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.23');
+define('YADORE_PLUGIN_VERSION', '2.9.24');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -71,6 +71,9 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_test_system_component', array($this, 'ajax_test_system_component'));
             add_action('wp_ajax_yadore_export_data', array($this, 'ajax_export_data'));
             add_action('wp_ajax_yadore_import_data', array($this, 'ajax_import_data'));
+            add_action('wp_ajax_yadore_clear_cache', array($this, 'ajax_clear_cache'));
+            add_action('wp_ajax_yadore_get_tool_stats', array($this, 'ajax_get_tool_stats'));
+            add_action('wp_ajax_yadore_analyze_cache', array($this, 'ajax_analyze_cache'));
 
             // Content integration
             add_shortcode('yadore_products', array($this, 'shortcode_products'));
@@ -101,7 +104,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.23 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.24 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
@@ -152,6 +155,8 @@ class YadoreMonetizer {
 
             // v2.7: Advanced activation procedures
             $this->setup_advanced_features();
+
+            $this->reset_cache_metrics();
 
             $this->log('Plugin activated successfully with complete feature set', 'info');
 
@@ -219,6 +224,23 @@ class YadoreMonetizer {
         );
     }
 
+    private function get_default_cache_metrics() {
+        $timestamp = function_exists('current_time') ? current_time('timestamp') : time();
+
+        return array(
+            'products' => array(
+                'hits' => 0,
+                'misses' => 0,
+            ),
+            'ai' => array(
+                'hits' => 0,
+                'misses' => 0,
+            ),
+            'last_cleared' => $timestamp,
+            'last_updated' => $timestamp,
+        );
+    }
+
     private function get_default_market() {
         $locale = function_exists('get_locale') ? get_locale() : 'de_DE';
         if (is_string($locale) && strlen($locale) >= 2) {
@@ -275,6 +297,10 @@ class YadoreMonetizer {
                     'overlay_views' => 0,
                     'conversion_rate' => '0%',
                 ), '', 'no');
+            }
+
+            if (false === get_option('yadore_cache_metrics', false)) {
+                add_option('yadore_cache_metrics', $this->get_default_cache_metrics(), '', 'no');
             }
 
             $this->ensure_default_templates_editable();
@@ -1701,6 +1727,90 @@ HTML
         }
     }
 
+    public function ajax_get_tool_stats() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $stats = array(
+                'cache' => $this->get_cache_statistics(),
+                'database' => $this->get_database_statistics(),
+                'logs' => $this->get_log_statistics(),
+                'cleanup' => $this->get_cleanup_statistics(),
+            );
+
+            wp_send_json_success($stats);
+        } catch (Exception $e) {
+            $this->log_error('Failed to load tool statistics', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_clear_cache() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $removed = $this->clear_plugin_caches();
+            $metrics = $this->reset_cache_metrics();
+
+            wp_send_json_success(array(
+                'message' => __('Cache cleared successfully.', 'yadore-monetizer'),
+                'removed' => $removed,
+                'metrics' => $metrics,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to clear cache', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_analyze_cache() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $stats = $this->get_cache_statistics();
+            $entries = isset($stats['entries']) ? (int) $stats['entries'] : 0;
+            $size = isset($stats['size']) ? $stats['size'] : '0 KB';
+            $hit_rate = isset($stats['hit_rate']) ? (int) $stats['hit_rate'] : 0;
+
+            $last_cleared = $stats['metrics']['last_cleared'] ?? 0;
+            $now = function_exists('current_time') ? current_time('timestamp') : time();
+            if ($last_cleared > 0 && $last_cleared <= $now && function_exists('human_time_diff')) {
+                $diff = human_time_diff($last_cleared, $now);
+                $cleared_message = sprintf(__('last cleared %s ago', 'yadore-monetizer'), $diff);
+            } else {
+                $cleared_message = __('no recent clear recorded', 'yadore-monetizer');
+            }
+
+            $message = sprintf(
+                __('Cache health check: %1$d entries (~%2$s) with a %3$d%% hit rate, %4$s.', 'yadore-monetizer'),
+                $entries,
+                $size,
+                $hit_rate,
+                $cleared_message
+            );
+
+            wp_send_json_success(array(
+                'message' => $message,
+                'stats' => $stats,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Cache analysis failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
     // Continue with more AJAX endpoints...
     // (I'll implement more in the next parts to avoid hitting token limits)
 
@@ -2390,6 +2500,7 @@ HTML
             $memory_cached = $this->api_cache[$cache_key];
 
             if (is_array($memory_cached) && !empty($memory_cached)) {
+                $this->record_cache_hit('products');
                 return array(
                     'products' => $memory_cached,
                     'keyword' => $keyword,
@@ -2405,6 +2516,7 @@ HTML
             if ($cached !== false) {
                 if (is_array($cached) && !empty($cached)) {
                     $this->api_cache[$cache_key] = $cached;
+                    $this->record_cache_hit('products');
                     return array(
                         'products' => $cached,
                         'keyword' => $keyword,
@@ -2414,6 +2526,10 @@ HTML
 
                 delete_transient($cache_key);
             }
+        }
+
+        if ($use_cache) {
+            $this->record_cache_miss('products');
         }
 
         $api_key = trim((string) get_option('yadore_api_key'));
@@ -3119,15 +3235,20 @@ HTML
             );
             $prompt = trim($prompt);
 
-            $cache_key = 'yadore_ai_' . md5($model . '|' . $prompt);
-            if ($use_cache) {
-                $cached = get_transient($cache_key);
-                if ($cached !== false) {
-                    return $cached;
-                }
+        $cache_key = 'yadore_ai_' . md5($model . '|' . $prompt);
+        if ($use_cache) {
+            $cached = get_transient($cache_key);
+            if ($cached !== false) {
+                $this->record_cache_hit('ai');
+                return $cached;
             }
+        }
 
-            $temperature = floatval(get_option('yadore_ai_temperature', '0.3'));
+        if ($use_cache) {
+            $this->record_cache_miss('ai');
+        }
+
+        $temperature = floatval(get_option('yadore_ai_temperature', '0.3'));
             $temperature = max(0, min(2, $temperature));
             $max_tokens = intval(get_option('yadore_ai_max_tokens', 50));
             if ($max_tokens <= 0) {
@@ -5952,9 +6073,268 @@ $wpdb->insert($analytics_table, array(
 
     // More methods will be implemented in continuation...
 
+    private function get_cache_statistics() {
+        global $wpdb;
 
+        $prefixes = array('yadore_products_', 'yadore_ai_');
+        $placeholders = array();
+        $values = array();
 
+        foreach ($prefixes as $prefix) {
+            $placeholders[] = 'option_name LIKE %s';
+            $values[] = $wpdb->esc_like('_transient_' . $prefix) . '%';
+        }
 
+        $entries = 0;
+        $bytes = 0;
+
+        if (!empty($placeholders)) {
+            $sql = 'SELECT option_name, option_value FROM ' . $wpdb->options . ' WHERE (' . implode(' OR ', $placeholders) . ')';
+            $prepared = $wpdb->prepare($sql, $values);
+            $rows = $wpdb->get_results($prepared);
+
+            if (is_array($rows)) {
+                foreach ($rows as $row) {
+                    $entries++;
+                    $value = maybe_unserialize($row->option_value);
+                    if (is_string($value)) {
+                        $bytes += strlen($value);
+                    } else {
+                        $bytes += strlen(maybe_serialize($value));
+                    }
+                }
+            }
+        }
+
+        $metrics = $this->get_cache_metrics();
+        $product_hits = (int) ($metrics['products']['hits'] ?? 0);
+        $product_misses = (int) ($metrics['products']['misses'] ?? 0);
+        $ai_hits = (int) ($metrics['ai']['hits'] ?? 0);
+        $ai_misses = (int) ($metrics['ai']['misses'] ?? 0);
+        $total_checks = max(0, $product_hits + $product_misses + $ai_hits + $ai_misses);
+        $hit_rate = $total_checks > 0 ? (int) round((($product_hits + $ai_hits) / $total_checks) * 100) : 0;
+
+        return array(
+            'size' => $this->format_bytes($bytes),
+            'entries' => $entries,
+            'hit_rate' => $hit_rate,
+            'metrics' => $metrics,
+        );
+    }
+
+    private function clear_plugin_caches() {
+        $removed = array(
+            'transients' => $this->purge_transients_by_prefix(array('yadore_products_', 'yadore_ai_')),
+            'ai_cache_rows' => $this->clear_ai_cache_table(),
+        );
+
+        $this->api_cache = array();
+        $this->keyword_candidate_cache = array();
+
+        return $removed;
+    }
+
+    private function purge_transients_by_prefix(array $prefixes) {
+        global $wpdb;
+
+        $total_removed = 0;
+
+        foreach ($prefixes as $prefix) {
+            $like = $wpdb->esc_like('_transient_' . $prefix) . '%';
+            $option_names = $wpdb->get_col($wpdb->prepare('SELECT option_name FROM ' . $wpdb->options . ' WHERE option_name LIKE %s', $like));
+
+            foreach ($option_names as $option_name) {
+                $transient_key = substr($option_name, strlen('_transient_'));
+                if ($transient_key === false) {
+                    continue;
+                }
+
+                if (delete_transient($transient_key)) {
+                    $total_removed++;
+                }
+            }
+
+            if (is_multisite() && property_exists($wpdb, 'sitemeta')) {
+                $site_like = $wpdb->esc_like('_site_transient_' . $prefix) . '%';
+                $meta_keys = $wpdb->get_col($wpdb->prepare('SELECT meta_key FROM ' . $wpdb->sitemeta . ' WHERE meta_key LIKE %s', $site_like));
+
+                foreach ($meta_keys as $meta_key) {
+                    $transient_key = substr($meta_key, strlen('_site_transient_'));
+                    if ($transient_key === false) {
+                        continue;
+                    }
+
+                    if (delete_site_transient($transient_key)) {
+                        $total_removed++;
+                    }
+                }
+            }
+        }
+
+        return $total_removed;
+    }
+
+    private function clear_ai_cache_table() {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'yadore_ai_cache';
+        if (!$this->table_exists($table)) {
+            return 0;
+        }
+
+        $deleted = $wpdb->query('DELETE FROM ' . $table);
+        return is_numeric($deleted) ? (int) $deleted : 0;
+    }
+
+    private function get_database_statistics() {
+        global $wpdb;
+
+        $tables = array(
+            $wpdb->prefix . 'yadore_ai_cache',
+            $wpdb->prefix . 'yadore_post_keywords',
+            $wpdb->prefix . 'yadore_api_logs',
+            $wpdb->prefix . 'yadore_error_logs',
+            $wpdb->prefix . 'yadore_analytics',
+        );
+
+        $size_bytes = 0;
+        $records = 0;
+        $overhead_bytes = 0;
+
+        foreach ($tables as $table) {
+            if (!$this->table_exists($table)) {
+                continue;
+            }
+
+            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $table));
+            if (!$status) {
+                continue;
+            }
+
+            $size_bytes += (int) ($status->Data_length ?? 0) + (int) ($status->Index_length ?? 0);
+            $records += (int) ($status->Rows ?? 0);
+            $overhead_bytes += (int) ($status->Data_free ?? 0);
+        }
+
+        return array(
+            'size' => $this->format_bytes($size_bytes),
+            'records' => $records,
+            'overhead' => $this->format_bytes($overhead_bytes),
+        );
+    }
+
+    private function get_log_statistics() {
+        global $wpdb;
+
+        $api_table = $wpdb->prefix . 'yadore_api_logs';
+        $error_table = $wpdb->prefix . 'yadore_error_logs';
+
+        $api_logs = $this->table_exists($api_table) ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . $api_table) : 0;
+        $error_logs = $this->table_exists($error_table) ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . $error_table) : 0;
+
+        $total_size = 0;
+        foreach (array($api_table, $error_table) as $table) {
+            if (!$this->table_exists($table)) {
+                continue;
+            }
+
+            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $table));
+            if ($status) {
+                $total_size += (int) ($status->Data_length ?? 0) + (int) ($status->Index_length ?? 0);
+            }
+        }
+
+        return array(
+            'api_logs' => $api_logs,
+            'error_logs' => $error_logs,
+            'total_size' => $this->format_bytes($total_size),
+        );
+    }
+
+    private function get_cleanup_statistics() {
+        return array(
+            'temp_files' => 0,
+            'orphaned_data' => 0,
+            'space_used' => '0 KB',
+        );
+    }
+
+    private function get_cache_metrics() {
+        $raw = get_option('yadore_cache_metrics', array());
+        if (!is_array($raw)) {
+            $raw = array();
+        }
+
+        $defaults = $this->get_default_cache_metrics();
+        $metrics = wp_parse_args($raw, $defaults);
+
+        foreach (array('products', 'ai') as $group) {
+            if (!isset($metrics[$group]) || !is_array($metrics[$group])) {
+                $metrics[$group] = $defaults[$group];
+            }
+
+            $metrics[$group]['hits'] = isset($metrics[$group]['hits']) ? (int) $metrics[$group]['hits'] : 0;
+            $metrics[$group]['misses'] = isset($metrics[$group]['misses']) ? (int) $metrics[$group]['misses'] : 0;
+        }
+
+        $metrics['last_cleared'] = isset($metrics['last_cleared']) ? (int) $metrics['last_cleared'] : 0;
+        $metrics['last_updated'] = isset($metrics['last_updated']) ? (int) $metrics['last_updated'] : 0;
+
+        return $metrics;
+    }
+
+    private function reset_cache_metrics() {
+        $metrics = $this->get_default_cache_metrics();
+        update_option('yadore_cache_metrics', $metrics, false);
+        return $metrics;
+    }
+
+    private function record_cache_hit($group) {
+        $this->update_cache_counter($group, 'hits');
+    }
+
+    private function record_cache_miss($group) {
+        $this->update_cache_counter($group, 'misses');
+    }
+
+    private function update_cache_counter($group, $field) {
+        if (!in_array($group, array('products', 'ai'), true)) {
+            return;
+        }
+
+        if (!in_array($field, array('hits', 'misses'), true)) {
+            return;
+        }
+
+        $metrics = $this->get_cache_metrics();
+        if (!isset($metrics[$group][$field])) {
+            $metrics[$group][$field] = 0;
+        }
+
+        $metrics[$group][$field] = max(0, (int) $metrics[$group][$field]) + 1;
+        $metrics['last_updated'] = function_exists('current_time') ? current_time('timestamp') : time();
+
+        update_option('yadore_cache_metrics', $metrics, false);
+    }
+
+    private function format_bytes($bytes) {
+        $bytes = (int) $bytes;
+
+        if ($bytes <= 0) {
+            return '0 KB';
+        }
+
+        $units = array('B', 'KB', 'MB', 'GB', 'TB');
+        $power = (int) floor(log($bytes, 1024));
+        $power = min($power, count($units) - 1);
+        $value = $bytes / pow(1024, $power);
+
+        if ($power === 0) {
+            return $bytes . ' B';
+        }
+
+        return sprintf('%.2f %s', $value, $units[$power]);
+    }
 
     /** Basic sanitize helpers (single authoritative copy) */
     private function sanitize_bool($v){ return $v ? 1 : 0; }
