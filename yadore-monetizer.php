@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.32
+Version: 2.9.33
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.32');
+define('YADORE_PLUGIN_VERSION', '2.9.33');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -53,6 +53,8 @@ class YadoreMonetizer {
             // v2.7: Complete AJAX endpoints (no duplicates)
             add_action('wp_ajax_yadore_get_overlay_products', array($this, 'ajax_get_overlay_products'));
             add_action('wp_ajax_nopriv_yadore_get_overlay_products', array($this, 'ajax_get_overlay_products'));
+            add_action('wp_ajax_yadore_track_product_click', array($this, 'ajax_track_product_click'));
+            add_action('wp_ajax_nopriv_yadore_track_product_click', array($this, 'ajax_track_product_click'));
             add_action('wp_ajax_yadore_test_gemini_api', array($this, 'ajax_test_gemini_api'));
             add_action('wp_ajax_yadore_test_yadore_api', array($this, 'ajax_test_yadore_api'));
             add_action('wp_ajax_yadore_scan_posts', array($this, 'ajax_scan_posts'));
@@ -508,7 +510,9 @@ class YadoreMonetizer {
         try {
             $this->set_default_options();
 
-            if (get_option('yadore_plugin_version') !== YADORE_PLUGIN_VERSION) {
+            $stored_version = (string) get_option('yadore_plugin_version', '');
+            if ($stored_version !== YADORE_PLUGIN_VERSION) {
+                $this->maybe_upgrade_database($stored_version);
                 update_option('yadore_plugin_version', YADORE_PLUGIN_VERSION);
             }
 
@@ -1562,6 +1566,40 @@ HTML
         }
     }
 
+    public function ajax_track_product_click() {
+        try {
+            check_ajax_referer('yadore_frontend_nonce', 'nonce');
+
+            $product_id = isset($_POST['product_id'])
+                ? sanitize_text_field(wp_unslash((string) $_POST['product_id']))
+                : '';
+
+            if ($product_id === '') {
+                throw new Exception(__('Invalid product identifier received.', 'yadore-monetizer'));
+            }
+
+            $page_url = isset($_POST['page_url'])
+                ? esc_url_raw(wp_unslash((string) $_POST['page_url']))
+                : '';
+
+            $post_id = isset($_POST['post_id']) ? absint(wp_unslash($_POST['post_id'])) : 0;
+            if ($post_id <= 0 && $page_url !== '') {
+                $post_id = url_to_postid($page_url);
+            }
+
+            $this->record_product_click_event($product_id, $post_id, $page_url);
+
+            wp_send_json_success(array('tracked' => true));
+        } catch (Exception $e) {
+            $context = array(
+                'product_id' => isset($product_id) ? $product_id : '',
+                'page_url' => isset($page_url) ? $page_url : '',
+            );
+            $this->log_error('Product click tracking request failed', $e, 'warning', $context);
+            wp_send_json_error(array('message' => $e->getMessage()));
+        }
+    }
+
     public function ajax_test_gemini_api() {
         try {
             check_ajax_referer('yadore_admin_nonce', 'nonce');
@@ -2299,6 +2337,25 @@ HTML
                 KEY session_id (session_id)
             ) $charset_collate;";
 
+            $api_clicks_table = $wpdb->prefix . 'yadore_api_clicks';
+            $sql6 = "CREATE TABLE $api_clicks_table (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                click_id varchar(128) NOT NULL,
+                clicked_at datetime NOT NULL,
+                market varchar(10),
+                merchant_id varchar(190),
+                merchant_name varchar(255),
+                placement_id varchar(190),
+                sales_amount decimal(12,2) DEFAULT 0.00,
+                raw_payload longtext,
+                synced_at datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                UNIQUE KEY click_id (click_id),
+                KEY clicked_at (clicked_at),
+                KEY market (market),
+                KEY merchant_id (merchant_id)
+            ) $charset_collate;";
+
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
             dbDelta($sql1);
@@ -2306,14 +2363,29 @@ HTML
             dbDelta($sql3);
             dbDelta($sql4);
             dbDelta($sql5);
+            dbDelta($sql6);
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v2.9', 'info');
+            $this->log('Enhanced database tables created successfully for v2.9.33', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
             throw $e;
+        }
+    }
+
+    private function maybe_upgrade_database($previous_version) {
+        try {
+            $baseline_version = is_string($previous_version) && $previous_version !== ''
+                ? $previous_version
+                : '0';
+
+            if (version_compare($baseline_version, '2.9.33', '<')) {
+                $this->create_tables();
+            }
+        } catch (Exception $e) {
+            $this->log_error('Database upgrade routine failed', $e, 'high');
         }
     }
 
@@ -4055,6 +4127,8 @@ HTML
             'conversion_rate' => 0,
         );
 
+        $this->maybe_sync_recent_clicks(3);
+
         $cached = get_option('yadore_stats_cache', array());
         if (!is_array($cached)) {
             $cached = array();
@@ -4209,6 +4283,8 @@ HTML
         if ($period > 1) {
             $start->modify(sprintf('-%d days', $period - 1));
         }
+
+        $this->maybe_sync_clicks_from_api(clone $start, clone $end);
 
         $start_string = $start->format('Y-m-d H:i:s');
         $start_timestamp = $start->getTimestamp();
@@ -6576,6 +6652,354 @@ HTML
         ));
     }
 
+    private function record_product_click_event($product_id, $post_id, $page_url) {
+        global $wpdb;
+
+        $analytics_table = $wpdb->prefix . 'yadore_analytics';
+
+        if (!$this->table_exists($analytics_table)) {
+            return false;
+        }
+
+        $payload = array(
+            'source' => 'frontend',
+            'product_id' => $product_id,
+            'page_url' => $page_url,
+        );
+
+        $encoded_payload = function_exists('wp_json_encode') ? wp_json_encode($payload) : json_encode($payload);
+
+        $inserted = $wpdb->insert(
+            $analytics_table,
+            array(
+                'event_type' => 'product_click',
+                'event_data' => $encoded_payload,
+                'post_id' => $post_id > 0 ? $post_id : 0,
+                'user_id' => get_current_user_id(),
+                'session_id' => $this->get_current_session_identifier(),
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            ),
+            array('%s', '%s', '%d', '%d', '%s', '%s', '%s')
+        );
+
+        if ($inserted === false) {
+            $this->log('Failed to record product click event for analytics table', 'warning');
+            return false;
+        }
+
+        return true;
+    }
+
+    private function get_current_session_identifier() {
+        if (function_exists('wp_get_session_token')) {
+            $token = wp_get_session_token();
+            if (is_string($token) && $token !== '') {
+                return substr($token, 0, 32);
+            }
+        }
+
+        if (function_exists('session_id')) {
+            $session = session_id();
+            if (is_string($session) && $session !== '') {
+                return substr($session, 0, 32);
+            }
+        }
+
+        return '';
+    }
+
+    private function maybe_sync_recent_clicks($days = 3) {
+        try {
+            $days = max(1, (int) $days);
+            $timezone = $this->get_wp_timezone_object();
+
+            $end = new \DateTime('now', $timezone);
+            $end->setTime(23, 59, 59);
+
+            $start = clone $end;
+            $start->setTime(0, 0, 0);
+
+            if ($days > 1) {
+                $start->modify(sprintf('-%d days', $days - 1));
+            }
+
+            $this->maybe_sync_clicks_from_api($start, $end);
+        } catch (Exception $e) {
+            $this->log_error('Recent click synchronization failed', $e, 'warning');
+        }
+    }
+
+    private function maybe_sync_clicks_from_api(\DateTime $start_date, \DateTime $end_date) {
+        global $wpdb;
+
+        $api_key = $this->sanitize_api_key(get_option('yadore_api_key', ''));
+        if ($api_key === '') {
+            return;
+        }
+
+        $analytics_table = $wpdb->prefix . 'yadore_analytics';
+        $clicks_table = $wpdb->prefix . 'yadore_api_clicks';
+
+        if (!$this->table_exists($analytics_table) || !$this->table_exists($clicks_table)) {
+            return;
+        }
+
+        $market_setting = $this->sanitize_market(get_option('yadore_market', ''));
+        $market_param = $market_setting !== '' ? strtolower($market_setting) : '';
+
+        $utc = new \DateTimeZone('UTC');
+
+        $start = clone $start_date;
+        $start->setTimezone($utc);
+        $start->setTime(0, 0, 0);
+
+        $end = clone $end_date;
+        $end->setTimezone($utc);
+        $end->setTime(0, 0, 0);
+
+        if ($start > $end) {
+            $temp = $start;
+            $start = $end;
+            $end = $temp;
+        }
+
+        $sync_log = get_option('yadore_click_sync_log', array());
+        if (!is_array($sync_log)) {
+            $sync_log = array();
+        }
+
+        $today = new \DateTime('now', $utc);
+        $today->setTime(0, 0, 0);
+
+        $now = time();
+        $updated = false;
+
+        $current = clone $start;
+
+        while ($current <= $end && $current <= $today) {
+            $date_string = $current->format('Y-m-d');
+            $last_sync = isset($sync_log[$date_string]) ? (int) $sync_log[$date_string] : 0;
+            $needs_sync = ($last_sync === 0) || (($now - $last_sync) >= 12 * HOUR_IN_SECONDS);
+
+            if ($needs_sync) {
+                $response = $this->fetch_click_data_for_date($date_string, $api_key, $market_param);
+                if ($response['success']) {
+                    $this->store_click_data_from_api($response['data'], $date_string);
+                    $sync_log[$date_string] = $now;
+                    $updated = true;
+                }
+            }
+
+            $current->modify('+1 day');
+        }
+
+        if ($updated) {
+            if (count($sync_log) > 120) {
+                ksort($sync_log);
+                $sync_log = array_slice($sync_log, -120, null, true);
+            }
+
+            update_option('yadore_click_sync_log', $sync_log, false);
+        }
+    }
+
+    private function fetch_click_data_for_date($date_string, $api_key, $market) {
+        $endpoint = 'https://api.yadore.com/v2/conversion/detail';
+        $query_args = array(
+            'date' => $date_string,
+            'format' => 'json',
+        );
+
+        if (is_string($market) && $market !== '') {
+            $query_args['market'] = strtolower($market);
+        }
+
+        $url = add_query_arg($query_args, $endpoint);
+
+        $args = array(
+            'headers' => array(
+                'Accept' => 'application/json',
+                'API-Key' => $api_key,
+                'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
+            ),
+            'timeout' => 20,
+        );
+
+        $response = wp_remote_get($url, $args);
+
+        if (is_wp_error($response)) {
+            $this->log_error(
+                'Yadore API click fetch failed: ' . $response->get_error_message(),
+                null,
+                'warning',
+                array('date' => $date_string)
+            );
+            $this->log_api_call('yadore', $url, 'error', array('message' => $response->get_error_message()));
+            return array('success' => false);
+        }
+
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+        $decoded = json_decode($body, true);
+
+        if ($code >= 200 && $code < 300 && is_array($decoded)) {
+            $this->log_api_call('yadore', $url, 'success', array(
+                'date' => $date_string,
+                'total_clicks' => isset($decoded['totalClicks']) ? (int) $decoded['totalClicks'] : 0,
+            ));
+
+            return array('success' => true, 'data' => $decoded);
+        }
+
+        $this->log_error(
+            'Unexpected Yadore API click response',
+            null,
+            'warning',
+            array(
+                'date' => $date_string,
+                'status' => $code,
+                'body' => is_string($body) ? $body : '',
+            )
+        );
+        $this->log_api_call('yadore', $url, 'error', array('status' => $code, 'body' => $body));
+
+        return array('success' => false);
+    }
+
+    private function store_click_data_from_api($payload, $default_date) {
+        global $wpdb;
+
+        if (!is_array($payload)) {
+            return 0;
+        }
+
+        $clicks = isset($payload['clicks']) && is_array($payload['clicks']) ? $payload['clicks'] : array();
+
+        if (empty($clicks)) {
+            return 0;
+        }
+
+        $click_table = $wpdb->prefix . 'yadore_api_clicks';
+        $analytics_table = $wpdb->prefix . 'yadore_analytics';
+
+        if (!$this->table_exists($click_table) || !$this->table_exists($analytics_table)) {
+            return 0;
+        }
+
+        $new_records = 0;
+
+        foreach ($clicks as $click) {
+            if (!is_array($click)) {
+                continue;
+            }
+
+            $click_id = isset($click['clickId']) ? trim((string) $click['clickId']) : '';
+            if ($click_id === '') {
+                continue;
+            }
+
+            $existing = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM {$click_table} WHERE click_id = %s",
+                $click_id
+            ));
+
+            if ($existing) {
+                continue;
+            }
+
+            $timestamp = $this->parse_click_timestamp($click['date'] ?? '', $default_date);
+
+            $market = '';
+            if (isset($click['market'])) {
+                $market_candidate = $this->sanitize_market($click['market']);
+                if ($market_candidate !== '') {
+                    $market = strtolower($market_candidate);
+                } else {
+                    $market = strtolower(trim((string) $click['market']));
+                }
+            }
+
+            $merchant = is_array($click['merchant']) ? $click['merchant'] : array();
+            $merchant_id = isset($merchant['id']) ? sanitize_text_field((string) $merchant['id']) : '';
+            $merchant_name = isset($merchant['name']) ? sanitize_text_field((string) $merchant['name']) : '';
+
+            $placement_id = '';
+            if (isset($click['placementId']) && $click['placementId'] !== false) {
+                $placement_id = sanitize_text_field((string) $click['placementId']);
+            }
+
+            $sales_amount = 0.0;
+            if (isset($click['sales']) && is_numeric($click['sales'])) {
+                $sales_amount = (float) $click['sales'];
+            }
+
+            $raw_payload = function_exists('wp_json_encode') ? wp_json_encode($click) : json_encode($click);
+
+            $wpdb->insert(
+                $click_table,
+                array(
+                    'click_id' => $click_id,
+                    'clicked_at' => gmdate('Y-m-d H:i:s', $timestamp),
+                    'market' => $market,
+                    'merchant_id' => $merchant_id,
+                    'merchant_name' => $merchant_name,
+                    'placement_id' => $placement_id,
+                    'sales_amount' => $sales_amount,
+                    'raw_payload' => $raw_payload,
+                    'synced_at' => gmdate('Y-m-d H:i:s'),
+                ),
+                array('%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s')
+            );
+
+            $event_payload = array(
+                'source' => 'yadore_api',
+                'click_id' => $click_id,
+                'market' => $market,
+                'merchant_id' => $merchant_id,
+                'merchant_name' => $merchant_name,
+                'sales' => $sales_amount,
+            );
+
+            $wpdb->insert(
+                $analytics_table,
+                array(
+                    'event_type' => 'product_click',
+                    'event_data' => function_exists('wp_json_encode') ? wp_json_encode($event_payload) : json_encode($event_payload),
+                    'post_id' => 0,
+                    'user_id' => 0,
+                    'session_id' => '',
+                    'ip_address' => '',
+                    'user_agent' => 'yadore-api',
+                    'created_at' => gmdate('Y-m-d H:i:s', $timestamp),
+                ),
+                array('%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s')
+            );
+
+            $new_records++;
+        }
+
+        return $new_records;
+    }
+
+    private function parse_click_timestamp($raw_date, $fallback_date) {
+        $timestamp = false;
+
+        if (is_string($raw_date) && $raw_date !== '') {
+            $timestamp = strtotime($raw_date);
+        }
+
+        if ($timestamp === false || $timestamp <= 0) {
+            $timestamp = strtotime($fallback_date . ' 00:00:00 UTC');
+        }
+
+        if ($timestamp === false || $timestamp <= 0) {
+            $timestamp = time();
+        }
+
+        return (int) $timestamp;
+    }
+
     private function log_api_call($api_type, $endpoint, $status, $data = array()) {
         global $wpdb;
         if (!isset($wpdb) || !($wpdb instanceof wpdb)) {
@@ -7777,6 +8201,7 @@ HTML
             $wpdb->prefix . 'yadore_api_logs',
             $wpdb->prefix . 'yadore_error_logs',
             $wpdb->prefix . 'yadore_analytics',
+            $wpdb->prefix . 'yadore_api_clicks',
         );
 
         $size_bytes = 0;
@@ -8093,6 +8518,7 @@ HTML
             'yadore_api_logs' => array('id', 'api_type', 'endpoint_url', 'request_method', 'request_headers', 'request_body', 'response_code', 'response_headers', 'response_body', 'response_time_ms', 'success', 'error_message', 'post_id', 'user_id', 'ip_address', 'user_agent', 'created_at'),
             'yadore_error_logs' => array('id', 'error_type', 'error_message', 'error_code', 'stack_trace', 'context_data', 'post_id', 'user_id', 'ip_address', 'user_agent', 'request_uri', 'severity', 'resolved', 'resolution_notes', 'created_at', 'resolved_at'),
             'yadore_analytics' => array('id', 'event_type', 'event_data', 'post_id', 'user_id', 'session_id', 'ip_address', 'user_agent', 'created_at'),
+            'yadore_api_clicks' => array('id', 'click_id', 'clicked_at', 'market', 'merchant_id', 'merchant_name', 'placement_id', 'sales_amount', 'raw_payload', 'synced_at'),
         );
 
         $details = array();

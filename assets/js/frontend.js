@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.32 - Frontend JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.33 - Frontend JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: (window.yadore_ajax && window.yadore_ajax.version) ? window.yadore_ajax.version : '2.9.32',
+        version: (window.yadore_ajax && window.yadore_ajax.version) ? window.yadore_ajax.version : '2.9.33',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,
@@ -735,12 +735,15 @@
         trackProductClick: function(productId) {
             if (!productId) return;
 
-            $.post(this.settings.ajax_url, {
+            const payload = {
                 action: 'yadore_track_product_click',
                 nonce: this.settings.nonce,
                 product_id: productId,
-                page_url: window.location.href
-            }).done((response) => {
+                page_url: window.location.href,
+                post_id: this.settings.post_id || 0
+            };
+
+            $.post(this.settings.ajax_url, payload).done((response) => {
                 console.log('Yadore Monetizer: Product click tracked', productId);
             }).fail((error) => {
                 console.warn('Yadore Monetizer: Failed to track product click', error);
