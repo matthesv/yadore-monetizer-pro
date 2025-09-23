@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.23 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.24 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.23 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.24 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features  
@@ -13,14 +13,14 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **API Documentation** - Live API-Testing und Request-Monitoring  
 ✅ **Debug & Error Analysis** - Vollständige Systemdiagnose und Fehlerbehebung  
 ✅ **Data Management Tools** - Export/Import, Backup und Migration  
-✅ **16 AJAX Endpoints** - Alle korrekt implementiert ohne Konflikte  
+✅ **19 AJAX Endpoints** - Alle korrekt implementiert inkl. Cache-Tools & Diagnostics
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.23**
+## 🌟 **NEU IN VERSION 2.9.24**
 
-- ✅ **Kombinierbare Aktivierungsoptionen** – Overlay, automatische Produkt-Injection und manueller Shortcode lassen sich jetzt einzeln oder gemeinsam in den Einstellungen aktivieren.
-- ✅ **Mobile Overlay in Vollbreite** – Das Overlay nutzt auf Smartphones über 90 % der Bildschirmbreite und passt sich dynamisch an kleinere Viewports an.
-- ✅ **Verbesserte Scrollbarkeit** – Optimierte CSS- und JavaScript-Regeln stellen sicher, dass sich lange Produktlisten im Overlay flüssig nach unten scrollen lassen.
+- ✅ **Cache-Dashboard & Statistiken** – Tools- und Debug-Seiten zeigen jetzt Cache-Größe, Einträge und Hit-Rate aus dem neuen Telemetrie-System.
+- ✅ **Neue Cache-AJAX-Endpunkte** – `yadore_get_tool_stats`, `yadore_clear_cache` und `yadore_analyze_cache` arbeiten vollständig per AJAX ohne Seitenreload.
+- ✅ **Automatisches Hit/Miss-Tracking** – Produkt- und AI-Anfragen aktualisieren die Cache-Telemetrie inklusive Reset bei Aktivierung oder manueller Bereinigung.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -28,7 +28,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **WordPress Admin Menu** - 8 Admin-Seiten vollständig verfügbar  
 ✅ **Plugin Lifecycle** - Proper activation/deactivation mit Setup  
 ✅ **Settings Management** - WordPress-native Einstellungen mit 5 Tabs  
-✅ **AJAX Security** - WordPress nonces für alle 16 Endpoints  
+✅ **AJAX Security** - WordPress nonces für alle 19 Endpoints
 ✅ **Admin Notices** - WordPress-Style Benachrichtigungen  
 ✅ **Script Enqueuing** - Proper wp_enqueue_* für alle Assets  
 ✅ **Shortcode System** - Native WordPress shortcode registration  
@@ -67,7 +67,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.23:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.24:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -80,7 +80,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 - **Plugin Files:** 15 Dateien
 - **Templates:** 8 Admin + 4 Frontend Templates
 - **Database Tables:** 5 enhanced tables
-- **AJAX Endpoints:** 16 vollständig implementiert
+- **AJAX Endpoints:** 19 vollständig implementiert (inkl. Cache-Verwaltung)
 - **CSS Files:** 2 (Admin + Frontend)
 - **JavaScript Files:** 2 (Admin + Frontend)
 
@@ -93,7 +93,7 @@ wp_yadore_error_logs       - Error Tracking & Resolution
 wp_yadore_analytics        - Performance Analytics (NEW)
 ```
 
-### **Complete AJAX Endpoints (16 total):**
+### **Complete AJAX Endpoints (19 total):**
 - `yadore_get_overlay_products` - Frontend product overlay
 - `yadore_test_gemini_api` - AI API connection testing
 - `yadore_test_yadore_api` - Product API testing
@@ -105,9 +105,12 @@ wp_yadore_analytics        - Performance Analytics (NEW)
 - `yadore_clear_api_logs` - Log management
 - `yadore_get_posts_data` - Post data retrieval
 - `yadore_get_debug_info` - System diagnostics
+- `yadore_get_tool_stats` - Tools dashboard statistics & cache metrics
 - `yadore_get_error_logs` - Error log retrieval
 - `yadore_resolve_error` - Error resolution
 - `yadore_test_system_component` - System testing
+- `yadore_clear_cache` - Cache invalidation & telemetry reset
+- `yadore_analyze_cache` - Cache health analysis output
 - `yadore_export_data` - Data export functionality
 - `yadore_import_data` - Data import functionality
 
@@ -266,12 +269,12 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.23 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.24 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.23:**
-- 🔄 Kombinierbare Aktivierungsoptionen – Overlay, automatische Produkt-Injection und manueller Shortcode lassen sich individuell schalten.
-- 📱 Mobile Overlay in Vollbreite – Nutzt auf Smartphones mehr als 90 % der Bildschirmbreite für maximale Sichtbarkeit.
-- 🧭 Verbesserte Scrollbarkeit – Optimierte Scroll-Logik und Layout sorgen für ein angenehmes Nutzererlebnis bei langen Produktlisten.
+### **Neue Highlights in v2.9.24:**
+- 📊 Cache-Dashboard im Admin – Tools- und Debug-Seiten liefern Live-Statistiken zu Größe, Einträgen und Hit-Rate.
+- 🧼 Ein-Klick-Cache-Bereinigung – `yadore_clear_cache` leert Produkt-, AI- und Transient-Caches inklusive Telemetrie-Reset.
+- 🤖 Automatisches Hit/Miss-Tracking – Jede Produkt- und AI-Abfrage aktualisiert die Cache-Metriken für präzisere Analysen.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -279,7 +282,7 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **WordPress Integration:** 100% VOLLSTÄNDIG
 ✅ **Admin Pages:** ALLE 8 SEITEN VERFÜGBAR
 ✅ **Features:** COMPLETE FEATURE SET
-✅ **AJAX Endpoints:** ALLE 16 FUNKTIONIEREN
+✅ **AJAX Endpoints:** ALLE 19 FUNKTIONIEREN
 ✅ **Database:** ENHANCED SCHEMA
 ✅ **Performance:** OPTIMIERT
 ✅ **Security:** ENTERPRISE GRADE
@@ -287,11 +290,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.23 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.24 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.23** - Production-Ready Market Release
+**Current Version: 2.9.24** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
