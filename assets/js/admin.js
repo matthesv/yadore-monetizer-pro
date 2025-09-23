@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.29 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.30 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '2.9.29',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '2.9.30',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -1701,21 +1701,36 @@
             $.post(this.ajax_url, {
                 action: 'yadore_test_connectivity',
                 nonce: this.nonce
-            }, (response) => {
-                if (response.success) {
-                    resultsDiv.html(`
-                        <div class="test-success">
-                            <h5>Connectivity Test Results</h5>
-                            <ul>
-                                <li>Yadore API: ${response.data.yadore_api}</li>
-                                <li>Gemini AI: ${response.data.gemini_api}</li>
-                                <li>External Services: ${response.data.external_services}</li>
-                            </ul>
-                        </div>
-                    `);
+            }).done((response) => {
+                if (response && response.success && response.data) {
+                    const payload = response.data;
+                    const services = Array.isArray(payload.services) ? payload.services : [];
+                    const cssClass = this.getDiagnosticClass(payload.status);
+                    let html = `<div class="${cssClass}">`;
+                    html += '<h5>Connectivity Test Results</h5>';
+
+                    if (services.length) {
+                        html += '<ul>';
+                        services.forEach((service) => {
+                            const icon = this.getDiagnosticIcon(service.status);
+                            const label = this.escapeHtml(service.label || '');
+                            const message = this.escapeHtml(service.message || '');
+                            html += `<li>${icon} <strong>${label}:</strong> ${message}</li>`;
+                        });
+                        html += '</ul>';
+                    }
+
+                    if (payload.message) {
+                        html += `<p>${this.escapeHtml(payload.message)}</p>`;
+                    }
+
+                    html += '</div>';
+                    resultsDiv.html(html);
                 } else {
-                    resultsDiv.html(`<div class="test-error"><p>${response.data}</p></div>`);
+                    resultsDiv.html(`<div class="test-error"><p>${this.escapeHtml(response?.data || 'Connectivity test failed.')}</p></div>`);
                 }
+            }).fail(() => {
+                resultsDiv.html('<div class="test-error"><p>Connectivity diagnostics are unavailable.</p></div>');
             }).always(() => {
                 button.prop('disabled', false).html('<span class="dashicons dashicons-admin-network"></span> Run Test');
             });
@@ -1732,8 +1747,11 @@
                 action: 'yadore_check_database',
                 nonce: this.nonce
             }).done((response) => {
-                if (response && response.success) {
-                    resultsDiv.html(`<div class="test-success"><p>${this.escapeHtml(response.data.message || 'Database check passed.')}</p></div>`);
+                if (response && response.success && response.data) {
+                    const payload = response.data;
+                    const message = payload.message || 'Database check passed.';
+                    const cssClass = this.getDiagnosticClass(payload.status);
+                    resultsDiv.html(`<div class="${cssClass}"><p>${this.escapeHtml(message)}</p></div>`);
                 } else {
                     resultsDiv.html(`<div class="test-error"><p>${this.escapeHtml(response?.data || 'Database check failed.')}</p></div>`);
                 }
@@ -1755,8 +1773,11 @@
                 action: 'yadore_test_performance',
                 nonce: this.nonce
             }).done((response) => {
-                if (response && response.success) {
-                    resultsDiv.html(`<div class="test-success"><p>${this.escapeHtml(response.data.message || 'Performance checks completed.')}</p></div>`);
+                if (response && response.success && response.data) {
+                    const payload = response.data;
+                    const message = payload.message || 'Performance checks completed.';
+                    const cssClass = this.getDiagnosticClass(payload.status);
+                    resultsDiv.html(`<div class="${cssClass}"><p>${this.escapeHtml(message)}</p></div>`);
                 } else {
                     resultsDiv.html(`<div class="test-error"><p>${this.escapeHtml(response?.data || 'Performance check failed.')}</p></div>`);
                 }
@@ -1778,8 +1799,11 @@
                 action: 'yadore_analyze_cache',
                 nonce: this.nonce
             }).done((response) => {
-                if (response && response.success) {
-                    resultsDiv.html(`<div class="test-success"><p>${this.escapeHtml(response.data.message || 'Cache analysis completed.')}</p></div>`);
+                if (response && response.success && response.data) {
+                    const payload = response.data;
+                    const message = payload.message || 'Cache analysis completed.';
+                    const cssClass = this.getDiagnosticClass(payload.status);
+                    resultsDiv.html(`<div class="${cssClass}"><p>${this.escapeHtml(message)}</p></div>`);
                 } else {
                     resultsDiv.html(`<div class="test-error"><p>${this.escapeHtml(response?.data || 'Cache analysis failed.')}</p></div>`);
                 }
@@ -1853,6 +1877,32 @@
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        },
+
+        getDiagnosticClass: function(status) {
+            const normalized = (status || '').toString().toLowerCase();
+            switch (normalized) {
+                case 'critical':
+                case 'error':
+                    return 'test-error';
+                case 'warning':
+                    return 'test-warning';
+                default:
+                    return 'test-success';
+            }
+        },
+
+        getDiagnosticIcon: function(status) {
+            const normalized = (status || '').toString().toLowerCase();
+            switch (normalized) {
+                case 'critical':
+                case 'error':
+                    return '❌';
+                case 'warning':
+                    return '⚠️';
+                default:
+                    return '✅';
+            }
         },
 
         escapeHtml: function(value) {

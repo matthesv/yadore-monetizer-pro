@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.29 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.30 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.29 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.30 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **6 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -12,15 +12,15 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **Product Overlay System** - Intelligente Produktempfehlungen mit Overlay
 ✅ **Debug & Error Analysis** - Vollständige Systemdiagnose und Fehlerbehebung  
 ✅ **Data Management Tools** - Export/Import, Backup und Migration  
-✅ **19 AJAX Endpoints** - Alle korrekt implementiert inkl. Cache-Tools & Diagnostics
+✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.29**
+## 🌟 **NEU IN VERSION 2.9.30**
 
-- ✅ **Gemini 2.5 Model Suite** – Flash, Pro, Flash Lite und Live Flash Preview stehen jetzt vollständig im Backend zur Verfügung.
-- ✅ **Aktualisierte AI-Presets** – Die Modell-Presets wurden auf die 2.5-Generation umgestellt und erleichtern die schnelle Auswahl.
-- ✅ **Dashboard Version Sync** – Alle Badges und Systemkarten laden die Plugin-Version automatisch aus dem Core.
-- ✅ **Version-aware Assets** – Admin- und Frontend-Skripte erhalten die aktuelle Versionsnummer über Localize Scripts für Logging & Debugging.
+- ✅ **Produktionsreife Diagnosen** – Connectivity-, Datenbank-, Performance- und Cache-Prüfungen liefern jetzt strukturierte Ergebnisse mit klaren Statusmeldungen.
+- ✅ **Tiefgreifende Health-Checks** – Serverseitige Validierung testet externe APIs, Tabellenintegrität, Cache-Hitrate und Cron-Jobs für sichere Deployments.
+- ✅ **Verbesserte Admin-UI** – Neue Warn- und Fehlerstile in der Oberfläche machen Probleme sofort sichtbar und erleichtern das Troubleshooting.
+- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 2.9.30.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -28,7 +28,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **WordPress Admin Menu** - 6 Admin-Seiten vollständig verfügbar
 ✅ **Plugin Lifecycle** - Proper activation/deactivation mit Setup  
 ✅ **Settings Management** - WordPress-native Einstellungen mit 5 Tabs  
-✅ **AJAX Security** - WordPress nonces für alle 19 Endpoints
+✅ **AJAX Security** - WordPress nonces für alle 22 Endpoints
 ✅ **Admin Notices** - WordPress-Style Benachrichtigungen  
 ✅ **Script Enqueuing** - Proper wp_enqueue_* für alle Assets  
 ✅ **Shortcode System** - Native WordPress shortcode registration  
@@ -65,7 +65,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.29:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.30:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -78,7 +78,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 - **Plugin Files:** Modular Core inklusive Update-Checker-Bibliothek
 - **Templates:** 6 Admin + 4 Frontend Templates
 - **Database Tables:** 5 enhanced tables
-- **AJAX Endpoints:** 19 vollständig implementiert (inkl. Cache-Verwaltung)
+- **AJAX Endpoints:** 22 vollständig implementiert (inkl. Cache- & Diagnose-Tools)
 - **CSS Files:** 2 (Admin + Frontend)
 - **JavaScript Files:** 2 (Admin + Frontend)
 
@@ -91,7 +91,7 @@ wp_yadore_error_logs       - Error Tracking & Resolution
 wp_yadore_analytics        - Performance Analytics (NEW)
 ```
 
-### **Complete AJAX Endpoints (19 total):**
+### **Complete AJAX Endpoints (22 total):**
 - `yadore_get_overlay_products` - Frontend product overlay
 - `yadore_test_gemini_api` - AI API connection testing
 - `yadore_test_yadore_api` - Product API testing
@@ -107,6 +107,9 @@ wp_yadore_analytics        - Performance Analytics (NEW)
 - `yadore_get_error_logs` - Error log retrieval
 - `yadore_resolve_error` - Error resolution
 - `yadore_test_system_component` - System testing
+- `yadore_test_connectivity` - Produktions-Connectivity-Check für externe APIs
+- `yadore_check_database` - Datenbankintegritätsprüfung & Tabellenanalyse
+- `yadore_test_performance` - Performance-Benchmark & Cron-Check
 - `yadore_clear_cache` - Cache invalidation & telemetry reset
 - `yadore_analyze_cache` - Cache health analysis output
 - `yadore_export_data` - Data export functionality
@@ -267,13 +270,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.29 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.30 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.29:**
-- 🤖 Gemini 2.5 Flash & Pro – Höchste Performance und Qualität für deine AI-Analysen.
-- ⚡ Gemini 2.5 Flash Lite – Effiziente Variante für kostensensitive Automationen.
-- 📡 Gemini Live 2.5 Flash Preview – Live-Vorschau für interaktive Sessions.
-- 🧭 Dynamische Dashboard-Angaben – Versionen & Statusinformationen werden jetzt automatisch geladen.
+### **Neue Highlights in v2.9.30:**
+- 🧪 Produktionsdiagnosen – Neue Connectivity-, Datenbank- und Performance-Checks für Live-Umgebungen.
+- 🔍 Automatisierte Health-Checks – Validierung von API-Erreichbarkeit, Cache-Hitrate, Tabellen und Cron-Jobs.
+- 🎨 Diagnose-UI-Refresh – Warn- und Fehlerstati mit klaren Farben und Icons direkt im Admin-Dashboard.
+- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 2.9.30.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -281,7 +284,7 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **WordPress Integration:** 100% VOLLSTÄNDIG
 ✅ **Admin Pages:** ALLE 6 SEITEN VERFÜGBAR
 ✅ **Features:** COMPLETE FEATURE SET
-✅ **AJAX Endpoints:** ALLE 19 FUNKTIONIEREN
+✅ **AJAX Endpoints:** ALLE 22 FUNKTIONIEREN
 ✅ **Database:** ENHANCED SCHEMA
 ✅ **Performance:** OPTIMIERT
 ✅ **Security:** ENTERPRISE GRADE
@@ -289,11 +292,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.29 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.30 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.29** - Production-Ready Market Release
+**Current Version: 2.9.30** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
