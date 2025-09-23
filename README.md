@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.30 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.31 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.30 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.31 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **6 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,12 +15,13 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.30**
+## 🌟 **NEU IN VERSION 2.9.31**
 
+- ✅ **Live Analytics Reloaded** – Vollständig dynamische Performance-Reports mit Traffic-, Funnel-, Revenue- und Keyword-Daten direkt im Dashboard.
 - ✅ **Produktionsreife Diagnosen** – Connectivity-, Datenbank-, Performance- und Cache-Prüfungen liefern jetzt strukturierte Ergebnisse mit klaren Statusmeldungen.
 - ✅ **Tiefgreifende Health-Checks** – Serverseitige Validierung testet externe APIs, Tabellenintegrität, Cache-Hitrate und Cron-Jobs für sichere Deployments.
 - ✅ **Verbesserte Admin-UI** – Neue Warn- und Fehlerstile in der Oberfläche machen Probleme sofort sichtbar und erleichtern das Troubleshooting.
-- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 2.9.30.
+- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 2.9.31.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -65,7 +66,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.30:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.31:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -270,13 +271,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.30 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.31 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.30:**
+### **Neue Highlights in v2.9.31:**
 - 🧪 Produktionsdiagnosen – Neue Connectivity-, Datenbank- und Performance-Checks für Live-Umgebungen.
 - 🔍 Automatisierte Health-Checks – Validierung von API-Erreichbarkeit, Cache-Hitrate, Tabellen und Cron-Jobs.
 - 🎨 Diagnose-UI-Refresh – Warn- und Fehlerstati mit klaren Farben und Icons direkt im Admin-Dashboard.
-- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 2.9.30.
+- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 2.9.31.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -292,11 +293,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.30 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.31 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.30** - Production-Ready Market Release
+**Current Version: 2.9.31** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
