@@ -22,7 +22,7 @@ if (trim($ai_current_prompt) === '') {
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-generic"></span>
         AI Management & Analysis
-        <span class="version-badge">v2.9.24</span>
+        <span class="version-badge">v2.9.25</span>
     </h1>
 
     <div class="yadore-ai-container">
@@ -376,7 +376,7 @@ function yadoreInitializeAiManagement() {
     $('#run-ai-test').on('click', yadoreRunAiTest);
     $('#run-batch-test').on('click', yadoreRunBatchTest);
 
-    console.log('Yadore AI Management v2.9.24 - Initialized');
+    console.log('Yadore AI Management v2.9.25 - Initialized');
 }
 
 function yadoreLoadAiStats() {

@@ -1,15 +1,18 @@
-/* Yadore Monetizer Pro v2.9.24 - Frontend JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.25 - Frontend JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: '2.9.24',
+        version: '2.9.25',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,
         lastScrollY: 0,
         scrollThreshold: 300,
+        prefetchedOverlay: null,
+        prefetchTimeout: null,
+        prefetchPromise: null,
 
         // Initialize frontend functionality
         init: function() {
@@ -25,7 +28,7 @@
             this.initScrollTriggers();
             this.initResponsiveHandling();
 
-            console.log('Yadore Monetizer Pro v2.9.24 Frontend - Initialized');
+            console.log('Yadore Monetizer Pro v2.9.25 Frontend - Initialized');
         },
 
         // Initialize product overlay
@@ -54,18 +57,125 @@
                 }
             });
 
-            // Prevent body scroll when overlay is open
-            $('#yadore-overlay-backdrop').on('wheel touchmove', (e) => {
-                if (this.isOverlayVisible) {
-                    e.preventDefault();
-                }
-            });
+            this.scheduleOverlayPrefetch();
+        },
 
-            $('#yadore-overlay-content').on('touchmove wheel', (e) => {
-                if (this.isOverlayVisible) {
-                    e.stopPropagation();
+        scheduleOverlayPrefetch: function() {
+            if (!this.settings.overlay_enabled) {
+                return;
+            }
+
+            if (this.prefetchTimeout) {
+                clearTimeout(this.prefetchTimeout);
+            }
+
+            const backgroundDelay = Math.max(this.getOverlayDelay(), 1000);
+
+            this.prefetchTimeout = setTimeout(() => {
+                this.prefetchTimeout = null;
+                this.queuePrefetchTask();
+            }, backgroundDelay);
+        },
+
+        queuePrefetchTask: function() {
+            if (this.prefetchedOverlay || this.prefetchPromise || this.isOverlayVisible) {
+                return;
+            }
+
+            const task = () => this.prefetchOverlayProducts();
+
+            if (typeof window.requestIdleCallback === 'function') {
+                window.requestIdleCallback(task, { timeout: 1500 });
+            } else {
+                task();
+            }
+        },
+
+        prefetchOverlayProducts: function() {
+            if (this.prefetchedOverlay || this.prefetchPromise || !this.settings.overlay_enabled) {
+                return;
+            }
+
+            const request = this.loadOverlayProducts({ prefetch: true });
+
+            if (request && typeof request.always === 'function') {
+                this.prefetchPromise = request;
+                request.always(() => {
+                    this.prefetchPromise = null;
+                });
+            }
+        },
+
+        displayPrefetchedOverlay: function() {
+            if (!this.prefetchedOverlay) {
+                return false;
+            }
+
+            const cache = this.prefetchedOverlay;
+            this.prefetchedOverlay = null;
+
+            const overlayBody = this.overlay.find('.overlay-body');
+
+            if (cache.html) {
+                overlayBody.html(cache.html);
+
+                if (cache.displayCount > 0) {
+                    this.showOverlay();
+                    this.trackOverlayView(cache.keyword, cache.displayCount);
+                    return true;
                 }
-            });
+
+                return false;
+            }
+
+            if (Array.isArray(cache.products) && cache.products.length > 0) {
+                const fallbackCount = this.renderOverlayProducts(cache.products);
+                this.showOverlay();
+                this.trackOverlayView(cache.keyword, fallbackCount);
+                return true;
+            }
+
+            return false;
+        },
+
+        getOverlayDelay: function() {
+            const parsedDelay = parseInt(this.settings.delay, 10);
+
+            if (Number.isNaN(parsedDelay) || parsedDelay < 0) {
+                return 2000;
+            }
+
+            return parsedDelay;
+        },
+
+        buildOverlayLoadingHtml: function() {
+            return `
+                <div class="overlay-loading">
+                    <div class="loading-spinner"></div>
+                    <p>Finding relevant products...</p>
+                    <small>Analyzing page content...</small>
+                </div>
+            `;
+        },
+
+        buildOverlayEmptyStateHtml: function() {
+            return `
+                <div class="overlay-no-products">
+                    <div class="no-products-icon">🔍</div>
+                    <h3>No products found</h3>
+                    <p>We couldn't find any relevant products for this content.</p>
+                </div>
+            `;
+        },
+
+        buildOverlayErrorHtml: function() {
+            return `
+                <div class="overlay-error">
+                    <div class="error-icon">⚠️</div>
+                    <h3>Loading Error</h3>
+                    <p>Unable to load product recommendations. Please try again later.</p>
+                </div>
+            `;
         },
 
         // Initialize product click tracking
@@ -213,13 +323,15 @@
             });
 
             // Auto-trigger after delay if enabled
-            if (this.settings.delay && parseInt(this.settings.delay) > 0) {
+            const overlayDelay = this.getOverlayDelay();
+
+            if (overlayDelay > 0) {
                 setTimeout(() => {
                     if (!hasTriggered && this.settings.overlay_enabled) {
                         hasTriggered = true;
                         this.triggerOverlay();
                     }
-                }, parseInt(this.settings.delay));
+                }, overlayDelay);
             }
         },
 
@@ -239,28 +351,55 @@
                 return;
             }
 
+            if (!this.overlay || this.overlay.length === 0) {
+                return;
+            }
+
+            if (this.prefetchTimeout) {
+                clearTimeout(this.prefetchTimeout);
+                this.prefetchTimeout = null;
+            }
+
+            if (this.displayPrefetchedOverlay()) {
+                return;
+            }
+
+            if (this.prefetchPromise) {
+                this.prefetchPromise.always(() => {
+                    if (this.isOverlayVisible) {
+                        return;
+                    }
+
+                    if (!this.displayPrefetchedOverlay()) {
+                        this.loadOverlayProducts();
+                    }
+                });
+
+                return;
+            }
+
             this.loadOverlayProducts();
         },
 
         // Load products for overlay
-        loadOverlayProducts: function() {
+        loadOverlayProducts: function(options = {}) {
+            if (!this.overlay || this.overlay.length === 0) {
+                return null;
+            }
+
+            const settings = Object.assign({ prefetch: false }, options);
             const overlayBody = this.overlay.find('.overlay-body');
 
-            // Show loading state
-            overlayBody.html(`
-                <div class="overlay-loading">
-                    <div class="loading-spinner"></div>
-                    <p>Finding relevant products...</p>
-                    <small>Analyzing page content...</small>
-                </div>
-            `);
+            if (!settings.prefetch) {
+                overlayBody.html(this.buildOverlayLoadingHtml());
+            }
 
             // Get page content for analysis
             const pageContent = this.extractPageContent();
             const requestedLimit = parseInt(this.settings.limit, 10);
             const productLimit = Number.isNaN(requestedLimit) || requestedLimit < 1 ? 1 : requestedLimit;
 
-            $.post(this.settings.ajax_url, {
+            const request = $.post(this.settings.ajax_url, {
                 action: 'yadore_get_overlay_products',
                 nonce: this.settings.nonce,
                 limit: productLimit,
@@ -273,50 +412,62 @@
                     const payload = response.data || {};
                     const displayCount = parseInt(payload.display_count, 10) || 0;
                     const html = typeof payload.html === 'string' ? payload.html : '';
+                    const products = Array.isArray(payload.products) ? payload.products : [];
+                    const keyword = payload.keyword || '';
+
+                    if (settings.prefetch) {
+                        this.prefetchedOverlay = {
+                            html,
+                            products,
+                            keyword,
+                            displayCount
+                        };
+
+                        return;
+                    }
 
                     if (html) {
                         overlayBody.html(html);
-                    } else if (payload.products && payload.products.length > 0) {
-                        const fallbackCount = this.renderOverlayProducts(payload.products);
-                        this.showOverlay();
-                        this.trackOverlayView(payload.keyword, fallbackCount);
+
+                        if (displayCount > 0) {
+                            this.showOverlay();
+                            this.trackOverlayView(keyword, displayCount);
+                        }
+
                         return;
-                    } else {
-                        overlayBody.html(`
-                            <div class="overlay-no-products">
-                                <div class="no-products-icon">🔍</div>
-                                <h3>No products found</h3>
-                                <p>We couldn't find any relevant products for this content.</p>
-                            </div>
-                        `);
                     }
 
-                    if (displayCount > 0) {
+                    if (products.length > 0) {
+                        const fallbackCount = this.renderOverlayProducts(products);
                         this.showOverlay();
-                        this.trackOverlayView(payload.keyword, displayCount);
+                        this.trackOverlayView(keyword, fallbackCount);
+                        return;
                     }
+
+                    overlayBody.html(this.buildOverlayEmptyStateHtml());
 
                     return;
                 }
 
-                overlayBody.html(`
-                    <div class="overlay-no-products">
-                        <div class="no-products-icon">🔍</div>
-                        <h3>No products found</h3>
-                        <p>We couldn't find any relevant products for this content.</p>
-                    </div>
-                `);
+                if (settings.prefetch) {
+                    this.prefetchedOverlay = null;
+                    return;
+                }
+
+                overlayBody.html(this.buildOverlayEmptyStateHtml());
             })
             .fail((xhr, status, error) => {
                 console.error('Yadore Monetizer: Failed to load overlay products', error);
-                overlayBody.html(`
-                    <div class="overlay-error">
-                        <div class="error-icon">⚠️</div>
-                        <h3>Loading Error</h3>
-                        <p>Unable to load product recommendations. Please try again later.</p>
-                    </div>
-                `);
+
+                if (settings.prefetch) {
+                    this.prefetchedOverlay = null;
+                    return;
+                }
+
+                overlayBody.html(this.buildOverlayErrorHtml());
             });
+
+            return request;
         },
 
         // Render products in overlay
@@ -527,7 +678,6 @@
         showOverlay: function() {
             if (this.isOverlayVisible) return;
 
-            $('body').addClass('yadore-overlay-active');
             this.overlay.show();
 
             // Trigger animation
@@ -535,14 +685,6 @@
                 this.overlay.addClass('active');
                 this.isOverlayVisible = true;
             }, 10);
-
-            // Prevent body scroll
-            const scrollY = window.pageYOffset;
-            $('body').css({
-                'position': 'fixed',
-                'top': `-${scrollY}px`,
-                'width': '100%'
-            });
         },
 
         // Hide overlay
@@ -554,16 +696,6 @@
             setTimeout(() => {
                 this.overlay.hide();
                 this.isOverlayVisible = false;
-
-                // Restore body scroll
-                const scrollY = parseInt($('body').css('top')) || 0;
-                $('body').removeClass('yadore-overlay-active').css({
-                    'position': '',
-                    'top': '',
-                    'width': ''
-                });
-
-                window.scrollTo(0, Math.abs(scrollY));
             }, 300);
         },
 

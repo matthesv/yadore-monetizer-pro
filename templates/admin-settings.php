@@ -2,7 +2,7 @@
     <h1 class="yadore-page-title">
         <span class="dashicons dashicons-admin-settings"></span>
         Yadore Monetizer Pro Settings
-        <span class="version-badge">v2.9.24</span>
+        <span class="version-badge">v2.9.25</span>
     </h1>
 
     <?php
@@ -761,7 +761,7 @@ jQuery(document).ready(function($) {
     $('#test-gemini-api').on('click', yadoreTestGeminiApi);
     $('#test-yadore-api').on('click', yadoreTestYadoreApi);
 
-    console.log('Yadore Monetizer Pro v2.9.24 Settings - Initialized');
+    console.log('Yadore Monetizer Pro v2.9.25 Settings - Initialized');
 });
 
 function yadoreTestGeminiApi() {
