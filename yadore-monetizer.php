@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.31
+Version: 2.9.32
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.31');
+define('YADORE_PLUGIN_VERSION', '2.9.32');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -34,6 +34,7 @@ class YadoreMonetizer {
     private $last_product_keyword = '';
     private $latest_error_notice = null;
     private $latest_error_notice_checked = false;
+    private $table_exists_cache = array();
 
     public function __construct() {
         self::$instance = $this;
@@ -1182,11 +1183,11 @@ HTML
             $log_threshold = gmdate('Y-m-d H:i:s', time() - ($log_retention * $day_in_seconds));
             $error_threshold = gmdate('Y-m-d H:i:s', time() - ($error_retention * $day_in_seconds));
 
-            if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $logs_table))) {
+            if ($this->table_exists($logs_table)) {
                 $wpdb->query($wpdb->prepare("DELETE FROM {$logs_table} WHERE created_at < %s", $log_threshold));
             }
 
-            if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $error_table))) {
+            if ($this->table_exists($error_table)) {
                 $wpdb->query($wpdb->prepare("DELETE FROM {$error_table} WHERE created_at < %s", $error_threshold));
             }
 
@@ -2305,6 +2306,8 @@ HTML
             dbDelta($sql3);
             dbDelta($sql4);
             dbDelta($sql5);
+
+            $this->reset_table_exists_cache();
 
             $this->log('Enhanced database tables created successfully for v2.9', 'info');
 
@@ -6268,10 +6271,42 @@ HTML
         );
     }
 
+    private function reset_table_exists_cache() {
+        $this->table_exists_cache = array();
+    }
+
+    private function escape_like_value($value) {
+        $value = (string) $value;
+
+        if (function_exists('esc_like')) {
+            return esc_like($value);
+        }
+
+        return addcslashes($value, '_%');
+    }
+
     private function table_exists($table_name) {
+        if (!is_string($table_name) || $table_name === '') {
+            return false;
+        }
+
+        if (isset($this->table_exists_cache[$table_name])) {
+            return $this->table_exists_cache[$table_name];
+        }
+
         global $wpdb;
-        $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
-        return $result === $table_name;
+
+        if (!isset($wpdb) || !($wpdb instanceof wpdb)) {
+            return false;
+        }
+
+        $like = $this->escape_like_value($table_name);
+        $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $like));
+        $exists = is_string($result) && $result === $table_name;
+
+        $this->table_exists_cache[$table_name] = $exists;
+
+        return $exists;
     }
 
     // v2.7: Shortcode Implementation (Enhanced)
@@ -6476,18 +6511,23 @@ HTML
         global $wpdb;
         $analytics_table = $wpdb->prefix . 'yadore_analytics';
 
-        if ( $wpdb->get_var( $wpdb->prepare("SHOW TABLES LIKE %s", $analytics_table) ) != $analytics_table ) { return; }
-$wpdb->insert($analytics_table, array(
+        if (!$this->table_exists($analytics_table)) {
+            return;
+        }
+
+        $payload = array(
+            'keyword' => $keyword,
+            'product_count' => $product_count,
+        );
+
+        $wpdb->insert($analytics_table, array(
             'event_type' => 'overlay_view',
-            'event_data' => json_encode(array(
-                'keyword' => $keyword,
-                'product_count' => $product_count
-            )),
+            'event_data' => function_exists('wp_json_encode') ? wp_json_encode($payload) : json_encode($payload),
             'post_id' => $post_id,
             'user_id' => get_current_user_id(),
-            'session_id' => session_id(),
+            'session_id' => function_exists('session_id') ? session_id() : '',
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
         ));
     }
 
@@ -6495,18 +6535,23 @@ $wpdb->insert($analytics_table, array(
         global $wpdb;
         $analytics_table = $wpdb->prefix . 'yadore_analytics';
 
-        if ( $wpdb->get_var( $wpdb->prepare("SHOW TABLES LIKE %s", $analytics_table) ) != $analytics_table ) { return; }
-$wpdb->insert($analytics_table, array(
+        if (!$this->table_exists($analytics_table)) {
+            return;
+        }
+
+        $payload = array(
+            'keyword' => $keyword,
+            'limit' => $limit,
+            'format' => $format,
+            'template' => $template_key,
+        );
+
+        $wpdb->insert($analytics_table, array(
             'event_type' => 'shortcode_usage',
-            'event_data' => json_encode(array(
-                'keyword' => $keyword,
-                'limit' => $limit,
-                'format' => $format,
-                'template' => $template_key
-            )),
+            'event_data' => function_exists('wp_json_encode') ? wp_json_encode($payload) : json_encode($payload),
             'post_id' => get_the_ID(),
             'user_id' => get_current_user_id(),
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? ''
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
         ));
     }
 
@@ -6514,27 +6559,42 @@ $wpdb->insert($analytics_table, array(
         global $wpdb;
         $analytics_table = $wpdb->prefix . 'yadore_analytics';
 
-        if ( $wpdb->get_var( $wpdb->prepare("SHOW TABLES LIKE %s", $analytics_table) ) != $analytics_table ) { return; }
-$wpdb->insert($analytics_table, array(
+        if (!$this->table_exists($analytics_table)) {
+            return;
+        }
+
+        $payload = array(
+            'keyword' => $keyword,
+        );
+
+        $wpdb->insert($analytics_table, array(
             'event_type' => 'auto_injection',
-            'event_data' => json_encode(array(
-                'keyword' => $keyword
-            )),
+            'event_data' => function_exists('wp_json_encode') ? wp_json_encode($payload) : json_encode($payload),
             'post_id' => $post_id,
             'user_id' => get_current_user_id(),
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? ''
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
         ));
     }
 
     private function log_api_call($api_type, $endpoint, $status, $data = array()) {
         global $wpdb;
+        if (!isset($wpdb) || !($wpdb instanceof wpdb)) {
+            return;
+        }
+
         $logs_table = $wpdb->prefix . 'yadore_api_logs';
+
+        if (!$this->table_exists($logs_table)) {
+            return;
+        }
+
+        $payload = function_exists('wp_json_encode') ? wp_json_encode($data) : json_encode($data);
 
         $wpdb->insert($logs_table, array(
             'api_type' => $api_type,
             'endpoint_url' => $endpoint,
             'success' => $status === 'success' ? 1 : 0,
-            'response_body' => json_encode($data),
+            'response_body' => $payload,
             'user_id' => get_current_user_id(),
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? ''
         ));
@@ -7043,8 +7103,26 @@ $wpdb->insert($analytics_table, array(
             return;
         }
 
+        $timestamp = function_exists('current_time') ? current_time('Y-m-d H:i:s') : gmdate('Y-m-d H:i:s');
+        $this->error_log[] = '[' . $timestamp . '] ' . $severity . ': ' . $message;
+
         global $wpdb;
+
+        if (!isset($wpdb) || !($wpdb instanceof wpdb)) {
+            if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                error_log('Yadore Error Logging Skipped (database unavailable): ' . $message);
+            }
+            return;
+        }
+
         $error_logs_table = $wpdb->prefix . 'yadore_error_logs';
+
+        if (!$this->table_exists($error_logs_table)) {
+            if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                error_log('Yadore Error Logging Skipped (table missing): ' . $message);
+            }
+            return;
+        }
 
         try {
             $error_data = array(
@@ -7052,19 +7130,16 @@ $wpdb->insert($analytics_table, array(
                 'error_message' => $message,
                 'error_code' => $exception ? $exception->getCode() : '',
                 'stack_trace' => $exception ? $exception->getTraceAsString() : wp_debug_backtrace_summary(),
-                'context_data' => json_encode($context),
+                'context_data' => function_exists('wp_json_encode') ? wp_json_encode($context) : json_encode($context),
                 'post_id' => $context['post_id'] ?? 0,
                 'user_id' => get_current_user_id(),
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
                 'request_uri' => $_SERVER['REQUEST_URI'] ?? '',
-                'severity' => $severity
+                'severity' => $severity,
             );
 
             $wpdb->insert($error_logs_table, $error_data);
-
-            // Also log to debug
-            $this->error_log[] = '[' . current_time('Y-m-d H:i:s') . '] ' . $severity . ': ' . $message;
 
         } catch (Exception $e) {
             if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
@@ -7713,7 +7788,7 @@ $wpdb->insert($analytics_table, array(
                 continue;
             }
 
-            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $table));
+            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $this->escape_like_value($table)));
             if (!$status) {
                 continue;
             }
@@ -8063,7 +8138,7 @@ $wpdb->insert($analytics_table, array(
             $table_detail['records'] = $count;
             $totals['records'] += $count;
 
-            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $table_name), ARRAY_A);
+            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $this->escape_like_value($table_name)), ARRAY_A);
             if (is_array($status)) {
                 $data_length = (int) ($status['Data_length'] ?? 0);
                 $index_length = (int) ($status['Index_length'] ?? 0);
@@ -8352,7 +8427,7 @@ $wpdb->insert($analytics_table, array(
                 continue;
             }
 
-            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $table));
+            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $this->escape_like_value($table)));
             if ($status) {
                 $total_size += (int) ($status->Data_length ?? 0) + (int) ($status->Index_length ?? 0);
             }

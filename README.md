@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v2.9.31 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v2.9.32 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v2.9.31 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v2.9.32 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **6 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,13 +15,12 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 2.9.31**
+## 🌟 **NEU IN VERSION 2.9.32**
 
-- ✅ **Live Analytics Reloaded** – Vollständig dynamische Performance-Reports mit Traffic-, Funnel-, Revenue- und Keyword-Daten direkt im Dashboard.
-- ✅ **Produktionsreife Diagnosen** – Connectivity-, Datenbank-, Performance- und Cache-Prüfungen liefern jetzt strukturierte Ergebnisse mit klaren Statusmeldungen.
-- ✅ **Tiefgreifende Health-Checks** – Serverseitige Validierung testet externe APIs, Tabellenintegrität, Cache-Hitrate und Cron-Jobs für sichere Deployments.
-- ✅ **Verbesserte Admin-UI** – Neue Warn- und Fehlerstile in der Oberfläche machen Probleme sofort sichtbar und erleichtern das Troubleshooting.
-- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 2.9.31.
+- ✅ **Stabilere Fehlerprotokollierung** – Fehler werden nur noch gespeichert, wenn die Log-Tabelle bereitsteht; fehlende Tabellen lösen keine Datenbankfehler mehr aus und Kontextdaten werden sicher kodiert.
+- ✅ **Zuverlässige Tabellenprüfungen** – Tabellenabfragen escapen Sonderzeichen und werden zwischengespeichert, wodurch Installationen mit individuellen Präfixen robuster arbeiten und unnötige Datenbankabfragen entfallen.
+- ✅ **Sichere Analytics-Aufzeichnung** – Tracking-Funktionen prüfen die Tabellenverfügbarkeit, bevor sie Daten speichern, und verwenden eine belastbare JSON-Kodierung für alle Ereignisdaten.
+- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 2.9.32.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -66,7 +65,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.31:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v2.9.32:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -271,13 +270,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v2.9.31 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v2.9.32 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v2.9.31:**
-- 🧪 Produktionsdiagnosen – Neue Connectivity-, Datenbank- und Performance-Checks für Live-Umgebungen.
-- 🔍 Automatisierte Health-Checks – Validierung von API-Erreichbarkeit, Cache-Hitrate, Tabellen und Cron-Jobs.
-- 🎨 Diagnose-UI-Refresh – Warn- und Fehlerstati mit klaren Farben und Icons direkt im Admin-Dashboard.
-- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 2.9.31.
+### **Neue Highlights in v2.9.32:**
+- 🛡️ Verbesserte Fehlerlogs – Datenbankfehler werden vermieden, wenn Logging-Tabellen noch nicht angelegt sind, und Kontextdaten werden sicher gespeichert.
+- 📊 Präzisere Tabellenprüfungen – Escapete und gecachte LIKE-Abfragen sorgen für verlässliche Diagnosen auch bei individuellen Tabellenpräfixen.
+- 📈 Stabilere Analytics-Events – Tracking speichert Ereignisse nur bei vorhandenen Tabellen und nutzt robuste JSON-Kodierung.
+- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 2.9.32.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -293,11 +292,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v2.9.31 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v2.9.32 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 2.9.31** - Production-Ready Market Release
+**Current Version: 2.9.32** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
