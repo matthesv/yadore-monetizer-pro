@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v2.9.25 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v2.9.26 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: '2.9.25',
+        version: '2.9.26',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -30,7 +30,7 @@
             this.initDebug();
             this.initErrorNotices();
 
-            console.log('Yadore Monetizer Pro v2.9.25 Admin - Fully Initialized');
+            console.log('Yadore Monetizer Pro v2.9.26 Admin - Fully Initialized');
         },
 
         // Dashboard functionality
@@ -194,6 +194,32 @@
                     this.resetSettings();
                 }
             });
+
+            // Color palette interactions
+            $('.color-picker-input').on('input change', function() {
+                const value = ($(this).val() || '').toString().toUpperCase();
+                $(this).closest('.color-input-wrapper').find('.color-value-display').val(value);
+            });
+
+            $('.color-value-display').on('focus', function() {
+                $(this).select();
+            });
+
+            $('.color-swatch').on('click', function() {
+                const target = $(this).data('target');
+                const color = ($(this).data('color') || '').toString().toUpperCase();
+
+                if (!target || !color) {
+                    return;
+                }
+
+                const $input = $('#' + target);
+                if ($input.length) {
+                    $input.val(color).trigger('input');
+                }
+            });
+
+            $('.color-picker-input').trigger('input');
         },
 
         resetSettings: function() {

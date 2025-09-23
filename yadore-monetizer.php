@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 2.9.25
+Version: 2.9.26
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,12 +14,14 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '2.9.25');
+define('YADORE_PLUGIN_VERSION', '2.9.26');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
 
 class YadoreMonetizer {
+
+    private static $instance = null;
 
     public const DEFAULT_AI_PROMPT = 'Analyze the title and content to find the most relevant purchase-ready product keyword (brand + model when available). Provide up to three alternate keywords for backup searches and return JSON that matches the schema (keyword, alternate_keywords, confidence, rationale).';
 
@@ -34,6 +36,7 @@ class YadoreMonetizer {
     private $latest_error_notice_checked = false;
 
     public function __construct() {
+        self::$instance = $this;
         try {
             // Core WordPress hooks
             add_action('init', array($this, 'init'));
@@ -104,12 +107,16 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
 
-            $this->log('Plugin v2.9.25 initialized successfully with complete feature set', 'info');
+            $this->log('Plugin v2.9.26 initialized successfully with complete feature set', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Plugin initialization failed', $e, 'critical');
             add_action('admin_notices', array($this, 'show_initialization_error'));
         }
+    }
+
+    public static function get_instance() {
+        return self::$instance;
     }
 
     public function init() {
@@ -183,6 +190,8 @@ class YadoreMonetizer {
     }
 
     private function get_default_options() {
+        $default_colors = $this->get_default_template_colors();
+
         return array(
             'yadore_api_key' => '',
             'yadore_market' => $this->get_default_market(),
@@ -216,6 +225,8 @@ class YadoreMonetizer {
             'yadore_overlay_template' => 'default-overlay',
             'yadore_auto_injection_template' => 'default-inline',
             'yadore_default_shortcode_template' => 'default-grid',
+            'yadore_shortcode_colors' => $default_colors['shortcode'],
+            'yadore_overlay_colors' => $default_colors['overlay'],
             'yadore_performance_mode' => 0,
             'yadore_analytics_enabled' => 1,
             'yadore_export_enabled' => 1,
@@ -241,6 +252,221 @@ class YadoreMonetizer {
         );
     }
 
+    private function get_default_template_colors() {
+        return array(
+            'shortcode' => array(
+                'primary' => '#3498DB',
+                'button_text' => '#FFFFFF',
+                'accent' => '#27AE60',
+                'text' => '#2C3E50',
+                'muted' => '#7F8C8D',
+                'border' => '#E9ECEF',
+                'background' => '#FFFFFF',
+                'card_background' => '#FFFFFF',
+                'placeholder' => '#ECF0F1',
+                'placeholder_text' => '#95A5A6',
+                'badge' => '#FF6B6B',
+                'badge_text' => '#FFFFFF',
+            ),
+            'overlay' => array(
+                'primary' => '#3498DB',
+                'button_text' => '#FFFFFF',
+                'accent' => '#27AE60',
+                'text' => '#2C3E50',
+                'muted' => '#7F8C8D',
+                'border' => '#E9ECEF',
+                'background' => '#F9F9F9',
+                'card_background' => '#F9F9F9',
+                'placeholder' => '#ECF0F1',
+                'placeholder_text' => '#95A5A6',
+                'badge' => '#3498DB',
+                'badge_text' => '#FFFFFF',
+            ),
+        );
+    }
+
+    public function get_color_palette() {
+        return array(
+            '#3498DB' => __('Ocean Blue', 'yadore-monetizer'),
+            '#2980B9' => __('Deep Blue', 'yadore-monetizer'),
+            '#1ABC9C' => __('Teal Breeze', 'yadore-monetizer'),
+            '#2ECC71' => __('Fresh Green', 'yadore-monetizer'),
+            '#27AE60' => __('Emerald', 'yadore-monetizer'),
+            '#F1C40F' => __('Golden Glow', 'yadore-monetizer'),
+            '#E67E22' => __('Sunset Orange', 'yadore-monetizer'),
+            '#E74C3C' => __('Crimson Red', 'yadore-monetizer'),
+            '#9B59B6' => __('Royal Purple', 'yadore-monetizer'),
+            '#8E44AD' => __('Plum', 'yadore-monetizer'),
+            '#FF6B6B' => __('Flamingo', 'yadore-monetizer'),
+            '#ECF0F1' => __('Cloud', 'yadore-monetizer'),
+            '#BDC3C7' => __('Silver', 'yadore-monetizer'),
+            '#7F8C8D' => __('Slate Gray', 'yadore-monetizer'),
+            '#2C3E50' => __('Midnight', 'yadore-monetizer'),
+            '#1D2731' => __('Deep Slate', 'yadore-monetizer'),
+            '#FFFFFF' => __('Pure White', 'yadore-monetizer'),
+            '#000000' => __('Jet Black', 'yadore-monetizer'),
+        );
+    }
+
+    public function get_template_colors($type = 'shortcode') {
+        $type = $type === 'overlay' ? 'overlay' : 'shortcode';
+        $option_name = $type === 'overlay' ? 'yadore_overlay_colors' : 'yadore_shortcode_colors';
+        $stored = get_option($option_name, array());
+
+        if (!is_array($stored)) {
+            $stored = array();
+        }
+
+        return $this->sanitize_color_settings($stored, $type);
+    }
+
+    public function get_template_color_style($type = 'shortcode') {
+        $colors = $this->get_template_colors($type);
+
+        $primary = $colors['primary'];
+        $card_background = $colors['card_background'];
+        $border = $colors['border'];
+
+        $style_map = array(
+            '--yadore-primary' => $primary,
+            '--yadore-primary-light' => $this->adjust_color_brightness($primary, 18),
+            '--yadore-primary-dark' => $this->adjust_color_brightness($primary, -15),
+            '--yadore-primary-darker' => $this->adjust_color_brightness($primary, -30),
+            '--yadore-primary-contrast' => $colors['button_text'],
+            '--yadore-primary-shadow' => $this->hex_to_rgba($primary, 0.35),
+            '--yadore-accent' => $colors['accent'],
+            '--yadore-text' => $colors['text'],
+            '--yadore-muted' => $colors['muted'],
+            '--yadore-border' => $border,
+            '--yadore-border-strong' => $this->adjust_color_brightness($border, -10),
+            '--yadore-background' => $colors['background'],
+            '--yadore-card-bg' => $card_background,
+            '--yadore-card-bg-muted' => $this->adjust_color_brightness($card_background, 10),
+            '--yadore-card-bg-dark' => $this->adjust_color_brightness($card_background, -40),
+            '--yadore-placeholder' => $colors['placeholder'],
+            '--yadore-placeholder-text' => $colors['placeholder_text'],
+            '--yadore-badge' => $colors['badge'],
+            '--yadore-badge-text' => $colors['badge_text'],
+            '--yadore-badge-rgba' => $this->hex_to_rgba($colors['badge'], 0.95),
+            '--yadore-badge-shadow' => $this->hex_to_rgba($colors['badge'], 0.3),
+            '--yadore-badge-light' => $this->adjust_color_brightness($colors['badge'], 12),
+            '--yadore-badge-dark' => $this->adjust_color_brightness($colors['badge'], -12),
+            '--yadore-text-contrast' => $this->get_contrast_color($card_background),
+            '--yadore-muted-light' => $this->adjust_color_brightness($colors['muted'], 30),
+        );
+
+        $style = '';
+
+        foreach ($style_map as $variable => $value) {
+            if ($value !== '') {
+                $style .= $variable . ':' . $value . ';';
+            }
+        }
+
+        return $style;
+    }
+
+    private function sanitize_color_settings($colors, $type = 'shortcode') {
+        $defaults = $this->get_default_template_colors();
+        $type = $type === 'overlay' ? 'overlay' : 'shortcode';
+
+        $sanitized = $defaults[$type];
+
+        foreach ($sanitized as $key => $default) {
+            if (isset($colors[$key])) {
+                $value = $this->sanitize_color_value($colors[$key]);
+                if ($value !== '') {
+                    $sanitized[$key] = $value;
+                }
+            }
+        }
+
+        return $sanitized;
+    }
+
+    private function sanitize_color_value($color) {
+        $color = trim((string) $color);
+
+        if ($color === '') {
+            return '';
+        }
+
+        if ($color[0] !== '#') {
+            $color = '#' . $color;
+        }
+
+        $hex = substr($color, 1);
+        $hex = preg_replace('/[^0-9a-fA-F]/', '', $hex);
+
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+
+        if (strlen($hex) !== 6) {
+            return '';
+        }
+
+        return '#' . strtoupper($hex);
+    }
+
+    private function adjust_color_brightness($hex, $steps) {
+        $color = $this->sanitize_color_value($hex);
+
+        if ($color === '') {
+            return '';
+        }
+
+        $steps = (int) $steps;
+        $steps = max(-255, min(255, $steps));
+
+        $hex = substr($color, 1);
+        $components = str_split($hex, 2);
+        $adjusted = '#';
+
+        foreach ($components as $component) {
+            $value = hexdec($component);
+            $value = max(0, min(255, $value + $steps));
+            $adjusted .= strtoupper(str_pad(dechex($value), 2, '0', STR_PAD_LEFT));
+        }
+
+        return $adjusted;
+    }
+
+    private function hex_to_rgba($hex, $alpha = 1.0) {
+        $color = $this->sanitize_color_value($hex);
+
+        if ($color === '') {
+            return '';
+        }
+
+        $alpha = max(0, min(1, (float) $alpha));
+        $hex = substr($color, 1);
+
+        $red = hexdec(substr($hex, 0, 2));
+        $green = hexdec(substr($hex, 2, 2));
+        $blue = hexdec(substr($hex, 4, 2));
+
+        $alpha_string = rtrim(rtrim(sprintf('%.3f', $alpha), '0'), '.');
+
+        return sprintf('rgba(%d, %d, %d, %s)', $red, $green, $blue, $alpha_string);
+    }
+
+    private function get_contrast_color($hex) {
+        $color = $this->sanitize_color_value($hex);
+
+        if ($color === '') {
+            return '#FFFFFF';
+        }
+
+        $hex = substr($color, 1);
+        $red = hexdec(substr($hex, 0, 2));
+        $green = hexdec(substr($hex, 2, 2));
+        $blue = hexdec(substr($hex, 4, 2));
+
+        $luminance = (0.299 * $red + 0.587 * $green + 0.114 * $blue) / 255;
+
+        return $luminance > 0.55 ? '#000000' : '#FFFFFF';
+    }
     private function get_default_market() {
         $locale = function_exists('get_locale') ? get_locale() : 'de_DE';
         if (is_string($locale) && strlen($locale) >= 2) {
@@ -670,6 +896,22 @@ HTML
                 }
             }
 
+            $color_settings = array(
+                'yadore_shortcode_colors' => 'shortcode',
+                'yadore_overlay_colors' => 'overlay',
+            );
+
+            foreach ($color_settings as $option => $type) {
+                if (isset($flat_post[$option]) && is_array($flat_post[$option])) {
+                    $raw_colors = wp_unslash($flat_post[$option]);
+                    if (!is_array($raw_colors)) {
+                        continue;
+                    }
+                    $sanitized_colors = $this->sanitize_color_settings($raw_colors, $type);
+                    update_option($option, $sanitized_colors);
+                }
+            }
+
             $this->log('Settings saved', 'info');
 
         } catch (Exception $e) {
@@ -715,6 +957,9 @@ HTML
             $data['default_market'] = $this->get_default_market();
             $data['overlay_template_choices'] = $this->get_template_choices('overlay');
             $data['shortcode_template_choices'] = $this->get_template_choices('shortcode');
+            $data['shortcode_colors'] = $this->get_template_colors('shortcode');
+            $data['overlay_colors'] = $this->get_template_colors('overlay');
+            $data['color_palette'] = $this->get_color_palette();
         }
 
         return $data;
@@ -1247,6 +1492,8 @@ HTML
             'yadore_overlay_template',
             'yadore_auto_injection_template',
             'yadore_default_shortcode_template',
+            'yadore_shortcode_colors',
+            'yadore_overlay_colors',
 
             // v2.7: Advanced settings
             'yadore_performance_mode',

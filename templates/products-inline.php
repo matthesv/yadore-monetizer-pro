@@ -1,4 +1,13 @@
-<div class="yadore-products-inline" data-format="inline">
+<?php
+$color_style = '';
+if (class_exists('YadoreMonetizer')) {
+    $instance = YadoreMonetizer::get_instance();
+    if ($instance instanceof YadoreMonetizer) {
+        $color_style = $instance->get_template_color_style('shortcode');
+    }
+}
+?>
+<div class="yadore-products-inline" data-format="inline" <?php if ($color_style !== '') : ?>style="<?php echo esc_attr($color_style); ?>"<?php endif; ?>>
     <div class="inline-header">
         <h3>Empfehlung</h3>
         <div class="inline-subtitle">

@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v2.9.25 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v2.9.26 - Admin CSS (Complete) */
 .yadore-admin-wrap {
     margin: 0;
 }
@@ -177,6 +177,91 @@
     font-size: 14px;
     color: #646970;
     font-weight: 500;
+}
+
+/* Color palette controls */
+.color-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.color-settings-card {
+    background: #f8f9fb;
+    border: 1px solid #e1e5e9;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.color-settings-card h4 {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.color-field {
+    margin-bottom: 18px;
+}
+
+.color-field:last-child {
+    margin-bottom: 0;
+}
+
+.color-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.color-picker-input {
+    width: 56px;
+    height: 36px;
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid #c3c4c7;
+    cursor: pointer;
+}
+
+.color-value-display {
+    width: 96px;
+    border-radius: 6px;
+    border: 1px solid #d0d5dd;
+    padding: 6px 8px;
+    font-family: monospace;
+    font-size: 13px;
+    background: #ffffff;
+    color: #1d2327;
+    text-transform: uppercase;
+}
+
+.color-palette-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.color-swatch:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.color-swatch:focus {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
 }
 
 /* Feature Status */

@@ -1,4 +1,13 @@
-<div class="yadore-products-list" data-format="list">
+<?php
+$color_style = '';
+if (class_exists('YadoreMonetizer')) {
+    $instance = YadoreMonetizer::get_instance();
+    if ($instance instanceof YadoreMonetizer) {
+        $color_style = $instance->get_template_color_style('shortcode');
+    }
+}
+?>
+<div class="yadore-products-list" data-format="list" <?php if ($color_style !== '') : ?>style="<?php echo esc_attr($color_style); ?>"<?php endif; ?>>
     <?php if (!empty($offers)): ?>
         <?php foreach ($offers as $offer): ?>
             <?php
