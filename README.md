@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.2 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.3 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.2 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.3 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **6 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,13 +15,13 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.2**
+## 🌟 **NEU IN VERSION 3.3**
 
 - ✅ **Manuelle Sidebar-Keywords** – Individuelle Primär- und Fallback-Keywords pro Beitrag oder Seite direkt in der Editor-Sidebar definieren – inklusive Validierung für automatische Platzierungen.
 - ✅ **Offizielles Click-Tracking** – Holt tägliche Daten über die Yadore Conversion Detail API, speichert eindeutige Click-IDs samt Händler- und Marktinformationen und füttert die Produkt-Analytics automatisch nach.
 - ✅ **AJAX-Endpunkt für Produktklicks** – Neue Frontend-Route `yadore_track_product_click` (inkl. Gastzugriff) persistiert Klicks mit Post-ID, URL und Session-Kontext, damit nichts verloren geht.
 - ✅ **Synchronisationsprotokoll** – Ein dediziertes `yadore_api_clicks`-Log vermeidet Duplikate, merkt sich Sync-Zeiten und stellt sicher, dass Dashboard und Reports immer die neuesten Klickzahlen zeigen.
-- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.2.
+- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.3.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -66,7 +66,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.2:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.3:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -271,13 +271,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.2 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v3.3 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v3.2:**
+### **Neue Highlights in v3.3:**
 - 🖱️ Offizielles Click-Sync – Die Conversion Detail API liefert echte Klickdaten (inkl. Händler & Markt) direkt in das Analytics-Dashboard.
 - 🔄 Synchronisationslog – Eine neue `yadore_api_clicks`-Tabelle verhindert Duplikate und merkt sich, wann welche Tage bereits synchronisiert wurden.
 - 🌐 AJAX-Klicktracking – Der Endpoint `yadore_track_product_click` speichert Frontend-Klicks mit Post-Kontext und Session-ID für verlässliche Statistiken.
-- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.2.
+- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.3.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -293,11 +293,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.2 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.3 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.2** - Production-Ready Market Release
+**Current Version: 3.3** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
