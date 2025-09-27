@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.1
+Version: 3.2
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.1');
+define('YADORE_PLUGIN_VERSION', '3.2');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -92,6 +92,7 @@ class YadoreMonetizer {
 
             // Post save hook for auto-scanning
             add_action('save_post', array($this, 'auto_scan_post_on_save'), 10, 2);
+            add_action('save_post', array($this, 'save_keyword_meta_box'), 20, 2);
 
             // Admin notices for errors
             add_action('admin_notices', array($this, 'admin_notices'));
@@ -101,6 +102,7 @@ class YadoreMonetizer {
 
             // Template management
             add_action('add_meta_boxes', array($this, 'register_template_meta_boxes'));
+            add_action('add_meta_boxes', array($this, 'register_keyword_meta_box'), 20, 2);
             add_action('save_post_yadore_template', array($this, 'save_template_meta'));
             add_filter('manage_yadore_template_posts_columns', array($this, 'register_template_columns'));
             add_action('manage_yadore_template_posts_custom_column', array($this, 'render_template_columns'), 10, 2);
@@ -2367,7 +2369,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.1', 'info');
+            $this->log('Enhanced database tables created successfully for v3.2', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
@@ -7022,6 +7024,193 @@ HTML
             'user_id' => get_current_user_id(),
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? ''
         ));
+    }
+
+    public function register_keyword_meta_box($post_type, $post = null) {
+        if (!in_array($post_type, $this->get_scannable_post_types(), true)) {
+            return;
+        }
+
+        add_meta_box(
+            'yadore_post_keywords',
+            __('Yadore Monetizer Keyword', 'yadore-monetizer'),
+            array($this, 'render_keyword_meta_box'),
+            $post_type,
+            'side',
+            'default'
+        );
+    }
+
+    public function render_keyword_meta_box($post) {
+        if (!($post instanceof WP_Post)) {
+            $post = get_post($post);
+        }
+
+        if (!($post instanceof WP_Post)) {
+            return;
+        }
+
+        wp_nonce_field('yadore_keyword_meta', 'yadore_keyword_meta_nonce');
+
+        $primary_keyword = '';
+        $fallback_keyword = '';
+        $status_label = '';
+        $validated = false;
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if ($this->table_exists($table)) {
+            $record = $wpdb->get_row(
+                $wpdb->prepare(
+                    "SELECT primary_keyword, fallback_keyword, scan_status, product_validated FROM {$table} WHERE post_id = %d",
+                    $post->ID
+                ),
+                ARRAY_A
+            );
+
+            if (is_array($record)) {
+                $primary_keyword = isset($record['primary_keyword']) ? (string) $record['primary_keyword'] : '';
+                $fallback_keyword = isset($record['fallback_keyword']) ? (string) $record['fallback_keyword'] : '';
+                $validated = !empty($record['product_validated']);
+
+                $scan_status = isset($record['scan_status']) ? (string) $record['scan_status'] : '';
+                $status_label = $this->get_scan_status_label($scan_status);
+            }
+        }
+
+        echo '<p>' . esc_html__(
+            'Set a manual product keyword for this content. Leave empty to keep using the automatic scanner.',
+            'yadore-monetizer'
+        ) . '</p>';
+
+        echo '<p><label for="yadore_primary_keyword"><strong>' . esc_html__(
+            'Primary keyword',
+            'yadore-monetizer'
+        ) . '</strong></label>';
+        echo '<input type="text" id="yadore_primary_keyword" name="yadore_primary_keyword" class="widefat" value="' . esc_attr($primary_keyword) . '" placeholder="' . esc_attr__('e.g. Dyson V15 Vacuum', 'yadore-monetizer') . '" /></p>';
+
+        echo '<p><label for="yadore_fallback_keyword"><strong>' . esc_html__(
+            'Fallback keyword',
+            'yadore-monetizer'
+        ) . '</strong></label>';
+        echo '<input type="text" id="yadore_fallback_keyword" name="yadore_fallback_keyword" class="widefat" value="' . esc_attr($fallback_keyword) . '" placeholder="' . esc_attr__('Used when the primary keyword has no results', 'yadore-monetizer') . '" /></p>';
+
+        echo '<p class="description">' . esc_html__(
+            'The fallback keyword is used if no products are found for the primary keyword.',
+            'yadore-monetizer'
+        ) . '</p>';
+
+        if ($status_label !== '') {
+            $status_text = $validated
+                ? sprintf(
+                    /* translators: %s: keyword status */
+                    esc_html__('Current status: %s (validated)', 'yadore-monetizer'),
+                    esc_html($status_label)
+                )
+                : sprintf(
+                    /* translators: %s: keyword status */
+                    esc_html__('Current status: %s', 'yadore-monetizer'),
+                    esc_html($status_label)
+                );
+
+            echo '<p class="description">' . $status_text . '</p>';
+        }
+    }
+
+    public function save_keyword_meta_box($post_id, $post) {
+        if (!isset($_POST['yadore_keyword_meta_nonce']) || !wp_verify_nonce($_POST['yadore_keyword_meta_nonce'], 'yadore_keyword_meta')) {
+            return;
+        }
+
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+
+        if (!($post instanceof WP_Post)) {
+            $post = get_post($post_id);
+        }
+
+        if (!($post instanceof WP_Post)) {
+            return;
+        }
+
+        if (!in_array($post->post_type, $this->get_scannable_post_types(), true)) {
+            return;
+        }
+
+        $primary = isset($_POST['yadore_primary_keyword'])
+            ? $this->sanitize_single_keyword(wp_unslash($_POST['yadore_primary_keyword']))
+            : '';
+        $fallback = isset($_POST['yadore_fallback_keyword'])
+            ? $this->sanitize_single_keyword(wp_unslash($_POST['yadore_fallback_keyword']))
+            : '';
+
+        $validated = ($primary !== '' || $fallback !== '');
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'yadore_post_keywords';
+
+        if (!$this->table_exists($table)) {
+            return;
+        }
+
+        $data = array(
+            'post_title' => get_the_title($post_id),
+            'primary_keyword' => $primary,
+            'fallback_keyword' => $fallback,
+            'product_validated' => $validated ? 1 : 0,
+            'keyword_confidence' => $validated ? 100 : 0,
+            'scan_status' => $validated ? 'completed_manual' : 'pending',
+            'scan_error' => '',
+        );
+        $formats = array('%s', '%s', '%s', '%d', '%f', '%s', '%s');
+
+        if ($validated) {
+            $data['last_scanned'] = current_time('mysql');
+            $formats[] = '%s';
+        }
+
+        $existing = $wpdb->get_row(
+            $wpdb->prepare("SELECT id FROM {$table} WHERE post_id = %d", $post_id),
+            ARRAY_A
+        );
+
+        if ($existing) {
+            $wpdb->update($table, $data, array('post_id' => $post_id), $formats, array('%d'));
+        } else {
+            $insert = array(
+                'post_id' => $post_id,
+                'post_title' => get_the_title($post_id),
+                'primary_keyword' => $primary,
+                'fallback_keyword' => $fallback,
+                'keyword_confidence' => $validated ? 100 : 0,
+                'product_validated' => $validated ? 1 : 0,
+                'product_count' => 0,
+                'word_count' => $this->count_words_in_text($post->post_content),
+                'content_hash' => '',
+                'scan_status' => $validated ? 'completed_manual' : 'pending',
+                'scan_error' => '',
+                'scan_attempts' => $validated ? 1 : 0,
+                'scan_duration_ms' => 0,
+            );
+            $insert_formats = array('%d', '%s', '%s', '%s', '%f', '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%d');
+
+            if ($validated) {
+                $insert['last_scanned'] = current_time('mysql');
+                $insert_formats[] = '%s';
+            }
+
+            $wpdb->insert($table, $insert, $insert_formats);
+        }
+
+        if ($validated) {
+            $this->update_scanned_posts_stat();
+        }
     }
 
     public function register_template_meta_boxes() {
