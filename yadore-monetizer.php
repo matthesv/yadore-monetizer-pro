@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.12
+Version: 3.13
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.12');
+define('YADORE_PLUGIN_VERSION', '3.13');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -2568,7 +2568,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.12', 'info');
+            $this->log('Enhanced database tables created successfully for v3.13', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
@@ -3650,12 +3650,6 @@ HTML
             $sanitized['merchant']['name'] = sanitize_text_field((string) $product['merchantName']);
         }
 
-        if (isset($product['thumbnail']) && is_array($product['thumbnail'])) {
-            $sanitized['thumbnail']['url'] = isset($product['thumbnail']['url'])
-                ? esc_url_raw($product['thumbnail']['url'])
-                : '';
-        }
-
         if (isset($product['image']) && is_array($product['image'])) {
             $sanitized['image']['url'] = isset($product['image']['url'])
                 ? esc_url_raw($product['image']['url'])
@@ -3668,6 +3662,12 @@ HTML
             $sanitized['image'] = array('url' => esc_url_raw($product['imageUrl']));
         } elseif (isset($product['imageUrls']) && is_array($product['imageUrls']) && !empty($product['imageUrls'][0])) {
             $sanitized['image'] = array('url' => esc_url_raw($product['imageUrls'][0]));
+        }
+
+        if (isset($product['thumbnail']) && is_array($product['thumbnail'])) {
+            $sanitized['thumbnail']['url'] = isset($product['thumbnail']['url'])
+                ? esc_url_raw($product['thumbnail']['url'])
+                : '';
         }
 
         if (isset($product['clickUrl'])) {
@@ -3694,6 +3694,10 @@ HTML
 
         if (isset($product['promoText'])) {
             $sanitized['promoText'] = sanitize_text_field((string) $product['promoText']);
+        }
+
+        if (empty($sanitized['image']['url']) && !empty($sanitized['thumbnail']['url'])) {
+            $sanitized['image']['url'] = $sanitized['thumbnail']['url'];
         }
 
         if (empty($sanitized['thumbnail']['url']) && !empty($sanitized['image']['url'])) {
@@ -8280,10 +8284,10 @@ HTML
         $click_url = esc_url($click_url_raw !== '' ? $click_url_raw : '#');
 
         $image_url_raw = '';
-        if (isset($product['thumbnail']['url']) && $product['thumbnail']['url'] !== '') {
-            $image_url_raw = (string) $product['thumbnail']['url'];
-        } elseif (isset($product['image']['url']) && $product['image']['url'] !== '') {
+        if (isset($product['image']['url']) && $product['image']['url'] !== '') {
             $image_url_raw = (string) $product['image']['url'];
+        } elseif (isset($product['thumbnail']['url']) && $product['thumbnail']['url'] !== '') {
+            $image_url_raw = (string) $product['thumbnail']['url'];
         }
         $image_url = esc_url($image_url_raw);
 

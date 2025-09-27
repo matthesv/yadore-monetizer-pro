@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.12 - Frontend JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.13 - Frontend JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global Yadore Frontend object
     window.yadoreFrontend = {
-        version: (window.yadore_ajax && window.yadore_ajax.version) ? window.yadore_ajax.version : '3.12',
+        version: (window.yadore_ajax && window.yadore_ajax.version) ? window.yadore_ajax.version : '3.13',
         settings: window.yadore_ajax || {},
         overlay: null,
         isOverlayVisible: false,
@@ -479,7 +479,7 @@
             const sanitize = (value) => $('<div/>').text(value || '').html();
 
             displayProducts.forEach((product) => {
-                const imageUrl = product.thumbnail?.url || product.image?.url || '';
+                const imageUrl = product.image?.url || product.thumbnail?.url || '';
                 const productId = sanitize(product.id || '');
                 const clickUrlRaw = product.clickUrl || '#';
                 const clickUrl = sanitize(clickUrlRaw);

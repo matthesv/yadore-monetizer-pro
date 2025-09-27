@@ -40,10 +40,10 @@ endif;
         $promo_text = esc_html($product['promoText'] ?? '');
 
         $image_url = '';
-        if (!empty($product['thumbnail']['url'])) {
-            $image_url = esc_url($product['thumbnail']['url']);
-        } elseif (!empty($product['image']['url'])) {
+        if (!empty($product['image']['url'])) {
             $image_url = esc_url($product['image']['url']);
+        } elseif (!empty($product['thumbnail']['url'])) {
+            $image_url = esc_url($product['thumbnail']['url']);
         }
         ?>
         <div class="overlay-product"
