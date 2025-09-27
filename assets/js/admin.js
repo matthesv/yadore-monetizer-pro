@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.8 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.9 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.8',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.9',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -657,7 +657,13 @@
 
             $('#results-pagination').off('click').on('click', '.page-link', (e) => {
                 e.preventDefault();
-                const page = parseInt($(e.currentTarget).data('page'), 10);
+                const $target = $(e.currentTarget);
+
+                if ($target.attr('aria-disabled') === 'true' || $target.hasClass('is-disabled')) {
+                    return;
+                }
+
+                const page = parseInt($target.data('page'), 10);
                 if (!Number.isNaN(page)) {
                     this.loadScanResults(page);
                 }
@@ -790,10 +796,40 @@
             }, (response) => {
                 if (response.success && response.data) {
                     const data = response.data;
-                    $('#total-posts').text(this.formatNumber(data.total_posts || 0));
-                    $('#scanned-posts').text(this.formatNumber(data.scanned_posts || 0));
-                    $('#pending-posts').text(this.formatNumber(data.pending_posts || 0));
-                    $('#validated-keywords').text(this.formatNumber(data.validated_keywords || 0));
+                    const total = data.total_posts || 0;
+                    const scanned = data.scanned_posts || 0;
+                    const pending = data.pending_posts != null ? data.pending_posts : Math.max(0, total - scanned);
+                    const validated = data.validated_keywords || 0;
+
+                    $('#total-posts').text(this.formatNumber(total));
+                    $('#scanned-posts').text(this.formatNumber(scanned));
+                    $('#pending-posts').text(this.formatNumber(pending));
+                    $('#validated-keywords').text(this.formatNumber(validated));
+
+                    const coverage = total > 0 ? Math.round((scanned / total) * 100) : 0;
+                    const keywordRate = scanned > 0 ? Math.round((validated / scanned) * 100) : 0;
+
+                    $('#scan-coverage').text(`${coverage}%`);
+                    $('#keyword-success-rate').text(`${keywordRate}%`);
+                    $('#overview-progress-percent').text(`${coverage}%`);
+                    $('#overview-progress-fill')
+                        .css('width', `${coverage}%`)
+                        .attr('aria-valuenow', coverage);
+
+                    const $subtext = $('#overview-progress-subtext');
+                    if (pending > 0) {
+                        const formattedPending = this.formatNumber(pending);
+                        const $pendingCount = $('#scan-pending-count');
+                        if ($pendingCount.length) {
+                            $pendingCount.text(formattedPending);
+                        } else {
+                            $subtext.html(`Noch <span id="scan-pending-count">${formattedPending}</span> Beiträge offen`);
+                        }
+                        $subtext.removeClass('is-complete');
+                    } else {
+                        $subtext.addClass('is-complete').text('Alle Beiträge gescannt!');
+                    }
+                    $('#overview-refreshed').text(new Date().toLocaleTimeString());
                 }
             });
         },
@@ -894,11 +930,90 @@
                 return;
             }
 
-            let html = '';
-            for (let i = 1; i <= pagination.total_pages; i += 1) {
-                const activeClass = i === pagination.current_page ? ' active' : '';
-                html += `<a href="#" class="page-link${activeClass}" data-page="${i}">${i}</a>`;
+            const total = pagination.total || 0;
+            const perPage = pagination.per_page || 10;
+            const current = pagination.current_page || 1;
+            const totalPages = pagination.total_pages || 1;
+            const start = total === 0 ? 0 : ((current - 1) * perPage) + 1;
+            const end = Math.min(total, current * perPage);
+
+            const createLink = (label, page, options = {}) => {
+                const opts = Object.assign({ disabled: false, active: false, className: '', ariaLabel: '' }, options);
+                const classes = ['page-link'];
+                if (opts.className) {
+                    classes.push(opts.className);
+                }
+                if (opts.active) {
+                    classes.push('is-active');
+                }
+                if (opts.disabled) {
+                    classes.push('is-disabled');
+                }
+
+                const attributes = [];
+                if (opts.ariaLabel) {
+                    attributes.push(`aria-label="${opts.ariaLabel}"`);
+                }
+                if (opts.active) {
+                    attributes.push('aria-current="page"');
+                }
+                if (opts.disabled) {
+                    attributes.push('aria-disabled="true"');
+                } else {
+                    attributes.push(`data-page="${page}"`);
+                }
+
+                return `<a href="#" class="${classes.join(' ')}" ${attributes.join(' ')}>${label}</a>`;
+            };
+
+            const pageLinks = [];
+
+            pageLinks.push(createLink('&lsaquo;', Math.max(1, current - 1), {
+                className: 'page-prev',
+                ariaLabel: 'Vorherige Seite',
+                disabled: current <= 1
+            }));
+
+            const windowSize = 5;
+            let startPage = Math.max(1, current - 2);
+            let endPage = Math.min(totalPages, startPage + windowSize - 1);
+            if (endPage - startPage < windowSize - 1) {
+                startPage = Math.max(1, endPage - windowSize + 1);
             }
+
+            if (startPage > 1) {
+                pageLinks.push(createLink('1', 1, { ariaLabel: 'Seite 1' }));
+                if (startPage > 2) {
+                    pageLinks.push('<span class="page-ellipsis" aria-hidden="true">…</span>');
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i += 1) {
+                pageLinks.push(createLink(`${i}`, i, {
+                    active: i === current,
+                    ariaLabel: `Seite ${i}`
+                }));
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    pageLinks.push('<span class="page-ellipsis" aria-hidden="true">…</span>');
+                }
+                pageLinks.push(createLink(`${totalPages}`, totalPages, { ariaLabel: `Seite ${totalPages}` }));
+            }
+
+            pageLinks.push(createLink('&rsaquo;', Math.min(totalPages, current + 1), {
+                className: 'page-next',
+                ariaLabel: 'Nächste Seite',
+                disabled: current >= totalPages
+            }));
+
+            const html = `
+                <nav class="pagination-nav" role="navigation" aria-label="Recent scan results pagination">
+                    <div class="pagination-summary">${start}–${end} von ${this.formatNumber(total)}</div>
+                    <div class="pagination-pages">${pageLinks.join('')}</div>
+                </nav>
+            `;
 
             container.html(html);
         },

@@ -35,6 +35,34 @@
                 </div>
             </div>
             <div class="card-content">
+                <div class="overview-enhancements">
+                    <div class="overview-meta">
+                        <div class="overview-pill" aria-live="polite">
+                            <span class="pill-label">Abdeckung</span>
+                            <span class="pill-value" id="scan-coverage">0%</span>
+                        </div>
+                        <div class="overview-pill" aria-live="polite">
+                            <span class="pill-label">Keyword-Erfolg</span>
+                            <span class="pill-value" id="keyword-success-rate">0%</span>
+                        </div>
+                        <div class="overview-refresh" aria-live="polite">
+                            <span class="dashicons dashicons-update"></span>
+                            <span>Aktualisiert: <span id="overview-refreshed">–</span></span>
+                        </div>
+                    </div>
+
+                    <div class="overview-progress-tracker">
+                        <div class="progress-top">
+                            <span class="progress-label">Scan-Fortschritt</span>
+                            <span class="progress-percent" id="overview-progress-percent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="overview-progress-fill" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                        <div class="progress-subtext" id="overview-progress-subtext">Noch <span id="scan-pending-count">0</span> Beiträge offen</div>
+                    </div>
+                </div>
+
                 <div class="scanner-stats">
                     <div class="stat-card stat-total">
                         <div class="stat-icon">
