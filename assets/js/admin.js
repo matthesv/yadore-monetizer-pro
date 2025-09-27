@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.10 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.11 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.10',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.11',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -23,6 +23,7 @@
         cachedErrorLogs: [],
         debugAutoScroll: true,
         debugWordWrap: true,
+        clipboardFeedbackTimer: null,
 
         // Initialize all admin functionality
         init: function() {
@@ -34,6 +35,7 @@
             this.initAnalytics();
             this.initTools();
             this.initDebug();
+            this.initStyleguide();
             this.initErrorNotices();
 
             console.log(`Yadore Monetizer Pro v${this.version} Admin - Fully Initialized`);
@@ -161,6 +163,114 @@
 
                 $container.append($entry);
             });
+        },
+
+        initStyleguide: function() {
+            const $page = $('.yadore-styleguide');
+            if (!$page.length) {
+                return;
+            }
+
+            const self = this;
+
+            $page.find('[data-token]').each(function() {
+                const tokenName = $(this).data('token');
+                if (typeof tokenName !== 'string' || tokenName.trim() === '') {
+                    return;
+                }
+
+                const value = window.getComputedStyle(document.documentElement)
+                    .getPropertyValue(tokenName.trim());
+
+                const display = $(this).find('[data-token-value]');
+                if (display.length && value) {
+                    display.text(`${tokenName.trim()} → ${value.trim()}`);
+                }
+            });
+
+            $(document).on('click', '[data-yadore-copy]', function(event) {
+                event.preventDefault();
+                const targetId = $(this).data('yadore-copy');
+                if (typeof targetId !== 'string' || targetId.trim() === '') {
+                    return;
+                }
+
+                const $target = $(`#${targetId}`);
+                if (!$target.length) {
+                    return;
+                }
+
+                const text = $target.text().trim();
+                if (!text) {
+                    return;
+                }
+
+                self.copyToClipboard(text)
+                    .then(() => {
+                        self.showCopyFeedback(this);
+                    })
+                    .catch((error) => {
+                        if (self.debug) {
+                            console.error('Clipboard copy failed', error);
+                        }
+                    });
+            });
+        },
+
+        copyToClipboard: function(text) {
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                return navigator.clipboard.writeText(text);
+            }
+
+            return new Promise((resolve, reject) => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.setAttribute('readonly', 'readonly');
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+
+                textarea.select();
+                textarea.setSelectionRange(0, textarea.value.length);
+
+                try {
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    if (successful) {
+                        resolve();
+                    } else {
+                        reject(new Error('execCommand returned false'));
+                    }
+                } catch (error) {
+                    document.body.removeChild(textarea);
+                    reject(error);
+                }
+            });
+        },
+
+        showCopyFeedback: function(button) {
+            if (!button) {
+                return;
+            }
+
+            const $button = $(button);
+            const originalLabel = $button.data('original-label') || $button.text();
+            if (!$button.data('original-label')) {
+                $button.data('original-label', originalLabel);
+            }
+
+            const copiedLabel = yadore_admin.strings?.copied || 'Copied!';
+
+            $button.addClass('copied').text(copiedLabel);
+
+            if (this.clipboardFeedbackTimer) {
+                clearTimeout(this.clipboardFeedbackTimer);
+            }
+
+            this.clipboardFeedbackTimer = window.setTimeout(() => {
+                $button.removeClass('copied').text(originalLabel);
+                this.clipboardFeedbackTimer = null;
+            }, 2000);
         },
 
         initErrorNotices: function() {

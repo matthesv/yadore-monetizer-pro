@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.10
+Version: 3.11
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.10');
+define('YADORE_PLUGIN_VERSION', '3.11');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -1411,6 +1411,16 @@ HTML
                 array($this, 'admin_analytics_page')
             );
 
+            // v3.11: Design system styleguide
+            add_submenu_page(
+                'yadore-monetizer',
+                'Design System & Styleguide',
+                'Styleguide',
+                'manage_options',
+                'yadore-styleguide',
+                array($this, 'admin_styleguide_page')
+            );
+
             // v2.7: Tools page
             add_submenu_page(
                 'yadore-monetizer',
@@ -1453,6 +1463,10 @@ HTML
         $this->render_admin_page('tools');
     }
 
+    public function admin_styleguide_page() {
+        $this->render_admin_page('styleguide');
+    }
+
     private function render_admin_page($page) {
         try {
             $template_file = YADORE_PLUGIN_DIR . "templates/admin-{$page}.php";
@@ -1485,12 +1499,24 @@ HTML
             }
 
             if ($is_plugin_screen) {
-                wp_enqueue_style(
-                    'yadore-admin-css',
-                    YADORE_PLUGIN_URL . 'assets/css/admin.css',
+                wp_register_style(
+                    'yadore-admin-design-system',
+                    YADORE_PLUGIN_URL . 'assets/css/admin-design-system.css',
                     array(),
                     YADORE_PLUGIN_VERSION
                 );
+                wp_style_add_data('yadore-admin-design-system', 'path', YADORE_PLUGIN_DIR . 'assets/css/admin-design-system.css');
+
+                wp_register_style(
+                    'yadore-admin-css',
+                    YADORE_PLUGIN_URL . 'assets/css/admin.css',
+                    array('yadore-admin-design-system'),
+                    YADORE_PLUGIN_VERSION
+                );
+                wp_style_add_data('yadore-admin-css', 'path', YADORE_PLUGIN_DIR . 'assets/css/admin.css');
+
+                wp_enqueue_style('yadore-admin-design-system');
+                wp_enqueue_style('yadore-admin-css');
             }
 
             wp_enqueue_script(
@@ -1521,7 +1547,8 @@ HTML
                     'confirm_delete' => __('Are you sure you want to delete this item?', 'yadore-monetizer'),
                     'processing' => __('Processing...', 'yadore-monetizer'),
                     'error' => __('An error occurred. Please try again.', 'yadore-monetizer'),
-                    'success' => __('Operation completed successfully.', 'yadore-monetizer')
+                    'success' => __('Operation completed successfully.', 'yadore-monetizer'),
+                    'copied' => __('Copied!', 'yadore-monetizer')
                 )
             ));
 
@@ -2541,7 +2568,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.10', 'info');
+            $this->log('Enhanced database tables created successfully for v3.11', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
