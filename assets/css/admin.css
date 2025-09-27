@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.7 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.8 - Admin CSS (Complete) */
 .yadore-admin-wrap {
     margin: 0;
 }
@@ -35,6 +35,243 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.scanner-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+    gap: 20px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    background: linear-gradient(120deg, rgba(34, 113, 177, 0.12), rgba(19, 94, 150, 0.08));
+    border: 1px solid rgba(34, 113, 177, 0.2);
+    border-radius: 12px;
+}
+
+.scanner-intro p {
+    margin: 0 0 12px;
+    color: #1d2327;
+    line-height: 1.5;
+}
+
+.intro-highlights {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.intro-highlights li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 10px;
+    border: 1px solid rgba(34, 113, 177, 0.12);
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.intro-highlights .dashicons {
+    color: #2271b1;
+    font-size: 16px;
+}
+
+.intro-actions {
+    display: flex;
+    align-items: stretch;
+}
+
+.intro-card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px 20px;
+    border: 1px solid rgba(34, 113, 177, 0.16);
+    box-shadow: 0 10px 30px rgba(34, 113, 177, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.intro-card h3 {
+    margin: 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #135e96;
+}
+
+.intro-card p {
+    margin: 0;
+    color: #3c434a;
+    font-size: 14px;
+}
+
+.intro-hint {
+    font-style: italic;
+    color: #2271b1;
+}
+
+.scanner-options .option-actions {
+    display: flex;
+    gap: 12px;
+    margin: 10px 0 6px;
+}
+
+.scanner-options .option-actions .button-link {
+    padding: 0;
+    height: auto;
+    line-height: 1.4;
+    color: #135e96;
+}
+
+.scanner-options .option-actions .button-link:hover,
+.scanner-options .option-actions .button-link:focus {
+    color: #0b3c61;
+    text-decoration: underline;
+    box-shadow: none;
+}
+
+.bulk-scan-summary {
+    margin-top: 24px;
+    padding: 20px;
+    background: #f8fbff;
+    border: 1px solid rgba(34, 113, 177, 0.18);
+    border-radius: 12px;
+}
+
+.bulk-scan-summary h3 {
+    margin: 0 0 16px;
+    font-size: 16px;
+    color: #135e96;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.summary-item {
+    background: white;
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid rgba(34, 113, 177, 0.12);
+    box-shadow: 0 2px 6px rgba(34, 113, 177, 0.08);
+}
+
+.summary-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #135e96;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: #1d2327;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.results-actions {
+    justify-content: flex-end;
+}
+
+.results-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.results-quick-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.results-quick-filters .quick-filter {
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+}
+
+.results-quick-filters .quick-filter.is-active {
+    background: #135e96;
+    border-color: #135e96;
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(19, 94, 150, 0.35);
+}
+
+.status-legend {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 14px 16px;
+    background: #f8f9fb;
+    border: 1px solid #e1e5e9;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #3c434a;
+}
+
+.status-legend .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-legend .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ccd0d4;
+    display: inline-block;
+}
+
+.legend-success .legend-dot {
+    background: #00a32a;
+}
+
+.legend-pending .legend-dot {
+    background: #f0ad4e;
+}
+
+.legend-failed .legend-dot {
+    background: #d63638;
+}
+
+.legend-ai .legend-dot {
+    background: #2271b1;
+}
+
+@media (max-width: 1024px) {
+    .scanner-intro {
+        grid-template-columns: 1fr;
+    }
+
+    .intro-actions {
+        justify-content: stretch;
+    }
+}
+
+@media (max-width: 782px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .results-actions {
+        justify-content: flex-start;
+    }
 }
 
 /* Notices */
