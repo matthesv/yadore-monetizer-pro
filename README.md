@@ -1,11 +1,11 @@
-# Yadore Monetizer Pro v3.10 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.11 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.10 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.11 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
-✅ **6 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
+✅ **7 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
 ✅ **AI Content Analysis** - Gemini 2.5 & Live Preview Model Support mit intelligenter Keyword-Erkennung
 ✅ **Advanced Analytics** - Umfassende Performance-Berichte und Statistiken  
 ✅ **Bulk Post Scanner** - Automatische Content-Analyse für alle Posts  
@@ -15,14 +15,14 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.10**
+## 🌟 **NEU IN VERSION 3.11**
 
-- ✅ **Überarbeitete Post-Scanner-Experience** – Neues Intro-Panel mit Best Practices, Quick-Tipps und klaren Highlights sorgt für einen transparenten Start in die Analyse.
-- 🎨 **Scan Analytics & Overview Refresh** – Mehr Abstand, nebeneinander angeordnete Kennzahlen und Panel-Design für eine klarere Interpretation der Ergebnisse.
-- ✅ **Aktive Scan-Zusammenfassung** – Unter dem Bulk Scanner zeigt eine Live-Zusammenfassung sofort, welche Post-Typen, Stati, Wortlimits und Zusatzoptionen ausgewählt sind.
-- ✅ **Schnellauswahl & Quick-Filter** – Selektiere Beitrags-Typen und Stati per Klick oder nutze die neuen Ergebnisfilter-Buttons (Alle, Erfolgreich, Fehlgeschlagen, AI genutzt) direkt in der Resultat-Liste.
-- ✅ **Status-Legende & Barrierefreiheit** – Eine farbcodierte Legende erklärt jeden Scanstatus, Quick-Filter erhalten ARIA-States und screenreader-freundliche Labels.
-- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.10.
+- 🎨 **Design Tokens & CSS Layers** – Neues Stylesheet `assets/css/admin-design-system.css` definiert Farbspektren, Spacing-, Radius- und Shadow-Tokens (inkl. Dark-Mode) und strukturiert alle Admin-Styles via `@layer`.
+- 🧭 **Backend Styleguide Seite** – Frische Admin-Unterseite „Styleguide“ zeigt Farbrampen, Typografie-Skalen, Abstände sowie schlüsselfertige Komponenten inkl. Code-Beispielen und Copy-to-Clipboard.
+- 🧱 **Komponenten-Refactor** – `assets/css/admin.css` nutzt die neuen Tokens für Farben, Schatten und Abstände, wodurch künftige Optimierungen konsistent bleiben.
+- 🧰 **Clipboard Utility** – `assets/js/admin.js` enthält Copy-Feedback für Code-Snippets und Token-Vorschauen, inklusive Fallback für Browser ohne `navigator.clipboard`.
+- 📘 **Design-Dokumentation** – Neues Repository-Dokument `docs/STYLEGUIDE.md` beschreibt Prinzipien, Token-Änderungsprozesse und verweist auf relevante Dateien.
+- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.11.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -39,13 +39,14 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **Custom Post Types** - Erweiterte WordPress-Features  
 ✅ **Cron Jobs** - Automatische Maintenance-Tasks  
 
-### **6 WordPress Admin Pages (Alle verfügbar):**
-🏠 **Dashboard** - Enhanced mit Stats, Shortcode Generator, System Status  
-⚙️ **Settings** - 5 Tabs: General, AI, Display, Performance, Advanced  
+### **7 WordPress Admin Pages (Alle verfügbar):**
+🏠 **Dashboard** - Enhanced mit Stats, Shortcode Generator, System Status
+⚙️ **Settings** - 5 Tabs: General, AI, Display, Performance, Advanced
 📄 **Post Scanner** - Bulk Scanner, Single Post Scanner, Results Analytics
 🔍 **Debug & Errors** - System Health, Error Logs, Diagnostic Tools
-📊 **Analytics** - Performance Reports, Traffic Analysis, Revenue Metrics  
-🛠️ **Tools** - Data Export/Import, Maintenance, Configuration Tools  
+📊 **Analytics** - Performance Reports, Traffic Analysis, Revenue Metrics
+🧭 **Styleguide** - Token-Referenz, Komponentenbibliothek & Copy-Snippets
+🛠️ **Tools** - Data Export/Import, Maintenance, Configuration Tools
 
 ## 🎯 **SHORTCODE SYSTEM - ERWEITERTE FUNKTIONALITÄT:**
 
@@ -67,7 +68,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.10:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.11:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -78,10 +79,10 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 
 ### **Plugin Architecture:**
 - **Plugin Files:** Modular Core inklusive Update-Checker-Bibliothek
-- **Templates:** 6 Admin + 4 Frontend Templates
+- **Templates:** 7 Admin + 4 Frontend Templates
 - **Database Tables:** 5 enhanced tables
 - **AJAX Endpoints:** 22 vollständig implementiert (inkl. Cache- & Diagnose-Tools)
-- **CSS Files:** 2 (Admin + Frontend)
+- **CSS Files:** 3 (Design System + Admin + Frontend)
 - **JavaScript Files:** 2 (Admin + Frontend)
 
 ### **Enhanced Database Schema:**
@@ -264,29 +265,29 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ## 📚 **DOCUMENTATION - COMPREHENSIVE:**
 
 ### **Available Documentation:**
-📖 **User Guide** - Complete setup and usage guide  
-🔧 **Developer API** - Technical integration documentation  
-🎥 **Video Tutorials** - Step-by-step video guides  
-💬 **Support Forum** - Community support and discussions  
-🐛 **Troubleshooting** - Common issues and solutions  
+📖 **User Guide** - Complete setup and usage guide
+🔧 **Developer API** - Technical integration documentation
+🎥 **Video Tutorials** - Step-by-step video guides
+💬 **Support Forum** - Community support and discussions
+🐛 **Troubleshooting** - Common issues and solutions
+ 🎨 **Design System Guide** - Siehe `docs/STYLEGUIDE.md` für Tokens & Komponenten-Governance
 
 ---
 
-## 🎉 **v3.10 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v3.11 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v3.10:**
-- 🎯 UX-Fokus – Überarbeitete Post-Scanner-Oberfläche mit Intro-Panel, Live-Zusammenfassung und Quick-Filtern.
-- 🧭 Orientierung auf einen Blick – Status-Legende, ARIA-optimierte Filterbuttons und ein zugängliches Scan-Dashboard erleichtern Reviews.
-- 🧱 Wiederherstellbare Standard-Templates – Neues Wartungs-Tool stellt die vier Default-Layouts inklusive Auswahloptionen per Klick wieder her.
-- 🧠 Gemini-Output ohne Limit – Das automatische Tokenlimit von 2000 verhindert abgeschnittene Antworten bei komplexen Analysen.
-- ✨ Prompt-Optimierung – Der Standardprompt nutzt `{title}` und `{content}` Platzhalter für zuverlässige Kontext-Übergabe an Gemini.
-- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.10.
+### **Neue Highlights in v3.11:**
+- 🎨 Design Tokens & Layered CSS – Farbspektren, Radius- und Spacing-Skalen sowie Schatten werden zentral gesteuert und in `assets/css/admin.css` genutzt.
+- 🧭 Admin Styleguide – Neue Unterseite „Styleguide“ mit Token-Vorschau, Komponentenbibliothek und Copy-to-Clipboard Buttons.
+- 🧰 Copy Workflow – `assets/js/admin.js` liefert ein modernes Clipboard-Feedback mit Fallback für ältere Browser.
+- 📘 Dokumentation – `docs/STYLEGUIDE.md` beschreibt Namenskonventionen, Governance und Abläufe für Designänderungen.
+- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.11.
 
 **Alle Features sind verfügbar und voll funktional!**
 
 ✅ **Status:** ALLE FUNKTIONEN INTEGRIERT
 ✅ **WordPress Integration:** 100% VOLLSTÄNDIG
-✅ **Admin Pages:** ALLE 6 SEITEN VERFÜGBAR
+✅ **Admin Pages:** ALLE 7 SEITEN VERFÜGBAR
 ✅ **Features:** COMPLETE FEATURE SET
 ✅ **AJAX Endpoints:** ALLE 22 FUNKTIONIEREN
 ✅ **Database:** ENHANCED SCHEMA
@@ -296,11 +297,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.10 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.11 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.10** - Production-Ready Market Release
+**Current Version: 3.11** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
