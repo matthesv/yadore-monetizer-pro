@@ -287,6 +287,18 @@
                             </div>
 
                             <div class="reset-option">
+                                <h4>Restore Product Templates</h4>
+                                <p>Recreate the default product templates if they were removed or heavily modified.</p>
+                                <button class="button button-primary" id="restore-default-templates">
+                                    <span class="dashicons dashicons-layout"></span> Restore Templates
+                                </button>
+                                <label>
+                                    <input type="checkbox" id="restore-reset-selection">
+                                    <span>Reset template selection to defaults</span>
+                                </label>
+                            </div>
+
+                            <div class="reset-option">
                                 <h4>Clear All Data</h4>
                                 <p>Remove all plugin data including settings, logs, and cache. This cannot be undone.</p>
                                 <button class="button button-link-delete" id="clear-all-data">

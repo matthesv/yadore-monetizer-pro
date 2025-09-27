@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.6 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.7 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.6 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.7 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **6 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,12 +15,13 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.6**
+## 🌟 **NEU IN VERSION 3.7**
 
+- ✅ **Wiederherstellbare Produkt-Templates** – Ein neues Tool stellt die vier Standard-Layouts per Klick wieder her und setzt auf Wunsch die Template-Auswahl zurück.
 - ✅ **Standard-Templates als Custom Posts** – Alle vier Frontend-Layouts werden automatisch angelegt, bleiben dauerhaft verfügbar und lassen sich direkt im WordPress-Editor bearbeiten.
 - ✅ **Gemini-Tokenlimit erhöht** – Der Standardwert für `maxOutputTokens` wurde auf 2000 angehoben, damit umfangreiche Antworten ohne Abschneiden verarbeitet werden können.
 - ✅ **Optimierter KI-Standardprompt** – Der Default-Prompt enthält jetzt explizite Variablen für `{title}` und `{content}` und liefert strukturierte Vorgaben für verlässliche Keyword-Ergebnisse.
-- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.6.
+- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.7.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -65,7 +66,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.6:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.7:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -270,13 +271,13 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.6 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v3.7 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v3.6:**
-- 🧱 Standard-Templates dauerhaft – Alle Standard-Layouts werden beim Aktivieren als Custom Posts angelegt und können jederzeit bearbeitet werden.
+### **Neue Highlights in v3.7:**
+- 🧱 Wiederherstellbare Standard-Templates – Neues Wartungs-Tool stellt die vier Default-Layouts inklusive Auswahloptionen per Klick wieder her.
 - 🧠 Gemini-Output ohne Limit – Das automatische Tokenlimit von 2000 verhindert abgeschnittene Antworten bei komplexen Analysen.
 - ✨ Prompt-Optimierung – Der Standardprompt nutzt `{title}` und `{content}` Platzhalter für zuverlässige Kontext-Übergabe an Gemini.
-- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.6.
+- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.7.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -292,11 +293,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.6 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.7 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.6** - Production-Ready Market Release
+**Current Version: 3.7** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
