@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.9 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.10 - Admin CSS (Complete) */
 .yadore-admin-wrap {
     margin: 0;
 }
@@ -512,14 +512,13 @@
 
 .overview-enhancements {
     display: grid;
-    gap: 18px;
-    margin-bottom: 24px;
+    gap: 22px;
 }
 
 .overview-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
     align-items: center;
 }
 
@@ -597,6 +596,25 @@
     overflow: hidden;
 }
 
+.overview-analytics-grid {
+    display: grid;
+    gap: 28px;
+    align-items: stretch;
+    margin-bottom: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.overview-analytics-grid .yadore-card {
+    height: 100%;
+}
+
+.scanner-overview .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    height: 100%;
+}
+
 .overview-progress-tracker .progress-fill {
     position: absolute;
     top: 0;
@@ -625,7 +643,87 @@
 .scanner-overview .scanner-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+}
+
+.scan-analytics-card .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    height: 100%;
+}
+
+.scan-analytics-card .analytics-grid {
+    display: grid;
+    gap: 24px;
+    grid-auto-rows: 1fr;
+}
+
+.scan-analytics-card .analytics-panel {
+    background: linear-gradient(135deg, #ffffff, #f7fbff);
+    border: 1px solid rgba(34, 113, 177, 0.12);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 12px 30px rgba(34, 113, 177, 0.08);
+    display: flex;
+    flex-direction: column;
     gap: 18px;
+    height: 100%;
+}
+
+.scan-analytics-card .analytics-panel h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #135e96;
+}
+
+.scan-analytics-card .analytics-chart canvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.scan-analytics-card .analytics-stats .stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.scan-analytics-card .analytics-stats .stat-label {
+    color: #475467;
+}
+
+.scan-analytics-card .analytics-stats .stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.scan-analytics-card .analytics-stats .stat-value {
+    font-weight: 600;
+    color: #0f4d78;
+}
+
+@media (min-width: 960px) {
+    .scan-analytics-card .analytics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .scan-analytics-card .analytics-stats {
+        grid-column: span 2;
+    }
+}
+
+@media (min-width: 1280px) {
+    .scan-analytics-card .analytics-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .scan-analytics-card .analytics-stats {
+        grid-column: auto;
+    }
 }
 
 .scanner-overview .stat-card {

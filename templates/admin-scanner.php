@@ -24,13 +24,14 @@
     </div>
 
     <div class="yadore-scanner-container">
-        <!-- Scanner Overview -->
-        <div class="yadore-card scanner-overview">
-            <div class="card-header">
-                <h2><span class="dashicons dashicons-dashboard"></span> Scanner Overview</h2>
-                <div class="card-actions">
-                    <button class="button button-secondary" id="refresh-overview">
-                        <span class="dashicons dashicons-update"></span> Refresh
+        <div class="overview-analytics-grid">
+            <!-- Scanner Overview -->
+            <div class="yadore-card scanner-overview">
+                <div class="card-header">
+                    <h2><span class="dashicons dashicons-dashboard"></span> Scanner Overview</h2>
+                    <div class="card-actions">
+                        <button class="button button-secondary" id="refresh-overview">
+                            <span class="dashicons dashicons-update"></span> Refresh
                     </button>
                 </div>
             </div>
@@ -116,6 +117,49 @@
                     <div class="progress-actions">
                         <button class="button button-secondary" id="pause-scan">Pause</button>
                         <button class="button button-link-delete" id="cancel-scan">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Scan Statistics -->
+            <div class="yadore-card scan-analytics-card">
+                <div class="card-header">
+                    <h2><span class="dashicons dashicons-chart-pie"></span> Scan Analytics</h2>
+                </div>
+                <div class="card-content">
+                    <div class="analytics-grid">
+                        <div class="analytics-panel analytics-chart">
+                            <h3>Keyword Categories</h3>
+                            <canvas id="keywords-chart" width="300" height="200"></canvas>
+                        </div>
+
+                        <div class="analytics-panel analytics-chart">
+                            <h3>Scan Success Rate</h3>
+                            <canvas id="success-chart" width="300" height="200"></canvas>
+                        </div>
+
+                        <div class="analytics-panel analytics-stats">
+                            <h3>Statistics</h3>
+                            <div class="stats-list">
+                                <div class="stat-row">
+                                    <span class="stat-label">Most Common Keyword:</span>
+                                    <span class="stat-value" id="top-keyword">Loading...</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Average Confidence:</span>
+                                    <span class="stat-value" id="avg-confidence">Loading...</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">AI Usage Rate:</span>
+                                    <span class="stat-value" id="ai-usage-rate">Loading...</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Success Rate:</span>
+                                    <span class="stat-value" id="scan-success-rate">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -344,47 +388,6 @@
             </div>
         </div>
 
-        <!-- Scan Statistics -->
-        <div class="yadore-card">
-            <div class="card-header">
-                <h2><span class="dashicons dashicons-chart-pie"></span> Scan Analytics</h2>
-            </div>
-            <div class="card-content">
-                <div class="analytics-grid">
-                    <div class="analytics-chart">
-                        <h3>Keyword Categories</h3>
-                        <canvas id="keywords-chart" width="300" height="200"></canvas>
-                    </div>
-
-                    <div class="analytics-chart">
-                        <h3>Scan Success Rate</h3>
-                        <canvas id="success-chart" width="300" height="200"></canvas>
-                    </div>
-
-                    <div class="analytics-stats">
-                        <h3>Statistics</h3>
-                        <div class="stats-list">
-                            <div class="stat-row">
-                                <span class="stat-label">Most Common Keyword:</span>
-                                <span class="stat-value" id="top-keyword">Loading...</span>
-                            </div>
-                            <div class="stat-row">
-                                <span class="stat-label">Average Confidence:</span>
-                                <span class="stat-value" id="avg-confidence">Loading...</span>
-                            </div>
-                            <div class="stat-row">
-                                <span class="stat-label">AI Usage Rate:</span>
-                                <span class="stat-value" id="ai-usage-rate">Loading...</span>
-                            </div>
-                            <div class="stat-row">
-                                <span class="stat-label">Success Rate:</span>
-                                <span class="stat-value" id="scan-success-rate">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
