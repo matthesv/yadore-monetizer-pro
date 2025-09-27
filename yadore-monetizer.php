@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.6
+Version: 3.7
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.6');
+define('YADORE_PLUGIN_VERSION', '3.7');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -83,6 +83,7 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_export_data', array($this, 'ajax_export_data'));
             add_action('wp_ajax_yadore_import_data', array($this, 'ajax_import_data'));
             add_action('wp_ajax_yadore_clear_cache', array($this, 'ajax_clear_cache'));
+            add_action('wp_ajax_yadore_restore_default_templates', array($this, 'ajax_restore_default_templates'));
             add_action('wp_ajax_yadore_get_tool_stats', array($this, 'ajax_get_tool_stats'));
             add_action('wp_ajax_yadore_test_connectivity', array($this, 'ajax_test_connectivity'));
             add_action('wp_ajax_yadore_check_database', array($this, 'ajax_check_database'));
@@ -558,24 +559,15 @@ class YadoreMonetizer {
         }
     }
 
-    private function ensure_default_templates_editable() {
-        try {
-            if (!post_type_exists('yadore_template')) {
-                $this->register_custom_post_types();
-            }
-
-            if (!post_type_exists('yadore_template')) {
-                return;
-            }
-
-            $defaults = array(
-                'default-grid' => array(
-                    'slug' => 'default-grid-template',
-                    'title' => __('Product Grid (Editable)', 'yadore-monetizer'),
-                    'type' => 'shortcode',
-                    'option' => 'yadore_default_shortcode_template',
-                    'option_default' => 'default-grid',
-                    'content' => <<<'HTML'
+    private function get_default_template_definitions() {
+        return array(
+            'default-grid' => array(
+                'slug' => 'default-grid-template',
+                'title' => __('Product Grid (Editable)', 'yadore-monetizer'),
+                'type' => 'shortcode',
+                'option' => 'yadore_default_shortcode_template',
+                'option_default' => 'default-grid',
+                'content' => <<<'HTML'
 <div class="yadore-products-grid" data-format="grid">
     [yadore_product_loop]
     <div class="yadore-product-card" data-offer-id="{{id}}" data-click-url="{{click_url}}" data-yadore-click="{{id}}" role="link" tabindex="0">
@@ -603,14 +595,14 @@ class YadoreMonetizer {
     [/yadore_product_loop]
 </div>
 HTML
-                ),
-                'default-list' => array(
-                    'slug' => 'default-list-template',
-                    'title' => __('Product List (Editable)', 'yadore-monetizer'),
-                    'type' => 'shortcode',
-                    'option' => null,
-                    'option_default' => 'default-list',
-                    'content' => <<<'HTML'
+            ),
+            'default-list' => array(
+                'slug' => 'default-list-template',
+                'title' => __('Product List (Editable)', 'yadore-monetizer'),
+                'type' => 'shortcode',
+                'option' => null,
+                'option_default' => 'default-list',
+                'content' => <<<'HTML'
 <div class="yadore-products-list" data-format="list">
     [yadore_product_loop]
     <div class="yadore-product-item" data-offer-id="{{id}}" data-click-url="{{click_url}}" data-yadore-click="{{id}}" role="link" tabindex="0">
@@ -638,14 +630,14 @@ HTML
     [/yadore_product_loop]
 </div>
 HTML
-                ),
-                'default-inline' => array(
-                    'slug' => 'default-inline-template',
-                    'title' => __('Inline Highlight (Editable)', 'yadore-monetizer'),
-                    'type' => 'shortcode',
-                    'option' => 'yadore_auto_injection_template',
-                    'option_default' => 'default-inline',
-                    'content' => <<<'HTML'
+            ),
+            'default-inline' => array(
+                'slug' => 'default-inline-template',
+                'title' => __('Inline Highlight (Editable)', 'yadore-monetizer'),
+                'type' => 'shortcode',
+                'option' => 'yadore_auto_injection_template',
+                'option_default' => 'default-inline',
+                'content' => <<<'HTML'
 <div class="yadore-products-inline" data-format="inline">
     <div class="inline-header">
         <h3>Empfehlung</h3>
@@ -679,14 +671,14 @@ HTML
     </div>
 </div>
 HTML
-                ),
-                'default-overlay' => array(
-                    'slug' => 'default-overlay-template',
-                    'title' => __('Modern Overlay (Editable)', 'yadore-monetizer'),
-                    'type' => 'overlay',
-                    'option' => 'yadore_overlay_template',
-                    'option_default' => 'default-overlay',
-                    'content' => <<<'HTML'
+            ),
+            'default-overlay' => array(
+                'slug' => 'default-overlay-template',
+                'title' => __('Modern Overlay (Editable)', 'yadore-monetizer'),
+                'type' => 'overlay',
+                'option' => 'yadore_overlay_template',
+                'option_default' => 'default-overlay',
+                'content' => <<<'HTML'
 <div class="overlay-products">
     [yadore_product_loop]
     <div class="overlay-product" data-product-id="{{id}}" data-click-url="{{click_url}}" data-yadore-click="{{id}}" role="link" tabindex="0">
@@ -712,54 +704,191 @@ HTML
     [/yadore_product_loop]
 </div>
 HTML
-                ),
-            );
+            ),
+        );
+    }
+
+    private function ensure_default_templates_editable() {
+        try {
+            if (!post_type_exists('yadore_template')) {
+                $this->register_custom_post_types();
+            }
+
+            if (!post_type_exists('yadore_template')) {
+                return;
+            }
+
+            $defaults = $this->get_default_template_definitions();
 
             foreach ($defaults as $key => $template) {
-                $slug = sanitize_title($template['slug'] ?? $key);
-                $type = $template['type'] ?? 'shortcode';
-
-                if ($slug === '' || !in_array($type, array('shortcode', 'overlay'), true)) {
-                    continue;
-                }
-
-                $existing = $this->get_template_post_by_slug($slug, $type);
-
-                if (!($existing instanceof WP_Post)) {
-                    $post_id = wp_insert_post(array(
-                        'post_title' => $template['title'],
-                        'post_name' => $slug,
-                        'post_content' => $template['content'],
-                        'post_status' => 'publish',
-                        'post_type' => 'yadore_template',
-                        'meta_input' => array(
-                            '_yadore_template_type' => $type,
-                        ),
-                    ), true);
-
-                    if (!is_wp_error($post_id)) {
-                        $existing = get_post($post_id);
-                    }
-                }
-
-                if ($existing instanceof WP_Post) {
-                    $option_name = $template['option'] ?? '';
-                    $option_default = $template['option_default'] ?? $key;
-
-                    if ($option_name) {
-                        $current = get_option($option_name, $option_default);
-                        if ($current === $option_default || $current === '' || $current === $key) {
-                            $storage_key = $this->get_template_storage_key($existing);
-                            if ($storage_key !== '') {
-                                update_option($option_name, $storage_key);
-                            }
-                        }
-                    }
-                }
+                $this->sync_default_template($key, $template, false, false);
             }
         } catch (Exception $e) {
             $this->log_error('Failed to ensure editable templates', $e);
         }
+    }
+
+    private function sync_default_template($key, array $template, $update_content = false, $force_option_reset = false) {
+        $result = array(
+            'post' => null,
+            'created' => false,
+            'updated' => false,
+            'option_updated' => false,
+        );
+
+        $slug = sanitize_title($template['slug'] ?? $key);
+        $type = $template['type'] ?? 'shortcode';
+        $type = in_array($type, array('overlay', 'shortcode'), true) ? $type : 'shortcode';
+
+        if ($slug === '') {
+            return $result;
+        }
+
+        $title = isset($template['title']) ? (string) $template['title'] : ucfirst($key);
+        $content = isset($template['content']) ? (string) $template['content'] : '';
+
+        $existing = $this->get_template_post_by_slug($slug, $type, true);
+
+        if ($existing instanceof WP_Post && $existing->post_status === 'trash') {
+            wp_untrash_post($existing->ID);
+            $existing = get_post($existing->ID);
+        }
+
+        if (!($existing instanceof WP_Post)) {
+            $post_id = wp_insert_post(array(
+                'post_title' => $title,
+                'post_name' => $slug,
+                'post_content' => $content,
+                'post_status' => 'publish',
+                'post_type' => 'yadore_template',
+                'meta_input' => array(
+                    '_yadore_template_type' => $type,
+                ),
+            ), true);
+
+            if (is_wp_error($post_id)) {
+                return $result;
+            }
+
+            $existing = get_post($post_id);
+            if (!($existing instanceof WP_Post)) {
+                return $result;
+            }
+
+            $result['created'] = true;
+        } else {
+            if ($update_content) {
+                $update_args = array(
+                    'ID' => $existing->ID,
+                    'post_title' => $title,
+                    'post_content' => $content,
+                    'post_status' => 'publish',
+                );
+
+                if ($existing->post_name !== $slug) {
+                    $update_args['post_name'] = $slug;
+                }
+
+                $update_result = wp_update_post($update_args, true);
+                if (is_wp_error($update_result)) {
+                    return $result;
+                }
+
+                $existing = get_post($existing->ID);
+                if (!($existing instanceof WP_Post)) {
+                    return $result;
+                }
+
+                $result['updated'] = true;
+            } elseif ($existing->post_status !== 'publish') {
+                $status_result = wp_update_post(array(
+                    'ID' => $existing->ID,
+                    'post_status' => 'publish',
+                ), true);
+
+                if (!is_wp_error($status_result)) {
+                    $existing = get_post($existing->ID);
+                }
+            }
+        }
+
+        if (!($existing instanceof WP_Post)) {
+            return $result;
+        }
+
+        update_post_meta($existing->ID, '_yadore_template_type', $type);
+
+        $result['post'] = $existing;
+
+        $option_name = $template['option'] ?? '';
+        $option_default = $template['option_default'] ?? $key;
+
+        if ($option_name) {
+            $storage_key = $this->get_template_storage_key($existing);
+            if ($storage_key !== '') {
+                $current = get_option($option_name, $option_default);
+                $should_update = false;
+
+                if ($force_option_reset) {
+                    $should_update = ($current !== $storage_key);
+                } else {
+                    if ($current === $option_default || $current === '' || $current === $key) {
+                        $should_update = ($current !== $storage_key);
+                    } elseif (is_string($current) && strpos($current, 'custom:') === 0) {
+                        $identifier = substr($current, 7);
+                        if ($identifier === (string) $existing->ID || $identifier === $slug) {
+                            $should_update = ($current !== $storage_key);
+                        }
+                    }
+                }
+
+                if ($should_update && update_option($option_name, $storage_key)) {
+                    $result['option_updated'] = true;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    private function restore_default_templates($force_option_reset = false) {
+        $summary = array(
+            'created' => 0,
+            'updated' => 0,
+            'options' => 0,
+        );
+
+        if (!post_type_exists('yadore_template')) {
+            $this->register_custom_post_types();
+        }
+
+        if (!post_type_exists('yadore_template')) {
+            return $summary;
+        }
+
+        $defaults = $this->get_default_template_definitions();
+
+        foreach ($defaults as $key => $template) {
+            $result = $this->sync_default_template($key, $template, true, $force_option_reset);
+
+            if (!is_array($result)) {
+                continue;
+            }
+
+            if (!empty($result['created'])) {
+                $summary['created']++;
+            }
+
+            if (!empty($result['updated'])) {
+                $summary['updated']++;
+            }
+
+            if (!empty($result['option_updated'])) {
+                $summary['options']++;
+            }
+        }
+
+        return $summary;
     }
 
     private function setup_advanced_features() {
@@ -2086,6 +2215,35 @@ HTML
         }
     }
 
+    public function ajax_restore_default_templates() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions to restore templates.', 'yadore-monetizer'));
+            }
+
+            $force_reset = false;
+            if (isset($_POST['reset_selection'])) {
+                $force_reset = filter_var(wp_unslash($_POST['reset_selection']), FILTER_VALIDATE_BOOLEAN);
+            }
+
+            $summary = $this->restore_default_templates($force_reset);
+
+            wp_send_json_success(array(
+                'message' => __('Default templates restored successfully.', 'yadore-monetizer'),
+                'created' => isset($summary['created']) ? (int) $summary['created'] : 0,
+                'updated' => isset($summary['updated']) ? (int) $summary['updated'] : 0,
+                'options_updated' => isset($summary['options']) ? (int) $summary['options'] : 0,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to restore default templates', $e);
+            wp_send_json_error(array(
+                'message' => $e->getMessage(),
+            ));
+        }
+    }
+
     public function ajax_analyze_cache() {
         try {
             check_ajax_referer('yadore_admin_nonce', 'nonce');
@@ -2383,7 +2541,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.6', 'info');
+            $this->log('Enhanced database tables created successfully for v3.7', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
@@ -7893,16 +8051,21 @@ HTML
         return null;
     }
 
-    private function get_template_post_by_slug($slug, $type) {
+    private function get_template_post_by_slug($slug, $type, $include_trashed = false) {
         $slug = sanitize_title($slug);
         if ($slug === '') {
             return null;
         }
 
+        $statuses = 'publish';
+        if ($include_trashed) {
+            $statuses = array('publish', 'draft', 'pending', 'future', 'private', 'trash');
+        }
+
         $posts = get_posts(array(
             'name' => $slug,
             'post_type' => 'yadore_template',
-            'post_status' => 'publish',
+            'post_status' => $statuses,
             'numberposts' => 1,
             'meta_key' => '_yadore_template_type',
             'meta_value' => $type,

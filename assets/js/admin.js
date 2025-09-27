@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.6 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.7 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.6',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.7',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -1599,6 +1599,12 @@
                 this.systemCleanup();
             });
 
+            $('#restore-default-templates').on('click', (e) => {
+                e.preventDefault();
+                const resetSelection = $('#restore-reset-selection').is(':checked');
+                this.restoreDefaultTemplates(resetSelection);
+            });
+
             // File upload handling
             $('#import-upload-area').on('click', () => {
                 $('#import-file').click();
@@ -1651,6 +1657,40 @@
                 }
             }).always(() => {
                 button.prop('disabled', false).html('<span class="dashicons dashicons-trash"></span> Clear Cache');
+            });
+        },
+
+        restoreDefaultTemplates: function(resetSelection) {
+            if (!confirm('Restore the default product templates? This will overwrite the built-in templates.')) {
+                return;
+            }
+
+            const button = $('#restore-default-templates');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Restoring...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_restore_default_templates',
+                nonce: this.nonce,
+                reset_selection: resetSelection ? 1 : 0
+            }, (response) => {
+                if (response && response.success) {
+                    const data = response.data || {};
+                    const created = Number(data.created) || 0;
+                    const updated = Number(data.updated) || 0;
+                    const message = data.message || 'Templates restored successfully.';
+                    alert(`${message}\n${this.formatNumber(created)} created, ${this.formatNumber(updated)} updated.`);
+                    this.loadToolStats();
+                } else {
+                    const error = (response && response.data && response.data.message)
+                        ? response.data.message
+                        : 'Failed to restore templates.';
+                    alert(error);
+                }
+            }).fail(() => {
+                alert('Failed to restore templates.');
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
             });
         },
 
