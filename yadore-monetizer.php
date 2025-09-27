@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.5
+Version: 3.6
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.5');
+define('YADORE_PLUGIN_VERSION', '3.6');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -23,7 +23,9 @@ class YadoreMonetizer {
 
     private static $instance = null;
 
-    public const DEFAULT_AI_PROMPT = 'Analyze the title and content to find the most relevant purchase-ready product keyword (brand + model when available). Provide up to three alternate keywords for backup searches and return JSON that matches the schema (keyword, alternate_keywords, confidence, rationale).';
+    public const PREVIOUS_DEFAULT_AI_PROMPT = 'Analyze the title and content to find the most relevant purchase-ready product keyword (brand + model when available). Provide up to three alternate keywords for backup searches and return JSON that matches the schema (keyword, alternate_keywords, confidence, rationale).';
+
+    public const DEFAULT_AI_PROMPT = "You are an affiliate marketing assistant. Analyze the provided blog post details and return JSON matching the schema (keyword, alternate_keywords, confidence, rationale).\n\nTitle: {title}\n\nContent:\n{content}\n\nFocus on purchase-ready product keywords (brand + model when available) and provide up to three alternates for backup searches.";
 
     public const LEGACY_AI_PROMPT = 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.';
 
@@ -169,6 +171,7 @@ class YadoreMonetizer {
         try {
             $this->create_tables();
             $this->set_default_options();
+            $this->register_custom_post_types();
             $this->setup_initial_data();
 
             // v2.7: Advanced activation procedures
@@ -217,7 +220,7 @@ class YadoreMonetizer {
             'yadore_ai_cache_duration' => 157680000,
             'yadore_ai_prompt' => self::DEFAULT_AI_PROMPT,
             'yadore_ai_temperature' => '0.3',
-            'yadore_ai_max_tokens' => 50,
+            'yadore_ai_max_tokens' => 2000,
             'yadore_auto_scan_posts' => 1,
             'yadore_bulk_scan_completed' => 0,
             'yadore_min_content_words' => 300,
@@ -520,9 +523,15 @@ class YadoreMonetizer {
             }
 
             $legacy_prompt = self::LEGACY_AI_PROMPT;
+            $previous_default_prompt = self::PREVIOUS_DEFAULT_AI_PROMPT;
             $stored_prompt = get_option('yadore_ai_prompt', '');
-            if ($stored_prompt === $legacy_prompt) {
+            if ($stored_prompt === $legacy_prompt || $stored_prompt === $previous_default_prompt) {
                 update_option('yadore_ai_prompt', self::DEFAULT_AI_PROMPT);
+            }
+
+            $stored_max_tokens = intval(get_option('yadore_ai_max_tokens', 0));
+            if ($stored_max_tokens === 50 || $stored_max_tokens <= 0) {
+                update_option('yadore_ai_max_tokens', 2000);
             }
 
             if (false === get_option('yadore_install_timestamp', false)) {
@@ -551,6 +560,10 @@ class YadoreMonetizer {
 
     private function ensure_default_templates_editable() {
         try {
+            if (!post_type_exists('yadore_template')) {
+                $this->register_custom_post_types();
+            }
+
             if (!post_type_exists('yadore_template')) {
                 return;
             }
@@ -2370,7 +2383,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.5', 'info');
+            $this->log('Enhanced database tables created successfully for v3.6', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
@@ -3683,9 +3696,9 @@ HTML
 
         $temperature = floatval(get_option('yadore_ai_temperature', '0.3'));
             $temperature = max(0, min(2, $temperature));
-            $max_tokens = intval(get_option('yadore_ai_max_tokens', 50));
+            $max_tokens = intval(get_option('yadore_ai_max_tokens', 2000));
             if ($max_tokens <= 0) {
-                $max_tokens = 50;
+                $max_tokens = 2000;
             }
             if ($max_tokens > 10000) {
                 $max_tokens = 10000;
