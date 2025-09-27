@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.3
+Version: 3.4
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.3');
+define('YADORE_PLUGIN_VERSION', '3.4');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -32,6 +32,7 @@ class YadoreMonetizer {
     private $api_cache = [];
     private $keyword_candidate_cache = [];
     private $last_product_keyword = '';
+    private $gemini_json_debug = array();
     private $latest_error_notice = null;
     private $latest_error_notice_checked = false;
     private $table_exists_cache = array();
@@ -2369,7 +2370,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.3', 'info');
+            $this->log('Enhanced database tables created successfully for v3.4', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
@@ -3799,6 +3800,7 @@ HTML
                 return array('error' => sprintf(__('Gemini API blocked the request: %s', 'yadore-monetizer'), $decoded['promptFeedback']['blockReason']));
             }
 
+            $this->gemini_json_debug = array();
             $raw_structured_text = '';
             $structured_data = $this->extract_gemini_structured_payload($decoded, $raw_structured_text);
 
@@ -3809,6 +3811,7 @@ HTML
                     'response' => $decoded,
                     'raw' => is_string($raw_structured_text) ? substr($raw_structured_text, 0, 500) : $raw_structured_text,
                     'parse_error' => 'Unable to extract structured keyword data',
+                    'parse_debug' => $this->gemini_json_debug,
                 ));
                 return array('error' => __('Gemini API returned data that could not be parsed as JSON.', 'yadore-monetizer'));
             }
@@ -3824,6 +3827,7 @@ HTML
                     'status' => $status,
                     'model' => $model,
                     'response' => $structured_data,
+                    'parse_debug' => $this->gemini_json_debug,
                 ));
                 return array('error' => __('Gemini API returned data that did not match the expected schema.', 'yadore-monetizer'));
             }
@@ -3834,6 +3838,7 @@ HTML
                     'status' => $status,
                     'model' => $model,
                     'response' => $structured_data,
+                    'parse_debug' => $this->gemini_json_debug,
                 ));
                 return array('error' => __('Gemini API did not return a usable keyword.', 'yadore-monetizer'));
             }
@@ -3931,6 +3936,7 @@ HTML
                 'model' => $model,
                 'post_id' => $post_id,
                 'result' => $result,
+                'parse_debug' => $this->gemini_json_debug,
             ));
 
             return $result;
@@ -3948,32 +3954,19 @@ HTML
         }
 
         if (!empty($response['candidates']) && is_array($response['candidates'])) {
-            foreach ($response['candidates'] as $candidate) {
+            foreach ($response['candidates'] as $candidate_index => $candidate) {
                 if (!empty($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
-                    foreach ($candidate['content']['parts'] as $part) {
-                        if (isset($part['functionCall']['args']) && is_array($part['functionCall']['args'])) {
-                            $raw_text = wp_json_encode($part['functionCall']['args']);
-                            return $part['functionCall']['args'];
-                        }
-
-                        if (isset($part['structValue']) && is_array($part['structValue'])) {
-                            $raw_text = wp_json_encode($part['structValue']);
-                            return $part['structValue'];
-                        }
-
-                        if (isset($part['text'])) {
-                            $raw_text = (string) $part['text'];
-                            $parsed = $this->decode_gemini_json_string($raw_text);
-                            if (is_array($parsed)) {
-                                return $parsed;
-                            }
+                    foreach ($candidate['content']['parts'] as $part_index => $part) {
+                        $normalized = $this->extract_gemini_payload_from_part($part, $raw_text, $candidate_index, $part_index);
+                        if (is_array($normalized)) {
+                            return $normalized;
                         }
                     }
                 }
 
                 if (isset($candidate['content']) && is_string($candidate['content'])) {
                     $raw_text = (string) $candidate['content'];
-                    $parsed = $this->decode_gemini_json_string($raw_text);
+                    $parsed = $this->decode_gemini_json_string($raw_text, 'candidate_content');
                     if (is_array($parsed)) {
                         return $parsed;
                     }
@@ -3983,12 +3976,12 @@ HTML
 
         if (isset($response['result']) && is_array($response['result'])) {
             $raw_text = wp_json_encode($response['result']);
-            return $response['result'];
+            return $this->normalize_gemini_structured_array($response['result']);
         }
 
         if (isset($response['text']) && is_string($response['text'])) {
             $raw_text = (string) $response['text'];
-            $parsed = $this->decode_gemini_json_string($raw_text);
+            $parsed = $this->decode_gemini_json_string($raw_text, 'response_text');
             if (is_array($parsed)) {
                 return $parsed;
             }
@@ -3997,7 +3990,7 @@ HTML
         return null;
     }
 
-    private function decode_gemini_json_string($text) {
+    private function decode_gemini_json_string($text, $context = 'text') {
         if (!is_string($text)) {
             return null;
         }
@@ -4013,7 +4006,12 @@ HTML
 
         $decoded = json_decode($normalized, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            return $decoded;
+            $this->record_gemini_parse_debug($context . '_full', true, 'Parsed JSON payload');
+            return $this->normalize_gemini_structured_array($decoded);
+        }
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->record_gemini_parse_debug($context . '_full', false, json_last_error_msg());
         }
 
         $candidates = array();
@@ -4030,7 +4028,7 @@ HTML
             $candidates[] = substr($normalized, $array_start, $array_end - $array_start + 1);
         }
 
-        foreach ($candidates as $candidate) {
+        foreach ($candidates as $candidate_index => $candidate) {
             $candidate = trim((string) $candidate);
             if ($candidate === '') {
                 continue;
@@ -4038,15 +4036,209 @@ HTML
 
             $decoded = json_decode($candidate, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
+                $this->record_gemini_parse_debug($context . '_substring_' . $candidate_index, true, 'Parsed JSON fragment');
+                return $this->normalize_gemini_structured_array($decoded);
+            }
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->record_gemini_parse_debug($context . '_substring_' . $candidate_index, false, json_last_error_msg());
             }
         }
 
         if (strpos($normalized, '{') === false && strpos($normalized, '[') === false) {
+            $this->record_gemini_parse_debug($context . '_fallback', true, 'Treated plain text as keyword');
             return array('keyword' => $normalized);
         }
 
+        $this->record_gemini_parse_debug($context . '_fallback', false, 'No JSON structure detected');
+
         return null;
+    }
+
+    private function extract_gemini_payload_from_part($part, &$raw_text, $candidate_index, $part_index) {
+        if (!is_array($part)) {
+            return null;
+        }
+
+        $context = sprintf('candidate_%d_part_%d', (int) $candidate_index, (int) $part_index);
+
+        if (isset($part['functionCall']) && is_array($part['functionCall'])) {
+            $call = $part['functionCall'];
+            $payload = null;
+
+            if (isset($call['args'])) {
+                $payload = $call['args'];
+            } elseif (isset($call['arguments'])) {
+                $payload = $call['arguments'];
+            }
+
+            if (is_string($payload)) {
+                $raw_text = $payload;
+                $parsed = $this->decode_gemini_json_string($payload, $context . '_function_call');
+                if (is_array($parsed)) {
+                    return $parsed;
+                }
+            } elseif (is_array($payload)) {
+                $raw_text = wp_json_encode($payload);
+                $this->record_gemini_parse_debug($context . '_function_call_args', true, 'Used structured args array');
+                return $this->normalize_gemini_structured_array($payload);
+            }
+        }
+
+        if (isset($part['functionResponse']) && is_array($part['functionResponse'])) {
+            $response = $part['functionResponse'];
+
+            if (isset($response['response']) && is_array($response['response'])) {
+                if (isset($response['response']['content']) && is_array($response['response']['content'])) {
+                    foreach ($response['response']['content'] as $response_content) {
+                        if (isset($response_content['parts']) && is_array($response_content['parts'])) {
+                            foreach ($response_content['parts'] as $nested_part) {
+                                $normalized = $this->extract_gemini_payload_from_part($nested_part, $raw_text, $candidate_index, $part_index);
+                                if (is_array($normalized)) {
+                                    return $normalized;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $raw_candidate = wp_json_encode($response['response']);
+                $parsed = $this->decode_gemini_json_string($raw_candidate, $context . '_function_response');
+                if (is_array($parsed)) {
+                    $raw_text = $raw_candidate;
+                    return $parsed;
+                }
+            }
+
+            if (isset($response['result'])) {
+                $raw_candidate = wp_json_encode($response['result']);
+                $parsed = $this->decode_gemini_json_string($raw_candidate, $context . '_function_result');
+                if (is_array($parsed)) {
+                    $raw_text = $raw_candidate;
+                    return $parsed;
+                }
+            }
+        }
+
+        if (isset($part['jsonValue'])) {
+            $raw_text = wp_json_encode($part['jsonValue']);
+            $this->record_gemini_parse_debug($context . '_json_value', true, 'Used jsonValue payload');
+            return $this->normalize_gemini_structured_array($part['jsonValue']);
+        }
+
+        if (isset($part['structValue'])) {
+            $raw_text = wp_json_encode($part['structValue']);
+            $this->record_gemini_parse_debug($context . '_struct_value', true, 'Used structValue payload');
+            return $this->normalize_gemini_structured_array($part['structValue']);
+        }
+
+        if (isset($part['inlineData']['data'])) {
+            $decoded_inline = $this->decode_gemini_inline_data($part['inlineData']['data']);
+            if (is_array($decoded_inline)) {
+                $raw_text = wp_json_encode($decoded_inline);
+                $this->record_gemini_parse_debug($context . '_inline_data', true, 'Decoded inline data payload');
+                return $decoded_inline;
+            }
+        }
+
+        if (isset($part['text'])) {
+            $raw_text = (string) $part['text'];
+            $parsed = $this->decode_gemini_json_string($raw_text, $context . '_text');
+            if (is_array($parsed)) {
+                return $parsed;
+            }
+        }
+
+        return null;
+    }
+
+    private function decode_gemini_inline_data($data) {
+        if (!is_string($data) || $data === '') {
+            return null;
+        }
+
+        $decoded = base64_decode($data, true);
+        if ($decoded === false || $decoded === '') {
+            $this->record_gemini_parse_debug('inline_data', false, 'Unable to base64 decode inline data');
+            return null;
+        }
+
+        $parsed = $this->decode_gemini_json_string($decoded, 'inline_data');
+        if (is_array($parsed)) {
+            return $parsed;
+        }
+
+        return null;
+    }
+
+    private function normalize_gemini_structured_array($value) {
+        if (!is_array($value)) {
+            return $value;
+        }
+
+        if (isset($value['fields']) && is_array($value['fields'])) {
+            $normalized = array();
+            foreach ($value['fields'] as $key => $field_value) {
+                $normalized[$key] = $this->normalize_gemini_value($field_value);
+            }
+            return $normalized;
+        }
+
+        $normalized = array();
+        foreach ($value as $key => $item) {
+            $normalized[$key] = $this->normalize_gemini_value($item);
+        }
+
+        return $normalized;
+    }
+
+    private function normalize_gemini_value($value) {
+        if (!is_array($value)) {
+            return $value;
+        }
+
+        if (array_key_exists('stringValue', $value)) {
+            return (string) $value['stringValue'];
+        }
+
+        if (array_key_exists('numberValue', $value)) {
+            return $value['numberValue'] + 0;
+        }
+
+        if (array_key_exists('boolValue', $value)) {
+            return (bool) $value['boolValue'];
+        }
+
+        if (isset($value['listValue']['values']) && is_array($value['listValue']['values'])) {
+            $list = array();
+            foreach ($value['listValue']['values'] as $list_item) {
+                $list[] = $this->normalize_gemini_value($list_item);
+            }
+            return $list;
+        }
+
+        if (isset($value['structValue'])) {
+            return $this->normalize_gemini_structured_array($value['structValue']);
+        }
+
+        if (isset($value['fields']) && is_array($value['fields'])) {
+            return $this->normalize_gemini_structured_array($value);
+        }
+
+        $normalized = array();
+        foreach ($value as $key => $item) {
+            $normalized[$key] = $this->normalize_gemini_value($item);
+        }
+
+        return $normalized;
+    }
+
+    private function record_gemini_parse_debug($strategy, $success, $detail = '') {
+        $this->gemini_json_debug[] = array(
+            'strategy' => (string) $strategy,
+            'success' => (bool) $success,
+            'detail'  => (string) $detail,
+        );
     }
 
     // Scanner helper methods
@@ -8153,6 +8345,7 @@ HTML
 
             $plugin_log = $this->get_debug_log();
             $stack_traces = array();
+            $gemini_errors = array();
 
             global $wpdb;
             $table = $wpdb->prefix . 'yadore_error_logs';
@@ -8169,11 +8362,34 @@ HTML
                 }
             }
 
+            $api_table = $wpdb->prefix . 'yadore_api_logs';
+            if ($this->table_exists($api_table)) {
+                $error_rows = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT id, endpoint_url, response_body, error_message, created_at FROM {$api_table} WHERE api_type = %s AND success = 0 ORDER BY created_at DESC LIMIT %d",
+                        'gemini',
+                        20
+                    ),
+                    ARRAY_A
+                );
+
+                foreach ((array) $error_rows as $error_row) {
+                    $gemini_errors[] = array(
+                        'id' => isset($error_row['id']) ? (int) $error_row['id'] : 0,
+                        'endpoint' => isset($error_row['endpoint_url']) ? (string) $error_row['endpoint_url'] : '',
+                        'error_message' => isset($error_row['error_message']) ? (string) $error_row['error_message'] : '',
+                        'response_body' => isset($error_row['response_body']) ? (string) $error_row['response_body'] : '',
+                        'created_at' => isset($error_row['created_at']) ? (string) $error_row['created_at'] : '',
+                    );
+                }
+            }
+
             $wp_debug_excerpt = $this->read_wp_debug_excerpt();
 
             wp_send_json_success(array(
                 'plugin_debug_log' => $plugin_log,
                 'stack_traces' => $stack_traces,
+                'gemini_errors' => $gemini_errors,
                 'wp_debug_excerpt' => $wp_debug_excerpt,
             ));
 

@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.3 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.4 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.3',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.4',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -2020,6 +2020,35 @@
                     return `${timestamp} ${severity} ${trace.error_message || ''}\n${trace.stack_trace || ''}`.trim();
                 });
                 sections.push('=== Recent Stack Traces ===\n' + traceLines.join('\n\n'));
+            }
+
+            if (Array.isArray(data.gemini_errors) && data.gemini_errors.length) {
+                const errorLines = data.gemini_errors.map((entry) => {
+                    const timestamp = entry.created_at ? `[${entry.created_at}]` : '';
+                    const endpoint = entry.endpoint ? `Endpoint: ${entry.endpoint}` : '';
+                    const message = entry.error_message || 'Gemini API error';
+                    let response = '';
+
+                    if (entry.response_body) {
+                        let formatted = entry.response_body;
+                        try {
+                            const parsed = JSON.parse(entry.response_body);
+                            formatted = JSON.stringify(parsed, null, 2);
+                        } catch (err) {
+                            formatted = entry.response_body;
+                        }
+
+                        response = `Response: ${formatted}`;
+                    }
+
+                    return [
+                        [timestamp, message].filter(Boolean).join(' ').trim(),
+                        endpoint,
+                        response
+                    ].filter(Boolean).join('\n');
+                });
+
+                sections.push('=== Gemini API Errors ===\n' + errorLines.join('\n\n'));
             }
 
             if (data.wp_debug_excerpt) {
