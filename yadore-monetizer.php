@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.4
+Version: 3.5
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.4');
+define('YADORE_PLUGIN_VERSION', '3.5');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -2370,7 +2370,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.4', 'info');
+            $this->log('Enhanced database tables created successfully for v3.5', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
@@ -3854,15 +3854,33 @@ HTML
             $structured_data = $this->extract_gemini_structured_payload($decoded, $raw_structured_text);
 
             if (!is_array($structured_data)) {
-                $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                $diagnosis = $this->diagnose_gemini_parse_failure($decoded, $raw_structured_text);
+                $error_message = __('Gemini API returned data that could not be parsed as JSON.', 'yadore-monetizer');
+                $log_context = array(
                     'status' => $status,
                     'model' => $model,
                     'response' => $decoded,
                     'raw' => is_string($raw_structured_text) ? substr($raw_structured_text, 0, 500) : $raw_structured_text,
                     'parse_error' => 'Unable to extract structured keyword data',
                     'parse_debug' => $this->gemini_json_debug,
-                ));
-                return array('error' => __('Gemini API returned data that could not be parsed as JSON.', 'yadore-monetizer'));
+                );
+
+                if (is_array($diagnosis)) {
+                    if (!empty($diagnosis['message'])) {
+                        $error_message = $diagnosis['message'];
+                    }
+
+                    if (!empty($diagnosis['log_reason'])) {
+                        $log_context['parse_error'] = $diagnosis['log_reason'];
+                    }
+
+                    if (!empty($diagnosis['details'])) {
+                        $log_context['parse_details'] = $diagnosis['details'];
+                    }
+                }
+
+                $this->log_api_call('gemini', $endpoint_base, 'error', $log_context);
+                return array('error' => $error_message);
             }
 
             $lower_keys = array_change_key_case($structured_data, CASE_LOWER);
@@ -4288,6 +4306,176 @@ HTML
             'success' => (bool) $success,
             'detail'  => (string) $detail,
         );
+    }
+
+    private function diagnose_gemini_parse_failure($response, $raw_text = '') {
+        if (!is_array($response)) {
+            return null;
+        }
+
+        $details = array();
+        $candidates = array();
+
+        if (isset($response['candidates']) && is_array($response['candidates'])) {
+            $candidates = $response['candidates'];
+        }
+
+        if (empty($candidates)) {
+            return array(
+                'message' => __('Gemini API response did not contain any candidates to parse.', 'yadore-monetizer'),
+                'log_reason' => 'No candidates returned',
+                'details' => array(),
+            );
+        }
+
+        $finish_reasons = array();
+        $all_candidates_empty = true;
+        $all_max_tokens = true;
+        $any_max_tokens = false;
+
+        foreach ($candidates as $candidate) {
+            $finish_reason = '';
+
+            if (isset($candidate['finishReason'])) {
+                $finish_reason = strtoupper(trim((string) $candidate['finishReason']));
+                if ($finish_reason !== '') {
+                    $finish_reasons[] = $finish_reason;
+                }
+            }
+
+            if ($finish_reason !== 'MAX_TOKENS') {
+                $all_max_tokens = false;
+            } else {
+                $any_max_tokens = true;
+            }
+
+            if ($this->gemini_candidate_has_payload($candidate)) {
+                $all_candidates_empty = false;
+            }
+        }
+
+        if (!empty($finish_reasons)) {
+            $details['finish_reasons'] = array_values(array_unique($finish_reasons));
+        }
+
+        if ($all_candidates_empty && $all_max_tokens) {
+            return array(
+                'message' => __('Gemini API truncated the response before returning any structured data. Increase the output token limit or reduce the prompt length.', 'yadore-monetizer'),
+                'log_reason' => 'Response truncated before content',
+                'details' => $details,
+            );
+        }
+
+        if (is_string($raw_text) && $raw_text !== '') {
+            $raw_text = (string) $raw_text;
+            $open_curly = substr_count($raw_text, '{');
+            $close_curly = substr_count($raw_text, '}');
+            $open_square = substr_count($raw_text, '[');
+            $close_square = substr_count($raw_text, ']');
+
+            if ($open_curly !== $close_curly || $open_square !== $close_square) {
+                $details['unbalanced_json'] = true;
+
+                if ($any_max_tokens) {
+                    return array(
+                        'message' => __('Gemini API cut off the JSON payload mid-response. Try requesting fewer fields or increasing the maximum output tokens.', 'yadore-monetizer'),
+                        'log_reason' => 'Truncated JSON payload',
+                        'details' => $details,
+                    );
+                }
+            }
+
+            $details['raw_preview'] = substr($raw_text, 0, 200);
+        }
+
+        if ($all_candidates_empty) {
+            return array(
+                'message' => __('Gemini API returned a response without any structured content. Please try again or adjust the prompt settings.', 'yadore-monetizer'),
+                'log_reason' => 'Empty candidate content',
+                'details' => $details,
+            );
+        }
+
+        if ($any_max_tokens) {
+            return array(
+                'message' => __('Gemini API stopped generating before the structured JSON was completed. Increase the token limit and retry.', 'yadore-monetizer'),
+                'log_reason' => 'Incomplete JSON due to MAX_TOKENS',
+                'details' => $details,
+            );
+        }
+
+        return array(
+            'message' => __('Gemini API response could not be parsed. Enable JSON schema mode or review the raw output in the debug logs.', 'yadore-monetizer'),
+            'log_reason' => 'Unparseable structured response',
+            'details' => $details,
+        );
+    }
+
+    private function gemini_candidate_has_payload($candidate) {
+        if (!is_array($candidate)) {
+            return false;
+        }
+
+        if (isset($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
+            foreach ($candidate['content']['parts'] as $part) {
+                if ($this->gemini_part_has_payload($part)) {
+                    return true;
+                }
+            }
+        }
+
+        if (isset($candidate['content']['text']) && is_string($candidate['content']['text'])) {
+            if (trim((string) $candidate['content']['text']) !== '') {
+                return true;
+            }
+        }
+
+        if (isset($candidate['content']) && is_string($candidate['content'])) {
+            if (trim((string) $candidate['content']) !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function gemini_part_has_payload($part) {
+        if (is_string($part)) {
+            return trim($part) !== '';
+        }
+
+        if (!is_array($part)) {
+            return false;
+        }
+
+        if (isset($part['text']) && is_string($part['text']) && trim($part['text']) !== '') {
+            return true;
+        }
+
+        if (isset($part['jsonValue']) && !empty($part['jsonValue'])) {
+            return true;
+        }
+
+        if (isset($part['structValue']) && !empty($part['structValue'])) {
+            return true;
+        }
+
+        if (isset($part['inlineData']['data']) && is_string($part['inlineData']['data']) && trim($part['inlineData']['data']) !== '') {
+            return true;
+        }
+
+        if (isset($part['functionCall']) && is_array($part['functionCall'])) {
+            $call = $part['functionCall'];
+            if ((isset($call['args']) && !empty($call['args'])) || (isset($call['arguments']) && !empty($call['arguments']))) {
+                return true;
+            }
+        }
+
+        if (isset($part['functionResponse']) && is_array($part['functionResponse']) && !empty($part['functionResponse'])) {
+            return true;
+        }
+
+        return false;
     }
 
     // Scanner helper methods
