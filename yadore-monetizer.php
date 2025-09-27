@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.11
+Version: 3.12
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.11');
+define('YADORE_PLUGIN_VERSION', '3.12');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -1411,7 +1411,7 @@ HTML
                 array($this, 'admin_analytics_page')
             );
 
-            // v3.11: Design system styleguide
+            // v3.12: Design system styleguide
             add_submenu_page(
                 'yadore-monetizer',
                 'Design System & Styleguide',
@@ -2568,7 +2568,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.11', 'info');
+            $this->log('Enhanced database tables created successfully for v3.12', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
