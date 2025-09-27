@@ -3801,6 +3801,55 @@ HTML
             }
 
             $this->gemini_json_debug = array();
+
+            if (!empty($decoded['candidates']) && is_array($decoded['candidates'])) {
+                $all_truncated = true;
+                $any_candidate_content = false;
+
+                foreach ($decoded['candidates'] as $candidate) {
+                    $finish_reason = '';
+                    if (isset($candidate['finishReason'])) {
+                        $finish_reason = strtoupper(trim((string) $candidate['finishReason']));
+                    }
+
+                    if ($finish_reason !== 'MAX_TOKENS') {
+                        $all_truncated = false;
+                    }
+
+                    if (!$any_candidate_content && !empty($candidate['content'])) {
+                        if (is_array($candidate['content'])) {
+                            if (!empty($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
+                                foreach ($candidate['content']['parts'] as $part) {
+                                    if (!empty($part) && (is_array($part) || (is_string($part) && trim($part) !== ''))) {
+                                        $any_candidate_content = true;
+                                        break;
+                                    }
+                                }
+                            } elseif (!empty($candidate['content']['text']) && is_string($candidate['content']['text'])) {
+                                if (trim((string) $candidate['content']['text']) !== '') {
+                                    $any_candidate_content = true;
+                                }
+                            }
+                        } elseif (is_string($candidate['content']) && trim($candidate['content']) !== '') {
+                            $any_candidate_content = true;
+                        }
+                    }
+                }
+
+                if ($all_truncated && !$any_candidate_content) {
+                    $this->log_api_call('gemini', $endpoint_base, 'error', array(
+                        'status' => $status,
+                        'model' => $model,
+                        'response' => $decoded,
+                        'parse_error' => 'Response truncated (MAX_TOKENS)',
+                    ));
+
+                    return array(
+                        'error' => __('Gemini API truncated the response before any data could be generated. Increase the maximum output tokens or choose a different model.', 'yadore-monetizer'),
+                    );
+                }
+            }
+
             $raw_structured_text = '';
             $structured_data = $this->extract_gemini_structured_payload($decoded, $raw_structured_text);
 
@@ -9404,8 +9453,17 @@ HTML
             'gemini-2.5-flash-lite' => array(
                 'label' => __('Gemini 2.5 Flash Lite - Efficient', 'yadore-monetizer'),
             ),
-            'gemini-live-2.5-flash-preview' => array(
-                'label' => __('Gemini Live 2.5 Flash Preview - Live preview capabilities', 'yadore-monetizer'),
+            'gemini-2.5-flash-preview-09-2025' => array(
+                'label' => __('Gemini 2.5 Flash Preview (Sep 2025)', 'yadore-monetizer'),
+            ),
+            'gemini-2.5-flash-lite-preview-09-2025' => array(
+                'label' => __('Gemini 2.5 Flash Lite Preview (Sep 2025)', 'yadore-monetizer'),
+            ),
+            'gemini-2.5-flash-native-audio-preview-09-2025' => array(
+                'label' => __('Gemini 2.5 Flash Native Audio Preview (Sep 2025)', 'yadore-monetizer'),
+            ),
+            'gemini-2.5-flash-exp-native-audio-thinking-dialog' => array(
+                'label' => __('Gemini 2.5 Flash Experimental Native Audio Thinking Dialog', 'yadore-monetizer'),
             ),
         );
     }

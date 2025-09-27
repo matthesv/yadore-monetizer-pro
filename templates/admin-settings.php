@@ -310,10 +310,13 @@
                                 <div class="model-selection">
                                     <?php
                                     $available_models = isset($gemini_models) && is_array($gemini_models) ? $gemini_models : array(
-                                        'gemini-2.5-flash' => array('label' => 'Gemini 2.5 Flash - Fastest next-gen'),
-                                        'gemini-2.5-pro' => array('label' => 'Gemini 2.5 Pro - Highest quality'),
-                                        'gemini-2.5-flash-lite' => array('label' => 'Gemini 2.5 Flash Lite - Efficient'),
-                                        'gemini-live-2.5-flash-preview' => array('label' => 'Gemini Live 2.5 Flash Preview - Live preview capabilities'),
+                                        'gemini-2.5-flash' => array('label' => __('Gemini 2.5 Flash - Fastest next-gen', 'yadore-monetizer')),
+                                        'gemini-2.5-pro' => array('label' => __('Gemini 2.5 Pro - Highest quality', 'yadore-monetizer')),
+                                        'gemini-2.5-flash-lite' => array('label' => __('Gemini 2.5 Flash Lite - Efficient', 'yadore-monetizer')),
+                                        'gemini-2.5-flash-preview-09-2025' => array('label' => __('Gemini 2.5 Flash Preview (Sep 2025)', 'yadore-monetizer')),
+                                        'gemini-2.5-flash-lite-preview-09-2025' => array('label' => __('Gemini 2.5 Flash Lite Preview (Sep 2025)', 'yadore-monetizer')),
+                                        'gemini-2.5-flash-native-audio-preview-09-2025' => array('label' => __('Gemini 2.5 Flash Native Audio Preview (Sep 2025)', 'yadore-monetizer')),
+                                        'gemini-2.5-flash-exp-native-audio-thinking-dialog' => array('label' => __('Gemini 2.5 Flash Experimental Native Audio Thinking Dialog', 'yadore-monetizer')),
                                     );
                                     $current_model = isset($selected_gemini_model)
                                         ? $selected_gemini_model
@@ -331,7 +334,8 @@
                                         'gemini-2.5-flash' => __('Flash 2.5', 'yadore-monetizer'),
                                         'gemini-2.5-pro' => __('Pro 2.5', 'yadore-monetizer'),
                                         'gemini-2.5-flash-lite' => __('Flash Lite 2.5', 'yadore-monetizer'),
-                                        'gemini-live-2.5-flash-preview' => __('Live 2.5 Flash Preview', 'yadore-monetizer'),
+                                        'gemini-2.5-flash-preview-09-2025' => __('Flash Preview 09-2025', 'yadore-monetizer'),
+                                        'gemini-2.5-flash-lite-preview-09-2025' => __('Flash Lite Preview 09-2025', 'yadore-monetizer'),
                                     );
                                     ?>
                                     <div class="model-presets">
@@ -345,7 +349,7 @@
                                     </div>
                                 </div>
                                 <p class="form-description">
-                                    Choose from the latest Gemini 2.5 family. Flash is ideal for speed, Pro delivers the highest quality, Flash Lite optimizes for efficiency, and Live Flash Preview enables real-time interactions.
+                                    <?php esc_html_e('Choose from the latest Gemini 2.5 family. Flash is ideal for speed, Pro delivers the highest quality, Flash Lite optimizes for efficiency, and the preview or native audio variants provide access to the newest capabilities.', 'yadore-monetizer'); ?>
                                 </p>
                             </div>
 
