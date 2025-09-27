@@ -26,7 +26,7 @@ if (class_exists('YadoreMonetizer')) {
                  tabindex="0">
                 <div class="product-image">
                     <?php
-                    $image_url = $offer['thumbnail']['url'] ?? $offer['image']['url'] ?? '';
+                    $image_url = $offer['image']['url'] ?? $offer['thumbnail']['url'] ?? '';
                     if (!empty($image_url)) :
                     ?>
                         <img src="<?php echo esc_url($image_url); ?>"

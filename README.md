@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.12 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.13 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.12 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.13 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **7 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,14 +15,14 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.12**
+## 🌟 **NEU IN VERSION 3.13**
 
 - 🎨 **Design Tokens & CSS Layers** – Neues Stylesheet `assets/css/admin-design-system.css` definiert Farbspektren, Spacing-, Radius- und Shadow-Tokens (inkl. Dark-Mode) und strukturiert alle Admin-Styles via `@layer`.
 - 🧭 **Backend Styleguide Seite** – Frische Admin-Unterseite „Styleguide“ zeigt Farbrampen, Typografie-Skalen, Abstände sowie schlüsselfertige Komponenten inkl. Code-Beispielen und Copy-to-Clipboard.
 - 🧱 **Komponenten-Refactor** – `assets/css/admin.css` nutzt die neuen Tokens für Farben, Schatten und Abstände, wodurch künftige Optimierungen konsistent bleiben.
 - 🧰 **Clipboard Utility** – `assets/js/admin.js` enthält Copy-Feedback für Code-Snippets und Token-Vorschauen, inklusive Fallback für Browser ohne `navigator.clipboard`.
 - 📘 **Design-Dokumentation** – Neues Repository-Dokument `docs/STYLEGUIDE.md` beschreibt Prinzipien, Token-Änderungsprozesse und verweist auf relevante Dateien.
-- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.12.
+- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.13.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -68,7 +68,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.12:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.13:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -274,14 +274,15 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.12 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v3.13 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v3.12:**
+### **Neue Highlights in v3.13:**
 - 🎨 Design Tokens & Layered CSS – Farbspektren, Radius- und Spacing-Skalen sowie Schatten werden zentral gesteuert und in `assets/css/admin.css` genutzt.
 - 🧭 Admin Styleguide – Neue Unterseite „Styleguide“ mit Token-Vorschau, Komponentenbibliothek und Copy-to-Clipboard Buttons.
 - 🧰 Copy Workflow – `assets/js/admin.js` liefert ein modernes Clipboard-Feedback mit Fallback für ältere Browser.
 - 📘 Dokumentation – `docs/STYLEGUIDE.md` beschreibt Namenskonventionen, Governance und Abläufe für Designänderungen.
-- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.12.
+- 🖼️ Bildqualität – Produkt-Listings priorisieren jetzt immer das hochauflösende Hauptbild statt des Thumbnails.
+- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.13.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -297,11 +298,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.12 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.13 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.12** - Production-Ready Market Release
+**Current Version: 3.13** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
