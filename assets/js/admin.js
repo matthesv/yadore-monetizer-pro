@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.7 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.8 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.7',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.8',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -612,6 +612,14 @@
                 this.scanSinglePost();
             });
 
+            $('.scanner-options input[type="checkbox"]').off('change.bulkSummary').on('change.bulkSummary', () => {
+                this.updateBulkScanSummary();
+            });
+
+            $('#min-words').off('input.bulkSummary change.bulkSummary').on('input.bulkSummary change.bulkSummary', () => {
+                this.updateBulkScanSummary();
+            });
+
             $('#post-search').off('input').on('input', (e) => {
                 const query = $(e.target).val();
                 clearTimeout(this.scannerState.searchTimeout);
@@ -643,6 +651,7 @@
 
             $('#results-filter').off('change').on('change', (e) => {
                 this.scannerState.currentFilter = $(e.target).val();
+                this.highlightResultsQuickFilter(this.scannerState.currentFilter);
                 this.loadScanResults(1);
             });
 
@@ -666,9 +675,23 @@
                 this.exportScanResults();
             });
 
+            this.bindScannerOptionToggles();
+
+            $('#results-quick-filters').off('click').on('click', '.quick-filter', (e) => {
+                e.preventDefault();
+                const filter = $(e.currentTarget).data('filter');
+                if (!filter) {
+                    return;
+                }
+
+                $('#results-filter').val(filter).trigger('change');
+            });
+
             this.loadScannerOverview();
             this.loadScanResults();
             this.loadScannerAnalytics();
+            this.updateBulkScanSummary();
+            this.highlightResultsQuickFilter(this.scannerState.currentFilter);
         },
 
         startBulkScan: function() {
@@ -783,6 +806,7 @@
             this.scannerState.currentPage = page;
 
             const filter = this.scannerState.currentFilter || 'all';
+            this.highlightResultsQuickFilter(filter);
             const tbody = $('#scan-results-body');
             tbody.html(`
                 <tr>
@@ -877,6 +901,78 @@
             }
 
             container.html(html);
+        },
+
+        bindScannerOptionToggles: function() {
+            $('.option-toggle').off('click').on('click', (e) => {
+                e.preventDefault();
+                const $button = $(e.currentTarget);
+                const target = $button.data('target');
+                const action = $button.data('action');
+
+                if (!target || !action) {
+                    return;
+                }
+
+                const selector = `input[name="${target}[]"]`;
+                const $checkboxes = $(selector);
+
+                if (!$checkboxes.length) {
+                    return;
+                }
+
+                const shouldCheck = action === 'select';
+                if (action === 'select' || action === 'clear') {
+                    $checkboxes.prop('checked', shouldCheck).trigger('change');
+                }
+            });
+        },
+
+        highlightResultsQuickFilter: function(activeFilter) {
+            const $buttons = $('#results-quick-filters .quick-filter');
+
+            if (!$buttons.length) {
+                return;
+            }
+
+            $buttons.removeClass('is-active').attr('aria-pressed', 'false');
+            const $active = $buttons.filter(`[data-filter="${activeFilter}"]`);
+            if ($active.length) {
+                $active.addClass('is-active').attr('aria-pressed', 'true');
+            }
+        },
+
+        updateBulkScanSummary: function() {
+            const $summary = $('#bulk-scan-summary');
+            if (!$summary.length) {
+                return;
+            }
+
+            const getCheckedLabels = (name) => {
+                return $(`input[name="${name}[]"]:checked`).map(function() {
+                    return $(this).closest('label').text().trim();
+                }).get();
+            };
+
+            const postTypes = getCheckedLabels('post_types');
+            const postStatus = getCheckedLabels('post_status');
+            const minWords = parseInt($('#min-words').val(), 10);
+
+            const scanOptions = [];
+            if ($('input[name="scan_options[]"][value="force_rescan"]').is(':checked')) {
+                scanOptions.push('Force Re-scan');
+            }
+            if ($('input[name="scan_options[]"][value="use_ai"]').is(':checked')) {
+                scanOptions.push('AI Analysis');
+            }
+            if ($('input[name="scan_options[]"][value="validate_products"]').is(':checked')) {
+                scanOptions.push('Validate Products');
+            }
+
+            $summary.find('.summary-post-types').text(postTypes.length ? postTypes.join(', ') : 'Keine Auswahl');
+            $summary.find('.summary-post-status').text(postStatus.length ? postStatus.join(', ') : 'Keine Auswahl');
+            $summary.find('.summary-min-words').text(Number.isFinite(minWords) ? `${minWords} Wörter` : 'Kein Mindestwert');
+            $summary.find('.summary-scan-options').text(scanOptions.length ? scanOptions.join(', ') : 'Standardprüfung');
         },
 
         getScanStatusLabel: function(status) {

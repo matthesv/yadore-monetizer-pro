@@ -5,6 +5,24 @@
         <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
+    <div class="scanner-intro" aria-label="Post scanner guidance">
+        <div class="intro-message">
+            <p><strong>Plan your scans with confidence.</strong> Überwache Inhalte, erkenne Optimierungspotenzial und gleiche alle Ergebnisse mit einem Blick ab.</p>
+            <ul class="intro-highlights">
+                <li><span class="dashicons dashicons-yes"></span> Sofort-Überblick über gescannte und offene Beiträge</li>
+                <li><span class="dashicons dashicons-visibility"></span> Preview-Funktion vor Bulk-Scans</li>
+                <li><span class="dashicons dashicons-analytics"></span> Klar visualisierte Erfolgsquoten & Keyword-Treffer</li>
+            </ul>
+        </div>
+        <div class="intro-actions">
+            <div class="intro-card">
+                <h3><span class="dashicons dashicons-lightbulb"></span> Schnelle Tipps</h3>
+                <p>Wähle zuerst Beitrags-Typen und Status, passe Mindestwörter an und sichere dir mit AI-Checks mehr Kontext.</p>
+                <p class="intro-hint">Aktive Einstellungen werden jetzt direkt unter dem Bulk Scanner zusammengefasst.</p>
+            </div>
+        </div>
+    </div>
+
     <div class="yadore-scanner-container">
         <!-- Scanner Overview -->
         <div class="yadore-card scanner-overview">
@@ -88,6 +106,10 @@
                             <label>
                                 <strong>Post Types to Scan</strong>
                             </label>
+                            <div class="option-actions" role="group" aria-label="Post type shortcuts">
+                                <button type="button" class="button button-link option-toggle" data-target="post_types" data-action="select">Alle auswählen</button>
+                                <button type="button" class="button button-link option-toggle" data-target="post_types" data-action="clear">Zurücksetzen</button>
+                            </div>
                             <div class="checkbox-group">
                                 <label>
                                     <input type="checkbox" name="post_types[]" value="post" checked> Posts
@@ -108,6 +130,10 @@
                             <label>
                                 <strong>Post Status</strong>
                             </label>
+                            <div class="option-actions" role="group" aria-label="Status shortcuts">
+                                <button type="button" class="button button-link option-toggle" data-target="post_status" data-action="select">Alle auswählen</button>
+                                <button type="button" class="button button-link option-toggle" data-target="post_status" data-action="clear">Zurücksetzen</button>
+                            </div>
                             <div class="checkbox-group">
                                 <label>
                                     <input type="checkbox" name="post_status[]" value="publish" checked> Published
@@ -126,7 +152,7 @@
                                 <strong>Minimum Word Count</strong>
                             </label>
                             <input type="number" id="min-words" min="0" max="10000" value="<?php echo esc_attr(get_option('yadore_min_content_words', '100')); ?>" class="small-text">
-                            <p class="description">Only scan posts with at least this many words</p>
+                            <p class="description">Only scan posts with at least this many words. Empfohlen für hochwertige Analysen: 250 Wörter.</p>
                         </div>
 
                         <div class="option-group">
@@ -143,6 +169,28 @@
                                 <label>
                                     <input type="checkbox" name="scan_options[]" value="validate_products" checked> Validate Products
                                 </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bulk-scan-summary" id="bulk-scan-summary" aria-live="polite">
+                        <h3><span class="dashicons dashicons-filter"></span> Aktive Scan-Einstellungen</h3>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <span class="summary-label">Post-Typen</span>
+                                <span class="summary-value summary-post-types">–</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Post-Status</span>
+                                <span class="summary-value summary-post-status">–</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Mindestwörter</span>
+                                <span class="summary-value summary-min-words">–</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Zusatzoptionen</span>
+                                <span class="summary-value summary-scan-options">–</span>
                             </div>
                         </div>
                     </div>
@@ -212,13 +260,22 @@
         <div class="yadore-card">
             <div class="card-header">
                 <h2><span class="dashicons dashicons-list-view"></span> Recent Scan Results</h2>
-                <div class="card-actions">
-                    <select id="results-filter">
+                <div class="card-actions results-actions">
+                    <div class="results-filter-group">
+                        <label class="screen-reader-text" for="results-filter">Filter scan results</label>
+                        <select id="results-filter">
                         <option value="all">All Results</option>
                         <option value="successful">Successful Only</option>
                         <option value="failed">Failed Only</option>
                         <option value="ai_analyzed">AI Analyzed</option>
                     </select>
+                    </div>
+                    <div class="results-quick-filters" id="results-quick-filters" role="group" aria-label="Quick result filters">
+                        <button type="button" class="button button-secondary quick-filter" data-filter="all">Alle</button>
+                        <button type="button" class="button button-secondary quick-filter" data-filter="successful">Erfolgreich</button>
+                        <button type="button" class="button button-secondary quick-filter" data-filter="failed">Fehlgeschlagen</button>
+                        <button type="button" class="button button-secondary quick-filter" data-filter="ai_analyzed">AI genutzt</button>
+                    </div>
                     <button class="button button-secondary" id="export-results">
                         <span class="dashicons dashicons-download"></span> Export CSV
                     </button>
@@ -249,6 +306,12 @@
                     <div class="table-pagination" id="results-pagination">
                         <!-- Pagination will be inserted here -->
                     </div>
+                </div>
+                <div class="status-legend" aria-label="Status legend">
+                    <span class="legend-item legend-success"><span class="legend-dot"></span> Erfolgreich validiert</span>
+                    <span class="legend-item legend-pending"><span class="legend-dot"></span> Ausstehend oder in Prüfung</span>
+                    <span class="legend-item legend-failed"><span class="legend-dot"></span> Fehlerhaft – benötigt Review</span>
+                    <span class="legend-item legend-ai"><span class="legend-dot"></span> Mit AI Analyse</span>
                 </div>
             </div>
         </div>
