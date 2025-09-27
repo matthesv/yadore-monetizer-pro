@@ -623,7 +623,15 @@
                                                        name="yadore_shortcode_colors[<?php echo esc_attr($color_key); ?>]"
                                                        value="<?php echo esc_attr($field_value); ?>"
                                                        class="color-picker-input">
-                                                <input type="text" class="color-value-display" value="<?php echo esc_attr($field_value); ?>" readonly>
+                                                <input type="text"
+                                                       class="color-value-display"
+                                                       value="<?php echo esc_attr($field_value); ?>"
+                                                       inputmode="text"
+                                                       spellcheck="false"
+                                                       autocomplete="off"
+                                                       pattern="^#?[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?$"
+                                                       maxlength="7"
+                                                       aria-label="<?php echo esc_attr($definition['label']); ?>">
                                             </div>
                                             <?php if (!empty($definition['description'])) : ?>
                                                 <p class="form-description"><?php echo esc_html($definition['description']); ?></p>
@@ -666,7 +674,15 @@
                                                        name="yadore_overlay_colors[<?php echo esc_attr($color_key); ?>]"
                                                        value="<?php echo esc_attr($field_value); ?>"
                                                        class="color-picker-input">
-                                                <input type="text" class="color-value-display" value="<?php echo esc_attr($field_value); ?>" readonly>
+                                                <input type="text"
+                                                       class="color-value-display"
+                                                       value="<?php echo esc_attr($field_value); ?>"
+                                                       inputmode="text"
+                                                       spellcheck="false"
+                                                       autocomplete="off"
+                                                       pattern="^#?[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?$"
+                                                       maxlength="7"
+                                                       aria-label="<?php echo esc_attr($definition['label']); ?>">
                                             </div>
                                             <?php if (!empty($definition['description'])) : ?>
                                                 <p class="form-description"><?php echo esc_html($definition['description']); ?></p>

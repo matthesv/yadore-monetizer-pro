@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.2 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.3 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.2',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.3',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -293,18 +293,89 @@
             });
 
             // Color palette interactions
+            const normalizeHexValue = (value) => {
+                const stringValue = (value || '').toString().trim();
+
+                if (stringValue === '') {
+                    return '';
+                }
+
+                const withHash = stringValue.startsWith('#') ? stringValue : `#${stringValue}`;
+                const sanitized = `#${withHash.slice(1).replace(/[^0-9A-Fa-f]/g, '')}`;
+
+                if (/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(sanitized)) {
+                    return sanitized.toUpperCase();
+                }
+
+                return null;
+            };
+
+            const getDisplayInput = ($picker) => $picker.closest('.color-input-wrapper').find('.color-value-display');
+            const getPickerInput = ($display) => $display.closest('.color-input-wrapper').find('.color-picker-input');
+
             $('.color-picker-input').on('input change', function() {
-                const value = ($(this).val() || '').toString().toUpperCase();
-                $(this).closest('.color-input-wrapper').find('.color-value-display').val(value);
+                const $picker = $(this);
+                const normalized = normalizeHexValue($picker.val());
+                const $display = getDisplayInput($picker);
+
+                if (normalized && $picker.val() !== normalized) {
+                    $picker.val(normalized);
+                }
+
+                if ($display.length) {
+                    if (normalized) {
+                        $display.val(normalized).removeClass('color-input-invalid');
+                    } else if (normalized === '') {
+                        $display.val('').removeClass('color-input-invalid');
+                    }
+                }
             });
 
             $('.color-value-display').on('focus', function() {
                 $(this).select();
             });
 
+            $('.color-value-display').on('input', function() {
+                const $display = $(this);
+                const value = $display.val();
+                const normalized = normalizeHexValue(value);
+                const $picker = getPickerInput($display);
+
+                if (value.trim() === '') {
+                    $display.removeClass('color-input-invalid');
+                    return;
+                }
+
+                if (normalized) {
+                    $display.removeClass('color-input-invalid');
+                    if ($picker.length && $picker.val().toUpperCase() !== normalized) {
+                        $picker.val(normalized).trigger('change');
+                    }
+                } else {
+                    $display.addClass('color-input-invalid');
+                }
+            });
+
+            $('.color-value-display').on('blur', function() {
+                const $display = $(this);
+                const normalized = normalizeHexValue($display.val());
+                const $picker = getPickerInput($display);
+
+                if (normalized) {
+                    $display.val(normalized).removeClass('color-input-invalid');
+                    if ($picker.length && $picker.val().toUpperCase() !== normalized) {
+                        $picker.val(normalized).trigger('change');
+                    }
+                    return;
+                }
+
+                const fallback = normalizeHexValue($picker.val()) || '#000000';
+                $display.val(fallback).removeClass('color-input-invalid');
+            });
+
             $('.color-swatch').on('click', function() {
                 const target = $(this).data('target');
-                const color = ($(this).data('color') || '').toString().toUpperCase();
+                const color = normalizeHexValue($(this).data('color'));
 
                 if (!target || !color) {
                     return;
@@ -312,11 +383,11 @@
 
                 const $input = $('#' + target);
                 if ($input.length) {
-                    $input.val(color).trigger('input');
+                    $input.val(color).trigger('change');
                 }
             });
 
-            $('.color-picker-input').trigger('input');
+            $('.color-picker-input').trigger('change');
         },
 
         resetSettings: function() {

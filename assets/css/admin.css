@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.2 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.3 - Admin CSS (Complete) */
 .yadore-admin-wrap {
     margin: 0;
 }
@@ -329,6 +329,12 @@
     background: #ffffff;
     color: #1d2327;
     text-transform: uppercase;
+}
+
+.color-value-display.color-input-invalid {
+    border-color: #d63638;
+    box-shadow: 0 0 0 1px rgba(214, 54, 56, 0.2);
+    color: #d63638;
 }
 
 .color-palette-swatches {
