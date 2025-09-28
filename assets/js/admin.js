@@ -1466,7 +1466,8 @@
 
             // Period selector
             $('#analytics-period').on('change', (e) => {
-                this.loadAnalyticsData($(e.target).val());
+                const selected = Number.parseInt($(e.target).val(), 10);
+                this.loadAnalyticsData(Number.isFinite(selected) ? selected : 30);
             });
 
             // Performance metric selector
@@ -1606,10 +1607,20 @@
         },
 
         loadAnalyticsData: function(period = 30) {
+            const parsedPeriod = Number.parseInt(period, 10);
+            const requestPeriod = Number.isFinite(parsedPeriod)
+                ? Math.min(Math.max(parsedPeriod, 1), 365)
+                : 30;
+
+            const $periodSelector = $('#analytics-period');
+            if ($periodSelector.length && String($periodSelector.val()) !== String(requestPeriod)) {
+                $periodSelector.val(String(requestPeriod));
+            }
+
             $.post(this.ajax_url, {
                 action: 'yadore_get_analytics_data',
                 nonce: this.nonce,
-                period: period
+                period: requestPeriod
             }).done((response) => {
                 if (!response || !response.success || !response.data) {
                     const message = response?.data?.message || null;
@@ -1773,12 +1784,32 @@
 
             rows.forEach((row) => {
                 const $tr = $('<tr/>');
-                $tr.append($('<td/>').text(row.title || '—'));
-                $tr.append($('<td/>').text(row.keyword || '—'));
-                $tr.append($('<td/>').text(this.formatNumber(row.views || 0)));
-                $tr.append($('<td/>').text(this.formatNumber(row.clicks || 0)));
-                $tr.append($('<td/>').text(`${this.formatRate(row.ctr || 0)}%`));
-                $tr.append($('<td/>').text(this.formatCurrency(row.revenue || 0)));
+                const title = row.title || '—';
+                const keyword = row.keyword || '—';
+
+                const $titleCell = $('<td/>', { 'class': 'cell-title' }).text(title);
+                const $keywordCell = $('<td/>', { 'class': 'cell-keyword' }).text(keyword);
+
+                if (keyword !== '—') {
+                    $keywordCell.attr('title', keyword);
+                }
+
+                const metrics = [
+                    this.formatNumber(row.views || 0),
+                    this.formatNumber(row.clicks || 0),
+                    `${this.formatRate(row.ctr || 0)}%`,
+                    this.formatCurrency(row.revenue || 0)
+                ];
+
+                $tr.append($titleCell);
+                $tr.append($keywordCell);
+
+                metrics.forEach((value) => {
+                    $tr.append(
+                        $('<td/>', { 'class': 'cell-metric' }).text(value)
+                    );
+                });
+
                 $tbody.append($tr);
             });
         },
@@ -1805,23 +1836,75 @@
                 return;
             }
 
-            const counts = items.map((item) => Number(item?.count) || 0);
+            const sortedItems = items
+                .filter((item) => item && typeof item.keyword === 'string' && item.keyword.trim() !== '')
+                .map((item) => ({
+                    keyword: String(item.keyword),
+                    count: Number(item.count) || 0,
+                    ctr: Number.isFinite(Number(item.ctr)) ? Number(item.ctr) : null,
+                    clicks: Number.isFinite(Number(item.clicks)) ? Number(item.clicks) : null,
+                }))
+                .sort((a, b) => b.count - a.count);
+
+            if (sortedItems.length === 0) {
+                $container.append(
+                    $('<div/>', { 'class': 'cloud-empty' }).text('No keyword data available.')
+                );
+                return;
+            }
+
+            const counts = sortedItems.map((item) => item.count);
             const maxCount = Math.max(...counts, 1);
+            const totalCount = counts.reduce((sum, value) => sum + value, 0) || 1;
 
-            items.forEach((item) => {
-                const keyword = (item && item.keyword) ? String(item.keyword) : '';
-                if (!keyword) {
-                    return;
+            sortedItems.forEach((item, index) => {
+                const share = (item.count / totalCount) * 100;
+                const formattedShare = share.toLocaleString(undefined, {
+                    minimumFractionDigits: share > 0 && share < 10 ? 1 : 0,
+                    maximumFractionDigits: 1,
+                });
+
+                const $chip = $('<div/>', {
+                    'class': 'keyword-chip',
+                    'data-rank': index + 1
+                });
+
+                const $header = $('<div/>', { 'class': 'chip-header' });
+                $header.append($('<span/>', { 'class': 'chip-label' }).text(item.keyword));
+                $header.append(
+                    $('<span/>', { 'class': 'chip-count' }).text(
+                        `${this.formatNumber(item.count)} ${item.count === 1 ? 'use' : 'uses'}`
+                    )
+                );
+
+                const fillWidth = Math.max(8, Math.round((item.count / maxCount) * 100));
+                const $bar = $('<div/>', { 'class': 'chip-bar' }).append(
+                    $('<span/>', { 'class': 'chip-bar-fill' }).css('width', `${fillWidth}%`)
+                );
+
+                const metaParts = [];
+                if (share > 0) {
+                    metaParts.push(`${formattedShare}% share`);
                 }
-                const count = Number(item.count) || 0;
-                const weight = count / maxCount;
-                const fontSize = 0.9 + (weight * 1.1);
+                if (item.clicks && item.clicks > 0) {
+                    metaParts.push(`${this.formatNumber(item.clicks)} clicks`);
+                }
+                if (item.ctr && item.ctr > 0) {
+                    metaParts.push(`${this.formatRate(item.ctr)}% CTR`);
+                }
 
-                $('<span/>', { 'class': 'keyword-cloud-item' })
-                    .text(keyword)
-                    .attr('data-count', count)
-                    .css('font-size', `${(fontSize * 100).toFixed(0)}%`)
-                    .appendTo($container);
+                $chip.append($header);
+                $chip.append($bar);
+
+                if (metaParts.length > 0) {
+                    const $meta = $('<div/>', { 'class': 'chip-meta' });
+                    metaParts.forEach((text) => {
+                        $meta.append($('<span/>').text(text));
+                    });
+                    $chip.append($meta);
+                }
+
+                $container.append($chip);
             });
         },
 
@@ -1844,12 +1927,18 @@
 
             rows.forEach((row) => {
                 const $tr = $('<tr/>');
-                $tr.append($('<td/>').text(row.keyword || '—'));
-                $tr.append($('<td/>').text(this.formatNumber(row.usage || 0)));
-                $tr.append($('<td/>').text(`${this.formatRate(row.ctr || 0)}%`));
-                $tr.append($('<td/>').text(this.formatNumber(row.clicks || 0)));
-                $tr.append($('<td/>').text(`${this.formatRate(row.confidence || 0)}%`));
-                $tr.append($('<td/>').text(row.source || '—'));
+                const keyword = row.keyword || '—';
+                const $keywordCell = $('<td/>', { 'class': 'cell-keyword' }).text(keyword);
+                if (keyword !== '—') {
+                    $keywordCell.attr('title', keyword);
+                }
+
+                $tr.append($keywordCell);
+                $tr.append($('<td/>', { 'class': 'cell-metric' }).text(this.formatNumber(row.usage || 0)));
+                $tr.append($('<td/>', { 'class': 'cell-metric' }).text(`${this.formatRate(row.ctr || 0)}%`));
+                $tr.append($('<td/>', { 'class': 'cell-metric' }).text(this.formatNumber(row.clicks || 0)));
+                $tr.append($('<td/>', { 'class': 'cell-metric' }).text(`${this.formatRate(row.confidence || 0)}%`));
+                $tr.append($('<td/>', { 'class': 'cell-source' }).text(row.source || '—'));
                 $tbody.append($tr);
             });
         },
