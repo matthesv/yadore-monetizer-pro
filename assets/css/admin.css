@@ -2128,6 +2128,110 @@
     font-size: var(--yadore-font-size-md);
 }
 
+.cloud-subtitle {
+    margin: 0;
+    color: var(--yadore-color-text-subtle);
+    font-size: var(--yadore-font-size-sm);
+}
+
+.cloud-container {
+    display: grid;
+    gap: var(--yadore-space-4);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.cloud-loading,
+.cloud-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--yadore-space-6);
+    border: 1px dashed var(--yadore-border-subtle);
+    border-radius: var(--yadore-radius-lg);
+    color: var(--yadore-color-text-muted);
+    background: var(--yadore-color-surface);
+    min-height: 140px;
+    font-size: var(--yadore-font-size-sm);
+    gap: var(--yadore-space-3);
+}
+
+.keyword-chip {
+    position: relative;
+    display: grid;
+    gap: var(--yadore-space-2);
+    padding: var(--yadore-space-4);
+    border-radius: var(--yadore-radius-lg);
+    border: 1px solid var(--yadore-border-subtle);
+    background: var(--yadore-color-surface);
+    box-shadow: var(--yadore-shadow-xs);
+}
+
+.keyword-chip::before {
+    content: attr(data-rank);
+    position: absolute;
+    top: var(--yadore-space-3);
+    left: var(--yadore-space-3);
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: var(--yadore-font-size-xs);
+    font-weight: var(--yadore-font-weight-semibold);
+    color: var(--yadore-color-primary-700);
+    background: var(--yadore-color-primary-100);
+}
+
+.keyword-chip .chip-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--yadore-space-3);
+    padding-left: calc(var(--yadore-space-3) + 32px);
+}
+
+.keyword-chip .chip-label {
+    font-weight: var(--yadore-font-weight-semibold);
+    color: var(--yadore-color-text-strong);
+}
+
+.keyword-chip .chip-count {
+    font-size: var(--yadore-font-size-sm);
+    color: var(--yadore-color-text-muted);
+    white-space: nowrap;
+}
+
+.keyword-chip .chip-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--yadore-color-surface-muted);
+    overflow: hidden;
+    margin-left: calc(var(--yadore-space-3) + 32px);
+}
+
+.keyword-chip .chip-bar-fill {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--yadore-color-primary-400), var(--yadore-color-primary-600));
+}
+
+.keyword-chip .chip-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--yadore-space-2);
+    font-size: var(--yadore-font-size-xs);
+    color: var(--yadore-color-text-subtle);
+    margin-left: calc(var(--yadore-space-3) + 32px);
+}
+
+.keyword-chip .chip-meta span {
+    background: var(--yadore-color-surface-muted);
+    padding: var(--yadore-space-1) var(--yadore-space-2);
+    border-radius: var(--yadore-radius-full);
+    line-height: 1;
+}
+
 .performance-chart canvas,
 .traffic-chart canvas,
 .revenue-chart canvas {
@@ -2245,6 +2349,57 @@
     border-bottom: 1px solid var(--yadore-border-subtle);
     text-align: left;
     white-space: nowrap;
+}
+
+.performance-table th,
+.performance-table td,
+.keyword-performance th,
+.keyword-performance td {
+    vertical-align: top;
+}
+
+.performance-table .col-title,
+.performance-table .col-keyword,
+.performance-table td.cell-title,
+.performance-table td.cell-keyword,
+.keyword-performance .col-keyword,
+.keyword-performance td.cell-keyword {
+    white-space: normal;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.performance-table td.cell-title {
+    font-weight: var(--yadore-font-weight-semibold);
+    color: var(--yadore-color-text-default);
+}
+
+.performance-table td.cell-keyword {
+    color: var(--yadore-color-text-subtle);
+}
+
+.performance-table .col-metric,
+.performance-table td.cell-metric,
+.keyword-performance .col-metric,
+.keyword-performance td.cell-metric {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.performance-table td.cell-metric,
+.keyword-performance td.cell-metric {
+    color: var(--yadore-color-text-strong);
+}
+
+.keyword-performance .col-source,
+.keyword-performance td.cell-source {
+    white-space: normal;
+}
+
+.performance-table tbody td,
+.keyword-performance tbody td {
+    background: transparent;
 }
 
 .performance-table th,

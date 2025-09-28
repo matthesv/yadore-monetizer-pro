@@ -171,12 +171,12 @@
                     <table class="wp-list-table widefat fixed striped">
                         <thead>
                             <tr>
-                                <th>Post Title</th>
-                                <th>Keywords</th>
-                                <th>Views</th>
-                                <th>Clicks</th>
-                                <th>CTR</th>
-                                <th>Est. Revenue</th>
+                                <th scope="col" class="col-title">Post Title</th>
+                                <th scope="col" class="col-keyword">Keywords</th>
+                                <th scope="col" class="col-metric">Views</th>
+                                <th scope="col" class="col-metric">Clicks</th>
+                                <th scope="col" class="col-metric">CTR</th>
+                                <th scope="col" class="col-metric">Est. Revenue</th>
                             </tr>
                         </thead>
                         <tbody id="performance-table-body">
@@ -216,7 +216,8 @@
 
                         <div class="keyword-cloud">
                             <h4>Most Popular Keywords</h4>
-                            <div class="cloud-container" id="keyword-cloud">
+                            <p class="cloud-subtitle">Track which search terms attract the most engagement at a glance.</p>
+                            <div class="cloud-container" id="keyword-cloud" aria-live="polite">
                                 <div class="cloud-loading">
                                     <span class="dashicons dashicons-update-alt spinning"></span> Generating keyword cloud...
                                 </div>
@@ -229,12 +230,12 @@
                         <table class="wp-list-table widefat fixed striped">
                             <thead>
                                 <tr>
-                                    <th>Keyword</th>
-                                    <th>Usage Count</th>
-                                    <th>Avg. CTR</th>
-                                    <th>Total Clicks</th>
-                                    <th>Confidence</th>
-                                    <th>Source</th>
+                                    <th scope="col" class="col-keyword">Keyword</th>
+                                    <th scope="col" class="col-metric">Usage Count</th>
+                                    <th scope="col" class="col-metric">Avg. CTR</th>
+                                    <th scope="col" class="col-metric">Total Clicks</th>
+                                    <th scope="col" class="col-metric">Confidence</th>
+                                    <th scope="col" class="col-source">Source</th>
                                 </tr>
                             </thead>
                             <tbody id="keyword-performance-body">
