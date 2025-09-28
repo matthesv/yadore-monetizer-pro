@@ -25,7 +25,7 @@
             <div class="card-content">
                 <div class="analytics-summary">
                     <div class="summary-stats">
-                        <div class="stat-card">
+                        <div class="stat-card stat-compact">
                             <div class="stat-header">
                                 <h3>Product Views</h3>
                                 <span class="stat-trend positive" id="views-trend">+15.3%</span>
@@ -34,7 +34,7 @@
                             <div class="stat-subtitle">Total product impressions</div>
                         </div>
 
-                        <div class="stat-card">
+                        <div class="stat-card stat-compact">
                             <div class="stat-header">
                                 <h3>Overlay Displays</h3>
                                 <span class="stat-trend positive" id="overlays-trend">+8.7%</span>
@@ -43,7 +43,7 @@
                             <div class="stat-subtitle">Overlay activations</div>
                         </div>
 
-                        <div class="stat-card">
+                        <div class="stat-card stat-compact">
                             <div class="stat-header">
                                 <h3>Click-Through Rate</h3>
                                 <span class="stat-trend negative" id="ctr-trend">-2.1%</span>
@@ -52,7 +52,7 @@
                             <div class="stat-subtitle">Average CTR</div>
                         </div>
 
-                        <div class="stat-card">
+                        <div class="stat-card stat-compact">
                             <div class="stat-header">
                                 <h3>AI Analysis</h3>
                                 <span class="stat-trend positive" id="ai-trend">+24.5%</span>
