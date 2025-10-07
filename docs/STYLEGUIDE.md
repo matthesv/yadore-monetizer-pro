@@ -1,6 +1,6 @@
-# Yadore Monetizer Pro Design System (v3.14)
+# Yadore Monetizer Pro Design System (v3.16)
 
-Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.14 einem token-basierten Designsystem. Dieses Dokument dient als zentrale Referenz für Entwickler:innen, UX-Designer:innen und QA, um konsistente UI-Entscheidungen zu treffen und Änderungen nachvollziehbar zu dokumentieren.
+Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.16 einem token-basierten Designsystem. Dieses Dokument dient als zentrale Referenz für Entwickler:innen, UX-Designer:innen und QA, um konsistente UI-Entscheidungen zu treffen und Änderungen nachvollziehbar zu dokumentieren.
 
 ## 1. Architektur & Dateien
 
@@ -43,6 +43,7 @@ Die Styleguide-Seite (`templates/admin-styleguide.php`) zeigt Referenz-HTML für
 - **Stat Cards** (`.stat-card`) – Kennzahlen mit Icon, Zahl und Label.
 - **Yadore Cards** (`.yadore-card`) – Standardcontainer für Einstellungen & Inhalte.
 - **Status Badges** (`.status-badge`) – Farbige Statusanzeigen, nutzen die primären Feedback-Farben.
+- **Onboarding Checklist** (`.yadore-onboarding-card`, `.checklist-item`) – Mehrstufiger Setup-Flow mit Fortschrittsanzeige, Status-Badges und kontextuellen Aktionen.
 - **Filter Pills** & **Quick Filter** – Verwenden `--yadore-radius-pill` und `--yadore-space-*` Tokens.
 
 Code-Beispiele können über den Copy-Button (Klasse `.styleguide-copy`) direkt übernommen werden. Das Snippet demonstriert ARIA-Anwendungen (`role`, `aria-labelledby`) und zeigt die erwartete Verwendung der Tokens.

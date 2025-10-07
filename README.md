@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.14 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.16 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.14 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.16 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **7 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,12 +15,13 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.14**
+## 🌟 **NEU IN VERSION 3.16**
 
-- 📊 **Analytics & Leistungsberichte Redesign** – Die komplette Admin-Seite „Analysen & Leistungsberichte" nutzt nun das tokenbasierte Grid-Layout inklusive responsiver Karten, klar strukturierter Tabellen und harmonisierter Abstände.
-- 🎯 **Trend- & Kennzahlen-Badges** – Stat Cards, Metrik-Zeilen und Trendlabels folgen der Design-Sprache aus dem Styleguide (Tokens für Farben, Typografie, Spacing & Motion).
-- 🧭 **Styleguide Alignment** – Karten, Kopfbereiche und Aktionsleisten wurden repository-weit auf das neue Komponentensystem gehoben und profitieren von konsistenten Tokens.
-- ✅ **Version Refresh** – Alle Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.14.
+- ✅ **Schnellstart-Checkliste & Fortschrittsanzeige** – Das Dashboard bietet jetzt eine geführte Onboarding-Karte inklusive Prozentanzeige und Statusbadges, damit neue Installationen keine Pflichtschritte übersehen.
+- 🧭 **Geführte Setup-Aktionen** – Jede Checklisten-Kachel enthält kontextuelle Call-to-Actions zu den relevanten Admin-Seiten (Einstellungen, Analytics), wodurch Konfigurationen mit einem Klick erreichbar sind.
+- 🔔 **Kontextuelle Status-Hinweise** – Der Systemstatus zeigt bei fehlenden API-Keys nun direkte Links zum Setup und reduziert so Reibung beim Troubleshooting.
+- 🎨 **UI-Polish & Mikrointeraktionen** – Neue Motion- und Hover-States für Checklisten-Elemente, optimierte Progress-Balken und zugängliche Farbkontraste verbessern das Nutzererlebnis spürbar.
+- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.16.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -66,7 +67,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.14:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.16:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -272,15 +273,14 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.14 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v3.16 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v3.14:**
-- 🎨 Design Tokens & Layered CSS – Farbspektren, Radius- und Spacing-Skalen sowie Schatten werden zentral gesteuert und in `assets/css/admin.css` genutzt.
-- 🧭 Admin Styleguide – Neue Unterseite „Styleguide“ mit Token-Vorschau, Komponentenbibliothek und Copy-to-Clipboard Buttons.
-- 🧰 Copy Workflow – `assets/js/admin.js` liefert ein modernes Clipboard-Feedback mit Fallback für ältere Browser.
-- 📘 Dokumentation – `docs/STYLEGUIDE.md` beschreibt Namenskonventionen, Governance und Abläufe für Designänderungen.
-- 🖼️ Bildqualität – Produkt-Listings priorisieren jetzt immer das hochauflösende Hauptbild statt des Thumbnails.
-- 📦 Versionsupdate – Sämtliche Assets, Tooltips und Readme zeigen die aktuelle Release-Version 3.14.
+### **Neue Highlights in v3.16:**
+- ✅ **Dashboard-Checkliste** – Neue Onboarding-Karte im Dashboard zeigt alle wichtigen Aktivierungsschritte inklusive Fortschrittsanzeige und Status-Tags.
+- 🔗 **Direkte Setup-Aktionen** – Jede Checklist-Kachel verlinkt zu den passenden Einstellungen (API, Automatisierung, Analytics) für ein nahtloses Setup.
+- 🔔 **Verbesserter Systemstatus** – Fehlende API- oder KI-Schlüssel werden jetzt mit klaren Warnfarben und Inline-Links zur Konfiguration hervorgehoben.
+- ✨ **Verfeinerte UX-Details** – Animierte Fortschrittsbalken, Hover-Zustände und kontrastreiche Buttons sorgen für mehr Klarheit und Feedback.
+- 📦 **Versionsupdate** – Sämtliche Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.16.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -296,11 +296,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.14 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.16 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.14** - Production-Ready Market Release
+**Current Version: 3.16** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

@@ -21,6 +21,71 @@
     </div>
     <?php delete_transient('yadore_activation_notice'); endif; ?>
 
+    <?php
+    $api_connected = (bool) get_option('yadore_api_key');
+    $gemini_connected = (bool) get_option('yadore_gemini_api_key');
+    $overlay_enabled = (bool) get_option('yadore_overlay_enabled', true);
+    $auto_scan_enabled = (bool) get_option('yadore_auto_scan_posts', true);
+    $analytics_enabled = (bool) get_option('yadore_analytics_enabled', true);
+
+    $settings_url = admin_url('admin.php?page=yadore-settings');
+    $analytics_url = admin_url('admin.php?page=yadore-analytics');
+
+    $onboarding_items = array(
+        array(
+            'title' => __('Yadore-API verbinden', 'yadore-monetizer'),
+            'description' => __('Aktiviere Produktdaten, indem du deinen Yadore API-Schlüssel hinterlegst.', 'yadore-monetizer'),
+            'icon' => 'dashicons-rest-api',
+            'complete' => $api_connected,
+            'action_url' => $settings_url,
+            'action_label' => __('Einstellungen öffnen', 'yadore-monetizer'),
+        ),
+        array(
+            'title' => __('Gemini-KI konfigurieren', 'yadore-monetizer'),
+            'description' => __('Hinterlege einen Gemini API-Schlüssel, um automatische Keyword-Vorschläge zu erhalten.', 'yadore-monetizer'),
+            'icon' => 'dashicons-art',
+            'complete' => $gemini_connected,
+            'action_url' => $settings_url,
+            'action_label' => __('AI-Einstellungen prüfen', 'yadore-monetizer'),
+        ),
+        array(
+            'title' => __('Automatischen Scan aktivieren', 'yadore-monetizer'),
+            'description' => __('Lass neue Beiträge automatisch analysieren, damit immer passende Produkte erscheinen.', 'yadore-monetizer'),
+            'icon' => 'dashicons-update',
+            'complete' => $auto_scan_enabled,
+            'action_url' => $settings_url,
+            'action_label' => __('Automatisierung einschalten', 'yadore-monetizer'),
+        ),
+        array(
+            'title' => __('Overlay & Shortcode testen', 'yadore-monetizer'),
+            'description' => __('Stelle sicher, dass Overlay und Shortcode-Ausgabe für deine Inhalte aktiviert sind.', 'yadore-monetizer'),
+            'icon' => 'dashicons-visibility',
+            'complete' => $overlay_enabled,
+            'action_url' => $settings_url,
+            'action_label' => __('Darstellung konfigurieren', 'yadore-monetizer'),
+        ),
+        array(
+            'title' => __('Analytics überwachen', 'yadore-monetizer'),
+            'description' => __('Nutze das Analytics-Dashboard, um Performance und Trends im Blick zu behalten.', 'yadore-monetizer'),
+            'icon' => 'dashicons-chart-area',
+            'complete' => $analytics_enabled,
+            'action_url' => $analytics_url,
+            'action_label' => __('Analytics öffnen', 'yadore-monetizer'),
+        ),
+    );
+
+    $onboarding_total = count($onboarding_items);
+    $onboarding_completed = 0;
+    foreach ($onboarding_items as $item) {
+        if (!empty($item['complete'])) {
+            $onboarding_completed++;
+        }
+    }
+    $onboarding_progress = $onboarding_total > 0
+        ? (int) round(($onboarding_completed / $onboarding_total) * 100)
+        : 100;
+    ?>
+
     <div class="yadore-dashboard-grid">
         <!-- Main Content -->
         <div class="yadore-main-content">
@@ -252,6 +317,54 @@
 
         <!-- Sidebar -->
         <div class="yadore-sidebar">
+            <!-- Onboarding Checklist -->
+            <div class="yadore-card yadore-onboarding-card">
+                <div class="card-header">
+                    <h3><span class="dashicons dashicons-yes-alt"></span> <?php echo esc_html__('Schnellstart-Checkliste', 'yadore-monetizer'); ?></h3>
+                </div>
+                <div class="card-content">
+                    <div class="onboarding-progress" role="status" aria-live="polite">
+                        <div class="progress-summary">
+                            <span class="progress-label"><?php printf(esc_html__('%1$d von %2$d Schritten erledigt', 'yadore-monetizer'), (int) $onboarding_completed, (int) $onboarding_total); ?></span>
+                            <span class="progress-value"><?php echo esc_html($onboarding_progress); ?>%</span>
+                        </div>
+                        <div class="progress-bar" aria-hidden="true">
+                            <span class="progress-bar-fill" style="--progress: <?php echo esc_attr($onboarding_progress); ?>%;"></span>
+                        </div>
+                        <?php if ($onboarding_progress === 100) : ?>
+                            <p class="progress-message success"><?php echo esc_html__('Alle Kernfunktionen sind aktiviert – großartig!', 'yadore-monetizer'); ?></p>
+                        <?php else : ?>
+                            <p class="progress-message"><?php echo esc_html__('Folge den Schritten, um das volle Potenzial des Plugins auszuschöpfen.', 'yadore-monetizer'); ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="onboarding-checklist">
+                        <?php foreach ($onboarding_items as $item): ?>
+                            <?php $is_complete = !empty($item['complete']); ?>
+                            <div class="checklist-item <?php echo $is_complete ? 'is-complete' : 'is-pending'; ?>">
+                                <div class="checklist-icon">
+                                    <span class="dashicons <?php echo esc_attr($item['icon']); ?>" aria-hidden="true"></span>
+                                </div>
+                                <div class="checklist-content">
+                                    <strong><?php echo esc_html($item['title']); ?></strong>
+                                    <p><?php echo esc_html($item['description']); ?></p>
+                                    <div class="checklist-meta">
+                                        <span class="status-badge <?php echo $is_complete ? 'status-active' : 'status-warning'; ?>">
+                                            <?php echo esc_html($is_complete ? __('Erledigt', 'yadore-monetizer') : __('Ausstehend', 'yadore-monetizer')); ?>
+                                        </span>
+                                        <?php if (!$is_complete && !empty($item['action_url'])): ?>
+                                            <a class="button-link" href="<?php echo esc_url($item['action_url']); ?>">
+                                                <?php echo esc_html($item['action_label']); ?>
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+
             <!-- Quick Actions -->
             <div class="yadore-card">
                 <div class="card-header">
@@ -318,18 +431,40 @@
                         </div>
 
                         <div class="status-item">
-                            <div class="status-indicator <?php echo get_option('yadore_api_key') ? 'status-active' : 'status-warning'; ?>"></div>
+                            <div class="status-indicator <?php echo $api_connected ? 'status-active' : 'status-warning'; ?>"></div>
                             <div class="status-details">
                                 <strong><?php echo esc_html__('Yadore-API', 'yadore-monetizer'); ?></strong>
-                                <small><?php echo get_option('yadore_api_key') ? esc_html__('Verbunden', 'yadore-monetizer') : esc_html__('API-Schlüssel erforderlich', 'yadore-monetizer'); ?></small>
+                                <small>
+                                    <?php
+                                    if ($api_connected) {
+                                        echo esc_html__('Verbunden', 'yadore-monetizer');
+                                    } else {
+                                        echo wp_kses_post(sprintf(
+                                            __('API-Schlüssel erforderlich – <a href="%s">jetzt verbinden</a>', 'yadore-monetizer'),
+                                            esc_url($settings_url)
+                                        ));
+                                    }
+                                    ?>
+                                </small>
                             </div>
                         </div>
 
                         <div class="status-item">
-                            <div class="status-indicator <?php echo get_option('yadore_gemini_api_key') ? 'status-active' : 'status-inactive'; ?>"></div>
+                            <div class="status-indicator <?php echo $gemini_connected ? 'status-active' : 'status-inactive'; ?>"></div>
                             <div class="status-details">
                                 <strong><?php echo esc_html__('Gemini-KI', 'yadore-monetizer'); ?></strong>
-                                <small><?php echo get_option('yadore_gemini_api_key') ? esc_html__('Verbunden', 'yadore-monetizer') : esc_html__('Nicht konfiguriert', 'yadore-monetizer'); ?></small>
+                                <small>
+                                    <?php
+                                    if ($gemini_connected) {
+                                        echo esc_html__('Verbunden', 'yadore-monetizer');
+                                    } else {
+                                        echo wp_kses_post(sprintf(
+                                            __('Nicht konfiguriert – <a href="%s">AI-Setup öffnen</a>', 'yadore-monetizer'),
+                                            esc_url($settings_url)
+                                        ));
+                                    }
+                                    ?>
+                                </small>
                             </div>
                         </div>
 

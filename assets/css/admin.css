@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.14 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.16 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -690,6 +690,169 @@
     min-width: 0;
 }
 
+.yadore-onboarding-card .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yadore-space-5);
+}
+
+.onboarding-progress {
+    display: grid;
+    gap: var(--yadore-space-3);
+    padding: var(--yadore-space-4);
+    border-radius: var(--yadore-radius-md);
+    border: 1px solid var(--yadore-border-subtle);
+    background: var(--yadore-color-surface-muted);
+}
+
+.progress-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--yadore-space-3);
+    font-weight: var(--yadore-font-weight-medium);
+    color: var(--yadore-color-neutral-900);
+}
+
+.progress-label {
+    font-size: var(--yadore-font-size-sm);
+    color: var(--yadore-color-neutral-600);
+}
+
+.progress-value {
+    font-size: var(--yadore-font-size-lg);
+    font-weight: var(--yadore-font-weight-semibold);
+    color: var(--yadore-color-primary-500);
+}
+
+.progress-bar {
+    position: relative;
+    height: 8px;
+    border-radius: var(--yadore-radius-pill);
+    background: var(--yadore-border-subtle);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    position: absolute;
+    inset: 0;
+    width: var(--progress, 0%);
+    background: var(--yadore-gradient-primary);
+    transition: width var(--yadore-motion-duration-fast) var(--yadore-motion-easing-standard);
+}
+
+.progress-message {
+    margin: 0;
+    font-size: var(--yadore-font-size-sm);
+    color: var(--yadore-color-neutral-600);
+}
+
+.progress-message.success {
+    color: var(--yadore-color-success-700);
+    font-weight: var(--yadore-font-weight-medium);
+}
+
+.onboarding-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yadore-space-3);
+}
+
+.checklist-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--yadore-space-3);
+    padding: var(--yadore-space-4);
+    border: 1px solid var(--yadore-border-subtle);
+    border-radius: var(--yadore-radius-md);
+    background: var(--yadore-color-surface);
+    align-items: flex-start;
+    transition: border-color var(--yadore-motion-duration-fast) var(--yadore-motion-easing-standard),
+        box-shadow var(--yadore-motion-duration-fast) var(--yadore-motion-easing-standard),
+        transform var(--yadore-motion-duration-fast) var(--yadore-motion-easing-standard);
+}
+
+.checklist-item:hover {
+    border-color: var(--yadore-color-primary-400);
+    box-shadow: var(--yadore-shadow-sm);
+    transform: translateY(-1px);
+}
+
+.checklist-item.is-complete {
+    border-color: rgba(0, 163, 42, 0.35);
+    background: var(--yadore-color-success-100);
+    background: color-mix(in srgb, var(--yadore-color-success-100) 60%, #ffffff 40%);
+}
+
+.checklist-item.is-pending {
+    border-style: dashed;
+}
+
+.checklist-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--yadore-color-surface-strong);
+    color: var(--yadore-color-primary-500);
+    font-size: 18px;
+}
+
+.checklist-item.is-complete .checklist-icon {
+    background: var(--yadore-color-success-100);
+    color: var(--yadore-color-success-700);
+}
+
+.checklist-content {
+    display: grid;
+    gap: var(--yadore-space-2);
+}
+
+.checklist-content strong {
+    font-size: var(--yadore-font-size-sm);
+    color: var(--yadore-color-neutral-900);
+}
+
+.checklist-content p {
+    margin: 0;
+    font-size: var(--yadore-font-size-sm);
+    color: var(--yadore-color-neutral-600);
+}
+
+.checklist-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--yadore-space-2);
+}
+
+.button-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--yadore-space-1);
+    font-size: var(--yadore-font-size-sm);
+    font-weight: var(--yadore-font-weight-semibold);
+    color: var(--yadore-color-primary-500);
+    text-decoration: none;
+}
+
+.button-link::after {
+    content: '\2192';
+    font-size: 14px;
+    line-height: 1;
+    transition: transform var(--yadore-motion-duration-fast) var(--yadore-motion-easing-standard);
+}
+
+.button-link:hover {
+    color: var(--yadore-color-primary-600);
+}
+
+.button-link:hover::after {
+    transform: translateX(2px);
+}
+
 /* Stats Grid */
 .yadore-stats-grid {
     display: grid;
@@ -1314,6 +1477,11 @@
 .status-badge.status-inactive {
     background: #f8d7da;
     color: #721c24;
+}
+
+.status-badge.status-warning {
+    background: #fff4ce;
+    color: #8a6d1a;
 }
 
 /* Shortcode Generator */
