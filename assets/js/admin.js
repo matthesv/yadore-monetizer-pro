@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.31 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.32 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.31',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.32',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
