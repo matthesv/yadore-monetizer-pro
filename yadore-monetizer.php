@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.17
+Version: 3.18
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.17');
+define('YADORE_PLUGIN_VERSION', '3.18');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -1549,6 +1549,14 @@ HTML
                     'error' => __('An error occurred. Please try again.', 'yadore-monetizer'),
                     'success' => __('Operation completed successfully.', 'yadore-monetizer'),
                     'copied' => __('Copied!', 'yadore-monetizer'),
+                    'copy_button_default' => __('Copy shortcode', 'yadore-monetizer'),
+                    'copy_button_loading' => __('Copying…', 'yadore-monetizer'),
+                    'copy_button_success' => __('Copied!', 'yadore-monetizer'),
+                    'copy_button_error' => __('Copy failed', 'yadore-monetizer'),
+                    'copy_feedback_success' => __('Shortcode copied to clipboard.', 'yadore-monetizer'),
+                    'copy_feedback_error' => __('Copy failed. Press Ctrl+C to copy manually.', 'yadore-monetizer'),
+                    'show_secret' => __('Show key', 'yadore-monetizer'),
+                    'hide_secret' => __('Hide key', 'yadore-monetizer'),
                     'refreshing' => __('Aktualisierung läuft...', 'yadore-monetizer'),
                     'no_data' => __('Noch keine Daten geladen', 'yadore-monetizer'),
                     'just_now' => __('Gerade eben', 'yadore-monetizer'),

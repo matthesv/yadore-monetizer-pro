@@ -1,7 +1,7 @@
 <div class="wrap yadore-admin-wrap">
     <h1 class="yadore-page-title">
-        <span class="dashicons dashicons-admin-settings"></span>
-        Yadore Monetizer Pro Settings
+        <span class="dashicons dashicons-admin-settings" aria-hidden="true"></span>
+        <?php echo esc_html__('Yadore Monetizer Pro Settings', 'yadore-monetizer'); ?>
         <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
     </h1>
 
@@ -94,36 +94,81 @@
 
         <div class="yadore-settings-container">
             <!-- Settings Navigation -->
-            <div class="settings-nav">
-                <div class="nav-tabs">
-                    <button type="button" class="nav-tab nav-tab-active" data-tab="general">
-                        <span class="dashicons dashicons-admin-generic"></span>
-                        General
+            <nav class="settings-nav" aria-label="<?php echo esc_attr__('Plugin settings navigation', 'yadore-monetizer'); ?>">
+                <div class="nav-tabs" role="tablist">
+                    <button
+                        type="button"
+                        class="nav-tab nav-tab-active"
+                        data-tab="general"
+                        id="tab-general"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="panel-general"
+                        tabindex="0"
+                    >
+                        <span class="dashicons dashicons-admin-generic" aria-hidden="true"></span>
+                        <?php echo esc_html__('General', 'yadore-monetizer'); ?>
                     </button>
-                    <button type="button" class="nav-tab" data-tab="ai">
-                        <span class="dashicons dashicons-admin-customizer"></span>
-                        AI Settings
+                    <button
+                        type="button"
+                        class="nav-tab"
+                        data-tab="ai"
+                        id="tab-ai"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="panel-ai"
+                        tabindex="-1"
+                    >
+                        <span class="dashicons dashicons-admin-customizer" aria-hidden="true"></span>
+                        <?php echo esc_html__('AI Settings', 'yadore-monetizer'); ?>
                     </button>
-                    <button type="button" class="nav-tab" data-tab="display">
-                        <span class="dashicons dashicons-visibility"></span>
-                        Display
+                    <button
+                        type="button"
+                        class="nav-tab"
+                        data-tab="display"
+                        id="tab-display"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="panel-display"
+                        tabindex="-1"
+                    >
+                        <span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+                        <?php echo esc_html__('Display', 'yadore-monetizer'); ?>
                     </button>
-                    <button type="button" class="nav-tab" data-tab="performance">
-                        <span class="dashicons dashicons-performance"></span>
-                        Performance
+                    <button
+                        type="button"
+                        class="nav-tab"
+                        data-tab="performance"
+                        id="tab-performance"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="panel-performance"
+                        tabindex="-1"
+                    >
+                        <span class="dashicons dashicons-performance" aria-hidden="true"></span>
+                        <?php echo esc_html__('Performance', 'yadore-monetizer'); ?>
                     </button>
-                    <button type="button" class="nav-tab" data-tab="advanced">
-                        <span class="dashicons dashicons-admin-tools"></span>
-                        Advanced
+                    <button
+                        type="button"
+                        class="nav-tab"
+                        data-tab="advanced"
+                        id="tab-advanced"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="panel-advanced"
+                        tabindex="-1"
+                    >
+                        <span class="dashicons dashicons-admin-tools" aria-hidden="true"></span>
+                        <?php echo esc_html__('Advanced', 'yadore-monetizer'); ?>
                     </button>
                 </div>
-            </div>
+            </nav>
 
             <!-- General Settings -->
-            <div class="settings-panel active" id="panel-general">
+            <div class="settings-panel active" id="panel-general" role="tabpanel" aria-labelledby="tab-general" tabindex="0">
                 <div class="yadore-card">
                     <div class="card-header">
-                        <h2><span class="dashicons dashicons-admin-network"></span> API Configuration</h2>
+                        <h2><span class="dashicons dashicons-admin-network" aria-hidden="true"></span> <?php echo esc_html__('API Configuration', 'yadore-monetizer'); ?></h2>
                     </div>
                     <div class="card-content">
                         <div class="form-group">
@@ -132,19 +177,28 @@
                                 <span class="required">*</span>
                             </label>
                             <div class="input-group">
-                                <input type="password" 
-                                       name="yadore_api_key" 
+                                <input type="password"
+                                       name="yadore_api_key"
                                        id="yadore_api_key"
-                                       value="<?php echo esc_attr(get_option('yadore_api_key', '')); ?>" 
+                                       value="<?php echo esc_attr(get_option('yadore_api_key', '')); ?>"
                                        class="form-input"
-                                       placeholder="Enter your Yadore API key">
+                                       placeholder="<?php echo esc_attr__('Enter your Yadore API key', 'yadore-monetizer'); ?>">
+                                <button
+                                    type="button"
+                                    class="button button-secondary password-visibility-toggle"
+                                    data-target="yadore_api_key"
+                                    aria-pressed="false"
+                                >
+                                    <span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+                                    <span class="button-label"><?php echo esc_html__('Show key', 'yadore-monetizer'); ?></span>
+                                </button>
                                 <button type="button" class="button button-secondary" id="test-yadore-api">
-                                    <span class="dashicons dashicons-admin-network"></span> Test Connection
+                                    <span class="dashicons dashicons-admin-network" aria-hidden="true"></span> <?php echo esc_html__('Test Connection', 'yadore-monetizer'); ?>
                                 </button>
                             </div>
                             <p class="form-description">
-                                Your Yadore API key is required to fetch product data. 
-                                <a href="https://yadore.com/api" target="_blank">Get your API key here</a>.
+                                <?php esc_html_e('Your Yadore API key is required to fetch product data.', 'yadore-monetizer'); ?>
+                                <a href="https://yadore.com/api" target="_blank"><?php esc_html_e('Get your API key here', 'yadore-monetizer'); ?></a>.
                             </p>
                             <div id="yadore-api-test-results" class="api-test-results"></div>
                         </div>
@@ -241,10 +295,10 @@
             </div>
 
             <!-- AI Settings -->
-            <div class="settings-panel" id="panel-ai">
+            <div class="settings-panel" id="panel-ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" hidden>
                 <div class="yadore-card">
                     <div class="card-header">
-                        <h2><span class="dashicons dashicons-admin-generic"></span> Gemini AI Configuration</h2>
+                        <h2><span class="dashicons dashicons-admin-generic" aria-hidden="true"></span> <?php echo esc_html__('Gemini AI Configuration', 'yadore-monetizer'); ?></h2>
                     </div>
                     <div class="card-content">
                         <div class="form-group">
@@ -268,15 +322,24 @@
                                     <span class="required">*</span>
                                 </label>
                                 <div class="input-group">
-                                    <input type="password"
-                                           name="yadore_gemini_api_key"
-                                           id="yadore_gemini_api_key"
-                                           value="<?php echo esc_attr(get_option('yadore_gemini_api_key', '')); ?>"
-                                           class="form-input"
-                                           placeholder="Enter your Gemini API key"
-                                           autocomplete="new-password">
+                                <input type="password"
+                                       name="yadore_gemini_api_key"
+                                       id="yadore_gemini_api_key"
+                                       value="<?php echo esc_attr(get_option('yadore_gemini_api_key', '')); ?>"
+                                       class="form-input"
+                                       placeholder="<?php echo esc_attr__('Enter your Gemini API key', 'yadore-monetizer'); ?>"
+                                       autocomplete="new-password">
+                                    <button
+                                        type="button"
+                                        class="button button-secondary password-visibility-toggle"
+                                        data-target="yadore_gemini_api_key"
+                                        aria-pressed="false"
+                                    >
+                                        <span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+                                        <span class="button-label"><?php echo esc_html__('Show key', 'yadore-monetizer'); ?></span>
+                                    </button>
                                     <button type="button" class="button button-secondary" id="test-gemini-api">
-                                        <span class="dashicons dashicons-admin-generic"></span> Test AI
+                                        <span class="dashicons dashicons-admin-generic" aria-hidden="true"></span> <?php echo esc_html__('Test AI', 'yadore-monetizer'); ?>
                                     </button>
                                 </div>
                                 <p class="form-description">
@@ -417,7 +480,7 @@
             </div>
 
             <!-- Display Settings -->
-            <div class="settings-panel" id="panel-display">
+            <div class="settings-panel" id="panel-display" role="tabpanel" aria-labelledby="tab-display" tabindex="0" hidden>
                 <div class="yadore-card">
                     <div class="card-header">
                         <h2><span class="dashicons dashicons-visibility"></span> Display Options</h2>
@@ -717,7 +780,7 @@
             </div>
 
             <!-- Performance Settings -->
-            <div class="settings-panel" id="panel-performance">
+            <div class="settings-panel" id="panel-performance" role="tabpanel" aria-labelledby="tab-performance" tabindex="0" hidden>
                 <div class="yadore-card">
                     <div class="card-header">
                         <h2><span class="dashicons dashicons-performance"></span> Performance & Caching</h2>
@@ -767,7 +830,7 @@
             </div>
 
             <!-- Advanced Settings -->
-            <div class="settings-panel" id="panel-advanced">
+            <div class="settings-panel" id="panel-advanced" role="tabpanel" aria-labelledby="tab-advanced" tabindex="0" hidden>
                 <div class="yadore-card">
                     <div class="card-header">
                         <h2><span class="dashicons dashicons-admin-tools"></span> Advanced Options</h2>

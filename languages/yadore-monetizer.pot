@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Yadore Monetizer Pro plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Yadore Monetizer Pro 3.17\n"
+"Project-Id-Version: Yadore Monetizer Pro 3.18\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yadore-monetizer-pro\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-24T06:11:31+00:00\n"
+"POT-Creation-Date: 2025-09-30T00:00:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: yadore-monetizer\n"
@@ -337,6 +337,34 @@ msgstr ""
 msgid "Manuell hinterlegt"
 msgstr ""
 
+#: templates/admin-settings.php:4
+msgid "Yadore Monetizer Pro Settings"
+msgstr ""
+
+#: templates/admin-settings.php:97
+msgid "Plugin settings navigation"
+msgstr ""
+
+#: templates/admin-settings.php:109
+msgid "General"
+msgstr ""
+
+#: templates/admin-settings.php:123
+msgid "AI Settings"
+msgstr ""
+
+#: templates/admin-settings.php:136
+msgid "Display"
+msgstr ""
+
+#: templates/admin-settings.php:149
+msgid "Performance"
+msgstr ""
+
+#: templates/admin-settings.php:161
+msgid "Advanced"
+msgstr ""
+
 #: templates/admin-settings.php:41
 msgid "Primary color"
 msgstr ""
@@ -433,6 +461,30 @@ msgstr ""
 msgid "Text color for promotional badges."
 msgstr ""
 
+#: templates/admin-settings.php:171
+msgid "API Configuration"
+msgstr ""
+
+#: templates/admin-settings.php:185
+msgid "Enter your Yadore API key"
+msgstr ""
+
+#: templates/admin-settings.php:193
+msgid "Show key"
+msgstr ""
+
+#: templates/admin-settings.php:196
+msgid "Test Connection"
+msgstr ""
+
+#: templates/admin-settings.php:200
+msgid "Your Yadore API key is required to fetch product data."
+msgstr ""
+
+#: templates/admin-settings.php:201
+msgid "Get your API key here"
+msgstr ""
+
 #: templates/admin-settings.php:154
 msgid "Default Market"
 msgstr ""
@@ -447,6 +499,18 @@ msgstr ""
 
 #: templates/admin-settings.php:183
 msgid "Enter the two-letter market code (ISO 3166-1 alpha-2) you are approved for, such as DE or AT. The value must match a market enabled for your API key."
+msgstr ""
+
+#: templates/admin-settings.php:331
+msgid "Gemini AI Configuration"
+msgstr ""
+
+#: templates/admin-settings.php:343
+msgid "Enter your Gemini API key"
+msgstr ""
+
+#: templates/admin-settings.php:352
+msgid "Test AI"
 msgstr ""
 
 #: templates/admin-settings.php:288
@@ -755,6 +819,38 @@ msgstr ""
 
 #: yadore-monetizer.php:1379
 msgid "Operation completed successfully."
+msgstr ""
+
+#: yadore-monetizer.php:1552
+msgid "Copy shortcode"
+msgstr ""
+
+#: yadore-monetizer.php:1553
+msgid "Copying…"
+msgstr ""
+
+#: yadore-monetizer.php:1554
+msgid "Copied!"
+msgstr ""
+
+#: yadore-monetizer.php:1555
+msgid "Copy failed"
+msgstr ""
+
+#: yadore-monetizer.php:1556
+msgid "Shortcode copied to clipboard."
+msgstr ""
+
+#: yadore-monetizer.php:1557
+msgid "Copy failed. Press Ctrl+C to copy manually."
+msgstr ""
+
+#: yadore-monetizer.php:1558
+msgid "Show key"
+msgstr ""
+
+#: yadore-monetizer.php:1559
+msgid "Hide key"
 msgstr ""
 
 #: yadore-monetizer.php:1527

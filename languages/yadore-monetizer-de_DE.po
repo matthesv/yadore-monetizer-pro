@@ -2,10 +2,10 @@
 # This file is distributed under the same license as the Yadore Monetizer Pro plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Yadore Monetizer Pro 3.17\n"
+"Project-Id-Version: Yadore Monetizer Pro 3.18\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yadore-monetizer-pro\n"
-"POT-Creation-Date: 2025-09-24T06:11:31+00:00\n"
-"PO-Revision-Date: 2025-09-24T06:11:31+00:00\n"
+"POT-Creation-Date: 2025-09-30T00:00:00+00:00\n"
+"PO-Revision-Date: 2025-09-30T00:00:00+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: de_DE\n"
@@ -1471,3 +1471,95 @@ msgstr "Gemini 2.5 Flash Lite - effizient"
 #: yadore-monetizer.php:9003
 msgid "Gemini Live 2.5 Flash Preview - Live preview capabilities"
 msgstr "Gemini Live 2.5 Flash Preview - Live -Vorschau -Funktionen"
+
+#: templates/admin-settings.php:4
+msgid "Yadore Monetizer Pro Settings"
+msgstr "Yadore Monetizer Pro Einstellungen"
+
+#: templates/admin-settings.php:97
+msgid "Plugin settings navigation"
+msgstr "Navigation der Plugin-Einstellungen"
+
+#: templates/admin-settings.php:109
+msgid "General"
+msgstr "Allgemein"
+
+#: templates/admin-settings.php:123
+msgid "AI Settings"
+msgstr "KI-Einstellungen"
+
+#: templates/admin-settings.php:136
+msgid "Display"
+msgstr "Darstellung"
+
+#: templates/admin-settings.php:149
+msgid "Performance"
+msgstr "Performance"
+
+#: templates/admin-settings.php:161
+msgid "Advanced"
+msgstr "Erweitert"
+
+#: templates/admin-settings.php:171
+msgid "API Configuration"
+msgstr "API-Konfiguration"
+
+#: templates/admin-settings.php:185
+msgid "Enter your Yadore API key"
+msgstr "Gib deinen Yadore-API-Schlüssel ein"
+
+#: templates/admin-settings.php:193
+msgid "Show key"
+msgstr "Schlüssel anzeigen"
+
+#: templates/admin-settings.php:196
+msgid "Test Connection"
+msgstr "Verbindung testen"
+
+#: templates/admin-settings.php:200
+msgid "Your Yadore API key is required to fetch product data."
+msgstr "Dein Yadore-API-Schlüssel ist erforderlich, um Produktdaten abzurufen."
+
+#: templates/admin-settings.php:201
+msgid "Get your API key here"
+msgstr "API-Schlüssel hier abrufen"
+
+#: templates/admin-settings.php:331
+msgid "Gemini AI Configuration"
+msgstr "Gemini-KI-Konfiguration"
+
+#: templates/admin-settings.php:343
+msgid "Enter your Gemini API key"
+msgstr "Gib deinen Gemini-API-Schlüssel ein"
+
+#: templates/admin-settings.php:352
+msgid "Test AI"
+msgstr "KI testen"
+
+#: templates/admin-dashboard.php:398
+msgid "Copy shortcode"
+msgstr "Shortcode kopieren"
+
+#: yadore-monetizer.php:1553
+msgid "Copying…"
+msgstr "Kopieren…"
+
+#: yadore-monetizer.php:1554
+msgid "Copied!"
+msgstr "Kopiert!"
+
+#: yadore-monetizer.php:1555
+msgid "Copy failed"
+msgstr "Kopieren fehlgeschlagen"
+
+#: yadore-monetizer.php:1556
+msgid "Shortcode copied to clipboard."
+msgstr "Shortcode in die Zwischenablage kopiert."
+
+#: yadore-monetizer.php:1557
+msgid "Copy failed. Press Ctrl+C to copy manually."
+msgstr "Kopieren fehlgeschlagen. Drücke Strg+C für die manuelle Kopie."
+
+#: yadore-monetizer.php:1559
+msgid "Hide key"
+msgstr "Schlüssel verbergen"

@@ -1723,6 +1723,13 @@
     align-items: flex-start;
 }
 
+.shortcode-output .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
 .shortcode-output textarea {
     flex: 1;
     padding: 12px;
@@ -1733,6 +1740,21 @@
     background: #f6f7f7;
     min-height: 60px;
     resize: vertical;
+}
+
+.copy-feedback {
+    margin-top: 8px;
+    min-height: 18px;
+    font-size: 13px;
+    color: #646970;
+}
+
+.copy-feedback[data-state="success"] {
+    color: #1a7f37;
+}
+
+.copy-feedback[data-state="error"] {
+    color: #b71c1c;
 }
 
 .generator-preview {
@@ -1754,6 +1776,22 @@
     align-items: center;
     gap: var(--yadore-space-2);
     color: #646970;
+}
+
+.password-visibility-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.password-visibility-toggle .dashicons {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.password-visibility-toggle .button-label {
+    line-height: 1.4;
 }
 
 /* Quick Actions */
