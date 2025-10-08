@@ -336,6 +336,19 @@
                         <div class="form-group">
                             <label class="form-label">
                                 <input type="checkbox"
+                                       name="yadore_auto_scan_posts"
+                                       value="1"
+                                       <?php checked(get_option('yadore_auto_scan_posts', true)); ?>>
+                                <strong>Enable Automatic Post Scans</strong>
+                            </label>
+                            <p class="form-description">
+                                Run AI-powered scans whenever posts are saved to keep recommendations fresh.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox"
                                        name="yadore_shortcode_enabled"
                                        value="1"
                                        <?php checked(get_option('yadore_shortcode_enabled', true)); ?>>
