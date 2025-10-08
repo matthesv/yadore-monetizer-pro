@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.25 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.26 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -23,16 +23,24 @@
             box-shadow var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized);
     }
 
-    .yadore-admin-wrap .button .dashicons {
+    .yadore-admin-wrap .button .dashicons,
+    .yadore-admin-wrap .button svg,
+    .yadore-admin-wrap .button .yadore-button-icon {
         margin: 0;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         line-height: 1;
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
+        font-size: 1.125em;
+        width: 1.5em;
+        height: 1.5em;
         flex-shrink: 0;
+    }
+
+    .yadore-admin-wrap .button svg {
+        width: 1.5em;
+        height: 1.5em;
+        fill: currentColor;
     }
 
     .version-badge {
@@ -2126,7 +2134,7 @@
 }
 
 .password-visibility-toggle .dashicons {
-    font-size: 16px;
+    font-size: 1.125em;
     line-height: 1;
 }
 
@@ -2163,13 +2171,14 @@
 }
 
 .action-button .dashicons {
-    font-size: 18px;
+    font-size: 1.125em;
     color: var(--yadore-color-primary-500);
-    width: 18px;
-    height: 18px;
+    width: 1.5em;
+    height: 1.5em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .action-content strong {
