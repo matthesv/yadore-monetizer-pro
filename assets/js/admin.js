@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.44 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.46 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.44',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.46',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -2634,9 +2634,10 @@
         initTools: function() {
             if (!$('.yadore-tools-container').length) return;
 
+            this.importFiles = [];
             this.setupExportDateRangeToggle();
 
-            // Export/Import
+            // Export tools
             $('#start-export').on('click', (e) => {
                 e.preventDefault();
                 this.startExport();
@@ -2647,9 +2648,15 @@
                 this.scheduleExport();
             });
 
+            // Import tools
             $('#start-import').on('click', (e) => {
                 e.preventDefault();
-                this.startImport();
+                this.startImport('import');
+            });
+
+            $('#validate-import').on('click', (e) => {
+                e.preventDefault();
+                this.startImport('validate');
             });
 
             // Maintenance tools
@@ -2658,14 +2665,74 @@
                 this.clearCache();
             });
 
+            $('#optimize-cache').on('click', (e) => {
+                e.preventDefault();
+                this.optimizeCache();
+            });
+
             $('#optimize-database').on('click', (e) => {
                 e.preventDefault();
                 this.optimizeDatabase();
             });
 
+            $('#cleanup-old-data').on('click', (e) => {
+                e.preventDefault();
+                this.cleanupOldData();
+            });
+
+            $('#archive-logs').on('click', (e) => {
+                e.preventDefault();
+                this.archiveLogs();
+            });
+
+            $('#clear-old-logs').on('click', (e) => {
+                e.preventDefault();
+                this.clearOldLogs();
+            });
+
             $('#system-cleanup').on('click', (e) => {
                 e.preventDefault();
                 this.systemCleanup();
+            });
+
+            $('#schedule-cleanup').on('click', (e) => {
+                e.preventDefault();
+                this.scheduleCleanup();
+            });
+
+            $('#reset-settings').on('click', (e) => {
+                e.preventDefault();
+                this.resetSettings();
+            });
+
+            $('#clear-all-data').on('click', (e) => {
+                e.preventDefault();
+                this.clearAllData();
+            });
+
+            $('#factory-reset').on('click', (e) => {
+                e.preventDefault();
+                this.factoryReset();
+            });
+
+            $('#export-config').on('click', (e) => {
+                e.preventDefault();
+                this.exportConfiguration();
+            });
+
+            $('#clone-settings').on('click', (e) => {
+                e.preventDefault();
+                this.cloneSettings();
+            });
+
+            $('#performance-scan').on('click', (e) => {
+                e.preventDefault();
+                this.runPerformanceScan();
+            });
+
+            $('#auto-optimize').on('click', (e) => {
+                e.preventDefault();
+                this.autoOptimize();
             });
 
             $('#restore-default-templates').on('click', (e) => {
@@ -2676,7 +2743,7 @@
 
             // File upload handling
             $('#import-upload-area').on('click', () => {
-                $('#import-file').click();
+                $('#import-file').trigger('click');
             }).on('dragover dragenter', (e) => {
                 e.preventDefault();
                 $(e.currentTarget).addClass('drag-over');
@@ -2932,6 +2999,452 @@
             }, 100);
         },
 
+        handleFileUpload: function(fileList) {
+            const files = Array.from(fileList || []);
+            const allowedExtensions = ['json', 'csv', 'xml'];
+            const accepted = [];
+
+            files.forEach((file) => {
+                const match = file.name.match(/\.([a-z0-9]+)$/i);
+                const ext = match ? match[1].toLowerCase() : '';
+                if (allowedExtensions.includes(ext)) {
+                    accepted.push(file);
+                }
+            });
+
+            if (!accepted.length) {
+                this.importFiles = [];
+                $('#import-results').hide();
+                $('#start-import, #validate-import').prop('disabled', true);
+                alert('Only JSON, CSV or XML files are supported.');
+                $('#import-file').val('');
+                return;
+            }
+
+            this.importFiles = accepted;
+            const summary = accepted.map((file) => {
+                const size = this.formatBytes(file.size || 0);
+                return `<li><strong>${this.escapeHtml(file.name)}</strong> <em>(${size})</em>`;
+            }).join('');
+
+            $('#import-results').show().find('.import-summary').html(`
+                <p>${accepted.length} file(s) ready for processing:</p>
+                <ul class="import-file-list">${summary}</ul>
+            `);
+
+            $('#start-import, #validate-import').prop('disabled', false);
+            $('#import-file').val('');
+        },
+
+        startImport: function(mode = 'import') {
+            if (!Array.isArray(this.importFiles) || !this.importFiles.length) {
+                alert('Please select at least one file to import.');
+                return;
+            }
+
+            const options = $('input[name="import_options[]"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            const button = mode === 'validate' ? $('#validate-import') : $('#start-import');
+            const originalHtml = button.html();
+            const resultsBox = $('#import-results');
+
+            const formData = new FormData();
+            formData.append('action', 'yadore_import_data');
+            formData.append('nonce', this.nonce);
+            formData.append('mode', mode);
+            options.forEach((option) => formData.append('options[]', option));
+            this.importFiles.forEach((file) => formData.append('files[]', file));
+
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Processing...');
+            resultsBox.show().find('.import-summary').html('<p><span class="dashicons dashicons-update-alt spinning"></span> Processing import...</p>');
+
+            $.ajax({
+                url: this.ajax_url,
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json'
+            }).done((response) => {
+                if (response && response.success) {
+                    this.renderImportResults(response.data || {}, mode);
+                    if (mode === 'import') {
+                        this.loadToolStats();
+                        this.importFiles = [];
+                        $('#start-import, #validate-import').prop('disabled', true);
+                        $('#import-file').val('');
+                    }
+                } else {
+                    const message = response?.data || 'Import failed.';
+                    resultsBox.find('.import-summary').html(`<p class="import-error">${this.escapeHtml(message)}</p>`);
+                    alert(message);
+                }
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Import failed.';
+                resultsBox.find('.import-summary').html(`<p class="import-error">${this.escapeHtml(message)}</p>`);
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        renderImportResults: function(data, mode) {
+            const box = $('#import-results');
+            if (!box.length) {
+                return;
+            }
+
+            const stats = data?.stats || {};
+            const messages = Array.isArray(data?.messages) ? data.messages : [];
+            const title = mode === 'validate' ? 'Validation Summary' : 'Import Summary';
+            const statsHtml = Object.keys(stats).map((key) => {
+                const label = key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+                return `<li><strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(String(stats[key]))}</li>`;
+            }).join('');
+
+            const messagesHtml = messages.length
+                ? `<ul class="import-messages">${messages.map((msg) => `<li>${this.escapeHtml(msg)}</li>`).join('')}</ul>`
+                : '<p>No additional messages provided.</p>';
+
+            box.find('.import-summary').html(`
+                <h4>${title}</h4>
+                ${statsHtml ? `<ul class="import-stats">${statsHtml}</ul>` : ''}
+                ${messagesHtml}
+            `);
+        },
+
+        optimizeCache: function() {
+            const button = $('#optimize-cache');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Optimizing...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_optimize_cache',
+                nonce: this.nonce
+            }).done((response) => {
+                const message = response?.data?.message || response?.data || 'Cache optimization completed.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Cache optimization failed.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        optimizeDatabase: function() {
+            const button = $('#optimize-database');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Optimizing...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_optimize_database',
+                nonce: this.nonce
+            }).done((response) => {
+                const data = response?.data || {};
+                const message = data.message || 'Database optimization completed.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Database optimization failed.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        cleanupOldData: function() {
+            const button = $('#cleanup-old-data');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Cleaning...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_cleanup_old_data',
+                nonce: this.nonce
+            }).done((response) => {
+                const data = response?.data || {};
+                const message = data.message || 'Cleanup completed.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Cleanup failed.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        archiveLogs: function() {
+            const button = $('#archive-logs');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Archiving...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_archive_logs',
+                nonce: this.nonce
+            }).done((response) => {
+                const data = response?.data || {};
+                const message = data.message || 'Logs archived.';
+                alert(message);
+                if (data.archive?.url) {
+                    window.open(data.archive.url, '_blank');
+                }
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Failed to archive logs.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        clearOldLogs: function() {
+            if (!confirm('Delete log entries older than the configured retention period?')) {
+                return;
+            }
+
+            const button = $('#clear-old-logs');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Clearing...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_clear_old_logs',
+                nonce: this.nonce
+            }).done((response) => {
+                const data = response?.data || {};
+                const message = data.message || 'Old logs cleared.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Failed to clear logs.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        systemCleanup: function() {
+            if (!confirm('Run a full system cleanup now?')) {
+                return;
+            }
+
+            const button = $('#system-cleanup');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Cleaning...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_system_cleanup',
+                nonce: this.nonce
+            }).done((response) => {
+                const data = response?.data || {};
+                const message = data.message || 'System cleanup completed.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'System cleanup failed.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        scheduleCleanup: function() {
+            const interval = prompt('Schedule cleanup frequency (hourly, twicedaily, daily, weekly):', 'daily');
+            if (!interval) {
+                return;
+            }
+
+            const button = $('#schedule-cleanup');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Scheduling...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_schedule_cleanup',
+                nonce: this.nonce,
+                interval
+            }).done((response) => {
+                const data = response?.data || {};
+                const message = data.message || 'Cleanup schedule updated.';
+                alert(message);
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Failed to schedule cleanup.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        resetSettings: function() {
+            if (!confirm('Reset all plugin settings to their default values?')) {
+                return;
+            }
+
+            $.post(this.ajax_url, {
+                action: 'yadore_reset_settings',
+                nonce: this.nonce
+            }).done((response) => {
+                const message = response?.data?.message || 'Settings reset to defaults.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Failed to reset settings.';
+                alert(message);
+            });
+        },
+
+        clearAllData: function() {
+            if (!confirm('Remove all plugin data, logs and cache? This cannot be undone.')) {
+                return;
+            }
+
+            $.post(this.ajax_url, {
+                action: 'yadore_clear_all_data',
+                nonce: this.nonce
+            }).done((response) => {
+                const message = response?.data?.message || 'All plugin data removed.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Failed to remove plugin data.';
+                alert(message);
+            });
+        },
+
+        factoryReset: function() {
+            if (!confirm('Factory reset will remove all plugin data and restore defaults. Continue?')) {
+                return;
+            }
+
+            $.post(this.ajax_url, {
+                action: 'yadore_factory_reset',
+                nonce: this.nonce
+            }).done((response) => {
+                const message = response?.data?.message || 'Factory reset completed.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Factory reset failed.';
+                alert(message);
+            });
+        },
+
+        exportConfiguration: function() {
+            const button = $('#export-config');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Exporting...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_export_config',
+                nonce: this.nonce
+            }, null, 'json').done((response) => {
+                if (response && response.success && response.data?.content) {
+                    try {
+                        this.handleExportDownload(response.data);
+                        alert(response.data.message || 'Configuration exported.');
+                    } catch (error) {
+                        alert('Configuration generated but download failed.');
+                    }
+                } else {
+                    const message = response?.data || 'Export failed.';
+                    alert(message);
+                }
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Export failed.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        cloneSettings: function() {
+            const source = ($('#source-site-url').val() || '').trim();
+            if (!source) {
+                alert('Please provide a source site URL.');
+                return;
+            }
+
+            const button = $('#clone-settings');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Cloning...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_clone_settings',
+                nonce: this.nonce,
+                source
+            }).done((response) => {
+                const data = response?.data || {};
+                const message = data.message || 'Settings cloned successfully.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Failed to clone settings.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        runPerformanceScan: function() {
+            const button = $('#performance-scan');
+            const originalHtml = button.html();
+            const resultsBox = $('#performance-scan-results');
+
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Running...');
+            resultsBox.show().html('<p><span class="dashicons dashicons-update-alt spinning"></span> Collecting diagnostics...</p>');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_test_performance',
+                nonce: this.nonce
+            }).done((response) => {
+                if (response && response.success) {
+                    const data = response.data || {};
+                    const status = data.status || 'unknown';
+                    const message = data.message || 'Performance scan completed.';
+                    const detailMessages = Array.isArray(data.details?.messages) ? data.details.messages : [];
+
+                    resultsBox.html(`
+                        <p><strong>Status:</strong> ${this.escapeHtml(status)}</p>
+                        <p>${this.escapeHtml(message)}</p>
+                        ${detailMessages.length ? `<ul>${detailMessages.map((msg) => `<li>${this.escapeHtml(msg)}</li>`).join('')}</ul>` : ''}
+                    `);
+                } else {
+                    const message = response?.data || 'Performance scan failed.';
+                    resultsBox.html(`<p class="scan-error">${this.escapeHtml(message)}</p>`);
+                    alert(message);
+                }
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Performance scan failed.';
+                resultsBox.html(`<p class="scan-error">${this.escapeHtml(message)}</p>`);
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        autoOptimize: function() {
+            const button = $('#auto-optimize');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Optimizing...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_auto_optimize',
+                nonce: this.nonce
+            }).done((response) => {
+                const data = response?.data || {};
+                const message = data.message || 'Auto optimization complete.';
+                alert(message);
+                this.loadToolStats();
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Auto optimization failed.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
         base64ToBlob: function(base64, mimeType = 'application/octet-stream') {
             try {
                 const binary = atob(base64);
@@ -2953,20 +3466,26 @@
             if (!confirm('Are you sure you want to clear all cache data?')) return;
 
             const button = $('#clear-cache');
+            const originalHtml = button.html();
             button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Clearing...');
 
             $.post(this.ajax_url, {
                 action: 'yadore_clear_cache',
                 nonce: this.nonce
-            }, (response) => {
-                if (response.success) {
-                    alert('Cache cleared successfully!');
+            }).done((response) => {
+                if (response && response.success) {
+                    const message = response.data?.message || 'Cache cleared successfully!';
+                    alert(message);
                     this.loadToolStats();
                 } else {
-                    alert('Failed to clear cache: ' + response.data);
+                    const error = response?.data || 'Failed to clear cache.';
+                    alert(error);
                 }
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Failed to clear cache.';
+                alert(message);
             }).always(() => {
-                button.prop('disabled', false).html('<span class="dashicons dashicons-trash"></span> Clear Cache');
+                button.prop('disabled', false).html(originalHtml);
             });
         },
 
@@ -3005,28 +3524,119 @@
         },
 
         loadToolStats: function() {
-            $.post(this.ajax_url, {
-                action: 'yadore_get_tool_stats',
-                nonce: this.nonce
-            }, (response) => {
-                if (response.success) {
-                    const data = response.data;
+            const fallback = () => {
+                const selectors = [
+                    '#cache-size', '#cache-entries', '#cache-hit-rate',
+                    '#db-size', '#db-records', '#db-overhead',
+                    '#temp-files', '#orphaned-data', '#space-used',
+                    '#api-log-count', '#error-log-count', '#total-log-size'
+                ];
 
-                    // Update cache stats
-                    $('#cache-size').text(data.cache?.size || '0 KB');
-                    $('#cache-entries').text(data.cache?.entries?.toLocaleString() || '0');
-                    $('#cache-hit-rate').text((data.cache?.hit_rate || '0') + '%');
+                selectors.forEach((selector) => {
+                    $(selector).text('—');
+                });
 
-                    // Update database stats
-                    $('#db-size').text(data.database?.size || '0 KB');
-                    $('#db-records').text(data.database?.records?.toLocaleString() || '0');
-                    $('#db-overhead').text(data.database?.overhead || '0 KB');
+                const message = this.getString('tool_stats_unavailable', 'Tool statistics are temporarily unavailable.');
+                this.updateScheduleStatus('', message);
+            };
+
+            $.ajax({
+                url: this.ajax_url,
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'yadore_get_tool_stats',
+                    nonce: this.nonce,
+                }
+            }).done((response) => {
+                if (response && response.success) {
+                    const data = response.data || {};
+                    const cache = data.cache || {};
+                    const database = data.database || {};
+                    const cleanup = data.cleanup || {};
+                    const logs = data.logs || {};
+
+                    const hitRateRaw = cache.hit_rate;
+                    let hitRateText;
+                    if (typeof hitRateRaw === 'number') {
+                        hitRateText = `${hitRateRaw.toLocaleString()}%`;
+                    } else if (typeof hitRateRaw === 'string' && hitRateRaw.trim().endsWith('%')) {
+                        hitRateText = hitRateRaw.trim();
+                    } else if (typeof hitRateRaw === 'string' && hitRateRaw.trim() !== '') {
+                        hitRateText = `${hitRateRaw.trim()}%`;
+                    } else {
+                        hitRateText = '0%';
+                    }
+
+                    $('#cache-size').text(cache.size || '0 KB');
+                    $('#cache-entries').text(this.formatNumber(cache.entries));
+                    $('#cache-hit-rate').text(hitRateText);
+
+                    $('#db-size').text(database.size || '0 KB');
+                    $('#db-records').text(this.formatNumber(database.records));
+                    $('#db-overhead').text(database.overhead || '0 KB');
+
+                    $('#temp-files').text(this.formatNumber(cleanup.temp_files));
+                    $('#orphaned-data').text(this.formatNumber(cleanup.orphaned_data));
+                    $('#space-used').text(cleanup.space_used || '0 KB');
+
+                    $('#api-log-count').text(this.formatNumber(logs.api_logs));
+                    $('#error-log-count').text(this.formatNumber(logs.error_logs));
+                    $('#total-log-size').text(logs.total_size || '0 KB');
 
                     const schedule = data.schedule || {};
                     const nextRun = typeof schedule.next_run_human === 'string' ? schedule.next_run_human : '';
-                    const fallback = Number(schedule.count) > 0 ? 'Scheduled exports are configured.' : '';
-                    this.updateScheduleStatus(nextRun, fallback);
+                    const fallbackMessage = Number(schedule.count) > 0 ? 'Scheduled exports are configured.' : '';
+                    this.updateScheduleStatus(nextRun, fallbackMessage);
+                } else {
+                    fallback();
                 }
+            }).fail(() => {
+                fallback();
+            });
+        },
+
+        analyzeKeywords: function() {
+            const text = ($('#analyzer-text').val() || '').trim();
+            const useAi = $('#use-ai-analyzer').is(':checked');
+            const maxKeywords = parseInt($('#max-keywords').val(), 10) || 5;
+
+            if (!text) {
+                alert('Please paste some text to analyze.');
+                return;
+            }
+
+            const button = $('#analyze-keywords');
+            const originalHtml = button.html();
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Analyzing...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_analyze_keywords',
+                nonce: this.nonce,
+                text,
+                use_ai: useAi ? 1 : 0,
+                max: maxKeywords
+            }).done((response) => {
+                if (response && response.success) {
+                    const keywords = Array.isArray(response.data?.keywords) ? response.data.keywords : [];
+                    const summary = response.data?.summary || '';
+                    const suggestions = keywords.length
+                        ? keywords.map((keyword) => `<span class="keyword-pill">${this.escapeHtml(keyword)}</span>`).join('')
+                        : '<p>No keywords detected.</p>';
+
+                    $('#analyzer-results').show().find('.keyword-suggestions').html(`
+                        ${suggestions}
+                        ${summary ? `<p class="keyword-summary">${this.escapeHtml(summary)}</p>` : ''}
+                    `);
+                } else {
+                    const message = response?.data || 'Keyword analysis failed.';
+                    alert(message);
+                }
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Keyword analysis failed.';
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
             });
         },
 
