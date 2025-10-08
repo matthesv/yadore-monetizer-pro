@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.38 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.40 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -2857,6 +2857,87 @@
     margin-top: 20px;
     display: flex;
     gap: var(--yadore-space-2);
+}
+
+.maintenance-tools {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yadore-space-4);
+}
+
+.maintenance-grid {
+    display: grid;
+    gap: var(--yadore-space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    align-items: stretch;
+}
+
+.maintenance-tool {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yadore-space-3);
+    background: var(--yadore-color-surface-subtle);
+    border: 1px solid var(--yadore-border-subtle);
+    border-radius: var(--yadore-radius-lg);
+    padding: var(--yadore-space-4);
+    box-shadow: var(--yadore-shadow-sm);
+    min-height: 100%;
+}
+
+.maintenance-tool .tool-icon {
+    width: 52px;
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--yadore-radius-pill);
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--yadore-color-primary-600);
+    font-size: 28px;
+}
+
+.maintenance-tool .tool-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yadore-space-2);
+    color: var(--yadore-color-text-default);
+}
+
+.maintenance-tool .tool-info h3 {
+    margin: 0;
+    font-size: var(--yadore-font-size-lg);
+}
+
+.maintenance-tool .tool-info p {
+    margin: 0;
+    color: var(--yadore-color-text-subtle);
+}
+
+.maintenance-tool .tool-actions {
+    margin-top: auto;
+    display: flex;
+    gap: var(--yadore-space-2);
+    align-items: stretch;
+}
+
+.maintenance-tool .tool-actions .button {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 44px;
+}
+
+.maintenance-tool .tool-actions .button .dashicons {
+    font-size: 1.1em;
+}
+
+@media (max-width: 782px) {
+    .maintenance-tool {
+        padding: var(--yadore-space-3);
+    }
+
+    .maintenance-tool .tool-actions {
+        flex-direction: column;
+    }
 }
 
 /* Utility classes */
