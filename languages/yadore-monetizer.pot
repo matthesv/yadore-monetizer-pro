@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Yadore Monetizer Pro plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Yadore Monetizer Pro 3.19\n"
+"Project-Id-Version: Yadore Monetizer Pro 3.20\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yadore-monetizer-pro\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
