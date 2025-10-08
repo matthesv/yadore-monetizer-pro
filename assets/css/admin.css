@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.36 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.38 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -915,6 +915,23 @@
     min-width: 160px;
     border-radius: var(--yadore-radius-pill);
     border-color: rgba(37, 99, 235, 0.25);
+    min-height: 44px;
+    padding-inline: var(--yadore-space-3);
+}
+
+.card-actions .button {
+    min-height: 44px;
+}
+
+@media (max-width: 782px) {
+    .card-actions {
+        width: 100%;
+    }
+
+    .card-actions select,
+    .card-actions .button {
+        flex: 1 1 160px;
+    }
 }
 
 .card-content {
