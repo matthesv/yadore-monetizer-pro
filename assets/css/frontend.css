@@ -1,9 +1,15 @@
-/* Yadore Monetizer Pro v3.20 - Frontend CSS (Complete) */
+/* Yadore Monetizer Pro v3.21 - Frontend CSS (Complete) */
 :root {
     --yadore-frontend-color-primary-500: var(--yadore-color-primary-500, #2563eb);
     --yadore-frontend-color-primary-600: var(--yadore-color-primary-600, #1d4ed8);
     --yadore-frontend-color-primary-700: var(--yadore-color-primary-700, #1e40af);
     --yadore-frontend-color-success-500: var(--yadore-color-success-500, #16a34a);
+    --yadore-frontend-color-warning-100: var(--yadore-color-warning-100, #fff7ed);
+    --yadore-frontend-color-warning-400: var(--yadore-color-warning-400, #fb923c);
+    --yadore-frontend-color-warning-700: var(--yadore-color-warning-700, #c2410c);
+    --yadore-frontend-color-danger-100: var(--yadore-color-danger-100, #fef2f2);
+    --yadore-frontend-color-danger-300: var(--yadore-color-danger-300, #fca5a5);
+    --yadore-frontend-color-danger-700: var(--yadore-color-danger-700, #b91c1c);
 }
 .yadore-products-grid {
     display: grid;
@@ -499,9 +505,9 @@
 /* Error States */
 .yadore-error,
 .yadore-no-results {
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    color: #856404;
+    background: var(--yadore-frontend-color-warning-100);
+    border: 1px solid var(--yadore-frontend-color-warning-400);
+    color: var(--yadore-frontend-color-warning-700);
     padding: 16px 20px;
     border-radius: 8px;
     margin: 20px 0;
@@ -510,9 +516,9 @@
 }
 
 .yadore-error {
-    background: #f8d7da;
-    border-color: #f5c6cb;
-    color: #721c24;
+    background: var(--yadore-frontend-color-danger-100);
+    border-color: var(--yadore-frontend-color-danger-300);
+    color: var(--yadore-frontend-color-danger-700);
 }
 
 /* Overlay Styles */
