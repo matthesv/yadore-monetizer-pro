@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.29 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.30 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -19,6 +19,7 @@
         border-radius: var(--yadore-radius-pill);
         padding-inline: calc(var(--yadore-space-3) + 2px);
         padding-block: calc(var(--yadore-space-1-5) + 1px);
+        min-height: 38px;
         transition: transform var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized),
             box-shadow var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized);
     }
@@ -2142,7 +2143,7 @@
 }
 
 .password-visibility-toggle .button-label {
-    line-height: 1.4;
+    line-height: inherit;
 }
 
 /* Quick Actions */
@@ -3369,6 +3370,7 @@
     border-radius: var(--yadore-radius-pill);
     padding-inline: calc(var(--yadore-space-3) + 2px);
     padding-block: calc(var(--yadore-space-1-5) + 1px);
+    min-height: 38px;
 }
 
 .yadore-admin-wrap .button .dashicons,
