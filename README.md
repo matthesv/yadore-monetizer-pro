@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.41 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.42 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.41 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.42 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **7 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,11 +15,12 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.41**
+## 🌟 **NEU IN VERSION 3.42**
 
+- 🩺 **Scan Analytics Stabilität** – Chart.js wird jetzt als Abhängigkeit des Admin-Skripts geladen, sodass die Diagramme ohne Fallbacks oder flackernde Aktualisierungen erscheinen.
 - 📦 **Vereinheitlichte Admin-Karten** – Dashboard-, Analyse- und Tool-Karten nutzen jetzt auf allen Breakpoints identische Innenabstände und eine konsistente Maximalbreite.
 - 📐 **Adaptive Card-Spacing Tokens** – Neue Clamp-basierte Token sorgen dafür, dass Header, Content und Statusbereiche derselben Karte auf Mobilgeräten genauso großzügig wirken wie auf Desktop.
-- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.41.
+- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.42.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -65,7 +66,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.41:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.42:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -271,9 +272,9 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.41 - FUTURE-PROOF EXPERIENCE RELEASE!**
+## 🎉 **v3.42 - FUTURE-PROOF EXPERIENCE RELEASE!**
 
-### **Neue Highlights in v3.41:**
+### **Neue Highlights in v3.42:**
 - 📦 **Karten mit fixer Design-Sprache** – Einheitliche Innenabstände für Header, Content und Aktionsleisten in allen Admin-Karten.
 - 📱 **Bruchlose Breakpoints** – Clamp-gesteuerte Spacing-Tokens halten Abstände auf Smartphone, Tablet und Desktop identisch angenehm.
 - 🛠️ **Feinschliff im UX-Detail** – Überarbeitete Stylesheets synchronisieren Frontend- und Admin-Versionen und liefern ein konsistentes Release-Branding.
@@ -292,11 +293,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.41 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.42 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.41** - Production-Ready Market Release
+**Current Version: 3.42** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

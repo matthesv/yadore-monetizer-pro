@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.41
+Version: 3.42
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.41');
+define('YADORE_PLUGIN_VERSION', '3.42');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -1516,22 +1516,30 @@ HTML
                 wp_enqueue_style('yadore-admin-css');
             }
 
-            wp_enqueue_script(
-                'yadore-admin-js',
-                YADORE_PLUGIN_URL . 'assets/js/admin.js',
-                array('jquery', 'wp-util'),
-                YADORE_PLUGIN_VERSION,
-                true
-            );
+            $script_dependencies = array('jquery', 'wp-util');
 
             if ($is_plugin_screen) {
-                wp_enqueue_script(
+                wp_register_script(
                     'yadore-charts',
                     YADORE_PLUGIN_URL . 'assets/js/chart.min.js',
                     array(),
                     '3.9.1',
                     true
                 );
+
+                $script_dependencies[] = 'yadore-charts';
+            }
+
+            wp_enqueue_script(
+                'yadore-admin-js',
+                YADORE_PLUGIN_URL . 'assets/js/admin.js',
+                $script_dependencies,
+                YADORE_PLUGIN_VERSION,
+                true
+            );
+
+            if ($is_plugin_screen) {
+                wp_enqueue_script('yadore-charts');
             }
 
             wp_localize_script('yadore-admin-js', 'yadore_admin', array(
