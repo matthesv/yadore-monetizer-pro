@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.24 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.25 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -309,6 +309,16 @@
 
         .yadore-hero__badge {
             margin-left: 0;
+        }
+
+        .yadore-hero__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .yadore-hero__actions .button {
+            width: 100%;
+            justify-content: center;
         }
     }
 
