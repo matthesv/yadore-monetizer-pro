@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.31 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.32 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -3128,6 +3128,7 @@
 .performance-table table,
 .keyword-performance table {
     width: 100%;
+    min-width: 680px;
     border-collapse: collapse;
     font-size: var(--yadore-font-size-sm);
 }
