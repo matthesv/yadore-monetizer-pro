@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.16
+Version: 3.17
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.16');
+define('YADORE_PLUGIN_VERSION', '3.17');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -1548,7 +1548,15 @@ HTML
                     'processing' => __('Processing...', 'yadore-monetizer'),
                     'error' => __('An error occurred. Please try again.', 'yadore-monetizer'),
                     'success' => __('Operation completed successfully.', 'yadore-monetizer'),
-                    'copied' => __('Copied!', 'yadore-monetizer')
+                    'copied' => __('Copied!', 'yadore-monetizer'),
+                    'refreshing' => __('Aktualisierung läuft...', 'yadore-monetizer'),
+                    'no_data' => __('Noch keine Daten geladen', 'yadore-monetizer'),
+                    'just_now' => __('Gerade eben', 'yadore-monetizer'),
+                    'relative_seconds' => __('vor %s Sekunden', 'yadore-monetizer'),
+                    'relative_minutes' => __('vor %s Minuten', 'yadore-monetizer'),
+                    'relative_hours' => __('vor %s Stunden', 'yadore-monetizer'),
+                    'relative_days' => __('vor %s Tagen', 'yadore-monetizer'),
+                    'activity_empty' => __('Keine Aktivitäten vorhanden.', 'yadore-monetizer')
                 )
             ));
 
@@ -2568,7 +2576,7 @@ HTML
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.16', 'info');
+            $this->log('Enhanced database tables created successfully for v3.17', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');

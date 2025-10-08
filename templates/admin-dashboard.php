@@ -84,50 +84,168 @@
     $onboarding_progress = $onboarding_total > 0
         ? (int) round(($onboarding_completed / $onboarding_total) * 100)
         : 100;
+
+    $next_onboarding_item = null;
+    foreach ($onboarding_items as $item) {
+        if (empty($item['complete'])) {
+            $next_onboarding_item = $item;
+            break;
+        }
+    }
+
+    $setup_status = array(
+        'type' => 'success',
+        'icon' => 'dashicons-yes-alt',
+        'title' => __('Alles eingerichtet – starke Performance voraus!', 'yadore-monetizer'),
+        'description' => __('Alle Kernfunktionen sind aktiv. Behalte deine KPIs im Blick und optimiere deine Inhalte weiter.', 'yadore-monetizer'),
+        'primary_action' => $analytics_url,
+        'primary_label' => __('Analytics öffnen', 'yadore-monetizer'),
+        'secondary_action' => $settings_url,
+        'secondary_label' => __('Einstellungen prüfen', 'yadore-monetizer'),
+    );
+
+    if ($next_onboarding_item) {
+        $setup_status['type'] = 'warning';
+        $setup_status['icon'] = 'dashicons-admin-generic';
+        $setup_status['title'] = __('Weiter geht es mit deiner Einrichtung', 'yadore-monetizer');
+        $setup_status['description'] = sprintf(
+            esc_html__('Nächster Schritt: %1$s – %2$s', 'yadore-monetizer'),
+            esc_html($next_onboarding_item['title']),
+            esc_html($next_onboarding_item['description'])
+        );
+        $setup_status['primary_action'] = !empty($next_onboarding_item['action_url'])
+            ? $next_onboarding_item['action_url']
+            : $settings_url;
+        $setup_status['primary_label'] = !empty($next_onboarding_item['action_label'])
+            ? $next_onboarding_item['action_label']
+            : __('Jetzt konfigurieren', 'yadore-monetizer');
+        $setup_status['secondary_action'] = $analytics_url;
+        $setup_status['secondary_label'] = __('Ergebnisse ansehen', 'yadore-monetizer');
+    }
+
+    $setup_highlights = array(
+        array(
+            'label' => __('Onboarding', 'yadore-monetizer'),
+            'value' => sprintf(__('%d%% abgeschlossen', 'yadore-monetizer'), (int) $onboarding_progress),
+            'state' => $onboarding_progress === 100 ? 'success' : 'warning',
+            'icon' => $onboarding_progress === 100 ? 'dashicons-yes-alt' : 'dashicons-flag',
+        ),
+        array(
+            'label' => __('Yadore-API', 'yadore-monetizer'),
+            'value' => $api_connected
+                ? __('Verbunden', 'yadore-monetizer')
+                : __('Nicht verbunden', 'yadore-monetizer'),
+            'state' => $api_connected ? 'success' : 'warning',
+            'icon' => 'dashicons-rest-api',
+        ),
+        array(
+            'label' => __('Gemini-KI', 'yadore-monetizer'),
+            'value' => $gemini_connected
+                ? __('Aktiviert', 'yadore-monetizer')
+                : __('Noch nicht aktiv', 'yadore-monetizer'),
+            'state' => $gemini_connected ? 'success' : 'info',
+            'icon' => 'dashicons-art',
+        ),
+    );
     ?>
 
     <div class="yadore-dashboard-grid">
         <!-- Main Content -->
         <div class="yadore-main-content">
+            <!-- Setup Status -->
+            <div class="yadore-card setup-status-card status-<?php echo esc_attr($setup_status['type']); ?>">
+                <div class="status-icon" aria-hidden="true">
+                    <span class="dashicons <?php echo esc_attr($setup_status['icon']); ?>"></span>
+                </div>
+                <div class="status-content">
+                    <h2><?php echo esc_html($setup_status['title']); ?></h2>
+                    <p><?php echo esc_html($setup_status['description']); ?></p>
+
+                    <ul class="status-highlights">
+                        <?php foreach ($setup_highlights as $highlight) : ?>
+                            <li class="status-highlight highlight-<?php echo esc_attr($highlight['state']); ?>">
+                                <span class="highlight-icon dashicons <?php echo esc_attr($highlight['icon']); ?>" aria-hidden="true"></span>
+                                <span class="highlight-label"><?php echo esc_html($highlight['label']); ?></span>
+                                <span class="highlight-value"><?php echo esc_html($highlight['value']); ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+                <div class="status-actions">
+                    <?php if (!empty($setup_status['primary_action']) && !empty($setup_status['primary_label'])) : ?>
+                        <a class="button button-primary" href="<?php echo esc_url($setup_status['primary_action']); ?>">
+                            <span class="dashicons dashicons-arrow-right-alt2" aria-hidden="true"></span>
+                            <?php echo esc_html($setup_status['primary_label']); ?>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (!empty($setup_status['secondary_action']) && !empty($setup_status['secondary_label'])) : ?>
+                        <a class="button button-secondary" href="<?php echo esc_url($setup_status['secondary_action']); ?>">
+                            <span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+                            <?php echo esc_html($setup_status['secondary_label']); ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <!-- Quick Stats -->
-            <div class="yadore-stats-grid">
-                <div class="stat-card stat-primary">
-                    <div class="stat-icon">
-                        <span class="dashicons dashicons-products"></span>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="total-products"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
-                        <div class="stat-label"><?php echo esc_html__('Ausgespielte Produkte', 'yadore-monetizer'); ?></div>
-                    </div>
-                </div>
-
-                <div class="stat-card stat-success">
-                    <div class="stat-icon">
-                        <span class="dashicons dashicons-admin-post"></span>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="scanned-posts"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
-                        <div class="stat-label"><?php echo esc_html__('Gescannte Beiträge', 'yadore-monetizer'); ?></div>
+            <div class="yadore-card yadore-stats-card">
+                <div class="card-header">
+                    <h2><span class="dashicons dashicons-chart-bar"></span> <?php echo esc_html__('Kernmetriken', 'yadore-monetizer'); ?></h2>
+                    <div class="card-actions">
+                        <button class="button button-secondary" id="refresh-stats">
+                            <span class="dashicons dashicons-update"></span> <?php echo esc_html__('Aktualisieren', 'yadore-monetizer'); ?>
+                        </button>
                     </div>
                 </div>
+                <div class="card-content">
+                    <div class="yadore-stats-grid">
+                        <div class="stat-card stat-primary">
+                            <div class="stat-icon">
+                                <span class="dashicons dashicons-products"></span>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="total-products"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
+                                <div class="stat-label"><?php echo esc_html__('Ausgespielte Produkte', 'yadore-monetizer'); ?></div>
+                            </div>
+                        </div>
 
-                <div class="stat-card stat-info">
-                    <div class="stat-icon">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="overlay-views"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
-                        <div class="stat-label"><?php echo esc_html__('Overlay-Aufrufe', 'yadore-monetizer'); ?></div>
-                    </div>
-                </div>
+                        <div class="stat-card stat-success">
+                            <div class="stat-icon">
+                                <span class="dashicons dashicons-admin-post"></span>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="scanned-posts"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
+                                <div class="stat-label"><?php echo esc_html__('Gescannte Beiträge', 'yadore-monetizer'); ?></div>
+                            </div>
+                        </div>
 
-                <div class="stat-card stat-warning">
-                    <div class="stat-icon">
-                        <span class="dashicons dashicons-performance"></span>
+                        <div class="stat-card stat-info">
+                            <div class="stat-icon">
+                                <span class="dashicons dashicons-visibility"></span>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="overlay-views"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
+                                <div class="stat-label"><?php echo esc_html__('Overlay-Aufrufe', 'yadore-monetizer'); ?></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card stat-warning">
+                            <div class="stat-icon">
+                                <span class="dashicons dashicons-performance"></span>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="conversion-rate"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
+                                <div class="stat-label"><?php echo esc_html__('Konversionsrate', 'yadore-monetizer'); ?></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="conversion-rate"><?php echo esc_html__('Wird geladen...', 'yadore-monetizer'); ?></div>
-                        <div class="stat-label"><?php echo esc_html__('Konversionsrate', 'yadore-monetizer'); ?></div>
+
+                    <div class="stats-meta">
+                        <div class="meta-item">
+                            <span class="dashicons dashicons-update-alt" aria-hidden="true"></span>
+                            <span class="meta-label"><?php echo esc_html__('Zuletzt aktualisiert', 'yadore-monetizer'); ?>:</span>
+                            <time id="stats-last-updated" class="stats-timestamp" aria-live="polite"><?php esc_html_e('Noch keine Daten geladen', 'yadore-monetizer'); ?></time>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -328,7 +446,14 @@
                             <span class="progress-label"><?php printf(esc_html__('%1$d von %2$d Schritten erledigt', 'yadore-monetizer'), (int) $onboarding_completed, (int) $onboarding_total); ?></span>
                             <span class="progress-value"><?php echo esc_html($onboarding_progress); ?>%</span>
                         </div>
-                        <div class="progress-bar" aria-hidden="true">
+                        <div
+                            class="progress-bar"
+                            role="progressbar"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="<?php echo esc_attr($onboarding_progress); ?>"
+                            aria-label="<?php echo esc_attr__('Onboarding-Fortschritt', 'yadore-monetizer'); ?>"
+                        >
                             <span class="progress-bar-fill" style="--progress: <?php echo esc_attr($onboarding_progress); ?>%;"></span>
                         </div>
                         <?php if ($onboarding_progress === 100) : ?>

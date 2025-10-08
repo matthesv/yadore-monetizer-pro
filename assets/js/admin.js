@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.16 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.17 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.16',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.17',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -24,6 +24,8 @@
         debugAutoScroll: true,
         debugWordWrap: true,
         clipboardFeedbackTimer: null,
+        lastDashboardUpdate: null,
+        statsTimestampInterval: null,
 
         // Initialize all admin functionality
         init: function() {
@@ -60,38 +62,49 @@
         },
 
         loadDashboardStats: function() {
+            this.showStatsLoading();
+
             $.post(this.ajax_url, {
                 action: 'yadore_get_dashboard_stats',
                 nonce: this.nonce
-            }, (response) => {
-                if (response && response.success && response.data) {
-                    const data = response.data;
-                    $('#total-products').text(this.formatNumber(data.total_products));
-                    $('#scanned-posts').text(this.formatNumber(data.scanned_posts));
-                    $('#overlay-views').text(this.formatNumber(data.overlay_views));
+            })
+                .done((response) => {
+                    if (response && response.success && response.data) {
+                        const data = response.data;
+                        $('#total-products').text(this.formatNumber(data.total_products));
+                        $('#scanned-posts').text(this.formatNumber(data.scanned_posts));
+                        $('#overlay-views').text(this.formatNumber(data.overlay_views));
 
-                    const formattedRate = this.formatRate(data.conversion_rate);
-                    $('#conversion-rate').text(`${formattedRate}%`);
+                        const formattedRate = this.formatRate(data.conversion_rate);
+                        $('#conversion-rate').text(`${formattedRate}%`);
 
-                    this.renderRecentActivity(Array.isArray(data.activity) ? data.activity : []);
-                } else {
-                    const message = (response && response.data && response.data.message)
-                        ? response.data.message
-                        : (yadore_admin.strings?.error || 'Fehler beim Laden der Statistiken.');
+                        this.lastDashboardUpdate = new Date();
+                        this.updateStatsTimestamp(true);
 
-                    $('#total-products').text('0');
-                    $('#scanned-posts').text('0');
-                    $('#overlay-views').text('0');
-                    $('#conversion-rate').text('0,00%');
+                        if (this.statsTimestampInterval) {
+                            clearInterval(this.statsTimestampInterval);
+                        }
 
-                    const $container = $('#recent-activity');
-                    if ($container.length) {
-                        $container.empty().append(
-                            $('<div/>', { 'class': 'activity-empty' }).text(message)
-                        );
+                        this.statsTimestampInterval = window.setInterval(() => {
+                            this.updateStatsTimestamp();
+                        }, 30000);
+
+                        this.renderRecentActivity(Array.isArray(data.activity) ? data.activity : []);
+                    } else {
+                        const message = (response && response.data && response.data.message)
+                            ? response.data.message
+                            : (yadore_admin.strings?.error || 'Fehler beim Laden der Statistiken.');
+
+                        this.handleStatsError(message);
                     }
-                }
-            });
+                })
+                .fail((jqXHR) => {
+                    const message = jqXHR?.responseJSON?.data?.message
+                        || jqXHR?.statusText
+                        || (yadore_admin.strings?.error || 'Fehler beim Laden der Statistiken.');
+
+                    this.handleStatsError(message);
+                });
         },
 
         formatNumber: function(value) {
@@ -113,6 +126,130 @@
             return '0,00';
         },
 
+        formatAbsoluteTime: function(date) {
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+                return '';
+            }
+
+            try {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } catch (error) {
+                return date.toISOString();
+            }
+        },
+
+        formatRelativeTime: function(date) {
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+                return '';
+            }
+
+            const diffSeconds = Math.round((Date.now() - date.getTime()) / 1000);
+            if (!Number.isFinite(diffSeconds)) {
+                return '';
+            }
+
+            if (diffSeconds < 10) {
+                return yadore_admin.strings?.just_now || 'Gerade eben';
+            }
+
+            if (diffSeconds < 60) {
+                const seconds = Math.max(diffSeconds, 1);
+                const template = yadore_admin.strings?.relative_seconds || 'vor %s Sekunden';
+                return template.replace('%s', seconds);
+            }
+
+            const diffMinutes = Math.round(diffSeconds / 60);
+            if (diffMinutes < 60) {
+                const minutes = Math.max(diffMinutes, 1);
+                const template = yadore_admin.strings?.relative_minutes || 'vor %s Minuten';
+                return template.replace('%s', minutes);
+            }
+
+            const diffHours = Math.round(diffMinutes / 60);
+            if (diffHours < 24) {
+                const hours = Math.max(diffHours, 1);
+                const template = yadore_admin.strings?.relative_hours || 'vor %s Stunden';
+                return template.replace('%s', hours);
+            }
+
+            const diffDays = Math.max(Math.round(diffHours / 24), 1);
+            const template = yadore_admin.strings?.relative_days || 'vor %s Tagen';
+            return template.replace('%s', diffDays);
+        },
+
+        showStatsLoading: function() {
+            const $timestamp = $('#stats-last-updated');
+            if (!$timestamp.length) {
+                return;
+            }
+
+            const loadingLabel = yadore_admin.strings?.refreshing || 'Aktualisierung läuft...';
+            $timestamp.attr('data-state', 'loading').text(loadingLabel).removeAttr('datetime');
+        },
+
+        showStatsError: function(message) {
+            const $timestamp = $('#stats-last-updated');
+            if (!$timestamp.length) {
+                return;
+            }
+
+            const fallback = message || yadore_admin.strings?.error || 'Fehler beim Laden der Statistiken.';
+            $timestamp.attr('data-state', 'error').text(fallback).removeAttr('datetime');
+        },
+
+        updateStatsTimestamp: function(force) {
+            const $timestamp = $('#stats-last-updated');
+            if (!$timestamp.length) {
+                return;
+            }
+
+            if (!(this.lastDashboardUpdate instanceof Date) || Number.isNaN(this.lastDashboardUpdate.getTime())) {
+                if (force) {
+                    const fallback = yadore_admin.strings?.no_data || 'Noch keine Daten geladen';
+                    $timestamp.attr('data-state', 'idle').text(fallback).removeAttr('datetime');
+                }
+                return;
+            }
+
+            const absolute = this.formatAbsoluteTime(this.lastDashboardUpdate);
+            const relative = this.formatRelativeTime(this.lastDashboardUpdate);
+            const textContent = relative ? `${absolute} · ${relative}` : absolute;
+
+            $timestamp
+                .attr('data-state', 'ready')
+                .attr('datetime', this.lastDashboardUpdate.toISOString())
+                .text(textContent);
+        },
+
+        handleStatsError: function(message) {
+            $('#total-products').text('—');
+            $('#scanned-posts').text('—');
+            $('#overlay-views').text('—');
+            $('#conversion-rate').text('—');
+
+            this.lastDashboardUpdate = null;
+            this.showStatsError(message);
+
+            if (this.statsTimestampInterval) {
+                clearInterval(this.statsTimestampInterval);
+                this.statsTimestampInterval = null;
+            }
+
+            this.showActivityMessage(message);
+        },
+
+        showActivityMessage: function(message) {
+            const $container = $('#recent-activity');
+            if (!$container.length) {
+                return;
+            }
+
+            const text = message || yadore_admin.strings?.activity_empty || 'Keine Aktivitäten vorhanden.';
+            $container.empty().append(
+                $('<div/>', { 'class': 'activity-empty' }).text(text)
+            );
+        },
+
         renderRecentActivity: function(items) {
             const $container = $('#recent-activity');
             if (!$container.length) {
@@ -120,9 +257,7 @@
             }
 
             if (!Array.isArray(items) || items.length === 0) {
-                $container.html(
-                    $('<div/>', { 'class': 'activity-empty' }).text('Keine Aktivitäten vorhanden.')
-                );
+                this.showActivityMessage();
                 return;
             }
 
