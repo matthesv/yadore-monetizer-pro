@@ -1,4 +1,10 @@
-/* Yadore Monetizer Pro v3.17 - Frontend CSS (Complete) */
+/* Yadore Monetizer Pro v3.20 - Frontend CSS (Complete) */
+:root {
+    --yadore-frontend-color-primary-500: var(--yadore-color-primary-500, #2563eb);
+    --yadore-frontend-color-primary-600: var(--yadore-color-primary-600, #1d4ed8);
+    --yadore-frontend-color-primary-700: var(--yadore-color-primary-700, #1e40af);
+    --yadore-frontend-color-success-500: var(--yadore-color-success-500, #16a34a);
+}
 .yadore-products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -25,7 +31,7 @@
 }
 
 .yadore-product-card:focus {
-    outline: 2px solid var(--yadore-primary, #3498db);
+    outline: 2px solid var(--yadore-primary, var(--yadore-frontend-color-primary-500));
     outline-offset: 3px;
 }
 
@@ -119,14 +125,14 @@
 .price-amount {
     font-size: 24px;
     font-weight: 800;
-    color: var(--yadore-accent, #27ae60);
+    color: var(--yadore-accent, var(--yadore-frontend-color-success-500));
     letter-spacing: -0.5px;
 }
 
 .price-currency {
     font-size: 16px;
     font-weight: 600;
-    color: var(--yadore-accent, #27ae60);
+    color: var(--yadore-accent, var(--yadore-frontend-color-success-500));
 }
 
 .product-merchant {
@@ -148,7 +154,7 @@
     gap: 8px;
     width: 100%;
     padding: 14px 20px;
-    background: linear-gradient(135deg, var(--yadore-primary-light, #5dade2), var(--yadore-primary-dark, #2980b9));
+    background: linear-gradient(135deg, var(--yadore-primary-light, var(--yadore-frontend-color-primary-500)), var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)));
     color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
     border-radius: 12px;
@@ -163,7 +169,7 @@
 }
 
 .product-cta-button:hover {
-    background: linear-gradient(135deg, var(--yadore-primary-dark, #2980b9), var(--yadore-primary-darker, #21618c));
+    background: linear-gradient(135deg, var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)), var(--yadore-primary-darker, var(--yadore-frontend-color-primary-700)));
     transform: translateY(-2px);
     box-shadow: 0 6px 20px var(--yadore-primary-shadow, rgba(52, 152, 219, 0.4));
     color: var(--yadore-primary-contrast, #ffffff);
@@ -203,7 +209,7 @@
 }
 
 .yadore-product-item:focus {
-    outline: 2px solid var(--yadore-primary, #3498db);
+    outline: 2px solid var(--yadore-primary, var(--yadore-frontend-color-primary-500));
     outline-offset: 3px;
 }
 
@@ -261,7 +267,7 @@
     gap: 4px;
     font-size: 18px;
     font-weight: 700;
-    color: var(--yadore-accent, #27ae60);
+    color: var(--yadore-accent, var(--yadore-frontend-color-success-500));
 }
 
 .list-price-amount {
@@ -272,7 +278,7 @@
     display: inline-block;
     text-transform: uppercase;
     font-weight: 600;
-    color: var(--yadore-accent, #27ae60);
+    color: var(--yadore-accent, var(--yadore-frontend-color-success-500));
 }
 
 .price-currency:empty,
@@ -289,7 +295,7 @@
 
 .list-cta-button {
     padding: 10px 20px;
-    background: linear-gradient(135deg, var(--yadore-primary-light, #5dade2), var(--yadore-primary-dark, #2980b9));
+    background: linear-gradient(135deg, var(--yadore-primary-light, var(--yadore-frontend-color-primary-500)), var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)));
     color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
     border-radius: 8px;
@@ -300,7 +306,7 @@
 }
 
 .list-cta-button:hover {
-    background: linear-gradient(135deg, var(--yadore-primary-dark, #2980b9), var(--yadore-primary-darker, #21618c));
+    background: linear-gradient(135deg, var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)), var(--yadore-primary-darker, var(--yadore-frontend-color-primary-700)));
     color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
 }
@@ -365,7 +371,7 @@
 }
 
 .inline-product:focus {
-    outline: 2px solid var(--yadore-primary, #3498db);
+    outline: 2px solid var(--yadore-primary, var(--yadore-frontend-color-primary-500));
     outline-offset: 3px;
 }
 
@@ -406,7 +412,7 @@
 .inline-price {
     font-size: 16px;
     font-weight: 700;
-    color: var(--yadore-accent, #27ae60);
+    color: var(--yadore-accent, var(--yadore-frontend-color-success-500));
 }
 
 .inline-price-amount {
@@ -418,7 +424,7 @@
     margin-left: 4px;
     text-transform: uppercase;
     font-weight: 600;
-    color: var(--yadore-accent, #27ae60);
+    color: var(--yadore-accent, var(--yadore-frontend-color-success-500));
 }
 
 .inline-merchant {
@@ -430,7 +436,7 @@
 .inline-cta {
     display: inline-block;
     padding: 8px 16px;
-    background: linear-gradient(135deg, var(--yadore-primary-light, #5dade2), var(--yadore-primary-dark, #2980b9));
+    background: linear-gradient(135deg, var(--yadore-primary-light, var(--yadore-frontend-color-primary-500)), var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)));
     color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
     border-radius: 6px;
@@ -440,7 +446,7 @@
 }
 
 .inline-cta:hover {
-    background: linear-gradient(135deg, var(--yadore-primary-dark, #2980b9), var(--yadore-primary-darker, #21618c));
+    background: linear-gradient(135deg, var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)), var(--yadore-primary-darker, var(--yadore-frontend-color-primary-700)));
     color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
 }
@@ -563,7 +569,7 @@
 }
 
 .overlay-header {
-    background: linear-gradient(135deg, var(--yadore-primary-light, #5dade2) 0%, var(--yadore-primary-dark, #2980b9) 100%);
+    background: linear-gradient(135deg, var(--yadore-primary-light, var(--yadore-frontend-color-primary-500)) 0%, var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)) 100%);
     color: var(--yadore-primary-contrast, #ffffff);
     padding: 20px 24px;
     display: flex;
@@ -625,7 +631,7 @@
 
 .overlay-product:focus-within,
 .overlay-product:focus {
-    outline: 2px solid var(--yadore-primary, #3498db);
+    outline: 2px solid var(--yadore-primary, var(--yadore-frontend-color-primary-500));
     outline-offset: 3px;
 }
 
@@ -666,14 +672,14 @@
 .overlay-price-amount {
     font-size: 20px;
     font-weight: 700;
-    color: var(--yadore-accent, #27ae60);
+    color: var(--yadore-accent, var(--yadore-frontend-color-success-500));
 }
 
 .overlay-price-currency {
     font-size: 14px;
     font-weight: 600;
     margin-left: 6px;
-    color: var(--yadore-accent, #27ae60);
+    color: var(--yadore-accent, var(--yadore-frontend-color-success-500));
     text-transform: uppercase;
 }
 
@@ -687,7 +693,7 @@
     display: block;
     width: 100%;
     padding: 12px 16px;
-    background: linear-gradient(135deg, var(--yadore-primary-light, #5dade2), var(--yadore-primary-dark, #2980b9));
+    background: linear-gradient(135deg, var(--yadore-primary-light, var(--yadore-frontend-color-primary-500)), var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)));
     color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
     border-radius: 8px;
@@ -698,7 +704,7 @@
 }
 
 .overlay-product-button:hover {
-    background: linear-gradient(135deg, var(--yadore-primary-dark, #2980b9), var(--yadore-primary-darker, #21618c));
+    background: linear-gradient(135deg, var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)), var(--yadore-primary-darker, var(--yadore-frontend-color-primary-700)));
     transform: translateY(-2px);
     color: var(--yadore-primary-contrast, #ffffff);
     text-decoration: none;
@@ -744,7 +750,7 @@
     width: 32px;
     height: 32px;
     border: 3px solid var(--yadore-card-bg-muted, #f3f3f3);
-    border-top: 3px solid var(--yadore-primary, #3498db);
+    border-top: 3px solid var(--yadore-primary, var(--yadore-frontend-color-primary-500));
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 16px;
