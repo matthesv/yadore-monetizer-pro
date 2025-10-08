@@ -34,7 +34,10 @@
     $has_api_key = !empty(get_option('yadore_api_key', ''));
     $has_gemini_key = !empty(get_option('yadore_gemini_api_key', ''));
     $overlay_enabled = (bool) get_option('yadore_overlay_enabled', true);
+    $auto_detection_enabled = (bool) get_option('yadore_auto_detection', true);
     $auto_scan_enabled = (bool) get_option('yadore_auto_scan_posts', true);
+    $shortcode_enabled = (bool) get_option('yadore_shortcode_enabled', true);
+    $debug_mode_enabled = (bool) get_option('yadore_debug_mode', false);
 
     $settings_actions = array(
         array(
@@ -69,8 +72,8 @@
                 ? esc_html__('Gemini aktiv', 'yadore-monetizer')
                 : esc_html__('Optional', 'yadore-monetizer'),
             'description' => $auto_scan_enabled
-                ? esc_html__('Automatische Keyword-Vorschläge sind eingeschaltet.', 'yadore-monetizer')
-                : esc_html__('Aktiviere Auto-Scan für kontinuierliche Optimierung.', 'yadore-monetizer'),
+                ? esc_html__('Automatischer Beitrags-Scan ist eingeschaltet.', 'yadore-monetizer')
+                : esc_html__('Aktiviere den Auto-Scan in den Einstellungen für kontinuierliche Optimierung.', 'yadore-monetizer'),
             'icon' => 'dashicons-admin-customizer',
             'state' => $has_gemini_key ? 'info' : 'neutral',
         ),
@@ -310,35 +313,9 @@
                         <div class="form-group">
                             <label class="form-label">
                                 <input type="checkbox"
-                                       name="yadore_overlay_enabled"
-                                       value="1"
-                                       <?php checked(get_option('yadore_overlay_enabled', true)); ?>>
-                                <strong>Enable Product Overlay</strong>
-                            </label>
-                            <p class="form-description">
-                                Display floating product recommendations on single posts.
-                            </p>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <input type="checkbox"
-                                       name="yadore_auto_detection"
-                                       value="1"
-                                       <?php checked(get_option('yadore_auto_detection', true)); ?>>
-                                <strong>Enable Automatic Product Injection</strong>
-                            </label>
-                            <p class="form-description">
-                                Automatically inject relevant products into post content.
-                            </p>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <input type="checkbox"
                                        name="yadore_shortcode_enabled"
                                        value="1"
-                                       <?php checked(get_option('yadore_shortcode_enabled', true)); ?>>
+                                       <?php checked($shortcode_enabled); ?>>
                                 <strong>Enable Manual Shortcode Output</strong>
                             </label>
                             <p class="form-description">
@@ -348,16 +325,69 @@
 
                         <div class="form-group">
                             <label class="form-label">
-                                <input type="checkbox" 
-                                       name="yadore_debug_mode" 
-                                       value="1" 
-                                       <?php checked(get_option('yadore_debug_mode', false)); ?>>
+                                <input type="checkbox"
+                                       name="yadore_debug_mode"
+                                       value="1"
+                                       <?php checked($debug_mode_enabled); ?>>
                                 <strong>Enable Debug Mode</strong>
                             </label>
                             <p class="form-description">
                                 Enable detailed logging for troubleshooting. Disable in production.
                             </p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="yadore-card">
+                <div class="card-header">
+                    <h2><span class="dashicons dashicons-update" aria-hidden="true"></span> <?php echo esc_html__('Automatisierung', 'yadore-monetizer'); ?></h2>
+                </div>
+                <div class="card-content">
+                    <p class="card-intro">
+                        <?php esc_html_e('Steuere, welche Automatisierungen auf deinen Beiträgen aktiv sind und ob der KI-Scan beim Speichern ausgeführt wird.', 'yadore-monetizer'); ?>
+                    </p>
+
+                    <div class="form-group">
+                        <label class="form-label" for="yadore_overlay_enabled">
+                            <input type="checkbox"
+                                   name="yadore_overlay_enabled"
+                                   id="yadore_overlay_enabled"
+                                   value="1"
+                                   <?php checked($overlay_enabled); ?>>
+                            <strong><?php esc_html_e('Produkt-Overlay aktivieren', 'yadore-monetizer'); ?></strong>
+                        </label>
+                        <p class="form-description">
+                            <?php esc_html_e('Blendet ein Overlay mit Produktempfehlungen auf Beitragsseiten ein.', 'yadore-monetizer'); ?>
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="yadore_auto_detection">
+                            <input type="checkbox"
+                                   name="yadore_auto_detection"
+                                   id="yadore_auto_detection"
+                                   value="1"
+                                   <?php checked($auto_detection_enabled); ?>>
+                            <strong><?php esc_html_e('Automatische Produktempfehlungen einfügen', 'yadore-monetizer'); ?></strong>
+                        </label>
+                        <p class="form-description">
+                            <?php esc_html_e('Fügt passende Produkte automatisch in den Beitragsinhalt ein.', 'yadore-monetizer'); ?>
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="yadore_auto_scan_posts">
+                            <input type="checkbox"
+                                   name="yadore_auto_scan_posts"
+                                   id="yadore_auto_scan_posts"
+                                   value="1"
+                                   <?php checked($auto_scan_enabled); ?>>
+                            <strong><?php esc_html_e('Automatischen Beitrags-Scan aktivieren', 'yadore-monetizer'); ?></strong>
+                        </label>
+                        <p class="form-description">
+                            <?php esc_html_e('Führt bei jedem Speichern einen KI-Scan aus und hält Produktempfehlungen aktuell.', 'yadore-monetizer'); ?>
+                        </p>
                     </div>
                 </div>
             </div>
