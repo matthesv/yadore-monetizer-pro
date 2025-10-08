@@ -393,10 +393,12 @@
                             <label for="generated-shortcode"><?php echo esc_html__('Generierter Shortcode:', 'yadore-monetizer'); ?></label>
                             <div class="shortcode-output">
                                 <textarea id="generated-shortcode" readonly>[yadore_products keyword="smartphone" limit="6" format="grid" cache="true"]</textarea>
-                                <button type="button" id="copy-shortcode" class="button button-primary">
-                                    <span class="dashicons dashicons-clipboard"></span> <?php echo esc_html__('Kopieren', 'yadore-monetizer'); ?>
+                                <button type="button" id="copy-shortcode" class="button button-primary" data-state="default">
+                                    <span class="dashicons dashicons-clipboard" aria-hidden="true"></span>
+                                    <span class="button-label"><?php echo esc_html__('Copy shortcode', 'yadore-monetizer'); ?></span>
                                 </button>
                             </div>
+                            <div class="copy-feedback" id="copy-feedback" role="status" aria-live="polite"></div>
                         </div>
 
                         <div class="generator-preview">

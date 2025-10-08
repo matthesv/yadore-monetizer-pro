@@ -273,14 +273,12 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.17 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v3.18 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v3.17:**
-- ✅ **Dashboard-Statuskarte** – Kombiniert Onboarding, Systemgesundheit und To-dos in einem sichtbaren Modul mit passenden Call-to-Actions.
-- 🔄 **Zeitgestempelte KPIs** – Alle Kennzahlen zeigen jetzt, wann sie zuletzt aktualisiert wurden, inklusive manueller Aktualisierung und Failover-Anzeige.
-- ♿ **Accessibility-Upgrade** – Progressbar und Live-Rückmeldungen folgen ARIA-Best-Practices und verbessern Screenreader-Kompatibilität.
-- 🧭 **Verbesserte Fehlermeldungen** – Einheitliche leere Zustände und klare Texte informieren bei ausbleibenden Daten oder API-Fehlern.
-- 📦 **Versionsupdate** – Sämtliche Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.17.
+### **Neue Highlights in v3.18:**
+- ♿ **ARIA-optimierte Tab-Navigation** – Die Einstellungen bieten jetzt vollständige Tastatursteuerung, Screenreader-Markup und automatisch fokussierte Panels.
+- 🔐 **Komfortable API-Schlüsselsteuerung** – Sichtbare Anzeigen-Buttons erlauben sicheres Ein- und Ausblenden der Geheimnisse inklusive lokalisierter Beschriftungen.
+- 📋 **Shortcode-Generator mit Live-Feedback** – Verbesserter Kopier-Workflow mit Statussymbolen, Erfolgs-/Fehlermeldungen und lokalisiertem Clipboard-Text.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -296,11 +294,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.17 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.18 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.17** - Production-Ready Market Release
+**Current Version: 3.18** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

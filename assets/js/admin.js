@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.17 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.18 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.17',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.18',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -26,6 +26,25 @@
         clipboardFeedbackTimer: null,
         lastDashboardUpdate: null,
         statsTimestampInterval: null,
+
+        getString: function(key, fallback) {
+            if (!key) {
+                return typeof fallback === 'string' ? fallback : '';
+            }
+
+            const strings = window.yadore_admin && window.yadore_admin.strings
+                ? window.yadore_admin.strings
+                : {};
+
+            if (strings && Object.prototype.hasOwnProperty.call(strings, key)) {
+                const value = strings[key];
+                if (typeof value === 'string' && value.length) {
+                    return value;
+                }
+            }
+
+            return typeof fallback === 'string' ? fallback : '';
+        },
 
         // Initialize all admin functionality
         init: function() {
@@ -474,16 +493,117 @@
         initSettings: function() {
             if (!$('.yadore-settings-container').length) return;
 
-            // Tab navigation
-            $('.nav-tab').on('click', function() {
-                const tab = $(this).data('tab');
+            const $tabs = $('.nav-tabs .nav-tab');
+            const $panels = $('.settings-panel');
 
-                $('.nav-tab').removeClass('nav-tab-active');
-                $(this).addClass('nav-tab-active');
+            const activateTab = ($targetTab, focusPanel = false) => {
+                if (!$targetTab || !$targetTab.length) {
+                    return;
+                }
 
-                $('.settings-panel').removeClass('active');
-                $('#panel-' + tab).addClass('active');
+                const tabId = $targetTab.attr('id');
+                const tabKey = $targetTab.data('tab');
+                if (!tabKey) {
+                    return;
+                }
+
+                $tabs.removeClass('nav-tab-active')
+                    .attr('aria-selected', 'false')
+                    .attr('tabindex', '-1');
+
+                $targetTab.addClass('nav-tab-active')
+                    .attr('aria-selected', 'true')
+                    .attr('tabindex', '0');
+
+                const targetPanelId = `panel-${tabKey}`;
+
+                $panels.each(function() {
+                    const $panel = $(this);
+                    const isActive = $panel.attr('id') === targetPanelId;
+                    $panel.toggleClass('active', isActive);
+
+                    if (isActive) {
+                        $panel.removeAttr('hidden');
+                        if (tabId) {
+                            $panel.attr('aria-labelledby', tabId);
+                        }
+
+                        if (focusPanel) {
+                            window.requestAnimationFrame(() => {
+                                $panel.trigger('focus');
+                            });
+                        }
+                    } else {
+                        $panel.attr('hidden', 'hidden');
+                    }
+                });
+            };
+
+            const focusTab = ($tab) => {
+                if ($tab && $tab.length) {
+                    $tab.trigger('focus');
+                }
+            };
+
+            $tabs.on('click', function(event) {
+                event.preventDefault();
+                const $tab = $(this);
+                activateTab($tab, false);
+                focusTab($tab);
             });
+
+            $tabs.on('keydown', function(event) {
+                const key = event.key;
+                const currentIndex = $tabs.index(this);
+
+                if (key === 'ArrowRight' || key === 'ArrowDown') {
+                    event.preventDefault();
+                    const nextIndex = (currentIndex + 1) % $tabs.length;
+                    const $nextTab = $tabs.eq(nextIndex);
+                    activateTab($nextTab, false);
+                    focusTab($nextTab);
+                    return;
+                }
+
+                if (key === 'ArrowLeft' || key === 'ArrowUp') {
+                    event.preventDefault();
+                    const prevIndex = (currentIndex - 1 + $tabs.length) % $tabs.length;
+                    const $prevTab = $tabs.eq(prevIndex);
+                    activateTab($prevTab, false);
+                    focusTab($prevTab);
+                    return;
+                }
+
+                if (key === 'Home') {
+                    event.preventDefault();
+                    const $firstTab = $tabs.first();
+                    activateTab($firstTab, false);
+                    focusTab($firstTab);
+                    return;
+                }
+
+                if (key === 'End') {
+                    event.preventDefault();
+                    const $lastTab = $tabs.last();
+                    activateTab($lastTab, false);
+                    focusTab($lastTab);
+                    return;
+                }
+
+                if (key === 'Enter' || key === ' ') {
+                    event.preventDefault();
+                    activateTab($(this), true);
+                }
+            });
+
+            const $initialTab = $tabs.filter('.nav-tab-active').first();
+            if ($initialTab.length) {
+                activateTab($initialTab, false);
+            } else if ($tabs.length) {
+                activateTab($tabs.first(), false);
+            }
+
+            this.initPasswordVisibilityToggles();
 
             // AI settings toggle
             $('#yadore_ai_enabled').on('change', function() {
@@ -652,6 +772,68 @@
         initShortcodeGenerator: function() {
             if (!$('.shortcode-generator-v27').length) return;
 
+            const $copyButton = $('#copy-shortcode');
+            const $copyFeedback = $('#copy-feedback');
+
+            const strings = {
+                default: this.getString('copy_button_default', 'Copy shortcode'),
+                loading: this.getString('copy_button_loading', 'Copying…'),
+                success: this.getString('copy_button_success', 'Copied!'),
+                error: this.getString('copy_button_error', 'Copy failed'),
+                feedbackSuccess: this.getString('copy_feedback_success', 'Shortcode copied to clipboard.'),
+                feedbackError: this.getString('copy_feedback_error', 'Copy failed. Press Ctrl+C to copy manually.'),
+            };
+
+            const iconStates = {
+                default: 'dashicons-clipboard',
+                loading: 'dashicons-update-alt',
+                success: 'dashicons-yes',
+                error: 'dashicons-warning',
+            };
+
+            const setCopyButtonState = (state) => {
+                if (!$copyButton.length) {
+                    return;
+                }
+
+                const normalizedState = iconStates[state] ? state : 'default';
+                const $icon = $copyButton.find('.dashicons').first();
+                const $label = $copyButton.find('.button-label').first();
+
+                Object.values(iconStates).forEach((className) => {
+                    $icon.removeClass(className);
+                });
+
+                $icon.removeClass('spinning');
+                $icon.addClass(iconStates[normalizedState]);
+
+                if (normalizedState === 'loading') {
+                    $icon.addClass('spinning');
+                }
+
+                const label = strings[normalizedState] || strings.default;
+                $label.text(label);
+
+                $copyButton.attr('data-state', normalizedState);
+                $copyButton.prop('disabled', normalizedState === 'loading');
+            };
+
+            const resetCopyFeedback = () => {
+                if ($copyFeedback.length) {
+                    $copyFeedback.text('');
+                    $copyFeedback.removeAttr('data-state');
+                }
+            };
+
+            const showCopyFeedback = (state, message) => {
+                if (!$copyFeedback.length) {
+                    return;
+                }
+
+                $copyFeedback.attr('data-state', state);
+                $copyFeedback.text(message);
+            };
+
             const updateShortcode = () => {
                 const keyword = $('#shortcode-keyword').val() || 'smartphone';
                 const limit = $('#shortcode-limit').val();
@@ -669,25 +851,49 @@
 
                 $('#generated-shortcode').val(shortcode);
 
+                setCopyButtonState('default');
+                resetCopyFeedback();
+
                 // Generate preview
                 this.generateShortcodePreview(shortcode);
             };
 
-            // Event listeners
-            $('#shortcode-keyword, #shortcode-limit, #shortcode-format, #shortcode-cache, #shortcode-class').on('input change', updateShortcode);
+            $('#shortcode-keyword, #shortcode-limit, #shortcode-format, #shortcode-cache, #shortcode-class')
+                .on('input change', updateShortcode);
 
-            // Copy functionality
-            $('#copy-shortcode').on('click', function() {
-                const shortcode = $('#generated-shortcode')[0];
-                shortcode.select();
-                shortcode.setSelectionRange(0, 99999);
-                document.execCommand('copy');
+            if ($copyButton.length) {
+                $copyButton.on('click', () => {
+                    const shortcode = $('#generated-shortcode').val();
+                    if (!shortcode) {
+                        return;
+                    }
 
-                $(this).addClass('copied').html('<span class="dashicons dashicons-yes"></span> Copied!');
-                setTimeout(() => {
-                    $(this).removeClass('copied').html('<span class="dashicons dashicons-clipboard"></span> Copy');
-                }, 2000);
-            });
+                    setCopyButtonState('loading');
+                    resetCopyFeedback();
+
+                    this.copyTextToClipboard(shortcode)
+                        .then(() => {
+                            setCopyButtonState('success');
+                            showCopyFeedback('success', strings.feedbackSuccess);
+
+                            window.clearTimeout(this.clipboardFeedbackTimer);
+                            this.clipboardFeedbackTimer = window.setTimeout(() => {
+                                setCopyButtonState('default');
+                                resetCopyFeedback();
+                            }, 2500);
+                        })
+                        .catch(() => {
+                            setCopyButtonState('error');
+                            showCopyFeedback('error', strings.feedbackError);
+
+                            window.clearTimeout(this.clipboardFeedbackTimer);
+                            this.clipboardFeedbackTimer = window.setTimeout(() => {
+                                setCopyButtonState('default');
+                                resetCopyFeedback();
+                            }, 4000);
+                        });
+                });
+            }
 
             // Initial update
             updateShortcode();
@@ -710,6 +916,101 @@
                     </div>
                 `);
             }, 1000);
+        },
+
+        initPasswordVisibilityToggles: function() {
+            const $toggles = $('.password-visibility-toggle');
+            if (!$toggles.length) {
+                return;
+            }
+
+            const strings = {
+                show: this.getString('show_secret', 'Show key'),
+                hide: this.getString('hide_secret', 'Hide key'),
+            };
+
+            const updateButton = ($button, isVisible) => {
+                const $icon = $button.find('.dashicons').first();
+                const $label = $button.find('.button-label').first();
+
+                $icon.removeClass('dashicons-visibility dashicons-hidden');
+
+                if (isVisible) {
+                    $icon.addClass('dashicons-hidden');
+                    $label.text(strings.hide);
+                    $button.attr('aria-pressed', 'true');
+                } else {
+                    $icon.addClass('dashicons-visibility');
+                    $label.text(strings.show);
+                    $button.attr('aria-pressed', 'false');
+                }
+            };
+
+            $toggles.each((index, element) => {
+                const $button = $(element);
+                const targetId = $button.data('target');
+                const $input = targetId ? $(`#${targetId}`) : $();
+                const isVisible = $input.length && $input.attr('type') === 'text';
+                updateButton($button, isVisible);
+            });
+
+            $toggles.on('click', (event) => {
+                event.preventDefault();
+
+                const $button = $(event.currentTarget);
+                const targetId = $button.data('target');
+                if (!targetId) {
+                    return;
+                }
+
+                const $input = $(`#${targetId}`);
+                if (!$input.length) {
+                    return;
+                }
+
+                const isPassword = $input.attr('type') === 'password';
+                const newType = isPassword ? 'text' : 'password';
+                $input.attr('type', newType);
+
+                updateButton($button, newType === 'text');
+                $input.trigger('focus');
+            });
+        },
+
+        copyTextToClipboard: function(text) {
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                return navigator.clipboard.writeText(text);
+            }
+
+            return new Promise((resolve, reject) => {
+                try {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.setAttribute('readonly', '');
+                    textarea.style.position = 'absolute';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+
+                    const activeElement = document.activeElement;
+                    textarea.focus();
+                    textarea.select();
+
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+
+                    if (activeElement && typeof activeElement.focus === 'function') {
+                        activeElement.focus();
+                    }
+
+                    if (successful) {
+                        resolve();
+                    } else {
+                        reject(new Error('copy_unsuccessful'));
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
         },
 
         // API Testing
