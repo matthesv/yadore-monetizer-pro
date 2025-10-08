@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.30 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.31 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -1632,7 +1632,7 @@
     gap: 28px;
     align-items: stretch;
     margin-bottom: 32px;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
 }
 
 .overview-analytics-grid .yadore-card {
@@ -1677,7 +1677,7 @@
 
 .scanner-overview .scanner-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
     gap: 22px;
 }
 
@@ -2896,7 +2896,7 @@
 .summary-stats {
     display: grid;
     gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
 }
 
 .performance-chart,
@@ -2928,7 +2928,7 @@
 .cloud-container {
     display: grid;
     gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
 }
 
 .cloud-loading,
@@ -3034,7 +3034,7 @@
 .analytics-grid {
     display: grid;
     gap: var(--yadore-space-6);
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
 }
 
 .traffic-metrics {
@@ -3070,7 +3070,7 @@
 .conversion-funnel {
     display: grid;
     gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
 }
 
 .funnel-step {
