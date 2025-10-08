@@ -1,6 +1,6 @@
-# Yadore Monetizer Pro Design System (v3.26)
+# Yadore Monetizer Pro Design System (v3.29)
 
-Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.16 einem token-basierten Designsystem. Mit v3.26 wurden die Hero-Metakarten, Tab-Navigation und Formulare vollständig auf die Tokenstruktur ausgerichtet. Dieses Dokument dient als zentrale Referenz für Entwickler:innen, UX-Designer:innen und QA, um konsistente UI-Entscheidungen zu treffen und Änderungen nachvollziehbar zu dokumentieren.
+Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.16 einem token-basierten Designsystem. Mit v3.29 wurden die Hero-Metakarten, Tab-Navigation und Formulare vollständig auf die Tokenstruktur ausgerichtet. Dieses Dokument dient als zentrale Referenz für Entwickler:innen, UX-Designer:innen und QA, um konsistente UI-Entscheidungen zu treffen und Änderungen nachvollziehbar zu dokumentieren.
 
 ## 1. Architektur & Dateien
 
@@ -56,6 +56,7 @@ Code-Beispiele können über den Copy-Button (Klasse `.styleguide-copy`) direkt 
 - **Spacing & Layout**: Grid-Layouts nutzen `repeat(auto-fit, minmax(...))`, um sich automatisch an verfügbare Breiten anzupassen.
 - **Typografie**: Titel verwenden `font-weight: var(--yadore-font-weight-semibold)`; Body-Text `var(--yadore-font-weight-regular)`.
 - **Fokus & Interaktionen**: Buttons und interaktive Elemente dürfen nur Tokens oder systemeigene Fokus-Stile überschreiben.
+- **Formulareingaben**: `.input-group` stapelt sich unter 640 px vertikal, dehnt Inputs und Buttons auf 100 % Breite und zentriert Button-Content für bessere Touch-Ziele.
 - **ARIA**: Komponenten, die Statusänderungen anzeigen, benötigen `aria-live` oder eindeutige Labels; das Styleguide-Template liefert Beispiele in `templates/admin-styleguide.php`.
 - **Kontraste**: Primärfarben erfüllen WCAG AA auf hellem und dunklem Hintergrund (getestet mit den hinterlegten Hex-Werten). Neue Farben müssen denselben Standard erreichen.
 

@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.28 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.29 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -2361,6 +2361,23 @@
 
 .input-group .form-input {
     flex: 1;
+}
+
+@media (max-width: 640px) {
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .input-group .form-input,
+    .input-group .button {
+        width: 100%;
+    }
+
+    .input-group .button {
+        text-align: center;
+        justify-content: center;
+    }
 }
 
 .form-row {
