@@ -606,6 +606,7 @@
     max-width: 420px;
     margin: 0 auto;
     width: 100%;
+    background-color: var(--yadore-background, transparent);
 }
 
 .overlay-product {
