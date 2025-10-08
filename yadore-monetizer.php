@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.44
+Version: 3.46
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.44');
+define('YADORE_PLUGIN_VERSION', '3.46');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -90,6 +90,20 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_check_database', array($this, 'ajax_check_database'));
             add_action('wp_ajax_yadore_test_performance', array($this, 'ajax_test_performance'));
             add_action('wp_ajax_yadore_analyze_cache', array($this, 'ajax_analyze_cache'));
+            add_action('wp_ajax_yadore_optimize_cache', array($this, 'ajax_optimize_cache'));
+            add_action('wp_ajax_yadore_optimize_database', array($this, 'ajax_optimize_database'));
+            add_action('wp_ajax_yadore_cleanup_old_data', array($this, 'ajax_cleanup_old_data'));
+            add_action('wp_ajax_yadore_archive_logs', array($this, 'ajax_archive_logs'));
+            add_action('wp_ajax_yadore_clear_old_logs', array($this, 'ajax_clear_old_logs'));
+            add_action('wp_ajax_yadore_system_cleanup', array($this, 'ajax_system_cleanup'));
+            add_action('wp_ajax_yadore_schedule_cleanup', array($this, 'ajax_schedule_cleanup'));
+            add_action('wp_ajax_yadore_reset_settings', array($this, 'ajax_reset_settings'));
+            add_action('wp_ajax_yadore_clear_all_data', array($this, 'ajax_clear_all_data'));
+            add_action('wp_ajax_yadore_factory_reset', array($this, 'ajax_factory_reset'));
+            add_action('wp_ajax_yadore_export_config', array($this, 'ajax_export_config'));
+            add_action('wp_ajax_yadore_clone_settings', array($this, 'ajax_clone_settings'));
+            add_action('wp_ajax_yadore_auto_optimize', array($this, 'ajax_auto_optimize'));
+            add_action('wp_ajax_yadore_analyze_keywords', array($this, 'ajax_analyze_keywords'));
 
             // Content integration
             add_shortcode('yadore_products', array($this, 'shortcode_products'));
@@ -122,6 +136,7 @@ class YadoreMonetizer {
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
             add_action('yadore_run_scheduled_export', array($this, 'run_scheduled_export'), 10, 1);
+            add_action('yadore_run_system_cleanup', array($this, 'run_system_cleanup'), 10, 0);
 
             $this->log(sprintf('Plugin v%s initialized successfully with complete feature set', YADORE_PLUGIN_VERSION), 'info');
 
@@ -2406,6 +2421,37 @@ HTML
         update_option('yadore_export_schedules', $schedules, false);
     }
 
+    public function ajax_import_data() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $mode = isset($_POST['mode']) ? sanitize_key(wp_unslash($_POST['mode'])) : 'import';
+            $options = isset($_POST['options']) ? (array) wp_unslash($_POST['options']) : array();
+
+            $flags = array(
+                'overwrite' => in_array('overwrite', $options, true),
+                'validate' => in_array('validate', $options, true) || $mode === 'validate',
+                'backup' => in_array('backup', $options, true),
+            );
+
+            $files = $this->normalize_uploaded_files('files');
+            if (empty($files)) {
+                throw new Exception(__('No import files provided.', 'yadore-monetizer'));
+            }
+
+            $result = $this->process_import_files($files, $flags, $mode);
+
+            wp_send_json_success($result);
+        } catch (Exception $e) {
+            $this->log_error('Import data request failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
     public function ajax_clear_cache() {
         try {
             check_ajax_referer('yadore_admin_nonce', 'nonce');
@@ -2503,6 +2549,320 @@ HTML
             ));
         } catch (Exception $e) {
             $this->log_error('Cache analysis failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_optimize_cache() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $summary = $this->optimize_plugin_cache();
+            $stats = $this->get_cache_statistics();
+
+            wp_send_json_success(array(
+                'message' => __('Cache optimization completed successfully.', 'yadore-monetizer'),
+                'summary' => $summary,
+                'stats' => $stats,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Cache optimization failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_optimize_database() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $result = $this->optimize_database_tables();
+
+            wp_send_json_success(array(
+                'message' => __('Database optimization completed.', 'yadore-monetizer'),
+                'details' => $result,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Database optimization failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_cleanup_old_data() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $result = $this->cleanup_old_data_records();
+
+            wp_send_json_success(array(
+                'message' => __('Old data cleanup completed.', 'yadore-monetizer'),
+                'details' => $result,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Old data cleanup failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_archive_logs() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $archive = $this->archive_logs_to_file();
+
+            wp_send_json_success(array(
+                'message' => __('Logs archived successfully.', 'yadore-monetizer'),
+                'archive' => $archive,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Log archiving failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_clear_old_logs() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $result = $this->delete_old_logs();
+
+            wp_send_json_success(array(
+                'message' => __('Old logs removed successfully.', 'yadore-monetizer'),
+                'details' => $result,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Clearing old logs failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_system_cleanup() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $result = $this->run_system_cleanup();
+
+            wp_send_json_success(array(
+                'message' => __('System cleanup completed successfully.', 'yadore-monetizer'),
+                'details' => $result,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('System cleanup failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_schedule_cleanup() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $interval = isset($_POST['interval']) ? sanitize_key(wp_unslash($_POST['interval'])) : 'daily';
+            $schedule = $this->schedule_cleanup_event($interval);
+
+            wp_send_json_success(array(
+                'message' => __('Cleanup schedule updated.', 'yadore-monetizer'),
+                'schedule' => $schedule,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to schedule cleanup', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_reset_settings() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $updated = $this->reset_plugin_settings_to_defaults();
+
+            wp_send_json_success(array(
+                'message' => __('Settings reset to defaults.', 'yadore-monetizer'),
+                'updated' => $updated,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to reset settings', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_clear_all_data() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $summary = $this->remove_all_plugin_data();
+
+            wp_send_json_success(array(
+                'message' => __('All plugin data removed.', 'yadore-monetizer'),
+                'details' => $summary,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to remove plugin data', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_factory_reset() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $summary = $this->perform_factory_reset();
+
+            wp_send_json_success(array(
+                'message' => __('Factory reset completed successfully.', 'yadore-monetizer'),
+                'details' => $summary,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Factory reset failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_export_config() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $package = $this->generate_config_export_package();
+
+            wp_send_json_success($package);
+        } catch (Exception $e) {
+            $this->log_error('Configuration export failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_clone_settings() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $source = isset($_POST['source']) ? esc_url_raw(wp_unslash($_POST['source'])) : '';
+            if ($source === '') {
+                throw new Exception(__('Please provide a valid source URL.', 'yadore-monetizer'));
+            }
+
+            $payload = $this->fetch_remote_settings_package($source);
+            if (empty($payload)) {
+                throw new Exception(__('The remote site did not provide any settings.', 'yadore-monetizer'));
+            }
+
+            $result = $this->import_payload($payload, array('overwrite' => true, 'validate' => false, 'backup' => true));
+
+            wp_send_json_success(array(
+                'message' => __('Settings cloned successfully.', 'yadore-monetizer'),
+                'details' => $result,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to clone settings', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_auto_optimize() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $result = $this->perform_auto_optimize();
+
+            wp_send_json_success(array(
+                'message' => __('Auto optimization completed.', 'yadore-monetizer'),
+                'details' => $result,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Auto optimization failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_analyze_keywords() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $text = isset($_POST['text']) ? wp_unslash($_POST['text']) : '';
+            if (trim($text) === '') {
+                throw new Exception(__('Please provide text to analyze.', 'yadore-monetizer'));
+            }
+
+            $max = isset($_POST['max']) ? max(1, (int) $_POST['max']) : 5;
+            $use_ai = isset($_POST['use_ai']) ? (bool) $_POST['use_ai'] : false;
+
+            $keywords = $this->analyze_keywords_locally($text, $max);
+            $summary = '';
+
+            if ($use_ai && get_option('yadore_ai_enabled')) {
+                try {
+                    $ai = $this->analyze_keywords_with_ai($text, $max);
+                    if (!empty($ai['keywords'])) {
+                        $keywords = $ai['keywords'];
+                    }
+                    if (!empty($ai['summary'])) {
+                        $summary = $ai['summary'];
+                    }
+                } catch (Exception $ai_error) {
+                    $this->log_error('AI keyword analysis failed', $ai_error, 'warning');
+                    $summary = __('AI analysis unavailable, showing local suggestions.', 'yadore-monetizer');
+                }
+            }
+
+            wp_send_json_success(array(
+                'keywords' => $keywords,
+                'summary' => $summary,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Keyword analysis failed', $e);
             wp_send_json_error($e->getMessage());
         }
     }
@@ -9306,7 +9666,7 @@ HTML
         return $removed;
     }
 
-    private function purge_transients_by_prefix(array $prefixes) {
+    private function purge_transients_by_prefix(array $prefixes, $expired_only = false) {
         global $wpdb;
 
         $total_removed = 0;
@@ -9318,6 +9678,10 @@ HTML
             foreach ($option_names as $option_name) {
                 $transient_key = substr($option_name, strlen('_transient_'));
                 if ($transient_key === false) {
+                    continue;
+                }
+
+                if ($expired_only && !$this->is_transient_expired($transient_key, false)) {
                     continue;
                 }
 
@@ -9336,6 +9700,10 @@ HTML
                         continue;
                     }
 
+                    if ($expired_only && !$this->is_transient_expired($transient_key, true)) {
+                        continue;
+                    }
+
                     if (delete_site_transient($transient_key)) {
                         $total_removed++;
                     }
@@ -9344,6 +9712,17 @@ HTML
         }
 
         return $total_removed;
+    }
+
+    private function is_transient_expired($transient_key, $network = false) {
+        $timeout_option = ($network ? '_site_transient_timeout_' : '_transient_timeout_') . $transient_key;
+        $timeout = $network ? get_site_option($timeout_option) : get_option($timeout_option);
+
+        if (!is_numeric($timeout)) {
+            return false;
+        }
+
+        return (int) $timeout <= $this->get_wp_timestamp();
     }
 
     private function clear_ai_cache_table() {
@@ -10033,11 +10412,56 @@ HTML
     }
 
     private function get_cleanup_statistics() {
-        return array(
+        $stats = array(
             'temp_files' => 0,
             'orphaned_data' => 0,
             'space_used' => '0 KB',
         );
+
+        if (!function_exists('wp_upload_dir')) {
+            return $stats;
+        }
+
+        $uploads = wp_upload_dir();
+        if (!empty($uploads['error'])) {
+            return $stats;
+        }
+
+        $base_dir = trailingslashit($uploads['basedir']) . 'yadore-monetizer';
+        if (!is_dir($base_dir)) {
+            return $stats;
+        }
+
+        $total_files = 0;
+        $total_bytes = 0;
+        $orphaned = 0;
+
+        try {
+            $directory = new RecursiveDirectoryIterator($base_dir, FilesystemIterator::SKIP_DOTS);
+            $iterator = new RecursiveIteratorIterator($directory);
+
+            foreach ($iterator as $file) {
+                if (!$file instanceof SplFileInfo || !$file->isFile()) {
+                    continue;
+                }
+
+                $total_files++;
+                $total_bytes += (int) $file->getSize();
+
+                $extension = strtolower($file->getExtension());
+                if (in_array($extension, array('tmp', 'log', 'bak'), true)) {
+                    $orphaned++;
+                }
+            }
+        } catch (Exception $e) {
+            $this->log_error('Failed to calculate cleanup statistics', $e, 'debug');
+        }
+
+        $stats['temp_files'] = $total_files;
+        $stats['orphaned_data'] = $orphaned;
+        $stats['space_used'] = $this->format_bytes($total_bytes);
+
+        return $stats;
     }
 
     private function get_cache_metrics() {
@@ -10719,6 +11143,934 @@ HTML
         }
 
         return $target->getTimestamp();
+    }
+
+    private function normalize_uploaded_files($key) {
+        if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
+            return array();
+        }
+
+        $files = $_FILES[$key];
+        $normalized = array();
+
+        if (is_array($files['name'])) {
+            $count = count($files['name']);
+            for ($i = 0; $i < $count; $i++) {
+                if (empty($files['name'][$i])) {
+                    continue;
+                }
+
+                $normalized[] = array(
+                    'name' => $files['name'][$i],
+                    'type' => $files['type'][$i] ?? '',
+                    'tmp_name' => $files['tmp_name'][$i] ?? '',
+                    'error' => $files['error'][$i] ?? UPLOAD_ERR_OK,
+                    'size' => $files['size'][$i] ?? 0,
+                );
+            }
+        } else {
+            if (!empty($files['name'])) {
+                $normalized[] = $files;
+            }
+        }
+
+        return array_filter($normalized, function ($file) {
+            return isset($file['error']) && (int) $file['error'] === UPLOAD_ERR_OK && !empty($file['tmp_name']);
+        });
+    }
+
+    private function process_import_files(array $files, array $flags, $mode) {
+        $mode = ($mode === 'validate') ? 'validate' : 'import';
+
+        $aggregate = array(
+            'meta' => array(),
+            'data' => array(
+                'settings' => array(),
+                'keywords' => array(),
+                'analytics' => array(),
+                'logs' => array(),
+                'cache' => array(),
+            ),
+        );
+
+        $messages = array();
+        $stats = array(
+            'files_processed' => 0,
+            'records_detected' => 0,
+        );
+
+        foreach ($files as $file) {
+            $parsed = $this->parse_import_file($file['tmp_name'], $file['name']);
+            $stats['files_processed']++;
+
+            if (!empty($parsed['meta']) && is_array($parsed['meta'])) {
+                $aggregate['meta'] = array_merge($aggregate['meta'], $parsed['meta']);
+            }
+
+            if (!empty($parsed['data']) && is_array($parsed['data'])) {
+                foreach ($parsed['data'] as $section => $records) {
+                    if (!isset($aggregate['data'][$section]) || !is_array($aggregate['data'][$section])) {
+                        $aggregate['data'][$section] = array();
+                    }
+
+                    if (is_array($records)) {
+                        $aggregate['data'][$section] = array_merge($aggregate['data'][$section], $records);
+                        $stats['records_detected'] += count($records);
+                    }
+                }
+            }
+        }
+
+        $validation = $this->validate_import_payload($aggregate);
+        $stats = array_merge($stats, $validation['stats']);
+        $messages = array_merge($messages, $validation['messages']);
+
+        if ($mode === 'validate') {
+            return array(
+                'mode' => 'validate',
+                'stats' => $stats,
+                'messages' => $messages,
+            );
+        }
+
+        if (!empty($flags['backup'])) {
+            try {
+                $backup = $this->generate_config_export_package();
+                $saved = $this->save_export_package($backup, 'backups');
+                if (!empty($saved['url'])) {
+                    $messages[] = sprintf(__('Backup stored at %s', 'yadore-monetizer'), esc_url($saved['url']));
+                }
+            } catch (Exception $backup_error) {
+                $this->log_error('Failed to create import backup', $backup_error, 'warning');
+                $messages[] = __('Backup could not be created before import.', 'yadore-monetizer');
+            }
+        }
+
+        $import_summary = $this->import_payload($aggregate, $flags);
+        $stats = array_merge($stats, $import_summary['stats']);
+        $messages = array_merge($messages, $import_summary['messages']);
+
+        return array(
+            'mode' => 'import',
+            'stats' => $stats,
+            'messages' => $messages,
+        );
+    }
+
+    private function parse_import_file($path, $filename) {
+        if (!is_readable($path)) {
+            throw new Exception(sprintf(__('Unable to read import file %s.', 'yadore-monetizer'), $filename));
+        }
+
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            throw new Exception(sprintf(__('Unable to read import file %s.', 'yadore-monetizer'), $filename));
+        }
+
+        switch ($extension) {
+            case 'json':
+                $decoded = json_decode($contents, true);
+                if (!is_array($decoded)) {
+                    throw new Exception(sprintf(__('Import file %s does not contain valid JSON.', 'yadore-monetizer'), $filename));
+                }
+                return $this->normalize_import_payload($decoded);
+            case 'xml':
+                $xml = simplexml_load_string($contents, 'SimpleXMLElement', LIBXML_NOCDATA);
+                if ($xml === false) {
+                    throw new Exception(sprintf(__('Import file %s does not contain valid XML.', 'yadore-monetizer'), $filename));
+                }
+                $decoded = json_decode(json_encode($xml), true);
+                return $this->normalize_import_payload(is_array($decoded) ? $decoded : array());
+            case 'csv':
+                $parsed = $this->parse_import_csv($path);
+                return $this->normalize_import_payload($parsed);
+        }
+
+        throw new Exception(sprintf(__('Unsupported import format: %s', 'yadore-monetizer'), $extension));
+    }
+
+    private function parse_import_csv($path) {
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            throw new Exception(__('Failed to open CSV import file.', 'yadore-monetizer'));
+        }
+
+        $headers = fgetcsv($handle);
+        if (!$headers || count($headers) < 3) {
+            fclose($handle);
+            throw new Exception(__('CSV import file is missing expected headers.', 'yadore-monetizer'));
+        }
+
+        $headers = array_map('strtolower', $headers);
+        $section_index = array_search('section', $headers, true);
+        $field_index = array_search('field', $headers, true);
+        $value_index = array_search('value', $headers, true);
+
+        if ($section_index === false || $value_index === false) {
+            fclose($handle);
+            throw new Exception(__('CSV import file is missing required columns.', 'yadore-monetizer'));
+        }
+
+        $payload = array(
+            'meta' => array(),
+            'data' => array(),
+        );
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $section = strtolower(trim((string) ($row[$section_index] ?? '')));
+            $field = isset($row[$field_index]) ? trim((string) $row[$field_index]) : '';
+            $value = $this->convert_import_value($row[$value_index] ?? '');
+
+            if ($section === 'meta') {
+                if ($field !== '') {
+                    $payload['meta'][$field] = $value;
+                }
+                continue;
+            }
+
+            if (!isset($payload['data'][$section]) || !is_array($payload['data'][$section])) {
+                $payload['data'][$section] = array();
+            }
+
+            if ($section === 'settings') {
+                $payload['data'][$section][] = array(
+                    'key' => $field,
+                    'value' => $value,
+                );
+                continue;
+            }
+
+            $payload['data'][$section][] = $value;
+        }
+
+        fclose($handle);
+
+        return $payload;
+    }
+
+    private function normalize_import_payload($raw) {
+        $payload = array(
+            'meta' => array(),
+            'data' => array(
+                'settings' => array(),
+                'keywords' => array(),
+                'analytics' => array(),
+                'logs' => array(),
+                'cache' => array(),
+            ),
+        );
+
+        if (isset($raw['meta']) && is_array($raw['meta'])) {
+            $payload['meta'] = $raw['meta'];
+            unset($raw['meta']);
+        }
+
+        if (isset($raw['data']) && is_array($raw['data'])) {
+            foreach ($raw['data'] as $section => $records) {
+                $payload['data'][$section] = is_array($records) ? $records : array($records);
+            }
+            unset($raw['data']);
+        }
+
+        foreach ($raw as $section => $records) {
+            if (!is_string($section)) {
+                continue;
+            }
+
+            if (!isset($payload['data'][$section]) || !is_array($payload['data'][$section])) {
+                $payload['data'][$section] = array();
+            }
+
+            if (is_array($records)) {
+                $payload['data'][$section] = array_merge($payload['data'][$section], $records);
+            } else {
+                $payload['data'][$section][] = $records;
+            }
+        }
+
+        foreach ($payload['data'] as $section => $records) {
+            if (!is_array($records)) {
+                $payload['data'][$section] = array($records);
+            }
+        }
+
+        return $payload;
+    }
+
+    private function convert_import_value($value) {
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        if ($trimmed === 'null') {
+            return null;
+        }
+
+        if ($trimmed === 'true') {
+            return true;
+        }
+
+        if ($trimmed === 'false') {
+            return false;
+        }
+
+        $decoded = json_decode($trimmed, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $decoded;
+        }
+
+        if (function_exists('is_serialized') && is_serialized($trimmed)) {
+            return maybe_unserialize($trimmed);
+        }
+
+        return $value;
+    }
+
+    private function validate_import_payload(array $payload) {
+        $stats = array();
+        $messages = array();
+
+        foreach ($payload['data'] as $section => $records) {
+            $count = is_array($records) ? count($records) : 0;
+            $stats[$section . '_records'] = $count;
+
+            if ($count > 0) {
+                $messages[] = sprintf(__('Detected %1$d records for %2$s.', 'yadore-monetizer'), $count, $section);
+            }
+        }
+
+        if (!empty($payload['meta']['site_url'])) {
+            $messages[] = sprintf(__('Export originated from %s.', 'yadore-monetizer'), $payload['meta']['site_url']);
+        }
+
+        return array(
+            'stats' => $stats,
+            'messages' => $messages,
+        );
+    }
+
+    private function import_payload(array $payload, array $flags) {
+        $stats = array(
+            'settings_imported' => 0,
+            'keywords_imported' => 0,
+            'analytics_imported' => 0,
+            'logs_imported' => 0,
+            'cache_entries_imported' => 0,
+        );
+
+        $messages = array();
+
+        if (!empty($payload['data']['settings'])) {
+            $stats['settings_imported'] = $this->import_settings_records($payload['data']['settings'], !empty($flags['overwrite']));
+            $messages[] = sprintf(__('Imported %d settings.', 'yadore-monetizer'), $stats['settings_imported']);
+        }
+
+        if (!empty($payload['data']['keywords'])) {
+            $stats['keywords_imported'] = $this->import_table_records('yadore_post_keywords', $payload['data']['keywords']);
+            $messages[] = sprintf(__('Imported %d keyword rows.', 'yadore-monetizer'), $stats['keywords_imported']);
+        }
+
+        if (!empty($payload['data']['analytics'])) {
+            $stats['analytics_imported'] = $this->import_table_records('yadore_analytics', $payload['data']['analytics']);
+            $messages[] = sprintf(__('Imported %d analytics records.', 'yadore-monetizer'), $stats['analytics_imported']);
+        }
+
+        if (!empty($payload['data']['logs'])) {
+            $log_summary = $this->import_log_records($payload['data']['logs']);
+            $stats['logs_imported'] = array_sum($log_summary);
+            $messages[] = sprintf(__('Imported %d log entries.', 'yadore-monetizer'), $stats['logs_imported']);
+        }
+
+        if (!empty($payload['data']['cache'])) {
+            $cache_summary = $this->import_cache_records($payload['data']['cache']);
+            $stats['cache_entries_imported'] = $cache_summary['entries'];
+            if ($cache_summary['metrics']) {
+                $messages[] = __('Cache metrics restored.', 'yadore-monetizer');
+            }
+            if ($stats['cache_entries_imported'] > 0) {
+                $messages[] = sprintf(__('Imported %d cache entries.', 'yadore-monetizer'), $stats['cache_entries_imported']);
+            }
+        }
+
+        return array(
+            'stats' => $stats,
+            'messages' => $messages,
+        );
+    }
+
+    private function import_settings_records(array $records, $overwrite) {
+        $defaults = $this->get_default_options();
+        $allowed_keys = array_merge(array_keys($defaults), array(
+            'yadore_install_timestamp',
+            'yadore_plugin_version',
+            'yadore_cache_metrics',
+        ));
+
+        $updated = 0;
+
+        foreach ($records as $record) {
+            if (!is_array($record) || empty($record['key'])) {
+                continue;
+            }
+
+            $key = sanitize_key($record['key']);
+            if (!in_array($key, $allowed_keys, true)) {
+                continue;
+            }
+
+            if (!$overwrite && get_option($key, null) !== null) {
+                continue;
+            }
+
+            $value = $record['value'] ?? null;
+            if (is_string($value)) {
+                $converted = $this->convert_import_value($value);
+                $value = $converted;
+            }
+
+            update_option($key, $value, false);
+            $updated++;
+        }
+
+        return $updated;
+    }
+
+    private function import_log_records(array $records) {
+        $api_logs = array();
+        $error_logs = array();
+
+        foreach ($records as $record) {
+            if (!is_array($record)) {
+                continue;
+            }
+
+            $type = isset($record['log_type']) ? strtolower((string) $record['log_type']) : 'api';
+
+            if ($type === 'error') {
+                $error_logs[] = $record;
+            } else {
+                $api_logs[] = $record;
+            }
+        }
+
+        return array(
+            'api' => $this->import_table_records('yadore_api_logs', $api_logs),
+            'error' => $this->import_table_records('yadore_error_logs', $error_logs),
+        );
+    }
+
+    private function import_cache_records(array $records) {
+        $metrics_restored = false;
+        $entries = array();
+
+        foreach ($records as $record) {
+            if (!is_array($record)) {
+                continue;
+            }
+
+            $type = isset($record['entry_type']) ? strtolower((string) $record['entry_type']) : '';
+
+            if ($type === 'metrics' && isset($record['data']) && is_array($record['data'])) {
+                update_option('yadore_cache_metrics', $record['data'], false);
+                $metrics_restored = true;
+                continue;
+            }
+
+            if ($type === 'ai_cache') {
+                unset($record['entry_type']);
+            }
+
+            $entries[] = $record;
+        }
+
+        $imported = $this->import_table_records('yadore_ai_cache', $entries);
+
+        return array(
+            'metrics' => $metrics_restored,
+            'entries' => $imported,
+        );
+    }
+
+    private function import_table_records($table_suffix, array $records) {
+        global $wpdb;
+
+        if (empty($records)) {
+            return 0;
+        }
+
+        $table = $wpdb->prefix . $table_suffix;
+        if (!$this->table_exists($table)) {
+            return 0;
+        }
+
+        $columns = $this->get_table_columns($table);
+        if (empty($columns)) {
+            return 0;
+        }
+
+        $imported = 0;
+
+        foreach ($records as $record) {
+            if (!is_array($record)) {
+                continue;
+            }
+
+            $row = array();
+            foreach ($record as $column => $value) {
+                if (!in_array($column, $columns, true)) {
+                    continue;
+                }
+
+                if (is_array($value) || is_object($value)) {
+                    $row[$column] = wp_json_encode($value);
+                } else {
+                    $row[$column] = $value;
+                }
+            }
+
+            if (empty($row)) {
+                continue;
+            }
+
+            $result = $wpdb->replace($table, $row);
+            if ($result !== false) {
+                $imported++;
+            }
+        }
+
+        return $imported;
+    }
+
+    private function get_table_columns($table) {
+        static $cache = array();
+
+        if (isset($cache[$table])) {
+            return $cache[$table];
+        }
+
+        global $wpdb;
+
+        $columns = $wpdb->get_col('SHOW COLUMNS FROM `' . str_replace('`', '``', $table) . '`');
+        $cache[$table] = is_array($columns) ? $columns : array();
+
+        return $cache[$table];
+    }
+
+    private function optimize_plugin_cache() {
+        $expired_transients = $this->purge_transients_by_prefix(array('yadore_products_', 'yadore_ai_'), true);
+        $expired_rows = $this->prune_ai_cache_table(true);
+
+        return array(
+            'expired_transients' => $expired_transients,
+            'expired_ai_rows' => $expired_rows,
+        );
+    }
+
+    private function prune_ai_cache_table($only_expired = false) {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'yadore_ai_cache';
+        if (!$this->table_exists($table)) {
+            return 0;
+        }
+
+        if ($only_expired) {
+            $now = $this->get_wp_timestamp();
+            $deleted = $wpdb->query($wpdb->prepare('DELETE FROM ' . $table . ' WHERE expires_at > 0 AND expires_at < %d', $now));
+        } else {
+            $deleted = $wpdb->query('DELETE FROM ' . $table);
+        }
+
+        return is_numeric($deleted) ? (int) $deleted : 0;
+    }
+
+    private function optimize_database_tables() {
+        global $wpdb;
+
+        $tables = $this->get_plugin_tables();
+        $results = array();
+
+        foreach ($tables as $table) {
+            if (!$this->table_exists($table)) {
+                continue;
+            }
+
+            $optimized = $wpdb->query('OPTIMIZE TABLE `' . str_replace('`', '``', $table) . '`');
+            $analyzed = $wpdb->query('ANALYZE TABLE `' . str_replace('`', '``', $table) . '`');
+
+            $results[] = array(
+                'table' => $table,
+                'optimized' => $optimized !== false,
+                'analyzed' => $analyzed !== false,
+            );
+        }
+
+        return array(
+            'tables' => $results,
+        );
+    }
+
+    private function get_plugin_tables() {
+        global $wpdb;
+
+        return array(
+            $wpdb->prefix . 'yadore_ai_cache',
+            $wpdb->prefix . 'yadore_post_keywords',
+            $wpdb->prefix . 'yadore_api_logs',
+            $wpdb->prefix . 'yadore_error_logs',
+            $wpdb->prefix . 'yadore_analytics',
+            $wpdb->prefix . 'yadore_api_clicks',
+        );
+    }
+
+    private function cleanup_old_data_records() {
+        $log_summary = $this->delete_old_logs();
+        $expired_cache = $this->optimize_plugin_cache();
+
+        return array(
+            'logs' => $log_summary,
+            'cache' => $expired_cache,
+        );
+    }
+
+    private function archive_logs_to_file() {
+        $config = array(
+            'data_types' => array('logs'),
+            'date_range' => 'all',
+            'format' => 'json',
+        );
+
+        $payload = $this->prepare_export_payload($config);
+        $content = $this->convert_export_payload($payload, 'json');
+
+        $package = array(
+            'filename' => $this->generate_export_filename('json'),
+            'format' => 'json',
+            'mime_type' => $this->get_export_mime_type('json'),
+            'content' => base64_encode($content),
+            'meta' => $payload['meta'],
+        );
+
+        return $this->save_export_package($package, 'archives');
+    }
+
+    private function delete_old_logs() {
+        global $wpdb;
+
+        $summary = array(
+            'api_logs' => 0,
+            'error_logs' => 0,
+        );
+
+        $api_table = $wpdb->prefix . 'yadore_api_logs';
+        $error_table = $wpdb->prefix . 'yadore_error_logs';
+
+        $api_days = max(1, (int) get_option('yadore_log_retention_days', 30));
+        $error_days = max(1, (int) get_option('yadore_error_retention_days', 90));
+
+        $now = $this->get_wp_timestamp();
+
+        if ($this->table_exists($api_table)) {
+            $cutoff = gmdate('Y-m-d H:i:s', $now - ($api_days * DAY_IN_SECONDS));
+            $deleted = $wpdb->query($wpdb->prepare('DELETE FROM ' . $api_table . ' WHERE created_at < %s', $cutoff));
+            if (is_numeric($deleted)) {
+                $summary['api_logs'] = (int) $deleted;
+            }
+        }
+
+        if ($this->table_exists($error_table)) {
+            $cutoff = gmdate('Y-m-d H:i:s', $now - ($error_days * DAY_IN_SECONDS));
+            $deleted = $wpdb->query($wpdb->prepare('DELETE FROM ' . $error_table . ' WHERE created_at < %s', $cutoff));
+            if (is_numeric($deleted)) {
+                $summary['error_logs'] = (int) $deleted;
+            }
+        }
+
+        return $summary;
+    }
+
+    public function run_system_cleanup() {
+        $cleanup = $this->cleanup_old_data_records();
+        $database = $this->optimize_database_tables();
+
+        return array(
+            'cleanup' => $cleanup,
+            'database' => $database,
+        );
+    }
+
+    private function schedule_cleanup_event($interval) {
+        $allowed = array('hourly', 'twicedaily', 'daily', 'weekly');
+        if (!in_array($interval, $allowed, true)) {
+            $interval = 'daily';
+        }
+
+        if (function_exists('wp_clear_scheduled_hook')) {
+            wp_clear_scheduled_hook('yadore_run_system_cleanup');
+        }
+
+        $timestamp = $this->calculate_schedule_timestamp($interval, '02:00');
+        wp_schedule_event($timestamp, $interval, 'yadore_run_system_cleanup');
+
+        return array(
+            'interval' => $interval,
+            'next_run' => $timestamp,
+            'next_run_human' => $this->format_timestamp_for_display($timestamp),
+        );
+    }
+
+    private function reset_plugin_settings_to_defaults() {
+        $defaults = $this->get_default_options();
+        $updated = 0;
+
+        foreach ($defaults as $key => $value) {
+            update_option($key, $value, false);
+            $updated++;
+        }
+
+        return $updated;
+    }
+
+    private function remove_all_plugin_data() {
+        global $wpdb;
+
+        $tables = $this->get_plugin_tables();
+        $dropped = 0;
+
+        foreach ($tables as $table) {
+            if ($this->table_exists($table)) {
+                $wpdb->query('DROP TABLE IF EXISTS `' . str_replace('`', '``', $table) . '`');
+                $dropped++;
+            }
+        }
+
+        $options = array_merge(array_keys($this->get_default_options()), array(
+            'yadore_install_timestamp',
+            'yadore_plugin_version',
+            'yadore_cache_metrics',
+            'yadore_export_schedules',
+        ));
+
+        foreach ($options as $option) {
+            delete_option($option);
+        }
+
+        $this->api_cache = array();
+        $this->keyword_candidate_cache = array();
+
+        return array(
+            'tables_dropped' => $dropped,
+            'options_deleted' => count($options),
+        );
+    }
+
+    private function perform_factory_reset() {
+        $summary = $this->remove_all_plugin_data();
+
+        $this->create_tables();
+        $this->set_default_options();
+        $this->setup_initial_data();
+        $summary['templates'] = $this->restore_default_templates(true);
+
+        return $summary;
+    }
+
+    private function generate_config_export_package() {
+        $config = array(
+            'data_types' => array('settings', 'keywords', 'analytics', 'logs', 'cache'),
+            'date_range' => 'all',
+            'format' => 'json',
+        );
+
+        $payload = $this->prepare_export_payload($config);
+        $content = $this->convert_export_payload($payload, 'json');
+
+        return array(
+            'filename' => $this->generate_export_filename('json'),
+            'format' => 'json',
+            'mime_type' => $this->get_export_mime_type('json'),
+            'content' => base64_encode($content),
+            'meta' => $payload['meta'],
+        );
+    }
+
+    private function save_export_package(array $package, $subdir = 'archives') {
+        if (empty($package['content'])) {
+            return array();
+        }
+
+        if (!function_exists('wp_upload_dir')) {
+            return array();
+        }
+
+        $uploads = wp_upload_dir();
+        if (!empty($uploads['error'])) {
+            return array();
+        }
+
+        $directory = trailingslashit($uploads['basedir']) . 'yadore-monetizer/' . trim($subdir, '/');
+        if (!wp_mkdir_p($directory)) {
+            return array();
+        }
+
+        $filename = isset($package['filename']) ? $package['filename'] : $this->generate_export_filename('json');
+        $path = trailingslashit($directory) . $filename;
+
+        $binary = base64_decode($package['content'], true);
+        if ($binary === false) {
+            return array();
+        }
+
+        $bytes = file_put_contents($path, $binary);
+        if ($bytes === false) {
+            return array();
+        }
+
+        $url = trailingslashit($uploads['baseurl']) . 'yadore-monetizer/' . trim($subdir, '/') . '/' . $filename;
+
+        return array(
+            'path' => $path,
+            'url' => $url,
+            'size' => $bytes,
+            'filename' => $filename,
+        );
+    }
+
+    private function fetch_remote_settings_package($url) {
+        $endpoints = array(
+            trailingslashit($url) . 'wp-json/yadore/v1/config',
+            $url,
+        );
+
+        foreach ($endpoints as $endpoint) {
+            $response = wp_remote_get($endpoint, array('timeout' => 15));
+            if (is_wp_error($response)) {
+                continue;
+            }
+
+            $body = wp_remote_retrieve_body($response);
+            if (!is_string($body) || trim($body) === '') {
+                continue;
+            }
+
+            $decoded = json_decode($body, true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+
+            return $this->normalize_import_payload($decoded);
+        }
+
+        return array();
+    }
+
+    private function perform_auto_optimize() {
+        $cache = $this->optimize_plugin_cache();
+        $cleanup = $this->cleanup_old_data_records();
+        $database = $this->optimize_database_tables();
+
+        return array(
+            'cache' => $cache,
+            'cleanup' => $cleanup,
+            'database' => $database,
+        );
+    }
+
+    private function analyze_keywords_locally($text, $limit) {
+        $text = wp_strip_all_tags((string) $text);
+        if ($text === '') {
+            return array();
+        }
+
+        $normalized = strtolower($text);
+        $normalized = preg_replace('/[^a-z0-9\s]/i', ' ', $normalized);
+        $normalized = preg_replace('/\s+/', ' ', $normalized);
+        $words = explode(' ', trim($normalized));
+
+        $stop_words = array('und','oder','aber','dass','nicht','sein','sind','sich','mit','eine','einer','eines','ein','der','die','das','den','dem','des','auf','für','von','zum','zur','ist','im','am','the','and','for','with','this','that','from','your','have','has','are','was','were','will','best','guide','review','reviews','test','tests','2024','2025','2026','2023','latest','top','complete','ultimate','check','update','news','new','edition','insights','tips','tricks','vergleich','kaufen','preis','erfahrungen','bester','beste','bieten','unser','ihre','seine','meine','deine','falls','auch','noch','heute');
+        $stop_map = array_flip($stop_words);
+
+        $counts = array();
+        $bigrams = array();
+        $previous = '';
+
+        foreach ($words as $word) {
+            $word = trim($word);
+            if ($word === '' || isset($stop_map[$word]) || is_numeric($word)) {
+                $previous = '';
+                continue;
+            }
+
+            $counts[$word] = ($counts[$word] ?? 0) + 1;
+
+            if ($previous !== '') {
+                $bigram = $previous . ' ' . $word;
+                $bigrams[$bigram] = ($bigrams[$bigram] ?? 0) + 1;
+            }
+
+            $previous = $word;
+        }
+
+        $candidates = array();
+
+        arsort($bigrams);
+        foreach (array_keys($bigrams) as $phrase) {
+            $candidates[] = $this->normalize_keyword_case($phrase);
+        }
+
+        arsort($counts);
+        foreach (array_keys($counts) as $word) {
+            $candidates[] = $this->normalize_keyword_case($word);
+        }
+
+        $sanitized = $this->sanitize_keyword_list($candidates);
+
+        return array_slice($sanitized, 0, max(1, (int) $limit));
+    }
+
+    private function analyze_keywords_with_ai($text, $limit) {
+        $result = $this->call_gemini_api(__('Keyword Analyzer', 'yadore-monetizer'), $text, false, 0);
+
+        if (!is_array($result)) {
+            throw new Exception(__('Unexpected response from AI service.', 'yadore-monetizer'));
+        }
+
+        if (isset($result['error'])) {
+            throw new Exception($result['error']);
+        }
+
+        $keywords = array();
+
+        if (!empty($result['keyword'])) {
+            $keywords[] = $result['keyword'];
+        }
+
+        if (!empty($result['alternate_keywords']) && is_array($result['alternate_keywords'])) {
+            $keywords = array_merge($keywords, $result['alternate_keywords']);
+        }
+
+        if (!empty($result['alternates']) && is_array($result['alternates'])) {
+            $keywords = array_merge($keywords, $result['alternates']);
+        }
+
+        $keywords = $this->sanitize_keyword_list($keywords);
+
+        $summary = '';
+        if (!empty($result['rationale'])) {
+            $summary = trim((string) $result['rationale']);
+        }
+
+        return array(
+            'keywords' => array_slice($keywords, 0, max(1, (int) $limit)),
+            'summary' => $summary,
+        );
     }
 
     private function store_export_file($schedule_id, $format, $content) {
