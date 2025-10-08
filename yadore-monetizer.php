@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.32
+Version: 3.33
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.32');
+define('YADORE_PLUGIN_VERSION', '3.33');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -4933,7 +4933,22 @@ HTML
         $this->maybe_sync_clicks_from_api(clone $start, clone $end);
 
         $start_string = $start->format('Y-m-d H:i:s');
+        $end_string = $end->format('Y-m-d H:i:s');
         $start_timestamp = $start->getTimestamp();
+        $end_timestamp = $end->getTimestamp();
+
+        $previous_end = (clone $start);
+        $previous_end->modify('-1 second');
+        $previous_start = clone $previous_end;
+        $previous_start->setTime(0, 0, 0);
+        if ($period > 1) {
+            $previous_start->modify(sprintf('-%d days', $period - 1));
+        }
+
+        $previous_start_string = $previous_start->format('Y-m-d H:i:s');
+        $previous_end_string = $previous_end->format('Y-m-d H:i:s');
+        $previous_start_timestamp = $previous_start->getTimestamp();
+        $previous_end_timestamp = $previous_end->getTimestamp();
 
         $date_map = $this->generate_analytics_date_map($start, $end);
         $labels = array();
@@ -4947,6 +4962,13 @@ HTML
         $label_count = count($labels);
 
         $summary = array(
+            'product_views' => 0,
+            'overlay_displays' => 0,
+            'average_ctr' => 0,
+            'ai_analyses' => 0,
+        );
+
+        $previous_summary = array(
             'product_views' => 0,
             'overlay_displays' => 0,
             'average_ctr' => 0,
@@ -5010,6 +5032,8 @@ HTML
         $page_views_total = 0;
         $clicks_total = 0;
         $conversions_total = 0;
+        $previous_page_views_total = 0;
+        $previous_clicks_total = 0;
         $session_count = 0;
         $session_duration_sum = 0;
         $revenue_total = 0.0;
@@ -5024,8 +5048,18 @@ HTML
         if ($this->table_exists($analytics_table)) {
             $event_totals = $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT event_type, COUNT(*) AS total FROM {$analytics_table} WHERE created_at >= %s GROUP BY event_type",
-                    $start_string
+                    "SELECT event_type, COUNT(*) AS total FROM {$analytics_table} WHERE created_at BETWEEN %s AND %s GROUP BY event_type",
+                    $start_string,
+                    $end_string
+                ),
+                ARRAY_A
+            );
+
+            $previous_event_totals = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT event_type, COUNT(*) AS total FROM {$analytics_table} WHERE created_at BETWEEN %s AND %s GROUP BY event_type",
+                    $previous_start_string,
+                    $previous_end_string
                 ),
                 ARRAY_A
             );
@@ -5052,16 +5086,39 @@ HTML
                 }
             }
 
+            if (is_array($previous_event_totals)) {
+                foreach ($previous_event_totals as $row) {
+                    $type = isset($row['event_type']) ? sanitize_key((string) $row['event_type']) : '';
+                    $total = isset($row['total']) ? (int) $row['total'] : 0;
+
+                    switch ($type) {
+                        case 'product_view':
+                            $previous_summary['product_views'] += $total;
+                            break;
+                        case 'overlay_view':
+                            $previous_summary['overlay_displays'] += $total;
+                            break;
+                        case 'product_click':
+                            $previous_clicks_total += $total;
+                            break;
+                        case 'conversion':
+                            // Conversion totals are tracked for current period funnel metrics only.
+                            break;
+                    }
+                }
+            }
+
             $daily_rows = $wpdb->get_results(
                 $wpdb->prepare(
                     "SELECT DATE(created_at) AS event_day,
                             SUM(CASE WHEN event_type IN ('product_view','overlay_view') THEN 1 ELSE 0 END) AS views,
                             SUM(CASE WHEN event_type = 'product_click' THEN 1 ELSE 0 END) AS clicks
                      FROM {$analytics_table}
-                     WHERE created_at >= %s
+                     WHERE created_at BETWEEN %s AND %s
                      GROUP BY DATE(created_at)
                      ORDER BY DATE(created_at) ASC",
-                    $start_string
+                    $start_string,
+                    $end_string
                 ),
                 ARRAY_A
             );
@@ -5095,9 +5152,10 @@ HTML
                 $wpdb->prepare(
                     "SELECT session_id, MIN(created_at) AS first_event, MAX(created_at) AS last_event
                      FROM {$analytics_table}
-                     WHERE created_at >= %s AND session_id IS NOT NULL AND session_id <> ''
+                     WHERE created_at BETWEEN %s AND %s AND session_id IS NOT NULL AND session_id <> ''
                      GROUP BY session_id",
-                    $start_string
+                    $start_string,
+                    $end_string
                 ),
                 ARRAY_A
             );
@@ -5125,9 +5183,10 @@ HTML
                     $wpdb->prepare(
                         "SELECT DATE(created_at) AS event_day, COUNT(DISTINCT session_id) AS sessions
                          FROM {$analytics_table}
-                         WHERE created_at >= %s AND session_id IS NOT NULL AND session_id <> ''
+                         WHERE created_at BETWEEN %s AND %s AND session_id IS NOT NULL AND session_id <> ''
                          GROUP BY DATE(created_at)",
-                        $start_string
+                        $start_string,
+                        $end_string
                     ),
                     ARRAY_A
                 );
@@ -5151,16 +5210,18 @@ HTML
 
             $product_pages = $wpdb->get_var(
                 $wpdb->prepare(
-                    "SELECT COUNT(DISTINCT post_id) FROM {$analytics_table} WHERE created_at >= %s AND post_id IS NOT NULL AND post_id > 0",
-                    $start_string
+                    "SELECT COUNT(DISTINCT post_id) FROM {$analytics_table} WHERE created_at BETWEEN %s AND %s AND post_id IS NOT NULL AND post_id > 0",
+                    $start_string,
+                    $end_string
                 )
             );
             $traffic['product_pages'] = is_numeric($product_pages) ? (int) $product_pages : 0;
 
             $conversion_rows = $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT DATE(created_at) AS event_day, post_id, event_data FROM {$analytics_table} WHERE created_at >= %s AND event_type = %s",
+                    "SELECT DATE(created_at) AS event_day, post_id, event_data FROM {$analytics_table} WHERE created_at BETWEEN %s AND %s AND event_type = %s",
                     $start_string,
+                    $end_string,
                     'conversion'
                 ),
                 ARRAY_A
@@ -5203,9 +5264,10 @@ HTML
                             SUM(CASE WHEN event_type = 'product_click' THEN 1 ELSE 0 END) AS clicks,
                             SUM(CASE WHEN event_type = 'conversion' THEN 1 ELSE 0 END) AS conversions
                      FROM {$analytics_table}
-                     WHERE created_at >= %s AND post_id IS NOT NULL AND post_id > 0
+                     WHERE created_at BETWEEN %s AND %s AND post_id IS NOT NULL AND post_id > 0
                      GROUP BY post_id",
-                    $start_string
+                    $start_string,
+                    $end_string
                 ),
                 ARRAY_A
             );
@@ -5258,6 +5320,7 @@ HTML
                     $product_count = isset($row['product_count']) ? (int) $row['product_count'] : 0;
                     $validated = isset($row['product_validated']) ? (int) $row['product_validated'] : 0;
                     $last_scanned = isset($row['last_scanned']) ? strtotime($row['last_scanned']) : 0;
+                    $is_completed_scan = in_array($scan_status, array('completed', 'completed_ai', 'completed_manual'), true);
 
                     $keyword_map[$post_id] = array(
                         'keyword' => $keyword,
@@ -5277,12 +5340,16 @@ HTML
                         $keyword_overview['ai']++;
                     }
 
-                    if ($validated || $product_count > 0 || in_array($scan_status, array('completed', 'completed_ai', 'completed_manual'), true)) {
+                    if ($validated || $product_count > 0 || $is_completed_scan) {
                         $keyword_overview['active']++;
                     }
 
-                    if ($last_scanned && $last_scanned >= $start_timestamp && in_array($scan_status, array('completed', 'completed_manual', 'completed_ai'), true)) {
+                    if ($last_scanned && $last_scanned >= $start_timestamp && $last_scanned <= $end_timestamp && $is_completed_scan) {
                         $summary['ai_analyses']++;
+                    }
+
+                    if ($last_scanned && $last_scanned >= $previous_start_timestamp && $last_scanned <= $previous_end_timestamp && $is_completed_scan) {
+                        $previous_summary['ai_analyses']++;
                     }
                 }
             }
@@ -5366,6 +5433,8 @@ HTML
             }
         }
 
+        $previous_page_views_total = $previous_summary['product_views'] + $previous_summary['overlay_displays'];
+
         $view_reference = $summary['product_views'] > 0 ? $summary['product_views'] : $page_views_total;
         if ($view_reference > 0 && $clicks_total > 0) {
             $summary['average_ctr'] = round(($clicks_total / $view_reference) * 100, 2);
@@ -5374,6 +5443,17 @@ HTML
         }
 
         $summary['product_views'] = max($summary['product_views'], $page_views_total);
+
+        $previous_view_reference = $previous_summary['product_views'] > 0
+            ? $previous_summary['product_views']
+            : $previous_page_views_total;
+        if ($previous_view_reference > 0 && $previous_clicks_total > 0) {
+            $previous_summary['average_ctr'] = round(($previous_clicks_total / $previous_view_reference) * 100, 2);
+        } else {
+            $previous_summary['average_ctr'] = 0;
+        }
+
+        $previous_summary['product_views'] = max($previous_summary['product_views'], $previous_page_views_total);
 
         $funnel['page_views'] = $page_views_total;
         $funnel['product_displays'] = $summary['overlay_displays'];
@@ -5398,8 +5478,9 @@ HTML
         if ($session_count > 0) {
             $sessions_with_click = $wpdb->get_var(
                 $wpdb->prepare(
-                    "SELECT COUNT(DISTINCT session_id) FROM {$analytics_table} WHERE created_at >= %s AND session_id IS NOT NULL AND session_id <> '' AND event_type = %s",
+                    "SELECT COUNT(DISTINCT session_id) FROM {$analytics_table} WHERE created_at BETWEEN %s AND %s AND session_id IS NOT NULL AND session_id <> '' AND event_type = %s",
                     $start_string,
+                    $end_string,
                     'product_click'
                 )
             );
@@ -5449,6 +5530,13 @@ HTML
             $revenue['top_category'] = sanitize_text_field((string) $top_category);
             $revenue['category_earnings'] = round((float) current($category_totals), 2);
         }
+
+        $summary['trends'] = array(
+            'views' => $this->calculate_trend_percentage($summary['product_views'], $previous_summary['product_views']),
+            'overlays' => $this->calculate_trend_percentage($summary['overlay_displays'], $previous_summary['overlay_displays']),
+            'ctr' => $this->calculate_trend_percentage($summary['average_ctr'], $previous_summary['average_ctr']),
+            'ai_analyses' => $this->calculate_trend_percentage($summary['ai_analyses'], $previous_summary['ai_analyses']),
+        );
 
         if (!empty($keyword_cloud)) {
             $cloud_items = array();
@@ -5590,6 +5678,47 @@ HTML
         }
 
         return sprintf('%ds', $remaining);
+    }
+
+    private function calculate_trend_percentage($current, $previous) {
+        $current_value = is_numeric($current) ? (float) $current : 0.0;
+        $previous_value = is_numeric($previous) ? (float) $previous : 0.0;
+
+        if ($previous_value <= 0.0) {
+            if ($current_value <= 0.0) {
+                return array(
+                    'direction' => 'neutral',
+                    'change' => 0.0,
+                    'current' => $current_value,
+                    'previous' => 0.0,
+                );
+            }
+
+            return array(
+                'direction' => 'up',
+                'change' => 100.0,
+                'current' => $current_value,
+                'previous' => 0.0,
+            );
+        }
+
+        $difference = $current_value - $previous_value;
+        $percent_change = ($difference / $previous_value) * 100;
+        $rounded_change = round($percent_change, 1);
+
+        $direction = 'neutral';
+        if ($rounded_change > 0.1) {
+            $direction = 'up';
+        } elseif ($rounded_change < -0.1) {
+            $direction = 'down';
+        }
+
+        return array(
+            'direction' => $direction,
+            'change' => $rounded_change,
+            'current' => $current_value,
+            'previous' => $previous_value,
+        );
     }
 
     private function extract_amount_from_event_data($event_data) {

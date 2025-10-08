@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.32 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.33 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.32',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.33',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -2132,6 +2132,49 @@
             }
         },
 
+        updateTrendIndicator: function(selector, trend) {
+            const $element = $(selector);
+            if (!$element.length) {
+                return;
+            }
+
+            const change = Number(trend?.change);
+            const direction = trend?.direction || 'neutral';
+            const current = Number(trend?.current);
+            const previous = Number(trend?.previous);
+
+            const classes = ['positive', 'negative', 'neutral'];
+            $element.removeClass(classes.join(' '));
+
+            let className = 'neutral';
+            if (direction === 'up') {
+                className = 'positive';
+            } else if (direction === 'down') {
+                className = 'negative';
+            }
+            $element.addClass(className);
+
+            let formattedChange = '0%';
+            if (Number.isFinite(change)) {
+                const prefix = change > 0 ? '+' : change < 0 ? '-' : '';
+                const absolute = Math.abs(change).toLocaleString(undefined, {
+                    minimumFractionDigits: Math.abs(change) > 0 && Math.abs(change) < 10 ? 1 : 0,
+                    maximumFractionDigits: 1,
+                });
+                formattedChange = `${prefix}${absolute}%`;
+            }
+
+            $element.text(formattedChange);
+
+            if (Number.isFinite(current) && Number.isFinite(previous)) {
+                const currentLabel = current.toLocaleString();
+                const previousLabel = previous.toLocaleString();
+                $element.attr('title', `${previousLabel} → ${currentLabel}`);
+            } else {
+                $element.removeAttr('title');
+            }
+        },
+
         updateAnalyticsSummary: function(summary = {}) {
             const views = Number(summary?.product_views) || 0;
             const overlays = Number(summary?.overlay_displays) || 0;
@@ -2142,6 +2185,11 @@
             $('#total-overlays').text(this.formatNumber(overlays));
             $('#average-ctr').text(`${this.formatRate(ctr)}%`);
             $('#ai-analyses').text(this.formatNumber(aiAnalyses));
+
+            this.updateTrendIndicator('#views-trend', summary?.trends?.views);
+            this.updateTrendIndicator('#overlays-trend', summary?.trends?.overlays);
+            this.updateTrendIndicator('#ctr-trend', summary?.trends?.ctr);
+            this.updateTrendIndicator('#ai-trend', summary?.trends?.ai_analyses);
         },
 
         updateTrafficMetrics: function(traffic = {}) {
