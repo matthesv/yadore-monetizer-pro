@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.20 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.22 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -29,6 +29,10 @@
         align-items: center;
         justify-content: center;
         line-height: 1;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
     }
 
     .version-badge {
@@ -2140,8 +2144,13 @@
 }
 
 .action-button .dashicons {
-    font-size: 20px;
+    font-size: 18px;
     color: var(--yadore-color-primary-500);
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .action-content strong {
@@ -3250,6 +3259,29 @@
 .revenue-category {
     font-size: var(--yadore-font-size-lg);
     font-weight: var(--yadore-font-weight-semibold);
+}
+
+@media (max-width: 640px) {
+    .yadore-hero__meta,
+    .token-grid,
+    .component-grid,
+    .yadore-stats-grid,
+    .summary-grid,
+    .overview-analytics-grid,
+    .scanner-overview .scanner-stats,
+    .scan-analytics-card .analytics-grid,
+    .color-settings-grid,
+    .generator-row,
+    .health-status-grid,
+    .tools-grid,
+    .summary-stats,
+    .cloud-container,
+    .analytics-grid,
+    .conversion-funnel,
+    .keyword-stats,
+    .revenue-cards {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 @media (min-width: 1024px) {
