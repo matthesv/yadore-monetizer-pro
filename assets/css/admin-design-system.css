@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.23 - Admin Design System Tokens */
+/* Yadore Monetizer Pro v3.24 - Admin Design System Tokens */
 @layer tokens {
     :root {
         color-scheme: light;
@@ -82,6 +82,8 @@
         --yadore-color-surface-strong: #ecf2fb;
         --yadore-color-surface-elevated: rgba(255, 255, 255, 0.92);
         --yadore-color-overlay: rgba(29, 64, 175, 0.28);
+        --yadore-color-surface-subtle: color-mix(in srgb, var(--yadore-color-neutral-50) 80%, #ffffff 20%);
+        --yadore-color-surface-card-muted: color-mix(in srgb, var(--yadore-color-surface) 75%, var(--yadore-color-neutral-100) 25%);
         --yadore-color-code-surface: #0f172a;
         --yadore-color-code-text: #e2e8f0;
         --yadore-color-code-border: rgba(15, 23, 42, 0.4);
@@ -90,12 +92,32 @@
         --yadore-color-text-subtle: var(--yadore-color-neutral-700);
         --yadore-color-text-muted: var(--yadore-color-neutral-600);
         --yadore-color-text-inverse: #ffffff;
+        --yadore-color-text-secondary: var(--yadore-color-text-subtle);
+        --yadore-color-text-tertiary: var(--yadore-color-neutral-600);
 
         --yadore-border-subtle: rgba(37, 99, 235, 0.12);
         --yadore-border-medium: rgba(29, 78, 216, 0.18);
         --yadore-border-strong: rgba(17, 24, 39, 0.16);
         --yadore-border-focus: rgba(37, 99, 235, 0.38);
         --yadore-border-glass: rgba(37, 99, 235, 0.22);
+        --yadore-border-muted: var(--yadore-color-neutral-200);
+        --yadore-border-emphasis: rgba(17, 24, 39, 0.22);
+        --yadore-border-success: rgba(22, 163, 74, 0.35);
+        --yadore-border-warning: rgba(249, 115, 22, 0.32);
+        --yadore-border-danger: rgba(239, 68, 68, 0.34);
+        --yadore-border-info: rgba(37, 99, 235, 0.28);
+
+        --yadore-color-status-neutral: var(--yadore-color-neutral-400);
+        --yadore-color-status-success: var(--yadore-color-success-500);
+        --yadore-color-status-warning: var(--yadore-color-warning-500);
+        --yadore-color-status-danger: var(--yadore-color-danger-500);
+        --yadore-color-status-info: var(--yadore-color-primary-500);
+        --yadore-color-status-warning-accent: color-mix(in srgb, var(--yadore-color-warning-500) 70%, #fef3c7 30%);
+
+        --yadore-color-status-success-soft: rgba(22, 163, 74, 0.12);
+        --yadore-color-status-warning-soft: rgba(249, 115, 22, 0.18);
+        --yadore-color-status-danger-soft: rgba(239, 68, 68, 0.14);
+        --yadore-color-status-info-soft: rgba(37, 99, 235, 0.12);
 
         --yadore-shadow-xs: 0 2px 6px rgba(30, 58, 138, 0.08);
         --yadore-shadow-sm: 0 8px 20px rgba(30, 58, 138, 0.08);

@@ -1,6 +1,6 @@
-# Yadore Monetizer Pro Design System (v3.23)
+# Yadore Monetizer Pro Design System (v3.24)
 
-Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.16 einem token-basierten Designsystem. Mit v3.23 wurden die Hero-Metakarten, Tab-Navigation und Formulare vollständig auf die Tokenstruktur ausgerichtet. Dieses Dokument dient als zentrale Referenz für Entwickler:innen, UX-Designer:innen und QA, um konsistente UI-Entscheidungen zu treffen und Änderungen nachvollziehbar zu dokumentieren.
+Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.16 einem token-basierten Designsystem. Mit v3.24 wurden die Hero-Metakarten, Tab-Navigation und Formulare vollständig auf die Tokenstruktur ausgerichtet. Dieses Dokument dient als zentrale Referenz für Entwickler:innen, UX-Designer:innen und QA, um konsistente UI-Entscheidungen zu treffen und Änderungen nachvollziehbar zu dokumentieren.
 
 ## 1. Architektur & Dateien
 
@@ -16,10 +16,13 @@ Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.16 einem token
 Alle Tokens werden auf `:root` Ebene definiert und innerhalb von `.yadore-admin-wrap` vererbt.
 
 - **Farben**: `--yadore-color-primary-*`, `--yadore-color-success-*`, `--yadore-color-warning-*`, `--yadore-color-danger-*`, `--yadore-color-neutral-*`, `--yadore-color-surface*`, `--yadore-color-code-*`.
+- **Statusfarben**: `--yadore-color-status-*` (inkl. `*-soft` & `--yadore-color-status-warning-accent`) für Badges, Pills und Hinweistexte.
 - **Typografie**: `--yadore-font-family-base`, `--yadore-font-family-mono`, `--yadore-font-size-*`, `--yadore-font-weight-*`.
 - **Spacing**: `--yadore-space-*` (0 bis 8) inkl. halber Schritte (`--yadore-space-1-5`, `--yadore-space-2-5`, `--yadore-space-4-5`).
 - **Radii**: `--yadore-radius-*` (xs bis pill).
 - **Shadows**: `--yadore-shadow-*` (xs bis lg) und Border-Intensitäten (`--yadore-border-subtle`, `--yadore-border-medium`, `--yadore-border-strong`).
+- **Grenzen**: `--yadore-border-muted`, `--yadore-border-emphasis`, `--yadore-border-success`, `--yadore-border-warning`, `--yadore-border-danger`, `--yadore-border-info` für Inputs, Cards und Statuspanels.
+- **Surface-Layer**: `--yadore-color-surface-subtle` & `--yadore-color-surface-card-muted` liefern konsistente Hintergründe für Listen, Pagination und Quick Actions.
 - **Motion**: `--yadore-motion-duration-*` & `--yadore-motion-easing-standard` für animierte Mikrointeraktionen.
 
 > **Dark Mode**: Über `@media (prefers-color-scheme: dark)` erhalten Farben, Schatten und Oberflächenwerte automatische Alternativen. Neue Tokens müssen beide Modi bedienen.
@@ -42,7 +45,7 @@ Die Styleguide-Seite (`templates/admin-styleguide.php`) zeigt Referenz-HTML für
 
 - **Stat Cards** (`.stat-card`) – Kennzahlen mit Icon, Zahl und Label.
 - **Yadore Cards** (`.yadore-card`) – Standardcontainer für Einstellungen & Inhalte.
-- **Status Badges** (`.status-badge`) – Farbige Statusanzeigen, nutzen die primären Feedback-Farben.
+- **Status Badges** (`.status-badge`) – Farbige Statusanzeigen, nutzen die Status-Tokens (`--yadore-color-status-*`).
 - **Onboarding Checklist** (`.yadore-onboarding-card`, `.checklist-item`) – Mehrstufiger Setup-Flow mit Fortschrittsanzeige, Status-Badges und kontextuellen Aktionen.
 - **Filter Pills** & **Quick Filter** – Verwenden `--yadore-radius-pill` und `--yadore-space-*` Tokens.
 
