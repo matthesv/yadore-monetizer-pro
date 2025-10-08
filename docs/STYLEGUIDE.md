@@ -1,6 +1,6 @@
-# Yadore Monetizer Pro Design System (v3.22)
+# Yadore Monetizer Pro Design System (v3.23)
 
-Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.16 einem token-basierten Designsystem. Seit v3.22 wurden die Status-Kommunikation, Onboarding-Hilfen und Metrik-Anzeigen weiter verfeinert. Dieses Dokument dient als zentrale Referenz für Entwickler:innen, UX-Designer:innen und QA, um konsistente UI-Entscheidungen zu treffen und Änderungen nachvollziehbar zu dokumentieren.
+Die Admin-Oberfläche von Yadore Monetizer Pro folgt ab Version 3.16 einem token-basierten Designsystem. Mit v3.23 wurden die Hero-Metakarten, Tab-Navigation und Formulare vollständig auf die Tokenstruktur ausgerichtet. Dieses Dokument dient als zentrale Referenz für Entwickler:innen, UX-Designer:innen und QA, um konsistente UI-Entscheidungen zu treffen und Änderungen nachvollziehbar zu dokumentieren.
 
 ## 1. Architektur & Dateien
 
