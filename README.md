@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.16 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.17 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.16 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.17 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **7 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,13 +15,13 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.16**
+## 🌟 **NEU IN VERSION 3.17**
 
-- ✅ **Schnellstart-Checkliste & Fortschrittsanzeige** – Das Dashboard bietet jetzt eine geführte Onboarding-Karte inklusive Prozentanzeige und Statusbadges, damit neue Installationen keine Pflichtschritte übersehen.
-- 🧭 **Geführte Setup-Aktionen** – Jede Checklisten-Kachel enthält kontextuelle Call-to-Actions zu den relevanten Admin-Seiten (Einstellungen, Analytics), wodurch Konfigurationen mit einem Klick erreichbar sind.
-- 🔔 **Kontextuelle Status-Hinweise** – Der Systemstatus zeigt bei fehlenden API-Keys nun direkte Links zum Setup und reduziert so Reibung beim Troubleshooting.
-- 🎨 **UI-Polish & Mikrointeraktionen** – Neue Motion- und Hover-States für Checklisten-Elemente, optimierte Progress-Balken und zugängliche Farbkontraste verbessern das Nutzererlebnis spürbar.
-- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.16.
+- ✅ **Setup-Kommandocenter** – Ein neuer Status-Header fasst Onboarding-Fortschritt, Systemzustände und die nächste sinnvolle Aktion in einem Blick zusammen – inklusive direkter CTAs.
+- 🔄 **Live-Metriken mit Zeitstempel** – Dashboard-Kennzahlen zeigen jetzt den exakten Aktualisierungszeitpunkt mit relativer Zeitangabe, manueller Refresh-Schaltfläche und Ausfallsicherung.
+- ♿ **Verbesserte Zugänglichkeit** – Progressbars, Statusmeldungen und Shortcuts wurden mit ARIA-Labels, klaren Zuständen und Lesbarkeit für Screenreader optimiert.
+- 🧭 **Smartes Aktivitäts-Feedback** – Fehlende Daten oder Ladezustände werden mit konsistenten Hinweisen, leeren Zustandskarten und detaillierten Fehlermeldungen kommuniziert.
+- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.17.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -67,7 +67,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.16:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.17:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -273,14 +273,14 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.16 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v3.17 - PRODUCTION-READY MARKET RELEASE!**
 
-### **Neue Highlights in v3.16:**
-- ✅ **Dashboard-Checkliste** – Neue Onboarding-Karte im Dashboard zeigt alle wichtigen Aktivierungsschritte inklusive Fortschrittsanzeige und Status-Tags.
-- 🔗 **Direkte Setup-Aktionen** – Jede Checklist-Kachel verlinkt zu den passenden Einstellungen (API, Automatisierung, Analytics) für ein nahtloses Setup.
-- 🔔 **Verbesserter Systemstatus** – Fehlende API- oder KI-Schlüssel werden jetzt mit klaren Warnfarben und Inline-Links zur Konfiguration hervorgehoben.
-- ✨ **Verfeinerte UX-Details** – Animierte Fortschrittsbalken, Hover-Zustände und kontrastreiche Buttons sorgen für mehr Klarheit und Feedback.
-- 📦 **Versionsupdate** – Sämtliche Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.16.
+### **Neue Highlights in v3.17:**
+- ✅ **Dashboard-Statuskarte** – Kombiniert Onboarding, Systemgesundheit und To-dos in einem sichtbaren Modul mit passenden Call-to-Actions.
+- 🔄 **Zeitgestempelte KPIs** – Alle Kennzahlen zeigen jetzt, wann sie zuletzt aktualisiert wurden, inklusive manueller Aktualisierung und Failover-Anzeige.
+- ♿ **Accessibility-Upgrade** – Progressbar und Live-Rückmeldungen folgen ARIA-Best-Practices und verbessern Screenreader-Kompatibilität.
+- 🧭 **Verbesserte Fehlermeldungen** – Einheitliche leere Zustände und klare Texte informieren bei ausbleibenden Daten oder API-Fehlern.
+- 📦 **Versionsupdate** – Sämtliche Assets, Tooltips und Dokumentation tragen die aktuelle Release-Version 3.17.
 
 **Alle Features sind verfügbar und voll funktional!**
 
@@ -296,11 +296,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.16 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.17 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.16** - Production-Ready Market Release
+**Current Version: 3.17** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
