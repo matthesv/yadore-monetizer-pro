@@ -1748,6 +1748,16 @@
     color: var(--yadore-color-primary-700);
 }
 
+@media (max-width: 959px) {
+    .scan-analytics-card .analytics-grid {
+        grid-auto-rows: auto;
+    }
+
+    .scan-analytics-card .analytics-panel {
+        height: auto;
+    }
+}
+
 @media (min-width: 960px) {
     .scan-analytics-card .analytics-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
