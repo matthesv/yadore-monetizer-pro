@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.42 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.44 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.42',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.44',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -641,13 +641,7 @@
             });
 
             // Date range picker
-            $('#export-date-range').on('change', function() {
-                if ($(this).val() === 'custom') {
-                    $('#custom-date-range').slideDown();
-                } else {
-                    $('#custom-date-range').slideUp();
-                }
-            });
+            this.setupExportDateRangeToggle();
 
             // Reset settings
             $('#reset-settings').on('click', (e) => {
@@ -2607,14 +2601,50 @@
             return `${seconds}s`;
         },
 
+        setupExportDateRangeToggle: function() {
+            const $select = $('#export-date-range');
+            const $custom = $('#custom-date-range');
+
+            if (!$select.length || !$custom.length) {
+                return;
+            }
+
+            const applyState = (animate) => {
+                const shouldShow = $select.val() === 'custom';
+
+                if (animate) {
+                    if (shouldShow) {
+                        $custom.stop(true, true).slideDown(150);
+                    } else {
+                        $custom.stop(true, true).slideUp(150);
+                    }
+                } else if (shouldShow) {
+                    $custom.stop(true, true).show();
+                } else {
+                    $custom.stop(true, true).hide();
+                }
+            };
+
+            applyState(false);
+
+            $select.off('change.yadoreTools').on('change.yadoreTools', () => applyState(true));
+        },
+
         // Tools functionality
         initTools: function() {
             if (!$('.yadore-tools-container').length) return;
+
+            this.setupExportDateRangeToggle();
 
             // Export/Import
             $('#start-export').on('click', (e) => {
                 e.preventDefault();
                 this.startExport();
+            });
+
+            $('#schedule-export').on('click', (e) => {
+                e.preventDefault();
+                this.scheduleExport();
             });
 
             $('#start-import').on('click', (e) => {
@@ -2676,6 +2706,247 @@
                 e.preventDefault();
                 this.analyzeKeywords();
             });
+
+            this.loadToolStats();
+        },
+
+        getExportConfiguration: function() {
+            const dataTypes = $('input[name="export_data[]"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (!dataTypes.length) {
+                throw new Error('Please select at least one data type to export.');
+            }
+
+            const format = $('input[name="export_format"]:checked').val() || 'json';
+            const dateRange = $('#export-date-range').val() || 'all';
+            let startDate = '';
+            let endDate = '';
+
+            if (dateRange === 'custom') {
+                startDate = $('#export-start-date').val();
+                endDate = $('#export-end-date').val();
+
+                if (!startDate || !endDate) {
+                    throw new Error('Please choose both a start and end date for the custom range.');
+                }
+
+                const startTime = new Date(startDate);
+                const endTime = new Date(endDate);
+                if (startTime > endTime) {
+                    throw new Error('The custom start date must be before the end date.');
+                }
+            }
+
+            return {
+                data_types: dataTypes,
+                format,
+                date_range: dateRange,
+                start_date: startDate,
+                end_date: endDate
+            };
+        },
+
+        startExport: function() {
+            let config;
+
+            try {
+                config = this.getExportConfiguration();
+            } catch (error) {
+                alert(error.message);
+                return;
+            }
+
+            const button = $('#start-export');
+            const originalHtml = button.html();
+
+            this.resetExportFeedback();
+            this.updateExportStatus('Preparing export...');
+            this.setExportProgress(5);
+
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Exporting...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_export_data',
+                nonce: this.nonce,
+                data_types: config.data_types,
+                format: config.format,
+                date_range: config.date_range,
+                start_date: config.start_date,
+                end_date: config.end_date
+            }, (response) => {
+                if (response && response.success) {
+                    const data = response.data || {};
+                    const records = Number(data.records) || 0;
+
+                    this.setExportProgress(100);
+                    this.updateExportStatus(`Export completed. ${records.toLocaleString()} records ready for download.`);
+
+                    if (data.content) {
+                        try {
+                            this.handleExportDownload(data);
+                        } catch (downloadError) {
+                            console.error(downloadError);
+                            alert('Export created, but the download could not be prepared.');
+                        }
+                    }
+                } else {
+                    const message = response && response.data ? response.data : 'Export failed.';
+                    this.setExportProgress(0);
+                    this.updateExportStatus(message);
+                    alert(message);
+                }
+            }, 'json').fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Export failed.';
+                this.setExportProgress(0);
+                this.updateExportStatus(message);
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        scheduleExport: function() {
+            let config;
+
+            try {
+                config = this.getExportConfiguration();
+            } catch (error) {
+                alert(error.message);
+                return;
+            }
+
+            const interval = $('#export-schedule-interval').val() || 'daily';
+            const time = $('#export-schedule-time').val() || '02:00';
+
+            if (!/^\d{2}:\d{2}$/.test(time)) {
+                alert('Please enter a valid schedule time (HH:MM).');
+                return;
+            }
+
+            const button = $('#schedule-export');
+            const originalHtml = button.html();
+
+            this.resetExportFeedback();
+
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Scheduling...');
+
+            $.post(this.ajax_url, {
+                action: 'yadore_schedule_export',
+                nonce: this.nonce,
+                data_types: config.data_types,
+                format: config.format,
+                date_range: config.date_range,
+                start_date: config.start_date,
+                end_date: config.end_date,
+                interval,
+                time
+            }, (response) => {
+                if (response && response.success) {
+                    const data = response.data || {};
+                    const nextRunRaw = typeof data.next_run_human === 'string' ? data.next_run_human : '';
+                    const nextRun = nextRunRaw.trim();
+                    const scheduleMessage = nextRun
+                        ? `Scheduled export saved. Next run: ${nextRun}`
+                        : 'Scheduled export saved.';
+
+                    this.setExportProgress(0);
+                    this.updateExportStatus(scheduleMessage);
+                    this.updateScheduleStatus(nextRun, 'Scheduled exports are configured.');
+                    this.loadToolStats();
+                } else {
+                    const message = response && response.data ? response.data : 'Failed to schedule export.';
+                    this.setExportProgress(0);
+                    this.updateExportStatus(message);
+                    alert(message);
+                }
+            }, 'json').fail((xhr) => {
+                const message = xhr?.responseJSON?.data || 'Failed to schedule export.';
+                this.setExportProgress(0);
+                this.updateExportStatus(message);
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+            });
+        },
+
+        resetExportFeedback: function() {
+            $('#export-results').hide();
+            this.setExportProgress(0);
+            $('#export-status').text('');
+        },
+
+        updateExportStatus: function(message) {
+            $('#export-results').show();
+            $('#export-status').text(message);
+        },
+
+        setExportProgress: function(percent) {
+            const clamped = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+            $('#export-progress').css('width', clamped + '%');
+        },
+
+        updateScheduleStatus: function(nextRunText, fallbackText = '') {
+            const $status = $('#export-schedule-status');
+            if (!$status.length) {
+                return;
+            }
+
+            const hasNextRun = typeof nextRunText === 'string' && nextRunText.trim() !== '';
+
+            if (hasNextRun) {
+                const safeNextRun = this.escapeHtml(nextRunText.trim());
+                $status.html(`<strong>Next run:</strong> ${safeNextRun}`);
+                return;
+            }
+
+            if (typeof fallbackText === 'string' && fallbackText !== '') {
+                $status.text(fallbackText);
+            } else {
+                $status.empty();
+            }
+        },
+
+        handleExportDownload: function(payload) {
+            if (!payload || !payload.content) {
+                throw new Error('Missing export payload.');
+            }
+
+            const blob = this.base64ToBlob(payload.content, payload.mime_type);
+            if (!blob) {
+                throw new Error('Failed to create export file.');
+            }
+
+            const filename = payload.filename || `yadore-export.${payload.format || 'json'}`;
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+                link.remove();
+            }, 100);
+        },
+
+        base64ToBlob: function(base64, mimeType = 'application/octet-stream') {
+            try {
+                const binary = atob(base64);
+                const len = binary.length;
+                const buffer = new Uint8Array(len);
+
+                for (let i = 0; i < len; i++) {
+                    buffer[i] = binary.charCodeAt(i);
+                }
+
+                return new Blob([buffer], { type: mimeType });
+            } catch (error) {
+                console.error('Failed to decode export file', error);
+                return null;
+            }
         },
 
         clearCache: function() {
@@ -2750,6 +3021,11 @@
                     $('#db-size').text(data.database?.size || '0 KB');
                     $('#db-records').text(data.database?.records?.toLocaleString() || '0');
                     $('#db-overhead').text(data.database?.overhead || '0 KB');
+
+                    const schedule = data.schedule || {};
+                    const nextRun = typeof schedule.next_run_human === 'string' ? schedule.next_run_human : '';
+                    const fallback = Number(schedule.count) > 0 ? 'Scheduled exports are configured.' : '';
+                    this.updateScheduleStatus(nextRun, fallback);
                 }
             });
         },

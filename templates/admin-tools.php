@@ -103,6 +103,21 @@
                                         <input type="date" id="export-end-date">
                                     </div>
                                 </div>
+
+                                <div class="option-group">
+                                    <h4>Schedule Options</h4>
+                                    <label for="export-schedule-interval">Frequency</label>
+                                    <select id="export-schedule-interval">
+                                        <option value="daily" selected>Daily</option>
+                                        <option value="twicedaily">Twice Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="hourly">Hourly</option>
+                                    </select>
+
+                                    <label for="export-schedule-time">Time of day</label>
+                                    <input type="time" id="export-schedule-time" value="02:00">
+                                    <p class="description">Schedule recurring exports with the selected cadence.</p>
+                                </div>
                             </div>
 
                             <div class="tool-actions">
@@ -122,6 +137,8 @@
                                     <div class="progress-text" id="export-status">Preparing export...</div>
                                 </div>
                             </div>
+
+                            <div class="export-schedule-status" id="export-schedule-status" aria-live="polite"></div>
                         </div>
                     </div>
 
@@ -494,94 +511,13 @@
 </div>
 
 <script>
-jQuery(document).ready(function($) {
-    // Initialize tools
-    yadoreInitializeTools();
+jQuery(document).ready(function() {
+    if (window.yadoreAdmin && typeof window.yadoreAdmin.initTools === 'function') {
+        window.yadoreAdmin.initTools();
+    }
 
-    // Load tool statistics
-    yadoreLoadToolStats();
+    if (window.yadoreAdmin && typeof window.yadoreAdmin.loadToolStats === 'function') {
+        window.yadoreAdmin.loadToolStats();
+    }
 });
-
-function yadoreInitializeTools() {
-    const $ = jQuery;
-
-    // Data management
-    $('#start-export').on('click', yadoreStartExport);
-    $('#start-import').on('click', yadoreStartImport);
-
-    // Maintenance tools
-    $('#clear-cache').on('click', yadoreClearCache);
-    $('#optimize-database').on('click', yadoreOptimizeDatabase);
-    $('#system-cleanup').on('click', yadoreSystemCleanup);
-
-    // Configuration tools
-    $('#reset-settings').on('click', yadoreResetSettings);
-    $('#performance-scan').on('click', yadorePerformanceScan);
-
-    // Utility tools
-    $('#open-keyword-analyzer').on('click', function() {
-        $('#keyword-analyzer-modal').show();
-    });
-
-    $('#analyze-keywords').on('click', yadoreAnalyzeKeywords);
-
-    // Modal functionality
-    $('.modal-close').on('click', function() {
-        $(this).closest('.yadore-modal').hide();
-    });
-
-    // File upload
-    $('#import-upload-area').on('click', function() {
-        $('#import-file').click();
-    }).on('dragover dragenter', function(e) {
-        e.preventDefault();
-        $(this).addClass('drag-over');
-    }).on('dragleave dragend drop', function(e) {
-        e.preventDefault();
-        $(this).removeClass('drag-over');
-        if (e.type === 'drop') {
-            yadoreHandleFileUpload(e.originalEvent.dataTransfer.files);
-        }
-    });
-
-    $('#import-file').on('change', function() {
-        yadoreHandleFileUpload(this.files);
-    });
-
-    const toolsVersion = (typeof yadore_admin !== 'undefined' && yadore_admin.version)
-        ? yadore_admin.version
-        : '<?php echo esc_js(YADORE_PLUGIN_VERSION); ?>';
-    console.log(`Yadore Tools v${toolsVersion} - Initialized`);
-}
-
-function yadoreLoadToolStats() {
-    jQuery.post(yadore_admin.ajax_url, {
-        action: 'yadore_get_tool_stats',
-        nonce: yadore_admin.nonce
-    }, function(response) {
-        if (response.success) {
-            const data = response.data;
-
-            // Cache stats
-            jQuery('#cache-size').text(data.cache.size);
-            jQuery('#cache-entries').text(data.cache.entries.toLocaleString());
-            jQuery('#cache-hit-rate').text(data.cache.hit_rate + '%');
-
-            // Database stats
-            jQuery('#db-size').text(data.database.size);
-            jQuery('#db-records').text(data.database.records.toLocaleString());
-            jQuery('#db-overhead').text(data.database.overhead);
-
-            // Log stats
-            jQuery('#api-log-count').text(data.logs.api_logs.toLocaleString());
-            jQuery('#error-log-count').text(data.logs.error_logs.toLocaleString());
-            jQuery('#total-log-size').text(data.logs.total_size);
-
-            // Cleanup stats
-            jQuery('#temp-files').text(data.cleanup.temp_files.toLocaleString());
-            jQuery('#orphaned-data').text(data.cleanup.orphaned_data.toLocaleString());
-            jQuery('#space-used').text(data.cleanup.space_used);
-        }
-    });
-}
 </script>

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.42
+Version: 3.44
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.42');
+define('YADORE_PLUGIN_VERSION', '3.44');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -81,6 +81,7 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_get_analytics_data', array($this, 'ajax_get_analytics_data'));
             add_action('wp_ajax_yadore_test_system_component', array($this, 'ajax_test_system_component'));
             add_action('wp_ajax_yadore_export_data', array($this, 'ajax_export_data'));
+            add_action('wp_ajax_yadore_schedule_export', array($this, 'ajax_schedule_export'));
             add_action('wp_ajax_yadore_import_data', array($this, 'ajax_import_data'));
             add_action('wp_ajax_yadore_clear_cache', array($this, 'ajax_clear_cache'));
             add_action('wp_ajax_yadore_restore_default_templates', array($this, 'ajax_restore_default_templates'));
@@ -120,6 +121,7 @@ class YadoreMonetizer {
             // v2.7: Advanced hooks
             add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets'));
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
+            add_action('yadore_run_scheduled_export', array($this, 'run_scheduled_export'), 10, 1);
 
             $this->log(sprintf('Plugin v%s initialized successfully with complete feature set', YADORE_PLUGIN_VERSION), 'info');
 
@@ -2232,6 +2234,7 @@ HTML
                 'database' => $this->get_database_statistics(),
                 'logs' => $this->get_log_statistics(),
                 'cleanup' => $this->get_cleanup_statistics(),
+                'schedule' => $this->get_schedule_overview(),
             );
 
             wp_send_json_success($stats);
@@ -2239,6 +2242,168 @@ HTML
             $this->log_error('Failed to load tool statistics', $e);
             wp_send_json_error($e->getMessage());
         }
+    }
+
+    public function ajax_export_data() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            if (!get_option('yadore_export_enabled', true)) {
+                throw new Exception(__('Data exports are disabled in the plugin settings.', 'yadore-monetizer'));
+            }
+
+            $config = $this->sanitize_export_request($_POST);
+            $payload = $this->prepare_export_payload($config);
+
+            $record_count = isset($payload['meta']['records']) ? (int) $payload['meta']['records'] : 0;
+            if ($record_count <= 0) {
+                throw new Exception(__('No data available for the selected export criteria.', 'yadore-monetizer'));
+            }
+
+            $content = $this->convert_export_payload($payload, $config['format']);
+            if ($content === '') {
+                throw new Exception(__('Failed to generate export file content.', 'yadore-monetizer'));
+            }
+
+            $filename = $this->generate_export_filename($config['format']);
+            $mime_type = $this->get_export_mime_type($config['format']);
+
+            wp_send_json_success(array(
+                'filename' => $filename,
+                'format' => $config['format'],
+                'mime_type' => $mime_type,
+                'content' => base64_encode($content),
+                'records' => $record_count,
+                'meta' => $payload['meta'],
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Export data request failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_schedule_export() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            if (!get_option('yadore_export_enabled', true)) {
+                throw new Exception(__('Data exports are disabled in the plugin settings.', 'yadore-monetizer'));
+            }
+
+            $config = $this->sanitize_export_request($_POST);
+
+            $interval = isset($_POST['interval']) ? sanitize_key(wp_unslash($_POST['interval'])) : 'daily';
+            $allowed_intervals = array('hourly', 'twicedaily', 'daily', 'weekly');
+            if (!in_array($interval, $allowed_intervals, true)) {
+                $interval = 'daily';
+            }
+
+            $time = isset($_POST['time']) ? sanitize_text_field(wp_unslash($_POST['time'])) : '02:00';
+            if (!preg_match('/^\d{2}:\d{2}$/', $time)) {
+                throw new Exception(__('Please provide a valid schedule time (HH:MM).', 'yadore-monetizer'));
+            }
+
+            $timestamp = $this->calculate_schedule_timestamp($interval, $time);
+
+            $schedules = get_option('yadore_export_schedules', array());
+            if (!is_array($schedules)) {
+                $schedules = array();
+            }
+
+            $schedule_id = uniqid('yadore_export_', true);
+
+            $schedules[$schedule_id] = array(
+                'id' => $schedule_id,
+                'created_at' => current_time('mysql'),
+                'interval' => $interval,
+                'time' => $time,
+                'config' => $config,
+                'next_run' => $timestamp,
+                'last_run' => null,
+                'last_error' => '',
+                'last_file' => array(),
+            );
+
+            update_option('yadore_export_schedules', $schedules, false);
+
+            if (function_exists('wp_clear_scheduled_hook')) {
+                wp_clear_scheduled_hook('yadore_run_scheduled_export', array($schedule_id));
+            }
+
+            wp_schedule_event($timestamp, $interval, 'yadore_run_scheduled_export', array($schedule_id));
+
+            $next_run = wp_next_scheduled('yadore_run_scheduled_export', array($schedule_id));
+            if (!$next_run) {
+                $next_run = $timestamp;
+            }
+
+            wp_send_json_success(array(
+                'schedule_id' => $schedule_id,
+                'next_run' => $next_run,
+                'next_run_human' => $this->format_timestamp_for_display($next_run),
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Failed to schedule export', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function run_scheduled_export($schedule_id) {
+        if (!is_string($schedule_id) || $schedule_id === '') {
+            return;
+        }
+
+        if (!get_option('yadore_export_enabled', true)) {
+            return;
+        }
+
+        $schedules = get_option('yadore_export_schedules', array());
+        if (!is_array($schedules) || empty($schedules[$schedule_id])) {
+            return;
+        }
+
+        $schedule = $schedules[$schedule_id];
+
+        try {
+            $config = isset($schedule['config']) && is_array($schedule['config']) ? $schedule['config'] : array();
+            $payload = $this->prepare_export_payload($config);
+            $record_count = isset($payload['meta']['records']) ? (int) $payload['meta']['records'] : 0;
+
+            if ($record_count > 0) {
+                $format = isset($config['format']) ? $config['format'] : 'json';
+                $content = $this->convert_export_payload($payload, $format);
+
+                if ($content !== '') {
+                    $stored = $this->store_export_file($schedule_id, $format, $content);
+                    $schedule['last_file'] = $stored;
+                }
+            }
+
+            $schedule['last_run'] = current_time('mysql');
+            $schedule['last_error'] = '';
+
+            $this->log(sprintf('Scheduled export %s completed with %d records.', $schedule_id, $record_count));
+        } catch (Exception $e) {
+            $schedule['last_run'] = current_time('mysql');
+            $schedule['last_error'] = $e->getMessage();
+            $this->log_error('Scheduled export failed', $e);
+        }
+
+        $next = wp_next_scheduled('yadore_run_scheduled_export', array($schedule_id));
+        if ($next) {
+            $schedule['next_run'] = $next;
+        }
+
+        $schedules[$schedule_id] = $schedule;
+        update_option('yadore_export_schedules', $schedules, false);
     }
 
     public function ajax_clear_cache() {
@@ -2634,6 +2799,8 @@ HTML
         if (!wp_next_scheduled('yadore_weekly_reports')) {
             wp_schedule_event(time(), 'weekly', 'yadore_weekly_reports');
         }
+
+        $this->ensure_scheduled_exports();
     }
 
     private function setup_advanced_admin_features() {
@@ -10018,8 +10185,625 @@ HTML
         $first = array_key_first($models);
         return $first ?: 'gemini-2.5-flash';
     }
-}
 
+    private function sanitize_export_request($request) {
+        $allowed_types = array('settings', 'keywords', 'analytics', 'logs', 'cache');
+        $selected = array();
+
+        if (isset($request['data_types'])) {
+            $selected = (array) $request['data_types'];
+        } elseif (isset($request['export_data'])) {
+            $selected = (array) $request['export_data'];
+        }
+
+        $data_types = array();
+        foreach ($selected as $type) {
+            $key = sanitize_key($type);
+            if (in_array($key, $allowed_types, true) && !in_array($key, $data_types, true)) {
+                $data_types[] = $key;
+            }
+        }
+
+        if (empty($data_types)) {
+            throw new Exception(__('Please select at least one dataset to export.', 'yadore-monetizer'));
+        }
+
+        $format = isset($request['format']) ? sanitize_key($request['format']) : 'json';
+        $allowed_formats = array('json', 'csv', 'xml');
+        if (!in_array($format, $allowed_formats, true)) {
+            $format = 'json';
+        }
+
+        $date_range = isset($request['date_range']) ? sanitize_text_field($request['date_range']) : 'all';
+        $custom_start = isset($request['start_date']) ? sanitize_text_field($request['start_date']) : '';
+        $custom_end = isset($request['end_date']) ? sanitize_text_field($request['end_date']) : '';
+
+        return array(
+            'data_types' => $data_types,
+            'format' => $format,
+            'date_range' => $date_range,
+            'custom_start' => $custom_start,
+            'custom_end' => $custom_end,
+        );
+    }
+
+    private function resolve_export_date_range($date_range, $custom_start = '', $custom_end = '') {
+        $date_range = is_string($date_range) ? strtolower($date_range) : 'all';
+        $timezone = $this->get_wp_timezone();
+        $now = new DateTimeImmutable('now', $timezone);
+        $start = null;
+        $end = null;
+
+        switch ($date_range) {
+            case '30':
+            case '90':
+            case '365':
+                $days = (int) $date_range;
+                $start = $now->modify(sprintf('-%d days', $days))->setTime(0, 0, 0);
+                $end = $now;
+                break;
+            case 'custom':
+                $start = $this->create_datetime_from_input($custom_start, $timezone, true);
+                $end = $this->create_datetime_from_input($custom_end, $timezone, false);
+                if ($start && $end && $start > $end) {
+                    $temp = $start;
+                    $start = $end;
+                    $end = $temp;
+                }
+                break;
+            case 'all':
+            default:
+                $start = null;
+                $end = null;
+                break;
+        }
+
+        return array(
+            'start' => $start ? $start->format('Y-m-d H:i:s') : null,
+            'end' => $end ? $end->format('Y-m-d H:i:s') : null,
+            'requested_start' => $custom_start,
+            'requested_end' => $custom_end,
+        );
+    }
+
+    private function create_datetime_from_input($value, DateTimeZone $timezone, $is_start = true) {
+        if (!is_string($value) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return null;
+        }
+
+        try {
+            $date = new DateTimeImmutable($value, $timezone);
+            return $is_start ? $date->setTime(0, 0, 0) : $date->setTime(23, 59, 59);
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    private function prepare_export_payload(array $config) {
+        $data_types = isset($config['data_types']) && is_array($config['data_types']) ? $config['data_types'] : array();
+        $date_range = $config['date_range'] ?? 'all';
+        $custom_start = $config['custom_start'] ?? '';
+        $custom_end = $config['custom_end'] ?? '';
+        $format = $config['format'] ?? 'json';
+
+        $range = $this->resolve_export_date_range($date_range, $custom_start, $custom_end);
+
+        $data = array();
+        $record_count = 0;
+
+        if (in_array('settings', $data_types, true)) {
+            $settings = $this->get_settings_export_records();
+            $data['settings'] = $settings;
+            $record_count += count($settings);
+        }
+
+        if (in_array('keywords', $data_types, true)) {
+            $keywords = $this->get_keywords_export_records($range);
+            $data['keywords'] = $keywords;
+            $record_count += count($keywords);
+        }
+
+        if (in_array('analytics', $data_types, true)) {
+            $analytics = $this->get_analytics_export_records($range);
+            $data['analytics'] = $analytics;
+            $record_count += count($analytics);
+        }
+
+        if (in_array('logs', $data_types, true)) {
+            $logs = $this->get_logs_export_records($range);
+            $data['logs'] = $logs;
+            $record_count += count($logs);
+        }
+
+        if (in_array('cache', $data_types, true)) {
+            $cache = $this->get_cache_export_records($range);
+            $data['cache'] = $cache;
+            $record_count += count($cache);
+        }
+
+        $meta = array(
+            'site_url' => home_url('/'),
+            'site_name' => get_bloginfo('name'),
+            'plugin_version' => YADORE_PLUGIN_VERSION,
+            'generated_at' => current_time('mysql'),
+            'format' => $format,
+            'data_types' => $data_types,
+            'date_range' => $date_range,
+            'range_start' => $range['start'],
+            'range_end' => $range['end'],
+            'records' => $record_count,
+        );
+
+        return array(
+            'meta' => $meta,
+            'data' => $data,
+        );
+    }
+
+    private function get_settings_export_records() {
+        $defaults = $this->get_default_options();
+        $options = array_keys($defaults);
+        $records = array();
+
+        foreach ($options as $option) {
+            $records[] = array(
+                'key' => $option,
+                'value' => get_option($option, null),
+            );
+        }
+
+        $additional = array(
+            'yadore_install_timestamp',
+            'yadore_plugin_version',
+            'yadore_cache_metrics',
+        );
+
+        foreach ($additional as $option) {
+            $records[] = array(
+                'key' => $option,
+                'value' => get_option($option, null),
+            );
+        }
+
+        return $records;
+    }
+
+    private function get_keywords_export_records(array $range) {
+        return $this->fetch_table_rows('yadore_post_keywords', 'last_scanned', $range);
+    }
+
+    private function get_analytics_export_records(array $range) {
+        return $this->fetch_table_rows('yadore_analytics', 'created_at', $range);
+    }
+
+    private function get_logs_export_records(array $range) {
+        $records = array();
+
+        $api_logs = $this->fetch_table_rows('yadore_api_logs', 'created_at', $range);
+        foreach ($api_logs as $log) {
+            $records[] = array_merge(array('log_type' => 'api'), $log);
+        }
+
+        $error_logs = $this->fetch_table_rows('yadore_error_logs', 'created_at', $range);
+        foreach ($error_logs as $log) {
+            $records[] = array_merge(array('log_type' => 'error'), $log);
+        }
+
+        return $records;
+    }
+
+    private function get_cache_export_records(array $range) {
+        $records = array();
+        $metrics = get_option('yadore_cache_metrics', array());
+
+        if (!empty($metrics)) {
+            $records[] = array(
+                'entry_type' => 'metrics',
+                'data' => $metrics,
+            );
+        }
+
+        $cache_entries = $this->fetch_table_rows('yadore_ai_cache', 'created_at', $range);
+        foreach ($cache_entries as $entry) {
+            $records[] = array_merge(array('entry_type' => 'ai_cache'), $entry);
+        }
+
+        return $records;
+    }
+
+    private function fetch_table_rows($table_suffix, $date_column, array $range) {
+        global $wpdb;
+
+        if (!isset($wpdb) || !($wpdb instanceof wpdb)) {
+            return array();
+        }
+
+        $table = $wpdb->prefix . $table_suffix;
+        if (!$this->table_exists($table)) {
+            return array();
+        }
+
+        $table_safe = str_replace('`', '``', $table);
+        $column = is_string($date_column) ? preg_replace('/[^A-Za-z0-9_]/', '', $date_column) : '';
+
+        $conditions = array();
+        $params = array();
+
+        if ($column !== '' && !empty($range['start'])) {
+            $conditions[] = sprintf('`%s` >= %%s', $column);
+            $params[] = $range['start'];
+        }
+
+        if ($column !== '' && !empty($range['end'])) {
+            $conditions[] = sprintf('`%s` <= %%s', $column);
+            $params[] = $range['end'];
+        }
+
+        $sql = sprintf('SELECT * FROM `%s`', $table_safe);
+        if (!empty($conditions)) {
+            $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+
+        if ($column !== '') {
+            $sql .= sprintf(' ORDER BY `%s` DESC', $column);
+        }
+
+        $query = !empty($params) ? $wpdb->prepare($sql, $params) : $sql;
+        $results = $wpdb->get_results($query, ARRAY_A);
+
+        if (!is_array($results)) {
+            return array();
+        }
+
+        foreach ($results as &$row) {
+            foreach ($row as $key => $value) {
+                if (is_string($value) && function_exists('is_serialized') && is_serialized($value)) {
+                    $row[$key] = maybe_unserialize($value);
+                }
+            }
+        }
+
+        return $results;
+    }
+
+    private function convert_export_payload(array $payload, $format) {
+        $format = is_string($format) ? strtolower($format) : 'json';
+
+        if ($format === 'csv') {
+            return $this->convert_export_to_csv($payload);
+        }
+
+        if ($format === 'xml') {
+            return $this->convert_export_to_xml($payload);
+        }
+
+        return $this->convert_export_to_json($payload);
+    }
+
+    private function convert_export_to_json(array $payload) {
+        return wp_json_encode($payload, JSON_PRETTY_PRINT);
+    }
+
+    private function convert_export_to_csv(array $payload) {
+        $rows = array(array('section', 'field', 'value'));
+
+        if (isset($payload['meta']) && is_array($payload['meta'])) {
+            foreach ($payload['meta'] as $key => $value) {
+                $rows[] = array('meta', $key, $this->stringify_export_value($value));
+            }
+        }
+
+        if (isset($payload['data']) && is_array($payload['data'])) {
+            foreach ($payload['data'] as $section => $records) {
+                if ($section === 'settings') {
+                    foreach ($records as $record) {
+                        $rows[] = array(
+                            'settings',
+                            $record['key'] ?? '',
+                            $this->stringify_export_value($record['value'] ?? ''),
+                        );
+                    }
+                } else {
+                    foreach ($records as $record) {
+                        $rows[] = array($section, '', $this->stringify_export_value($record));
+                    }
+                }
+            }
+        }
+
+        $handle = fopen('php://temp', 'w+');
+        if (!$handle) {
+            return '';
+        }
+
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return is_string($csv) ? $csv : '';
+    }
+
+    private function convert_export_to_xml(array $payload) {
+        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><yadoreExport/>' );
+
+        $metaNode = $xml->addChild('meta');
+        if (isset($payload['meta']) && is_array($payload['meta'])) {
+            foreach ($payload['meta'] as $key => $value) {
+                $metaNode->addChild($this->sanitize_xml_tag($key), htmlspecialchars($this->stringify_export_value($value), ENT_QUOTES | ENT_XML1, 'UTF-8'));
+            }
+        }
+
+        $dataNode = $xml->addChild('data');
+        if (isset($payload['data']) && is_array($payload['data'])) {
+            foreach ($payload['data'] as $section => $records) {
+                $sectionNode = $dataNode->addChild($this->sanitize_xml_tag($section));
+                if ($section === 'settings') {
+                    foreach ($records as $record) {
+                        $setting = $sectionNode->addChild('setting');
+                        $setting->addChild('key', htmlspecialchars($this->stringify_export_value($record['key'] ?? ''), ENT_QUOTES | ENT_XML1, 'UTF-8'));
+                        $setting->addChild('value', htmlspecialchars($this->stringify_export_value($record['value'] ?? ''), ENT_QUOTES | ENT_XML1, 'UTF-8'));
+                    }
+                } else {
+                    foreach ($records as $record) {
+                        $recordNode = $sectionNode->addChild('record');
+                        if (is_array($record)) {
+                            foreach ($record as $field => $value) {
+                                $recordNode->addChild($this->sanitize_xml_tag($field), htmlspecialchars($this->stringify_export_value($value), ENT_QUOTES | ENT_XML1, 'UTF-8'));
+                            }
+                        } else {
+                            $recordNode->addChild('value', htmlspecialchars($this->stringify_export_value($record), ENT_QUOTES | ENT_XML1, 'UTF-8'));
+                        }
+                    }
+                }
+            }
+        }
+
+        return $xml->asXML();
+    }
+
+    private function stringify_export_value($value) {
+        if ($value === null) {
+            return '';
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return $value->format(DATE_ATOM);
+        }
+
+        return wp_json_encode($value);
+    }
+
+    private function sanitize_xml_tag($name) {
+        $tag = preg_replace('/[^A-Za-z0-9_\-]/', '_', (string) $name);
+        if ($tag === '' || preg_match('/^[^A-Za-z_]/', $tag)) {
+            $tag = 'field_' . $tag;
+        }
+
+        return $tag;
+    }
+
+    private function generate_export_filename($format) {
+        $format = in_array($format, array('json', 'csv', 'xml'), true) ? $format : 'json';
+        $timestamp = date_i18n('Ymd-His');
+
+        return sprintf('yadore-export-%s.%s', $timestamp, $format);
+    }
+
+    private function get_export_mime_type($format) {
+        switch ($format) {
+            case 'csv':
+                return 'text/csv';
+            case 'xml':
+                return 'application/xml';
+            case 'json':
+            default:
+                return 'application/json';
+        }
+    }
+
+    private function ensure_scheduled_exports() {
+        $schedules = get_option('yadore_export_schedules', array());
+        if (!is_array($schedules)) {
+            return;
+        }
+
+        foreach ($schedules as $schedule_id => $schedule) {
+            $interval = isset($schedule['interval']) ? sanitize_key($schedule['interval']) : 'daily';
+            $allowed_intervals = array('hourly', 'twicedaily', 'daily', 'weekly');
+            if (!in_array($interval, $allowed_intervals, true)) {
+                $interval = 'daily';
+            }
+
+            $time = isset($schedule['time']) ? sanitize_text_field($schedule['time']) : '02:00';
+            $args = array($schedule_id);
+
+            if (!wp_next_scheduled('yadore_run_scheduled_export', $args)) {
+                $next = isset($schedule['next_run']) ? (int) $schedule['next_run'] : 0;
+                if ($next <= $this->get_wp_timestamp()) {
+                    $next = $this->calculate_schedule_timestamp($interval, $time);
+                }
+
+                wp_schedule_event($next, $interval, 'yadore_run_scheduled_export', $args);
+            }
+        }
+    }
+
+    private function get_schedule_overview() {
+        $schedules = get_option('yadore_export_schedules', array());
+        if (!is_array($schedules) || empty($schedules)) {
+            return array(
+                'count' => 0,
+                'next_run' => null,
+                'next_run_human' => '',
+            );
+        }
+
+        $next_timestamp = null;
+        foreach ($schedules as $schedule_id => $schedule) {
+            $next = isset($schedule['next_run']) ? (int) $schedule['next_run'] : 0;
+            if ($next <= 0) {
+                $next = wp_next_scheduled('yadore_run_scheduled_export', array($schedule_id));
+            }
+
+            if ($next && ($next_timestamp === null || $next < $next_timestamp)) {
+                $next_timestamp = $next;
+            }
+        }
+
+        return array(
+            'count' => count($schedules),
+            'next_run' => $next_timestamp,
+            'next_run_human' => $next_timestamp ? $this->format_timestamp_for_display($next_timestamp) : '',
+        );
+    }
+
+    private function calculate_schedule_timestamp($interval, $time) {
+        $allowed_intervals = array('hourly', 'twicedaily', 'daily', 'weekly');
+        if (!in_array($interval, $allowed_intervals, true)) {
+            $interval = 'daily';
+        }
+
+        $timezone = $this->get_wp_timezone();
+        $now = new DateTimeImmutable('now', $timezone);
+
+        if ($interval === 'hourly') {
+            return $now->modify('+1 hour')->getTimestamp();
+        }
+
+        $hours = 2;
+        $minutes = 0;
+        if (is_string($time) && preg_match('/^(\d{2}):(\d{2})$/', $time, $matches)) {
+            $hours = max(0, min(23, (int) $matches[1]));
+            $minutes = max(0, min(59, (int) $matches[2]));
+        }
+
+        if ($interval === 'twicedaily') {
+            $first = $now->setTime($hours, $minutes, 0);
+            $second = $first->modify('+12 hours');
+
+            if ($first > $now) {
+                return $first->getTimestamp();
+            }
+
+            if ($second > $now) {
+                return $second->getTimestamp();
+            }
+
+            return $first->modify('+1 day')->getTimestamp();
+        }
+
+        if ($interval === 'weekly') {
+            $target = $now->setTime($hours, $minutes, 0);
+            if ($target <= $now) {
+                $target = $target->modify('+1 week');
+            }
+
+            return $target->getTimestamp();
+        }
+
+        $target = $now->setTime($hours, $minutes, 0);
+        if ($target <= $now) {
+            $target = $target->modify('+1 day');
+        }
+
+        return $target->getTimestamp();
+    }
+
+    private function store_export_file($schedule_id, $format, $content) {
+        if (!function_exists('wp_upload_dir')) {
+            throw new Exception(__('Upload directory is not available.', 'yadore-monetizer'));
+        }
+
+        $uploads = wp_upload_dir();
+        if (!empty($uploads['error'])) {
+            throw new Exception($uploads['error']);
+        }
+
+        $directory = trailingslashit($uploads['basedir']) . 'yadore-exports';
+        if (!wp_mkdir_p($directory)) {
+            throw new Exception(__('Failed to prepare export directory.', 'yadore-monetizer'));
+        }
+
+        $filename = sprintf('yadore-export-%s-%s.%s', preg_replace('/[^A-Za-z0-9]/', '', (string) $schedule_id), date_i18n('Ymd-His'), $format);
+        $path = trailingslashit($directory) . $filename;
+
+        $bytes = file_put_contents($path, $content);
+        if ($bytes === false) {
+            throw new Exception(__('Failed to write export file to disk.', 'yadore-monetizer'));
+        }
+
+        $url = trailingslashit($uploads['baseurl']) . 'yadore-exports/' . $filename;
+
+        return array(
+            'path' => $path,
+            'url' => $url,
+            'filename' => $filename,
+            'size' => $bytes,
+        );
+    }
+
+    private function format_timestamp_for_display($timestamp) {
+        $timestamp = (int) $timestamp;
+        if ($timestamp <= 0) {
+            return '';
+        }
+
+        if (function_exists('date_i18n')) {
+            $format = get_option('date_format', 'Y-m-d') . ' ' . get_option('time_format', 'H:i');
+            return date_i18n($format, $timestamp);
+        }
+
+        $timezone = $this->get_wp_timezone();
+        $date = new DateTimeImmutable('@' . $timestamp);
+        $date = $date->setTimezone($timezone);
+
+        return $date->format('Y-m-d H:i');
+    }
+
+    private function get_wp_timezone() {
+        if (function_exists('wp_timezone')) {
+            return wp_timezone();
+        }
+
+        $timezone_string = get_option('timezone_string');
+        if ($timezone_string) {
+            try {
+                return new DateTimeZone($timezone_string);
+            } catch (Exception $e) {
+                // Fall back below.
+            }
+        }
+
+        $offset = (float) get_option('gmt_offset', 0);
+        $hours = (int) $offset;
+        $minutes = (int) round(($offset - $hours) * 60);
+        $sign = $offset >= 0 ? '+' : '-';
+        $tz_name = sprintf('%s%02d:%02d', $sign, abs($hours), abs($minutes));
+
+        try {
+            return new DateTimeZone($tz_name);
+        } catch (Exception $e) {
+            return new DateTimeZone('UTC');
+        }
+    }
+
+    private function get_wp_timestamp() {
+        return function_exists('current_time') ? current_time('timestamp') : time();
+    }
+
+}
 if (!function_exists('yadore_get_formatted_price_parts')) {
     /**
      * Format price information for consistent display across templates.
