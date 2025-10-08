@@ -136,7 +136,7 @@
         --yadore-motion-easing-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
 
         --yadore-container-max-width: 1280px;
-        --yadore-container-gutter: 28px;
+        --yadore-container-gutter: clamp(16px, 4vw, 28px);
     }
 
     .yadore-admin-wrap {

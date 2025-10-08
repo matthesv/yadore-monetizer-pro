@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.32 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.34 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -57,12 +57,15 @@
     }
 
     .yadore-admin-shell {
-        width: min(var(--yadore-container-max-width), calc(100% - 2 * var(--yadore-container-gutter)));
+        width: 100%;
+        max-width: calc(var(--yadore-container-max-width) + 2 * var(--yadore-container-gutter));
         margin: 0 auto;
         display: flex;
         flex-direction: column;
         gap: var(--yadore-space-7);
+        padding-inline: var(--yadore-container-gutter);
         padding-bottom: var(--yadore-space-8);
+        box-sizing: border-box;
     }
 
     .yadore-admin-content {
