@@ -1,11 +1,74 @@
 <div class="wrap yadore-admin-wrap">
-    <h1 class="yadore-page-title">
-        <span class="dashicons dashicons-admin-tools"></span>
-        Debug & Error Analysis
-        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
-    </h1>
+    <?php
+    $wp_version = get_bloginfo('version');
+    $php_version = phpversion();
+    $has_api_key = !empty(get_option('yadore_api_key', ''));
+    $last_error = get_option('yadore_latest_error', '');
 
-    <div class="yadore-debug-container">
+    $debug_actions = array(
+        array(
+            'label' => esc_html__('Diagnose starten', 'yadore-monetizer'),
+            'url' => '#run-diagnostics',
+            'type' => 'primary',
+            'icon' => 'dashicons-admin-tools',
+        ),
+        array(
+            'label' => esc_html__('Logs exportieren', 'yadore-monetizer'),
+            'url' => '#download-debug-log',
+            'type' => 'ghost',
+            'icon' => 'dashicons-download',
+        ),
+    );
+
+    $debug_meta = array(
+        array(
+            'label' => esc_html__('Systemkern', 'yadore-monetizer'),
+            'value' => sprintf(__('WP %1$s · PHP %2$s', 'yadore-monetizer'), $wp_version, $php_version),
+            'description' => esc_html__('WordPress und PHP-Version im Abgleich.', 'yadore-monetizer'),
+            'icon' => 'dashicons-wordpress-alt',
+            'state' => 'success',
+        ),
+        array(
+            'label' => esc_html__('API Status', 'yadore-monetizer'),
+            'value' => $has_api_key
+                ? esc_html__('Verbindung aktiv', 'yadore-monetizer')
+                : esc_html__('Schlüssel fehlt', 'yadore-monetizer'),
+            'description' => $has_api_key
+                ? esc_html__('Letzte Synchronisierung ohne Fehler.', 'yadore-monetizer')
+                : esc_html__('Hinterlege einen Schlüssel in den Einstellungen.', 'yadore-monetizer'),
+            'icon' => 'dashicons-rest-api',
+            'state' => $has_api_key ? 'success' : 'warning',
+        ),
+        array(
+            'label' => esc_html__('Fehler-Monitoring', 'yadore-monetizer'),
+            'value' => empty($last_error)
+                ? esc_html__('Keine offenen Fehler', 'yadore-monetizer')
+                : esc_html__('Review erforderlich', 'yadore-monetizer'),
+            'description' => empty($last_error)
+                ? esc_html__('Logs werden in Echtzeit aktualisiert.', 'yadore-monetizer')
+                : esc_html__('Sieh dir die Debug-Logs für Details an.', 'yadore-monetizer'),
+            'icon' => 'dashicons-shield-alt',
+            'state' => empty($last_error) ? 'info' : 'warning',
+        ),
+    );
+
+    $page_header = array(
+        'slug' => 'debug',
+        'eyebrow' => esc_html__('Reliability Center', 'yadore-monetizer'),
+        'icon' => 'dashicons-admin-tools',
+        'title' => esc_html__('Debug & Error Analysis', 'yadore-monetizer'),
+        'subtitle' => esc_html__('Analysiere Systemzustände, API-Integrationen und Fehlerprotokolle mit Echtzeit-Monitoring.', 'yadore-monetizer'),
+        'version' => YADORE_PLUGIN_VERSION,
+        'actions' => $debug_actions,
+        'meta' => $debug_meta,
+    );
+    ?>
+
+    <div class="yadore-admin-shell">
+        <?php include __DIR__ . '/partials/admin-page-header.php'; ?>
+
+        <div class="yadore-admin-content">
+            <div class="yadore-debug-container">
         <!-- System Health Overview -->
         <div class="yadore-card">
             <div class="card-header">

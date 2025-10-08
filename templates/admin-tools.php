@@ -1,11 +1,61 @@
 <div class="wrap yadore-admin-wrap">
-    <h1 class="yadore-page-title">
-        <span class="dashicons dashicons-admin-tools"></span>
-        Tools & Utilities
-        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
-    </h1>
+    <?php
+    $tools_actions = array(
+        array(
+            'label' => esc_html__('Backup Wizard starten', 'yadore-monetizer'),
+            'url' => '#tools-export',
+            'type' => 'primary',
+            'icon' => 'dashicons-migrate',
+        ),
+        array(
+            'label' => esc_html__('Debug-Logs prüfen', 'yadore-monetizer'),
+            'url' => admin_url('admin.php?page=yadore-debug'),
+            'type' => 'ghost',
+            'icon' => 'dashicons-admin-network',
+        ),
+    );
 
-    <div class="yadore-tools-container">
+    $tools_meta = array(
+        array(
+            'label' => esc_html__('Datenexporte', 'yadore-monetizer'),
+            'value' => esc_html__('JSON, CSV & XML', 'yadore-monetizer'),
+            'description' => esc_html__('Sichere Einstellungen, Keywords und Analytics.', 'yadore-monetizer'),
+            'icon' => 'dashicons-download',
+            'state' => 'info',
+        ),
+        array(
+            'label' => esc_html__('Systemwartung', 'yadore-monetizer'),
+            'value' => esc_html__('Cache · Logs · Reset', 'yadore-monetizer'),
+            'description' => esc_html__('Optimierungs-Tools für saubere Installationen.', 'yadore-monetizer'),
+            'icon' => 'dashicons-hammer',
+            'state' => 'success',
+        ),
+        array(
+            'label' => esc_html__('Zugriff', 'yadore-monetizer'),
+            'value' => esc_html__('Nur Administrator:innen', 'yadore-monetizer'),
+            'description' => esc_html__('Protokolliert jede kritische Aktion.', 'yadore-monetizer'),
+            'icon' => 'dashicons-shield-alt',
+            'state' => 'neutral',
+        ),
+    );
+
+    $page_header = array(
+        'slug' => 'tools',
+        'eyebrow' => esc_html__('Maintenance Suite', 'yadore-monetizer'),
+        'icon' => 'dashicons-admin-tools',
+        'title' => esc_html__('Tools & Utilities', 'yadore-monetizer'),
+        'subtitle' => esc_html__('Exportiere Daten, optimiere Caches und verwalte Integrationen mit modernen Sicherheitsnetzen.', 'yadore-monetizer'),
+        'version' => YADORE_PLUGIN_VERSION,
+        'actions' => $tools_actions,
+        'meta' => $tools_meta,
+    );
+    ?>
+
+    <div class="yadore-admin-shell">
+        <?php include __DIR__ . '/partials/admin-page-header.php'; ?>
+
+        <div class="yadore-admin-content">
+            <div class="yadore-tools-container">
         <!-- Data Management Tools -->
         <div class="yadore-card">
             <div class="card-header">
@@ -14,7 +64,7 @@
             <div class="card-content">
                 <div class="tools-grid">
                     <!-- Export Tools -->
-                    <div class="tool-section">
+                    <div class="tool-section" id="tools-export">
                         <div class="tool-header">
                             <h3><span class="dashicons dashicons-download"></span> Export Data</h3>
                         </div>

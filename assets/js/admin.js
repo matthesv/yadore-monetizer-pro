@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.18 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.19 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.18',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.19',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -1361,6 +1361,16 @@
                     $('#overview-progress-fill')
                         .css('width', `${coverage}%`)
                         .attr('aria-valuenow', coverage);
+
+                    const $heroCoverage = $('#scanner-hero-coverage');
+                    if ($heroCoverage.length) {
+                        $heroCoverage.text(`${coverage}%`);
+                    }
+
+                    const $heroKeywordRate = $('#scanner-hero-keyword-rate');
+                    if ($heroKeywordRate.length) {
+                        $heroKeywordRate.text(`${keywordRate}%`);
+                    }
 
                     const $subtext = $('#overview-progress-subtext');
                     if (pending > 0) {

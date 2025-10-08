@@ -273,14 +273,14 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.18 - PRODUCTION-READY MARKET RELEASE!**
+## 🎉 **v3.19 - FUTURE-PROOF EXPERIENCE RELEASE!**
 
-### **Neue Highlights in v3.18:**
-- ♿ **ARIA-optimierte Tab-Navigation** – Die Einstellungen bieten jetzt vollständige Tastatursteuerung, Screenreader-Markup und automatisch fokussierte Panels.
-- 🔐 **Komfortable API-Schlüsselsteuerung** – Sichtbare Anzeigen-Buttons erlauben sicheres Ein- und Ausblenden der Geheimnisse inklusive lokalisierter Beschriftungen.
-- 📋 **Shortcode-Generator mit Live-Feedback** – Verbesserter Kopier-Workflow mit Statussymbolen, Erfolgs-/Fehlermeldungen und lokalisiertem Clipboard-Text.
+### **Neue Highlights in v3.19:**
+- 🛰️ **SOTA 2025 Admin Experience** – Alle Backend-Seiten nutzen jetzt eine einheitliche Command-Bar, KPI-Hero-Header und modernisierte Glaskarten für maximale Orientierung.
+- 🎨 **Frische Design Tokens & Komponenten** – Überarbeitete Farbpaletten, Bewegungen und Schatten mit zusätzlichen Aurora-Gradients und glasigen Oberflächen.
+- ☀️ **Light-First Produktwelt** – Dunkelmodus wurde vollständig entfernt, damit Markenfarben, Tokens und Layouts konsistent in jeder Oberfläche erscheinen.
 
-**Alle Features sind verfügbar und voll funktional!**
+**Alle Features sind verfügbar und voll funktional – jetzt mit Premium-UX!**
 
 ✅ **Status:** ALLE FUNKTIONEN INTEGRIERT
 ✅ **WordPress Integration:** 100% VOLLSTÄNDIG
@@ -294,11 +294,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.18 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.19 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.18** - Production-Ready Market Release
+**Current Version: 3.19** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

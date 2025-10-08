@@ -1,11 +1,66 @@
 <div class="wrap yadore-admin-wrap">
-    <h1 class="yadore-page-title">
-        <span class="dashicons dashicons-search"></span>
-        Post Scanner & Analysis
-        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
-    </h1>
+    <?php
+    $auto_scan_enabled = (bool) get_option('yadore_auto_scan_posts', true);
+    $scanner_actions = array(
+        array(
+            'label' => esc_html__('Bulk Scan starten', 'yadore-monetizer'),
+            'url' => '#start-bulk-scan',
+            'type' => 'primary',
+            'icon' => 'dashicons-update-alt',
+        ),
+        array(
+            'label' => esc_html__('Zur Übersicht', 'yadore-monetizer'),
+            'url' => admin_url('admin.php?page=yadore-dashboard'),
+            'type' => 'ghost',
+            'icon' => 'dashicons-dashboard',
+        ),
+    );
 
-    <div class="scanner-intro" aria-label="Post scanner guidance">
+    $scanner_meta = array(
+        array(
+            'label' => esc_html__('Scan-Abdeckung', 'yadore-monetizer'),
+            'value_html' => '<span id="scanner-hero-coverage">0%</span>',
+            'description' => esc_html__('Live-Aktualisierung bei jedem Durchlauf.', 'yadore-monetizer'),
+            'icon' => 'dashicons-admin-site',
+            'state' => 'info',
+        ),
+        array(
+            'label' => esc_html__('Keyword-Erfolg', 'yadore-monetizer'),
+            'value_html' => '<span id="scanner-hero-keyword-rate">0%</span>',
+            'description' => esc_html__('Validierte Keywords basierend auf AI-Analysen.', 'yadore-monetizer'),
+            'icon' => 'dashicons-tag',
+            'state' => 'success',
+        ),
+        array(
+            'label' => esc_html__('Automatisierung', 'yadore-monetizer'),
+            'value' => $auto_scan_enabled
+                ? esc_html__('Auto-Scan aktiv', 'yadore-monetizer')
+                : esc_html__('Manuelle Ausführung', 'yadore-monetizer'),
+            'description' => $auto_scan_enabled
+                ? esc_html__('Neue Beiträge werden automatisch geprüft.', 'yadore-monetizer')
+                : esc_html__('Aktiviere Auto-Scan für kontinuierliche Checks.', 'yadore-monetizer'),
+            'icon' => 'dashicons-update',
+            'state' => $auto_scan_enabled ? 'success' : 'warning',
+        ),
+    );
+
+    $page_header = array(
+        'slug' => 'scanner',
+        'eyebrow' => esc_html__('Content Intelligence', 'yadore-monetizer'),
+        'icon' => 'dashicons-search',
+        'title' => esc_html__('Scanner & AI Analysis', 'yadore-monetizer'),
+        'subtitle' => esc_html__('Überwache Inhalte, erkenne Chancen und starte Bulk-Analysen mit einem Klick.', 'yadore-monetizer'),
+        'version' => YADORE_PLUGIN_VERSION,
+        'actions' => $scanner_actions,
+        'meta' => $scanner_meta,
+    );
+    ?>
+
+    <div class="yadore-admin-shell">
+        <?php include __DIR__ . '/partials/admin-page-header.php'; ?>
+
+        <div class="yadore-admin-content">
+            <div class="scanner-intro" aria-label="Post scanner guidance">
         <div class="intro-message">
             <p><strong>Plan your scans with confidence.</strong> Überwache Inhalte, erkenne Optimierungspotenzial und gleiche alle Ergebnisse mit einem Blick ab.</p>
             <ul class="intro-highlights">
@@ -388,6 +443,10 @@
             </div>
         </div>
 
+            </div>
+        </div>
+
+        </div>
     </div>
 </div>
 

@@ -1,27 +1,6 @@
 <div class="wrap yadore-admin-wrap">
-    <h1 class="yadore-page-title">
-        <span class="dashicons dashicons-cart"></span>
-        <?php echo esc_html__('Yadore Monetizer Pro – Übersicht', 'yadore-monetizer'); ?>
-        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
-    </h1>
-
-    <?php if (get_transient('yadore_activation_notice')): ?>
-    <div class="notice notice-success is-dismissible">
-        <p>
-            <strong>
-                <?php
-                printf(
-                    esc_html__('Yadore Monetizer Pro v%s wurde erfolgreich aktiviert!', 'yadore-monetizer'),
-                    esc_html(YADORE_PLUGIN_VERSION)
-                );
-                ?>
-            </strong>
-            <?php esc_html_e('Alle Funktionen stehen jetzt zur Verfügung.', 'yadore-monetizer'); ?>
-        </p>
-    </div>
-    <?php delete_transient('yadore_activation_notice'); endif; ?>
-
     <?php
+    $activation_notice = get_transient('yadore_activation_notice');
     $api_connected = (bool) get_option('yadore_api_key');
     $gemini_connected = (bool) get_option('yadore_gemini_api_key');
     $overlay_enabled = (bool) get_option('yadore_overlay_enabled', true);
@@ -147,9 +126,107 @@
             'icon' => 'dashicons-art',
         ),
     );
+    $integration_label = array();
+    $integration_state = 'success';
+
+    if ($api_connected) {
+        $integration_label[] = esc_html__('Yadore API aktiv', 'yadore-monetizer');
+    } else {
+        $integration_label[] = esc_html__('Yadore API fehlt', 'yadore-monetizer');
+        $integration_state = 'warning';
+    }
+
+    if ($gemini_connected) {
+        $integration_label[] = esc_html__('Gemini bereit', 'yadore-monetizer');
+    } else {
+        $integration_label[] = esc_html__('Gemini deaktiviert', 'yadore-monetizer');
+        $integration_state = 'warning';
+    }
+
+    if (!$analytics_enabled) {
+        $integration_state = 'warning';
+    }
+
+    $automation_state = $auto_scan_enabled ? 'success' : 'info';
+    $automation_description = $auto_scan_enabled
+        ? esc_html__('Neue Beiträge werden automatisch analysiert.', 'yadore-monetizer')
+        : esc_html__('Aktiviere den Auto-Scan, um KI-Empfehlungen auszunutzen.', 'yadore-monetizer');
+
+    $page_header = array(
+        'slug' => 'dashboard',
+        'eyebrow' => esc_html__('Command Center', 'yadore-monetizer'),
+        'icon' => 'dashicons-cart',
+        'title' => esc_html__('Yadore Monetizer Pro', 'yadore-monetizer'),
+        'subtitle' => esc_html__('Steuere Datenfeeds, Automatisierung und Performance aus einem zukunftssicheren Cockpit.', 'yadore-monetizer'),
+        'version' => YADORE_PLUGIN_VERSION,
+        'actions' => array(
+            array(
+                'label' => esc_html__('Performance öffnen', 'yadore-monetizer'),
+                'url' => $analytics_url,
+                'type' => 'primary',
+                'icon' => 'dashicons-chart-area',
+            ),
+            array(
+                'label' => esc_html__('Einstellungen prüfen', 'yadore-monetizer'),
+                'url' => $settings_url,
+                'type' => 'ghost',
+                'icon' => 'dashicons-admin-generic',
+            ),
+        ),
+        'meta' => array(
+            array(
+                'label' => esc_html__('Onboarding', 'yadore-monetizer'),
+                'value' => sprintf(__('%d%% vollständig', 'yadore-monetizer'), (int) $onboarding_progress),
+                'description' => $onboarding_progress === 100
+                    ? esc_html__('Alle Basisschritte sind erledigt.', 'yadore-monetizer')
+                    : esc_html__('Es warten noch Schritte auf dich.', 'yadore-monetizer'),
+                'icon' => $onboarding_progress === 100 ? 'dashicons-yes-alt' : 'dashicons-flag',
+                'state' => $onboarding_progress === 100 ? 'success' : 'info',
+            ),
+            array(
+                'label' => esc_html__('Integrationen', 'yadore-monetizer'),
+                'value' => implode(' • ', $integration_label),
+                'description' => $analytics_enabled
+                    ? esc_html__('Analytics Tracking ist aktiv.', 'yadore-monetizer')
+                    : esc_html__('Aktiviere Analytics für vollständige Einblicke.', 'yadore-monetizer'),
+                'icon' => 'dashicons-admin-links',
+                'state' => $integration_state,
+            ),
+            array(
+                'label' => esc_html__('Automatisierung', 'yadore-monetizer'),
+                'value' => $auto_scan_enabled
+                    ? esc_html__('Auto-Scan aktiv', 'yadore-monetizer')
+                    : esc_html__('Manuelle Scans', 'yadore-monetizer'),
+                'description' => $automation_description,
+                'icon' => 'dashicons-update',
+                'state' => $automation_state,
+            ),
+        ),
+    );
     ?>
 
-    <div class="yadore-dashboard-grid">
+    <div class="yadore-admin-shell">
+        <?php if ($activation_notice) : ?>
+            <div class="notice notice-success is-dismissible">
+                <p>
+                    <strong>
+                        <?php
+                        printf(
+                            esc_html__('Yadore Monetizer Pro v%s wurde erfolgreich aktiviert!', 'yadore-monetizer'),
+                            esc_html(YADORE_PLUGIN_VERSION)
+                        );
+                        ?>
+                    </strong>
+                    <?php esc_html_e('Alle Funktionen stehen jetzt zur Verfügung.', 'yadore-monetizer'); ?>
+                </p>
+            </div>
+            <?php delete_transient('yadore_activation_notice'); ?>
+        <?php endif; ?>
+
+        <?php include __DIR__ . '/partials/admin-page-header.php'; ?>
+
+        <div class="yadore-admin-content">
+            <div class="yadore-dashboard-grid">
         <!-- Main Content -->
         <div class="yadore-main-content">
             <!-- Setup Status -->
@@ -660,7 +737,9 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
+</div>
 </div>
 
 <script>
