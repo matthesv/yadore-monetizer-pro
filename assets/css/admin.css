@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.40 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.41 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -850,6 +850,11 @@
     flex-direction: column;
     margin-bottom: var(--yadore-space-6);
     backdrop-filter: blur(14px);
+    width: min(100%, var(--yadore-card-max-width, 100%));
+    margin-inline: auto;
+    --yadore-card-padding-inline: clamp(var(--yadore-space-4), 4vw, var(--yadore-space-6));
+    --yadore-card-padding-block: clamp(var(--yadore-space-4), 3vw, var(--yadore-space-5));
+    --yadore-card-section-gap: clamp(var(--yadore-space-4), 3.5vw, var(--yadore-space-5));
     transition: transform var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized),
         box-shadow var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized),
         border-color var(--yadore-motion-duration-medium) var(--yadore-motion-easing-standard);
@@ -878,7 +883,7 @@
 }
 
 .card-header {
-    padding: var(--yadore-space-5);
+    padding: var(--yadore-card-padding-block) var(--yadore-card-padding-inline);
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(255, 255, 255, 0.92));
     display: flex;
@@ -935,15 +940,9 @@
 }
 
 .card-content {
-    padding: var(--yadore-space-5) var(--yadore-space-6);
+    padding: var(--yadore-card-padding-block) var(--yadore-card-padding-inline);
     display: grid;
-    gap: var(--yadore-space-5);
-}
-
-@media (max-width: 640px) {
-    .card-content {
-        padding: var(--yadore-space-5);
-    }
+    gap: var(--yadore-card-section-gap);
 }
 
 /* Activity List */
@@ -1056,7 +1055,7 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: start;
     gap: var(--yadore-space-5);
-    padding: var(--yadore-space-5);
+    padding: var(--yadore-card-padding-block) var(--yadore-card-padding-inline);
     border-left: 6px solid var(--yadore-color-primary-500);
 }
 

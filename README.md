@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.29 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.41 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.29 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.41 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **7 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,14 +15,11 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.29**
+## 🌟 **NEU IN VERSION 3.41**
 
-- 📱 **Responsive Dashboard-Buttons** – Die Schnellaktionen im Command Center stapeln sich auf Smartphones automatisch unterhalb des Einleitungstextes. Damit bleibt der Intro-Text vollständig lesbar und keine Schaltfläche verdeckt Inhalte.
-- 🧾 **Mobile-optimierte Formulargruppen** – Formulareingaben und Aktionen innerhalb der Admin-Input-Gruppen stapeln sich unter 640 px automatisch und Buttons füllen die komplette Breite, wodurch Touch-Interaktionen leichter werden.
-- 🎨 **Design Consistency Audit** – Alle Status-Badges, Quick Actions, Tabellen und Diagnose-Hinweise nutzen weiterhin die Design-Tokens für Farben, Rahmen und Hintergründe. Legacy-WordPress-Grautöne bleiben entfernt, wodurch die Oberfläche sichtbar konsistent bleibt.
-- 🧭 **Konsistentes Dashboard-Meta-Layout** – Die Setup- und Integrationskacheln im Command Center nutzen ein adaptives Grid und passen sich automatisch an verfügbare Breite an. Dadurch bleiben alle Statuskarten sauber ausgerichtet und wirken nicht mehr wie eine zufällige Liste.
-- 🎛️ **Design-System Tabs & Formulare** – Die Einstellungsnavigation und Formulare greifen vollständig auf die Token-Palette zu. Farben, Abstände, Fokus- und Hover-Zustände sind damit an das Admin-Designsystem angeglichen.
-- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.29.
+- 📦 **Vereinheitlichte Admin-Karten** – Dashboard-, Analyse- und Tool-Karten nutzen jetzt auf allen Breakpoints identische Innenabstände und eine konsistente Maximalbreite.
+- 📐 **Adaptive Card-Spacing Tokens** – Neue Clamp-basierte Token sorgen dafür, dass Header, Content und Statusbereiche derselben Karte auf Mobilgeräten genauso großzügig wirken wie auf Desktop.
+- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.41.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -68,7 +65,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.29:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.41:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -274,11 +271,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.29 - FUTURE-PROOF EXPERIENCE RELEASE!**
+## 🎉 **v3.41 - FUTURE-PROOF EXPERIENCE RELEASE!**
 
-### **Neue Highlights in v3.29:**
-- 📱 **Vollständig responsive Card-Grids** – Scanner-, Analytics-, Dashboard- und Tools-Module passen sich automatisch an Viewports unter 640 px an und bleiben ohne horizontales Scrollen nutzbar.
-- 🎯 **Ausbalancierte Dashicons in Buttons** – Skalierende Icon-Größen mit sauberer Flex-Ausrichtung sorgen für präzise Lesbarkeit aller Call-to-Action Buttons.
+### **Neue Highlights in v3.41:**
+- 📦 **Karten mit fixer Design-Sprache** – Einheitliche Innenabstände für Header, Content und Aktionsleisten in allen Admin-Karten.
+- 📱 **Bruchlose Breakpoints** – Clamp-gesteuerte Spacing-Tokens halten Abstände auf Smartphone, Tablet und Desktop identisch angenehm.
 - 🛠️ **Feinschliff im UX-Detail** – Überarbeitete Stylesheets synchronisieren Frontend- und Admin-Versionen und liefern ein konsistentes Release-Branding.
 
 **Alle Features sind verfügbar und voll funktional – jetzt mit Premium-UX!**
@@ -295,11 +292,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.29 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.41 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.29** - Production-Ready Market Release
+**Current Version: 3.41** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
