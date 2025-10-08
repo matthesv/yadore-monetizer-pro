@@ -1,22 +1,26 @@
-/* Yadore Monetizer Pro v3.17 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.19 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
+        min-height: 100vh;
+        background-image: var(--yadore-gradient-aurora);
+        background-size: cover;
+        background-repeat: no-repeat;
     }
 
     .yadore-page-title {
-        display: flex;
-        align-items: center;
-        gap: var(--yadore-space-3);
-        margin-bottom: var(--yadore-space-7);
-        font-size: var(--yadore-font-size-xl);
-        color: var(--yadore-color-neutral-900);
+        display: none;
     }
 
     .yadore-admin-wrap .button {
         display: inline-flex;
         align-items: center;
         gap: var(--yadore-space-2);
+        border-radius: var(--yadore-radius-pill);
+        padding-inline: calc(var(--yadore-space-3) + 2px);
+        padding-block: calc(var(--yadore-space-1-5) + 1px);
+        transition: transform var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized),
+            box-shadow var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized);
     }
 
     .yadore-admin-wrap .button .dashicons {
@@ -36,19 +40,297 @@
         font-weight: var(--yadore-font-weight-semibold);
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+    }
+
+    .yadore-admin-shell {
+        width: min(var(--yadore-container-max-width), calc(100% - 2 * var(--yadore-container-gutter)));
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: var(--yadore-space-7);
+        padding-bottom: var(--yadore-space-8);
+    }
+
+    .yadore-admin-content {
+        display: grid;
+        gap: var(--yadore-space-6);
+    }
+
+    .yadore-admin-wrap .button:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .yadore-admin-wrap .button:hover {
+        transform: translateY(-1px);
+    }
+
+    .yadore-admin-wrap .button:active {
+        transform: translateY(0);
+        box-shadow: none;
     }
 }
 
 @layer components {
+    .yadore-hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+        gap: var(--yadore-space-6);
+        padding: var(--yadore-space-6);
+        border-radius: var(--yadore-radius-xl);
+        background: var(--yadore-color-surface-elevated);
+        box-shadow: var(--yadore-shadow-lg);
+        border: 1px solid var(--yadore-border-glass);
+        backdrop-filter: blur(18px);
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .yadore-hero::before {
+        content: "";
+        position: absolute;
+        inset: -40% 40% 40% -40%;
+        background: radial-gradient(circle at top, rgba(37, 99, 235, 0.25), transparent 65%);
+        z-index: -1;
+        opacity: 0.6;
+    }
+
+    .yadore-hero::after {
+        content: "";
+        position: absolute;
+        inset: 40% -35% -35% 40%;
+        background: radial-gradient(circle at bottom, rgba(147, 197, 253, 0.28), transparent 60%);
+        z-index: -1;
+        opacity: 0.7;
+    }
+
+    .yadore-hero--flat {
+        background: var(--yadore-color-surface);
+        box-shadow: var(--yadore-shadow-sm);
+        backdrop-filter: none;
+    }
+
+    .yadore-hero__primary {
+        display: flex;
+        flex-direction: column;
+        gap: var(--yadore-space-4);
+    }
+
+    .yadore-hero__eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--yadore-space-2);
+        padding: var(--yadore-space-1) var(--yadore-space-3);
+        border-radius: var(--yadore-radius-pill);
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--yadore-color-primary-700);
+        font-size: var(--yadore-font-size-xs);
+        font-weight: var(--yadore-font-weight-semibold);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .yadore-hero__headline {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: max-content;
+        align-items: center;
+        gap: var(--yadore-space-3);
+    }
+
+    .yadore-hero__icon {
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--yadore-radius-pill);
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--yadore-color-primary-600);
+        font-size: 22px;
+    }
+
+    .yadore-hero__title {
+        font-size: var(--yadore-font-size-2xl);
+        font-weight: var(--yadore-font-weight-semibold);
+        margin: 0;
+        color: var(--yadore-color-text-default);
+    }
+
+    .yadore-hero__lead {
+        font-size: var(--yadore-font-size-md);
+        color: var(--yadore-color-text-subtle);
+        max-width: 48ch;
+        margin: 0;
+    }
+
+    .yadore-hero__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--yadore-space-3);
+    }
+
+    .yadore-hero__actions .button-primary {
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
+    }
+
+    .button-ghost {
+        background: transparent;
+        border: 1px solid rgba(37, 99, 235, 0.18);
+        color: var(--yadore-color-primary-700);
+        box-shadow: none;
+    }
+
+    .button-ghost:hover {
+        background: rgba(37, 99, 235, 0.08);
+        border-color: rgba(37, 99, 235, 0.25);
+    }
+
+    .button-ghost:focus-visible {
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+    }
+
+    .yadore-hero__badge {
+        margin-left: var(--yadore-space-3);
+    }
+
+    .button-link {
+        background: transparent;
+        border: none;
+        color: var(--yadore-color-primary-600);
+        padding: 0;
+        font-weight: var(--yadore-font-weight-medium);
+        text-decoration: underline;
+    }
+
+    .button-link:hover {
+        color: var(--yadore-color-primary-700);
+        text-decoration: none;
+    }
+
+    .yadore-hero__meta {
+        display: grid;
+        gap: var(--yadore-space-4);
+    }
+
+    .yadore-hero__meta-card {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: var(--yadore-space-3);
+        align-items: start;
+        padding: var(--yadore-space-4);
+        border-radius: var(--yadore-radius-lg);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: var(--yadore-shadow-sm);
+    }
+
+    .yadore-hero__meta-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--yadore-radius-pill);
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--yadore-color-primary-600);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .yadore-hero__meta-body {
+        display: grid;
+        gap: var(--yadore-space-1-5);
+    }
+
+    .yadore-hero__meta-label {
+        font-size: var(--yadore-font-size-sm);
+        color: var(--yadore-color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .yadore-hero__meta-value {
+        font-size: var(--yadore-font-size-lg);
+        font-weight: var(--yadore-font-weight-semibold);
+        color: var(--yadore-color-text-default);
+    }
+
+    .yadore-hero__meta-description {
+        font-size: var(--yadore-font-size-sm);
+        color: var(--yadore-color-text-subtle);
+    }
+
+    .meta-state-success {
+        border-color: rgba(22, 163, 74, 0.28);
+        background: linear-gradient(135deg, rgba(22, 163, 74, 0.12), rgba(255, 255, 255, 0.9));
+    }
+
+    .meta-state-warning {
+        border-color: rgba(249, 115, 22, 0.28);
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.12), rgba(255, 255, 255, 0.92));
+    }
+
+    .meta-state-info {
+        border-color: rgba(147, 197, 253, 0.35);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(255, 255, 255, 0.92));
+    }
+
+    .meta-state-neutral {
+        border-color: rgba(192, 203, 219, 0.55);
+    }
+
+    @media (max-width: 1024px) {
+        .yadore-hero {
+            grid-template-columns: 1fr;
+        }
+
+        .yadore-hero__meta {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+    }
+
+    @media (max-width: 640px) {
+        .yadore-hero {
+            padding: var(--yadore-space-5);
+        }
+
+        .yadore-hero__headline {
+            grid-auto-flow: row;
+            justify-items: start;
+        }
+
+        .yadore-hero__badge {
+            margin-left: 0;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .yadore-hero,
+        .yadore-card,
+        .yadore-admin-wrap .button,
+        .yadore-hero__actions .button,
+        .scanner-intro {
+            transition: none !important;
+            transform: none !important;
+        }
+    }
+
     .scanner-intro {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
         gap: var(--yadore-space-5);
-        padding: var(--yadore-space-4) var(--yadore-space-5);
-        margin-bottom: var(--yadore-space-6);
-        background: var(--yadore-gradient-primary-soft);
-        border: 1px solid rgba(34, 113, 177, 0.2);
-        border-radius: var(--yadore-radius-lg);
+        padding: var(--yadore-space-5) var(--yadore-space-6);
+        margin-bottom: var(--yadore-space-7);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(148, 163, 235, 0.16));
+        border: 1px solid rgba(37, 99, 235, 0.16);
+        border-radius: var(--yadore-radius-xl);
+        box-shadow: var(--yadore-shadow-md);
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
     }
 
     .yadore-styleguide {
@@ -544,20 +826,47 @@
 
 /* Card System */
 .yadore-card {
-    background: var(--yadore-color-surface);
+    position: relative;
+    background: var(--yadore-color-surface-elevated);
     border-radius: var(--yadore-radius-xl);
-    border: 1px solid var(--yadore-border-subtle);
-    box-shadow: var(--yadore-shadow-sm);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    box-shadow: var(--yadore-shadow-md);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     margin-bottom: var(--yadore-space-6);
+    backdrop-filter: blur(14px);
+    transition: transform var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized),
+        box-shadow var(--yadore-motion-duration-medium) var(--yadore-motion-easing-emphasized),
+        border-color var(--yadore-motion-duration-medium) var(--yadore-motion-easing-standard);
+}
+
+.yadore-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(37, 99, 235, 0.06), rgba(147, 197, 253, 0));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--yadore-motion-duration-medium) var(--yadore-motion-easing-standard);
+}
+
+.yadore-card:hover,
+.yadore-card:focus-within {
+    transform: translateY(-3px);
+    box-shadow: var(--yadore-shadow-lg);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+.yadore-card:hover::before,
+.yadore-card:focus-within::before {
+    opacity: 1;
 }
 
 .card-header {
     padding: var(--yadore-space-5);
-    border-bottom: 1px solid var(--yadore-border-subtle);
-    background: var(--yadore-color-surface-muted);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(255, 255, 255, 0.92));
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -590,12 +899,20 @@
 
 .card-actions select {
     min-width: 160px;
+    border-radius: var(--yadore-radius-pill);
+    border-color: rgba(37, 99, 235, 0.25);
 }
 
 .card-content {
-    padding: var(--yadore-space-5);
+    padding: var(--yadore-space-5) var(--yadore-space-6);
     display: grid;
     gap: var(--yadore-space-5);
+}
+
+@media (max-width: 640px) {
+    .card-content {
+        padding: var(--yadore-space-5);
+    }
 }
 
 /* Activity List */

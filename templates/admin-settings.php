@@ -1,15 +1,10 @@
 <div class="wrap yadore-admin-wrap">
-    <h1 class="yadore-page-title">
-        <span class="dashicons dashicons-admin-settings" aria-hidden="true"></span>
-        <?php echo esc_html__('Yadore Monetizer Pro Settings', 'yadore-monetizer'); ?>
-        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
-    </h1>
-
     <?php
-    // Handle form submission
+    $settings_notice = '';
     if (isset($_POST['submit']) && wp_verify_nonce($_POST['yadore_nonce'], 'yadore_settings')) {
-        echo '<div class="notice notice-success is-dismissible"><p>Settings saved successfully!</p></div>';
+        $settings_notice = '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Settings saved successfully!', 'yadore-monetizer') . '</p></div>';
     }
+
     $market_options = isset($available_markets) && is_array($available_markets) ? $available_markets : array();
     $default_market_code = isset($default_market) ? strtoupper($default_market) : 'DE';
     $current_market = isset($options['yadore_market'])
@@ -35,6 +30,71 @@
     $overlay_colors = isset($overlay_colors) && is_array($overlay_colors)
         ? $overlay_colors
         : ($plugin_instance instanceof YadoreMonetizer ? $plugin_instance->get_template_colors('overlay') : array());
+
+    $has_api_key = !empty(get_option('yadore_api_key', ''));
+    $has_gemini_key = !empty(get_option('yadore_gemini_api_key', ''));
+    $overlay_enabled = (bool) get_option('yadore_overlay_enabled', true);
+    $auto_scan_enabled = (bool) get_option('yadore_auto_scan_posts', true);
+
+    $settings_actions = array(
+        array(
+            'label' => esc_html__('Design System öffnen', 'yadore-monetizer'),
+            'url' => admin_url('admin.php?page=yadore-styleguide'),
+            'type' => 'secondary',
+            'icon' => 'dashicons-art',
+        ),
+        array(
+            'label' => esc_html__('Scanner starten', 'yadore-monetizer'),
+            'url' => admin_url('admin.php?page=yadore-scanner'),
+            'type' => 'ghost',
+            'icon' => 'dashicons-search',
+        ),
+    );
+
+    $settings_meta = array(
+        array(
+            'label' => esc_html__('Yadore API', 'yadore-monetizer'),
+            'value' => $has_api_key
+                ? esc_html__('Verbunden', 'yadore-monetizer')
+                : esc_html__('Fehlt', 'yadore-monetizer'),
+            'description' => $has_api_key
+                ? esc_html__('Produkt- und Preisfeeds werden synchronisiert.', 'yadore-monetizer')
+                : esc_html__('Hinterlege deinen API-Schlüssel für Live-Daten.', 'yadore-monetizer'),
+            'icon' => 'dashicons-rest-api',
+            'state' => $has_api_key ? 'success' : 'warning',
+        ),
+        array(
+            'label' => esc_html__('KI-Automation', 'yadore-monetizer'),
+            'value' => $has_gemini_key
+                ? esc_html__('Gemini aktiv', 'yadore-monetizer')
+                : esc_html__('Optional', 'yadore-monetizer'),
+            'description' => $auto_scan_enabled
+                ? esc_html__('Automatische Keyword-Vorschläge sind eingeschaltet.', 'yadore-monetizer')
+                : esc_html__('Aktiviere Auto-Scan für kontinuierliche Optimierung.', 'yadore-monetizer'),
+            'icon' => 'dashicons-admin-customizer',
+            'state' => $has_gemini_key ? 'info' : 'neutral',
+        ),
+        array(
+            'label' => esc_html__('Overlay & Templates', 'yadore-monetizer'),
+            'value' => $overlay_enabled
+                ? esc_html__('Overlay aktiv', 'yadore-monetizer')
+                : esc_html__('Overlay deaktiviert', 'yadore-monetizer'),
+            'description' => esc_html__('Passe Farben, Typografie und Layout zentral an.', 'yadore-monetizer'),
+            'icon' => 'dashicons-layout',
+            'state' => $overlay_enabled ? 'success' : 'warning',
+        ),
+    );
+
+    $page_header = array(
+        'slug' => 'settings',
+        'eyebrow' => esc_html__('Konfiguration', 'yadore-monetizer'),
+        'icon' => 'dashicons-admin-settings',
+        'title' => esc_html__('Plugin-Einstellungen', 'yadore-monetizer'),
+        'subtitle' => esc_html__('Definiere Datenquellen, Automatisierung und Darstellung aus einer einzigen Schaltzentrale.', 'yadore-monetizer'),
+        'version' => YADORE_PLUGIN_VERSION,
+        'actions' => $settings_actions,
+        'meta' => $settings_meta,
+    );
 
     $color_field_definitions = array(
         'primary' => array(
@@ -89,10 +149,18 @@
 
     ?>
 
-    <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=yadore-settings')); ?>" class="yadore-settings-form">
-        <?php wp_nonce_field('yadore_settings', 'yadore_nonce'); ?>
+    <div class="yadore-admin-shell">
+        <?php if (!empty($settings_notice)) : ?>
+            <?php echo wp_kses_post($settings_notice); ?>
+        <?php endif; ?>
 
-        <div class="yadore-settings-container">
+        <?php include __DIR__ . '/partials/admin-page-header.php'; ?>
+
+        <div class="yadore-admin-content">
+            <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=yadore-settings')); ?>" class="yadore-settings-form">
+                <?php wp_nonce_field('yadore_settings', 'yadore_nonce'); ?>
+
+                <div class="yadore-settings-container">
             <!-- Settings Navigation -->
             <nav class="settings-nav" aria-label="<?php echo esc_attr__('Plugin settings navigation', 'yadore-monetizer'); ?>">
                 <div class="nav-tabs" role="tablist">
@@ -952,6 +1020,8 @@
             </div>
         </div>
     </form>
+        </div>
+    </div>
 </div>
 
 <script>

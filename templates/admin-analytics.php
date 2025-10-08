@@ -1,11 +1,61 @@
 <div class="wrap yadore-admin-wrap">
-    <h1 class="yadore-page-title">
-        <span class="dashicons dashicons-chart-area"></span>
-        Analysen & Leistungsberichte
-        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
-    </h1>
+    <?php
+    $analytics_actions = array(
+        array(
+            'label' => esc_html__('Live-Daten aktualisieren', 'yadore-monetizer'),
+            'url' => '#analytics-period',
+            'type' => 'primary',
+            'icon' => 'dashicons-update',
+        ),
+        array(
+            'label' => esc_html__('Zu den Tools', 'yadore-monetizer'),
+            'url' => admin_url('admin.php?page=yadore-tools'),
+            'type' => 'ghost',
+            'icon' => 'dashicons-admin-tools',
+        ),
+    );
 
-    <div class="yadore-analytics-container">
+    $analytics_meta = array(
+        array(
+            'label' => esc_html__('Berichtsfenster', 'yadore-monetizer'),
+            'value' => esc_html__('30 Tage Standard', 'yadore-monetizer'),
+            'description' => esc_html__('Wechsle oben zwischen 7, 30, 90 oder 365 Tagen.', 'yadore-monetizer'),
+            'icon' => 'dashicons-calendar-alt',
+            'state' => 'info',
+        ),
+        array(
+            'label' => esc_html__('Aktive Tracking-Punkte', 'yadore-monetizer'),
+            'value' => esc_html__('Views · Overlays · CTR', 'yadore-monetizer'),
+            'description' => esc_html__('Alle Kernmetriken werden minütlich synchronisiert.', 'yadore-monetizer'),
+            'icon' => 'dashicons-chart-line',
+            'state' => 'success',
+        ),
+        array(
+            'label' => esc_html__('Exportoptionen', 'yadore-monetizer'),
+            'value' => esc_html__('CSV & JSON', 'yadore-monetizer'),
+            'description' => esc_html__('Weitere Formate findest du in den Tools.', 'yadore-monetizer'),
+            'icon' => 'dashicons-download',
+            'state' => 'neutral',
+        ),
+    );
+
+    $page_header = array(
+        'slug' => 'analytics',
+        'eyebrow' => esc_html__('Insights & KPIs', 'yadore-monetizer'),
+        'icon' => 'dashicons-chart-area',
+        'title' => esc_html__('Analytics & Leistungsberichte', 'yadore-monetizer'),
+        'subtitle' => esc_html__('Verfolge Impressionen, Klicks und Umsatztrends in Echtzeit mit KI-Korrelationen.', 'yadore-monetizer'),
+        'version' => YADORE_PLUGIN_VERSION,
+        'actions' => $analytics_actions,
+        'meta' => $analytics_meta,
+    );
+    ?>
+
+    <div class="yadore-admin-shell">
+        <?php include __DIR__ . '/partials/admin-page-header.php'; ?>
+
+        <div class="yadore-admin-content">
+            <div class="yadore-analytics-container">
         <!-- Analytics Overview -->
         <div class="yadore-card">
             <div class="card-header">
@@ -286,6 +336,8 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
         </div>
     </div>
 </div>

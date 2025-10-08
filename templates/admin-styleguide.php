@@ -164,23 +164,94 @@ $component_snippet = <<<HTML
         <p>Nutze <code>var(--yadore-space-*)</code> und <code>var(--yadore-color-primary-*)</code>, um Abstände & Farben konsistent zu halten.</p>
         <button class="button button-primary"><span class="dashicons dashicons-admin-customizer"></span> Einstellungen öffnen</button>
     </div>
+        </div>
+    </div>
 </div>
 HTML;
 ?>
 
 <div class="wrap yadore-admin-wrap">
-    <h1 class="yadore-page-title">
-        <span class="dashicons dashicons-admin-appearance"></span>
-        <?php echo esc_html__('Yadore Monetizer Pro – Styleguide', 'yadore-monetizer'); ?>
-        <span class="version-badge">v<?php echo esc_html(YADORE_PLUGIN_VERSION); ?></span>
-    </h1>
+    <?php
+    $total_color_tokens = 0;
+    foreach ($color_groups as $group) {
+        $total_color_tokens += count($group['tokens']);
+    }
 
-    <div class="styleguide-meta">
-        <span class="styleguide-chip"><?php esc_html_e('SoTA 2025 Ready', 'yadore-monetizer'); ?></span>
-        <span><?php esc_html_e('Design Tokens, Komponenten und Accessibility-Guidelines für alle Backend-Ansichten.', 'yadore-monetizer'); ?></span>
-    </div>
+    $total_token_count = $total_color_tokens
+        + count($spacing_tokens)
+        + count($radius_tokens)
+        + count($shadow_tokens)
+        + count($typography_tokens);
 
-    <div class="yadore-styleguide">
+    $component_count = count($component_samples);
+    $design_tokens_url = plugins_url('assets/css/admin-design-system.css', YADORE_PLUGIN_FILE);
+    $styleguide_doc_url = plugins_url('docs/STYLEGUIDE.md', YADORE_PLUGIN_FILE);
+
+    $styleguide_actions = array(
+        array(
+            'label' => esc_html__('Design Tokens öffnen', 'yadore-monetizer'),
+            'url' => $design_tokens_url,
+            'type' => 'secondary',
+            'icon' => 'dashicons-media-code',
+            'target' => '_blank',
+            'rel' => 'noopener noreferrer',
+        ),
+        array(
+            'label' => esc_html__('Styleguide-Dokumentation', 'yadore-monetizer'),
+            'url' => $styleguide_doc_url,
+            'type' => 'ghost',
+            'icon' => 'dashicons-media-text',
+            'target' => '_blank',
+            'rel' => 'noopener noreferrer',
+        ),
+    );
+
+    $styleguide_meta = array(
+        array(
+            'label' => esc_html__('Design Tokens', 'yadore-monetizer'),
+            'value' => sprintf(__('%d Tokens', 'yadore-monetizer'), (int) $total_token_count),
+            'description' => esc_html__('Farben, Abstände, Typografie und Schatten.', 'yadore-monetizer'),
+            'icon' => 'dashicons-art',
+            'state' => 'success',
+        ),
+        array(
+            'label' => esc_html__('Komponenten', 'yadore-monetizer'),
+            'value' => sprintf(__('%d Referenzen', 'yadore-monetizer'), (int) $component_count),
+            'description' => esc_html__('UI-Bausteine für alle Backend-Module.', 'yadore-monetizer'),
+            'icon' => 'dashicons-layout',
+            'state' => 'info',
+        ),
+        array(
+            'label' => esc_html__('Dokumentation', 'yadore-monetizer'),
+            'value' => esc_html__('STYLEGUIDE.md', 'yadore-monetizer'),
+            'description' => esc_html__('Versioniertes Living Design System.', 'yadore-monetizer'),
+            'icon' => 'dashicons-admin-appearance',
+            'state' => 'neutral',
+        ),
+    );
+
+    $page_header = array(
+        'slug' => 'styleguide',
+        'eyebrow' => esc_html__('Design System', 'yadore-monetizer'),
+        'icon' => 'dashicons-admin-appearance',
+        'title' => esc_html__('Yadore Monetizer Pro – Styleguide', 'yadore-monetizer'),
+        'subtitle' => esc_html__('Token-basierte UI-Bibliothek für ein konsistentes 2025er Backend-Erlebnis.', 'yadore-monetizer'),
+        'version' => YADORE_PLUGIN_VERSION,
+        'actions' => $styleguide_actions,
+        'meta' => $styleguide_meta,
+    );
+    ?>
+
+    <div class="yadore-admin-shell">
+        <?php include __DIR__ . '/partials/admin-page-header.php'; ?>
+
+        <div class="yadore-admin-content">
+            <div class="styleguide-meta">
+                <span class="styleguide-chip"><?php esc_html_e('SoTA 2025 Ready', 'yadore-monetizer'); ?></span>
+                <span><?php esc_html_e('Design Tokens, Komponenten und Accessibility-Guidelines für alle Backend-Ansichten.', 'yadore-monetizer'); ?></span>
+            </div>
+
+            <div class="yadore-styleguide">
         <section class="styleguide-section">
             <h2><?php esc_html_e('Designgrundsätze', 'yadore-monetizer'); ?></h2>
             <div class="styleguide-legend">
@@ -305,5 +376,7 @@ HTML;
                 </div>
             </div>
         </section>
+    </div>
+        </div>
     </div>
 </div>

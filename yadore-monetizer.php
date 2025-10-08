@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.18
+Version: 3.19
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.18');
+define('YADORE_PLUGIN_VERSION', '3.19');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -357,7 +357,6 @@ class YadoreMonetizer {
             '--yadore-background' => $colors['background'],
             '--yadore-card-bg' => $card_background,
             '--yadore-card-bg-muted' => $this->adjust_color_brightness($card_background, 10),
-            '--yadore-card-bg-dark' => $this->adjust_color_brightness($card_background, -40),
             '--yadore-placeholder' => $colors['placeholder'],
             '--yadore-placeholder-text' => $colors['placeholder_text'],
             '--yadore-badge' => $colors['badge'],
@@ -366,8 +365,6 @@ class YadoreMonetizer {
             '--yadore-badge-shadow' => $this->hex_to_rgba($colors['badge'], 0.3),
             '--yadore-badge-light' => $this->adjust_color_brightness($colors['badge'], 12),
             '--yadore-badge-dark' => $this->adjust_color_brightness($colors['badge'], -12),
-            '--yadore-text-contrast' => $this->get_contrast_color($card_background),
-            '--yadore-muted-light' => $this->adjust_color_brightness($colors['muted'], 30),
         );
 
         $style = '';

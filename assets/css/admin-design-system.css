@@ -1,15 +1,16 @@
-/* Yadore Monetizer Pro v3.17 - Admin Design System Tokens */
+/* Yadore Monetizer Pro v3.19 - Admin Design System Tokens */
 @layer tokens {
     :root {
         color-scheme: light;
-        --yadore-font-family-base: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --yadore-font-family-base: "Inter var", "Plus Jakarta Sans", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         --yadore-font-family-mono: "JetBrains Mono", "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
         --yadore-font-size-xs: 12px;
         --yadore-font-size-sm: 14px;
         --yadore-font-size-md: 16px;
         --yadore-font-size-lg: 20px;
-        --yadore-font-size-xl: 24px;
+        --yadore-font-size-xl: 26px;
+        --yadore-font-size-2xl: 32px;
         --yadore-font-weight-regular: 400;
         --yadore-font-weight-medium: 500;
         --yadore-font-weight-semibold: 600;
@@ -25,90 +26,102 @@
         --yadore-space-4-5: 18px;
         --yadore-space-5: 20px;
         --yadore-space-6: 24px;
-        --yadore-space-7: 30px;
-        --yadore-space-8: 40px;
+        --yadore-space-7: 32px;
+        --yadore-space-8: 44px;
+        --yadore-space-9: 64px;
 
         --yadore-radius-xs: 6px;
-        --yadore-radius-sm: 8px;
-        --yadore-radius-md: 10px;
-        --yadore-radius-lg: 12px;
-        --yadore-radius-xl: 16px;
+        --yadore-radius-sm: 10px;
+        --yadore-radius-md: 14px;
+        --yadore-radius-lg: 18px;
+        --yadore-radius-xl: 24px;
         --yadore-radius-pill: 999px;
 
-        --yadore-color-primary-50: #f0f6fc;
-        --yadore-color-primary-100: #d9ecff;
-        --yadore-color-primary-200: #b8d5ee;
-        --yadore-color-primary-300: #8fbde3;
-        --yadore-color-primary-400: #5e9fd4;
-        --yadore-color-primary-500: #2271b1;
-        --yadore-color-primary-600: #135e96;
-        --yadore-color-primary-700: #0f4d78;
-        --yadore-color-primary-800: #0b3c61;
-        --yadore-color-primary-900: #082c47;
+        --yadore-color-primary-50: #eff6ff;
+        --yadore-color-primary-100: #dbeafe;
+        --yadore-color-primary-200: #bfdbfe;
+        --yadore-color-primary-300: #93c5fd;
+        --yadore-color-primary-400: #60a5fa;
+        --yadore-color-primary-500: #2563eb;
+        --yadore-color-primary-600: #1d4ed8;
+        --yadore-color-primary-700: #1e40af;
+        --yadore-color-primary-800: #1e3a8a;
+        --yadore-color-primary-900: #1d2c68;
 
-        --yadore-color-success-100: #e6f4ea;
-        --yadore-color-success-500: #00a32a;
-        --yadore-color-success-700: #055d20;
+        --yadore-color-success-100: #ecfdf3;
+        --yadore-color-success-500: #16a34a;
+        --yadore-color-success-700: #0f6b34;
 
-        --yadore-color-warning-100: #fff4e5;
-        --yadore-color-warning-400: #f0ad4e;
-        --yadore-color-warning-500: #dba617;
-        --yadore-color-warning-700: #8c5300;
+        --yadore-color-warning-100: #fff7ed;
+        --yadore-color-warning-400: #fb923c;
+        --yadore-color-warning-500: #f97316;
+        --yadore-color-warning-700: #c2410c;
 
-        --yadore-color-danger-100: #fde2e1;
-        --yadore-color-danger-300: #f8d7da;
-        --yadore-color-danger-500: #d63638;
-        --yadore-color-danger-700: #a42824;
+        --yadore-color-danger-100: #fef2f2;
+        --yadore-color-danger-300: #fca5a5;
+        --yadore-color-danger-500: #ef4444;
+        --yadore-color-danger-700: #b91c1c;
 
-        --yadore-color-neutral-50: #f8fafb;
-        --yadore-color-neutral-100: #f6f7f7;
-        --yadore-color-neutral-200: #eef2f7;
-        --yadore-color-neutral-300: #e1e5e9;
-        --yadore-color-neutral-400: #ccd0d4;
-        --yadore-color-neutral-500: #c3c4c7;
-        --yadore-color-neutral-600: #8a8f96;
-        --yadore-color-neutral-700: #646970;
-        --yadore-color-neutral-800: #50575e;
-        --yadore-color-neutral-900: #1d2327;
+        --yadore-color-neutral-50: #f9fbfd;
+        --yadore-color-neutral-100: #f4f6fb;
+        --yadore-color-neutral-200: #e7ecf5;
+        --yadore-color-neutral-300: #d7deeb;
+        --yadore-color-neutral-400: #c2cbdb;
+        --yadore-color-neutral-500: #a3acc1;
+        --yadore-color-neutral-600: #7a8297;
+        --yadore-color-neutral-700: #4b5160;
+        --yadore-color-neutral-800: #343946;
+        --yadore-color-neutral-900: #1a1d25;
+
+        --yadore-color-accent-100: #eef2ff;
+        --yadore-color-accent-400: #a855f7;
+        --yadore-color-accent-500: #9333ea;
 
         --yadore-color-surface: #ffffff;
-        --yadore-color-surface-muted: #f7fbff;
-        --yadore-color-surface-strong: #f0f6fc;
-        --yadore-color-overlay: rgba(8, 44, 71, 0.45);
-        --yadore-color-code-surface: #101828;
-        --yadore-color-code-text: #e4e7ec;
-        --yadore-color-code-border: rgba(16, 24, 40, 0.45);
+        --yadore-color-surface-muted: #f4f7fb;
+        --yadore-color-surface-strong: #ecf2fb;
+        --yadore-color-surface-elevated: rgba(255, 255, 255, 0.92);
+        --yadore-color-overlay: rgba(29, 64, 175, 0.28);
+        --yadore-color-code-surface: #0f172a;
+        --yadore-color-code-text: #e2e8f0;
+        --yadore-color-code-border: rgba(15, 23, 42, 0.4);
 
         --yadore-color-text-default: var(--yadore-color-neutral-900);
         --yadore-color-text-subtle: var(--yadore-color-neutral-700);
         --yadore-color-text-muted: var(--yadore-color-neutral-600);
         --yadore-color-text-inverse: #ffffff;
 
-        --yadore-border-subtle: rgba(34, 113, 177, 0.12);
-        --yadore-border-medium: rgba(34, 113, 177, 0.16);
-        --yadore-border-strong: rgba(34, 113, 177, 0.18);
-        --yadore-border-focus: rgba(34, 113, 177, 0.35);
+        --yadore-border-subtle: rgba(37, 99, 235, 0.12);
+        --yadore-border-medium: rgba(29, 78, 216, 0.18);
+        --yadore-border-strong: rgba(17, 24, 39, 0.16);
+        --yadore-border-focus: rgba(37, 99, 235, 0.38);
+        --yadore-border-glass: rgba(37, 99, 235, 0.22);
 
-        --yadore-shadow-xs: 0 1px 3px rgba(15, 77, 120, 0.08);
-        --yadore-shadow-sm: 0 2px 6px rgba(34, 113, 177, 0.08);
-        --yadore-shadow-md: 0 10px 30px rgba(34, 113, 177, 0.1);
-        --yadore-shadow-lg: 0 25px 45px rgba(15, 77, 120, 0.18);
+        --yadore-shadow-xs: 0 2px 6px rgba(30, 58, 138, 0.08);
+        --yadore-shadow-sm: 0 8px 20px rgba(30, 58, 138, 0.08);
+        --yadore-shadow-md: 0 18px 45px rgba(15, 23, 42, 0.12);
+        --yadore-shadow-lg: 0 32px 60px rgba(15, 23, 42, 0.14);
+        --yadore-shadow-xl: 0 48px 90px rgba(15, 23, 42, 0.18);
 
         --yadore-gradient-primary: linear-gradient(135deg, var(--yadore-color-primary-500), var(--yadore-color-primary-600));
-        --yadore-gradient-primary-soft: linear-gradient(120deg, rgba(34, 113, 177, 0.12), rgba(19, 94, 150, 0.08));
+        --yadore-gradient-primary-soft: linear-gradient(130deg, rgba(37, 99, 235, 0.14), rgba(147, 197, 253, 0.22));
+        --yadore-gradient-aurora: radial-gradient(circle at top left, rgba(147, 197, 253, 0.35), transparent 55%), radial-gradient(circle at bottom right, rgba(148, 163, 235, 0.4), transparent 60%);
 
         --yadore-motion-duration-fast: 120ms;
-        --yadore-motion-duration-medium: 200ms;
-        --yadore-motion-duration-slow: 320ms;
+        --yadore-motion-duration-medium: 220ms;
+        --yadore-motion-duration-slow: 360ms;
         --yadore-motion-easing-standard: cubic-bezier(0.33, 1, 0.68, 1);
+        --yadore-motion-easing-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
 
-        --yadore-container-max-width: 1240px;
+        --yadore-container-max-width: 1280px;
+        --yadore-container-gutter: 28px;
     }
 
     .yadore-admin-wrap {
         font-family: var(--yadore-font-family-base);
         color: var(--yadore-color-text-default);
         background-color: var(--yadore-color-surface-muted);
+        padding: var(--yadore-space-7) var(--yadore-space-0) var(--yadore-space-8);
     }
 
     .yadore-admin-wrap h1,
@@ -118,31 +131,5 @@
     .yadore-admin-wrap h5 {
         font-weight: var(--yadore-font-weight-semibold);
         letter-spacing: -0.015em;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        :root {
-            color-scheme: dark;
-            --yadore-color-surface: #101828;
-            --yadore-color-surface-muted: #111827;
-            --yadore-color-surface-strong: #1f2937;
-            --yadore-color-text-default: #f3f4f6;
-            --yadore-color-text-subtle: #d0d5dd;
-            --yadore-color-text-muted: #98a2b3;
-            --yadore-border-subtle: rgba(94, 159, 212, 0.35);
-            --yadore-border-strong: rgba(94, 159, 212, 0.45);
-            --yadore-shadow-xs: 0 1px 2px rgba(8, 44, 71, 0.45);
-            --yadore-shadow-sm: 0 6px 18px rgba(8, 44, 71, 0.45);
-            --yadore-shadow-md: 0 20px 40px rgba(8, 44, 71, 0.45);
-            --yadore-shadow-lg: 0 28px 64px rgba(8, 44, 71, 0.55);
-            --yadore-gradient-primary-soft: linear-gradient(140deg, rgba(34, 113, 177, 0.25), rgba(8, 44, 71, 0.45));
-            --yadore-color-code-surface: #0f172a;
-            --yadore-color-code-text: #e0f2fe;
-            --yadore-color-code-border: rgba(14, 116, 144, 0.45);
-        }
-
-        .yadore-admin-wrap {
-            background-color: var(--yadore-color-surface-muted);
-        }
     }
 }
