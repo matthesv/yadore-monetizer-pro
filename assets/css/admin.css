@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.26 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.27 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -805,19 +805,6 @@
     .intro-actions {
         justify-content: stretch;
     }
-
-    .setup-status-card {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .setup-status-card .status-actions {
-        align-items: stretch;
-    }
-
-    .setup-status-card .status-actions .button {
-        min-width: 0;
-        width: 100%;
-    }
 }
 
 @media (max-width: 782px) {
@@ -1166,6 +1153,22 @@
 .setup-status-card .status-actions .button {
     min-width: 200px;
     justify-content: center;
+}
+
+@media (max-width: 1024px) {
+    .setup-status-card {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .setup-status-card .status-actions {
+        align-items: stretch;
+    }
+
+    .setup-status-card .status-actions .button {
+        min-width: 0;
+        width: 100%;
+        align-items: stretch;
+    }
 }
 
 .yadore-onboarding-card .card-content {
