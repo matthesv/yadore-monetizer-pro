@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.27 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.28 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -3342,4 +3342,34 @@
     .revenue-analytics {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
+}
+
+/* Override WordPress core button styles */
+.yadore-admin-wrap .button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--yadore-space-2);
+    border-radius: var(--yadore-radius-pill);
+    padding-inline: calc(var(--yadore-space-3) + 2px);
+    padding-block: calc(var(--yadore-space-1-5) + 1px);
+}
+
+.yadore-admin-wrap .button .dashicons,
+.yadore-admin-wrap .button svg,
+.yadore-admin-wrap .button .yadore-button-icon {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 1.125em;
+    width: 1.5em;
+    height: 1.5em;
+    flex-shrink: 0;
+}
+
+.yadore-admin-wrap .button svg {
+    width: 1.5em;
+    height: 1.5em;
+    fill: currentColor;
 }
