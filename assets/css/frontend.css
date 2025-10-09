@@ -31,7 +31,6 @@
 .yadore-cta-button:focus {
     background: linear-gradient(135deg, var(--yadore-primary-dark, var(--yadore-frontend-color-primary-600)), var(--yadore-primary-darker, var(--yadore-frontend-color-primary-700)));
     color: var(--yadore-primary-contrast, #ffffff);
-    text-decoration: none;
 }
 
 .yadore-product-card {
