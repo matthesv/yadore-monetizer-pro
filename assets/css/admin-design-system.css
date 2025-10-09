@@ -143,7 +143,7 @@
         font-family: var(--yadore-font-family-base);
         color: var(--yadore-color-text-default);
         background-color: var(--yadore-color-surface-muted);
-        padding: var(--yadore-space-7) clamp(16px, 4vw, 24px) var(--yadore-space-8);
+        padding: var(--yadore-space-7) var(--yadore-space-0) var(--yadore-space-8);
     }
 
     .yadore-admin-wrap h1,
