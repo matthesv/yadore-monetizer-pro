@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.20 - 2025-10-21
+- Expanded the Configuration Tools cards so reset, migration, and optimization boxes retain full-width content until widescreen breakpoints, preventing text and buttons from clipping on medium displays.
+- Enlarged the migration action column with a responsive clamp so URLs, inputs, and buttons have room to render without wrapping labels.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.20 to document the layout widening.
+
 ## 3.47.19 - 2025-10-20
 - Rebuilt the Configuration Tools cards with responsive grid layouts so text, buttons, and checkboxes stack cleanly on phones while stretching controls to full width.
 - Added adaptive desktop breakpoints that restore side-by-side alignment for reset and optimization actions without sacrificing the improved mobile flow.

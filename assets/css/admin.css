@@ -3185,8 +3185,11 @@
     .config-tools {
         gap: var(--yadore-space-7);
     }
+}
 
-    .reset-option {
+@media (min-width: 1200px) {
+    .reset-option,
+    .optimization-option {
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
     }
@@ -3195,13 +3198,14 @@
         grid-column: 1 / -1;
     }
 
-    .reset-option .button {
+    .reset-option .button,
+    .optimization-option .button {
         width: auto;
         justify-self: end;
     }
 
     .migration-option {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+        grid-template-columns: minmax(0, 1fr) minmax(320px, clamp(360px, 32vw, 440px));
         align-items: end;
     }
 
@@ -3217,16 +3221,6 @@
 
     .migration-option .button {
         width: auto;
-    }
-
-    .optimization-option {
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-    }
-
-    .optimization-option .button {
-        width: auto;
-        justify-self: end;
     }
 }
 
