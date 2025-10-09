@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.23 - 2025-10-24
+- Organized the maintenance tool statistic sections into spaced column layouts so cache, database, log, and cleanup metrics read cleanly on all devices.
+- Styled individual maintenance tool statistic rows with padded, bordered flex wrappers to keep labels and values aligned and legible.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.23 to record the maintenance stats layout polish.
+
 ## 3.47.22 - 2025-10-23
 - Tightened the Configuration Tools reset card grid to use a shrinkable single column on mobile while stretching content within the card.
 - Ensured the widescreen breakpoint still places the reset button beside its description by updating the responsive grid override.
