@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.47.9 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.47.10 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.47.9 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.47.10 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **7 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,11 +15,11 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.47.9**
+## 🌟 **NEU IN VERSION 3.47.10**
 
-- 📱 **Hero-Meta-Gleichheit** – Das Hero-Meta-Grid nutzt jetzt eine geklammerte Mindestbreite (`min(220px, 100%)`), damit Karten auf schmalen Displays immer die volle Breite ausfüllen.
-- 🧰 **Responsives Tuning** – Die Tablet- und Mobile-Breakpoints greifen weiterhin sauber, da alle hero-bezogenen Layout-Regeln das neue Grid-Schema übernehmen.
-- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.47.9.
+- 📦 **Viewport-sichere Hero-Shell** – Die `.yadore-admin-wrap` erhält `box-sizing: border-box` und volle Breite, damit die neuen Inline-Paddings innerhalb der Viewport-Kante bleiben und Hero + Meta-Karten auch bei ≤400 px gleichmäßige Ränder behalten.
+- 🧰 **Asset-Redeploy** – Admin CSS & JS wurden mit Version 3.47.10 neu ausgeliefert, sodass alle Dashboards unmittelbar vom verbesserten Spacing profitieren.
+- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.47.10.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -65,7 +65,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.47.9:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.47.10:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -271,9 +271,9 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.47.9 - FUTURE-PROOF EXPERIENCE RELEASE!**
+## 🎉 **v3.47.10 - FUTURE-PROOF EXPERIENCE RELEASE!**
 
-### **Neue Highlights in v3.47.9:**
+### **Neue Highlights in v3.47.10:**
 - 🧩 **Globales Card-Grid** – Die neue Utility-Klasse liefert identische Mindestbreiten, Abstände und Padding-Werte für jedes Admin-Modul.
 - 🗂️ **Template-Refit** – Dashboard-, Analytics-, Scanner-, Debug- und Tools-Ansichten greifen geschlossen auf das Utility zu und bleiben dadurch visuell synchron.
 - 📱 **Responsive Verlässlichkeit** – Karten-Gruppen wurden für Mobil-, Tablet- und Desktop-Breakpoints abgestimmt, damit Inhalte unabhängig von ihrer Länge sauber ausgerichtet bleiben.
@@ -292,11 +292,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.47.9 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.47.10 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.47.9** - Production-Ready Market Release
+**Current Version: 3.47.10** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**
