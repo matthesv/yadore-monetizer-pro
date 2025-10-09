@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.2 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -1711,7 +1711,7 @@
 .scan-analytics-card .analytics-grid {
     display: grid;
     gap: 24px;
-    grid-auto-rows: 1fr;
+    grid-auto-rows: auto;
 }
 
 .scan-analytics-card .analytics-panel {
@@ -1727,7 +1727,6 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
-    height: 100%;
 }
 
 .scan-analytics-card .analytics-panel h3 {
@@ -1739,7 +1738,8 @@
 
 .scan-analytics-card .analytics-chart canvas {
     width: 100% !important;
-    height: auto !important;
+    height: clamp(240px, 38vh, 360px) !important;
+    max-height: 420px;
 }
 
 .scan-analytics-card .analytics-stats .stats-list {
