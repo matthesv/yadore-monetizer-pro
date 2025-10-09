@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.46
+Version: 3.47
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.46');
+define('YADORE_PLUGIN_VERSION', '3.47');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -276,6 +276,10 @@ class YadoreMonetizer {
                 'misses' => 0,
             ),
             'ai' => array(
+                'hits' => 0,
+                'misses' => 0,
+            ),
+            'analytics' => array(
                 'hits' => 0,
                 'misses' => 0,
             ),
@@ -2227,7 +2231,7 @@ HTML
             }
 
             $period = isset($_POST['period']) ? intval($_POST['period']) : 30;
-            $report = $this->build_analytics_report($period);
+            $report = $this->get_analytics_report($period);
 
             wp_send_json_success($report);
         } catch (Exception $e) {
@@ -5448,6 +5452,44 @@ HTML
         }
 
         return sprintf('%.2f%%', $value);
+    }
+
+    private function get_analytics_report($period_days) {
+        $period = max(1, min(365, (int) $period_days));
+        $use_cache = !get_option('yadore_debug_mode', false);
+        $cache_key = 'yadore_analytics_' . $period;
+
+        if ($use_cache) {
+            $cached = get_transient($cache_key);
+            if ($cached !== false && is_array($cached)) {
+                $this->record_cache_hit('analytics');
+                return $cached;
+            }
+
+            $this->record_cache_miss('analytics');
+        }
+
+        $report = $this->build_analytics_report($period);
+
+        if ($use_cache) {
+            $duration = $this->get_analytics_cache_duration();
+            if ($duration > 0) {
+                set_transient($cache_key, $report, $duration);
+            }
+        }
+
+        return $report;
+    }
+
+    private function get_analytics_cache_duration() {
+        $duration = (int) get_option('yadore_cache_duration', 3600);
+        if ($duration <= 0) {
+            return 0;
+        }
+
+        $day_in_seconds = defined('DAY_IN_SECONDS') ? DAY_IN_SECONDS : 86400;
+
+        return max(300, min($duration, $day_in_seconds));
     }
 
     private function build_analytics_report($period_days) {
@@ -9608,7 +9650,7 @@ HTML
     private function get_cache_statistics() {
         global $wpdb;
 
-        $prefixes = array('yadore_products_', 'yadore_ai_');
+        $prefixes = array('yadore_products_', 'yadore_ai_', 'yadore_analytics_');
         $placeholders = array();
         $values = array();
 
@@ -9639,12 +9681,17 @@ HTML
         }
 
         $metrics = $this->get_cache_metrics();
-        $product_hits = (int) ($metrics['products']['hits'] ?? 0);
-        $product_misses = (int) ($metrics['products']['misses'] ?? 0);
-        $ai_hits = (int) ($metrics['ai']['hits'] ?? 0);
-        $ai_misses = (int) ($metrics['ai']['misses'] ?? 0);
-        $total_checks = max(0, $product_hits + $product_misses + $ai_hits + $ai_misses);
-        $hit_rate = $total_checks > 0 ? (int) round((($product_hits + $ai_hits) / $total_checks) * 100) : 0;
+        $groups = array('products', 'ai', 'analytics');
+        $hits = 0;
+        $misses = 0;
+
+        foreach ($groups as $group) {
+            $hits += (int) ($metrics[$group]['hits'] ?? 0);
+            $misses += (int) ($metrics[$group]['misses'] ?? 0);
+        }
+
+        $total_checks = max(0, $hits + $misses);
+        $hit_rate = $total_checks > 0 ? (int) round(($hits / $total_checks) * 100) : 0;
 
         return array(
             'size' => $this->format_bytes($bytes),
@@ -9656,7 +9703,7 @@ HTML
 
     private function clear_plugin_caches() {
         $removed = array(
-            'transients' => $this->purge_transients_by_prefix(array('yadore_products_', 'yadore_ai_')),
+            'transients' => $this->purge_transients_by_prefix(array('yadore_products_', 'yadore_ai_', 'yadore_analytics_')),
             'ai_cache_rows' => $this->clear_ai_cache_table(),
         );
 
@@ -10473,7 +10520,7 @@ HTML
         $defaults = $this->get_default_cache_metrics();
         $metrics = wp_parse_args($raw, $defaults);
 
-        foreach (array('products', 'ai') as $group) {
+        foreach (array('products', 'ai', 'analytics') as $group) {
             if (!isset($metrics[$group]) || !is_array($metrics[$group])) {
                 $metrics[$group] = $defaults[$group];
             }
@@ -10503,7 +10550,7 @@ HTML
     }
 
     private function update_cache_counter($group, $field) {
-        if (!in_array($group, array('products', 'ai'), true)) {
+        if (!in_array($group, array('products', 'ai', 'analytics'), true)) {
             return;
         }
 
@@ -11664,7 +11711,7 @@ HTML
     }
 
     private function optimize_plugin_cache() {
-        $expired_transients = $this->purge_transients_by_prefix(array('yadore_products_', 'yadore_ai_'), true);
+        $expired_transients = $this->purge_transients_by_prefix(array('yadore_products_', 'yadore_ai_', 'yadore_analytics_'), true);
         $expired_rows = $this->prune_ai_cache_table(true);
 
         return array(
