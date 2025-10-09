@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.23 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.26 - Admin CSS (Complete) */
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
@@ -3418,7 +3418,7 @@
     border-radius: var(--yadore-radius-md);
 }
 
-@media (max-width: 782px) {
+@media (max-width: 960px) {
     .maintenance-tool .cache-stat,
     .maintenance-tool .db-stat,
     .maintenance-tool .log-stat,
@@ -3447,7 +3447,7 @@
     font-size: 1.1em;
 }
 
-@media (max-width: 782px) {
+@media (max-width: 960px) {
     .maintenance-tool {
         padding: var(--yadore-space-3);
     }
