@@ -1,10 +1,10 @@
-/* Yadore Monetizer Pro v3.47.11 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.47.28 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.47.11',
+        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.47.28',
         ajax_url: yadore_admin.ajax_url,
         nonce: yadore_admin.nonce,
         debug: yadore_admin.debug || false,
@@ -2639,6 +2639,7 @@
 
             this.importFiles = [];
             const $uploadArea = $('#import-upload-area');
+            const $fileInput = $('#import-file');
             if ($uploadArea.length) {
                 const rawExtensions = ($uploadArea.data('importExtensions') || '').toString();
                 const parsedExtensions = rawExtensions.split(',')
@@ -2764,22 +2765,30 @@
             });
 
             // File upload handling
-            $('#import-upload-area').on('click', () => {
-                $('#import-file').trigger('click');
-            }).on('dragover dragenter', (e) => {
-                e.preventDefault();
-                $(e.currentTarget).addClass('drag-over');
-            }).on('dragleave dragend drop', (e) => {
-                e.preventDefault();
-                $(e.currentTarget).removeClass('drag-over');
-                if (e.type === 'drop') {
-                    this.handleFileUpload(e.originalEvent.dataTransfer.files);
-                }
-            });
+            if ($uploadArea.length && $fileInput.length) {
+                $uploadArea.on('click', () => {
+                    $fileInput.trigger('click');
+                }).on('keydown', (e) => {
+                    const key = e.key || e.keyCode;
+                    if (key === 'Enter' || key === ' ' || key === 13 || key === 32) {
+                        e.preventDefault();
+                        $fileInput.trigger('click');
+                    }
+                }).on('dragover dragenter', (e) => {
+                    e.preventDefault();
+                    $(e.currentTarget).addClass('drag-over');
+                }).on('dragleave dragend drop', (e) => {
+                    e.preventDefault();
+                    $(e.currentTarget).removeClass('drag-over');
+                    if (e.type === 'drop') {
+                        this.handleFileUpload(e.originalEvent.dataTransfer.files);
+                    }
+                });
 
-            $('#import-file').on('change', (e) => {
-                this.handleFileUpload(e.target.files);
-            });
+                $fileInput.on('change', (e) => {
+                    this.handleFileUpload(e.target.files);
+                });
+            }
 
             // Modal functionality
             $('.modal-close').on('click', function() {
