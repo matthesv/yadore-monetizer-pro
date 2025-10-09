@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.26 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.29 - Admin CSS (Complete) */
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
@@ -4012,6 +4012,36 @@
     .yadore-tools-container .import-options {
         display: grid;
         gap: var(--yadore-space-3);
+    }
+
+    .yadore-tools-container .file-upload .upload-area {
+        position: relative;
+    }
+
+    .yadore-tools-container .file-upload .import-file-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        border: 0;
+        white-space: nowrap;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+        .yadore-tools-container .file-upload .import-file-input {
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            clip: auto;
+            clip-path: none;
+            opacity: 0;
+            cursor: pointer;
+        }
     }
 
     .yadore-tools-container .export-options {

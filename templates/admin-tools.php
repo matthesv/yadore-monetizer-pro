@@ -224,15 +224,25 @@
 
                             <div class="import-options">
                                 <div class="file-upload">
-                                    <div class="upload-area" id="import-upload-area" data-import-extensions="<?php echo esc_attr($import_extensions_attr); ?>" data-import-labels="<?php echo esc_attr($import_formats_text); ?>">
+                                    <?php $upload_instructions_id = 'import-upload-instructions'; ?>
+                                    <div
+                                        class="upload-area"
+                                        id="import-upload-area"
+                                        role="button"
+                                        tabindex="0"
+                                        aria-label="<?php echo esc_attr__('Select files to import', 'yadore-monetizer'); ?>"
+                                        aria-describedby="<?php echo esc_attr($upload_instructions_id); ?>"
+                                        data-import-extensions="<?php echo esc_attr($import_extensions_attr); ?>"
+                                        data-import-labels="<?php echo esc_attr($import_formats_text); ?>"
+                                    >
                                         <div class="upload-icon">
                                             <span class="dashicons dashicons-upload"></span>
                                         </div>
                                         <div class="upload-text">
-                                            <strong>Drop files here or click to upload</strong>
-                                            <p><?php printf(esc_html__('Supported formats: %s', 'yadore-monetizer'), esc_html($import_formats_text)); ?></p>
+                                            <strong><?php esc_html_e('Drop files here or click to upload', 'yadore-monetizer'); ?></strong>
+                                            <p id="<?php echo esc_attr($upload_instructions_id); ?>"><?php printf(esc_html__('Supported formats: %s', 'yadore-monetizer'), esc_html($import_formats_text)); ?></p>
                                         </div>
-                                        <input type="file" id="import-file" accept="<?php echo esc_attr($import_accept_raw); ?>" multiple style="display: none;">
+                                        <input type="file" id="import-file" class="import-file-input" accept="<?php echo esc_attr($import_accept_raw); ?>" multiple aria-hidden="true" tabindex="-1">
                                     </div>
                                 </div>
 
