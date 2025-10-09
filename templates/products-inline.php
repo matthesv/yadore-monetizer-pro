@@ -63,7 +63,7 @@ if (class_exists('YadoreMonetizer')) {
                         <div class="inline-merchant">Verfügbar bei <?php echo esc_html($offer['merchant']['name'] ?? 'Online Store'); ?></div>
 
                         <a href="<?php echo $click_url; ?>"
-                           class="inline-cta" target="_blank" rel="nofollow noopener"
+                           class="inline-cta yadore-cta-button" target="_blank" rel="nofollow noopener"
                            data-yadore-click="<?php echo esc_attr($offer['id'] ?? ''); ?>">
                             Zum Angebot
                         </a>

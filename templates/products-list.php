@@ -56,7 +56,7 @@ if (class_exists('YadoreMonetizer')) {
 
                 <div class="product-action">
                     <a href="<?php echo $click_url; ?>"
-                       class="list-cta-button" target="_blank" rel="nofollow noopener"
+                       class="list-cta-button yadore-cta-button" target="_blank" rel="nofollow noopener"
                        data-yadore-click="<?php echo esc_attr($offer['id'] ?? ''); ?>">
                         Zum Angebot
                     </a>
