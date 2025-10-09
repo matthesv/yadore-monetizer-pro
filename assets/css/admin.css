@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.10 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.11 - Admin CSS (Complete) */
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
@@ -202,10 +202,10 @@
 
     .yadore-hero__headline {
         display: grid;
-        grid-auto-flow: column;
-        grid-auto-columns: max-content;
+        grid-template-columns: auto minmax(0, 1fr);
         align-items: center;
         gap: var(--yadore-space-3);
+        column-gap: var(--yadore-space-3);
     }
 
     .yadore-hero__icon {
@@ -238,6 +238,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: var(--yadore-space-3);
+        align-items: center;
     }
 
     .yadore-hero__actions .button-primary {
@@ -280,7 +281,7 @@
 
     .yadore-hero__meta {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
         gap: var(--yadore-space-4);
     }
 
@@ -355,8 +356,13 @@
             grid-template-columns: 1fr;
         }
 
+        .yadore-hero__headline {
+            grid-template-columns: minmax(0, 1fr);
+            justify-items: start;
+        }
+
         .yadore-hero__meta {
-            grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
         }
     }
 
@@ -366,8 +372,9 @@
         }
 
         .yadore-hero__headline {
-            grid-auto-flow: row;
+            grid-template-columns: minmax(0, 1fr);
             justify-items: start;
+            row-gap: var(--yadore-space-2);
         }
 
         .yadore-hero__badge {
@@ -409,6 +416,7 @@
         position: relative;
         overflow: hidden;
         isolation: isolate;
+        align-items: stretch;
     }
 
     .yadore-styleguide {
@@ -679,6 +687,9 @@
 .intro-actions {
     display: flex;
     align-items: stretch;
+    justify-content: flex-end;
+    gap: var(--yadore-space-4);
+    flex-wrap: wrap;
 }
 
 .intro-card {
@@ -852,11 +863,24 @@
 
 @media (max-width: 1024px) {
     .scanner-intro {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+        padding: var(--yadore-space-5);
+        gap: var(--yadore-space-5);
     }
 
     .intro-actions {
-        justify-content: stretch;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 782px) {
+    .scanner-intro {
+        gap: var(--yadore-space-4);
+    }
+
+    .intro-actions {
+        flex-direction: column;
+        align-items: stretch;
     }
 }
 
