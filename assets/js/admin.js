@@ -23,6 +23,9 @@
         cachedErrorLogs: [],
         debugAutoScroll: true,
         debugWordWrap: true,
+        importFiles: [],
+        importAllowedExtensions: ['json', 'csv', 'xml'],
+        importAllowedFormatsLabel: 'JSON, CSV, XML',
         clipboardFeedbackTimer: null,
         lastDashboardUpdate: null,
         statsTimestampInterval: null,
@@ -2635,6 +2638,25 @@
             if (!$('.yadore-tools-container').length) return;
 
             this.importFiles = [];
+            const $uploadArea = $('#import-upload-area');
+            if ($uploadArea.length) {
+                const rawExtensions = ($uploadArea.data('importExtensions') || '').toString();
+                const parsedExtensions = rawExtensions.split(',')
+                    .map((ext) => ext.trim().toLowerCase())
+                    .filter((ext) => ext.length);
+
+                if (parsedExtensions.length) {
+                    this.importAllowedExtensions = parsedExtensions;
+                }
+
+                const labelData = $uploadArea.data('importLabels');
+                if (typeof labelData === 'string' && labelData.length) {
+                    this.importAllowedFormatsLabel = labelData;
+                } else if (this.importAllowedExtensions.length) {
+                    this.importAllowedFormatsLabel = this.importAllowedExtensions.map((ext) => ext.toUpperCase()).join(', ');
+                }
+            }
+
             this.setupExportDateRangeToggle();
 
             // Export tools
@@ -3001,7 +3023,12 @@
 
         handleFileUpload: function(fileList) {
             const files = Array.from(fileList || []);
-            const allowedExtensions = ['json', 'csv', 'xml'];
+            const allowedExtensions = Array.isArray(this.importAllowedExtensions) && this.importAllowedExtensions.length
+                ? this.importAllowedExtensions
+                : ['json', 'csv', 'xml'];
+            const formatsLabel = (typeof this.importAllowedFormatsLabel === 'string' && this.importAllowedFormatsLabel.length)
+                ? this.importAllowedFormatsLabel
+                : allowedExtensions.map((ext) => ext.toUpperCase()).join(', ');
             const accepted = [];
 
             files.forEach((file) => {
@@ -3016,7 +3043,7 @@
                 this.importFiles = [];
                 $('#import-results').hide();
                 $('#start-import, #validate-import').prop('disabled', true);
-                alert('Only JSON, CSV or XML files are supported.');
+                alert(`Only ${formatsLabel} files are supported.`);
                 $('#import-file').val('');
                 return;
             }

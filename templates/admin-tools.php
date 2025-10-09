@@ -15,10 +15,77 @@
         ),
     );
 
+    $supported_formats = array();
+    if (isset($data_formats) && is_array($data_formats)) {
+        foreach ($data_formats as $format_key => $format_config) {
+            $key = sanitize_key(is_string($format_key) ? $format_key : '');
+            $extension = '';
+            if (isset($format_config['extension'])) {
+                $extension = strtolower(preg_replace('/[^a-z0-9]/i', '', (string) $format_config['extension']));
+            }
+
+            if ($extension === '') {
+                $extension = $key;
+            }
+
+            $extension = strtolower(preg_replace('/[^a-z0-9]/i', '', (string) $extension));
+            if ($extension === '') {
+                continue;
+            }
+
+            if ($key === '') {
+                $key = $extension;
+            }
+
+            $label = isset($format_config['label']) ? $format_config['label'] : strtoupper($extension);
+
+            $supported_formats[$key] = array(
+                'label' => $label,
+                'extension' => $extension,
+            );
+        }
+    }
+
+    if (empty($supported_formats)) {
+        $supported_formats = array(
+            'json' => array(
+                'label' => __('JSON', 'yadore-monetizer'),
+                'extension' => 'json',
+            ),
+            'csv' => array(
+                'label' => __('CSV', 'yadore-monetizer'),
+                'extension' => 'csv',
+            ),
+            'xml' => array(
+                'label' => __('XML', 'yadore-monetizer'),
+                'extension' => 'xml',
+            ),
+        );
+    }
+
+    $format_extensions = array();
+    $format_labels_display = array();
+    foreach ($supported_formats as $supported) {
+        $extension = isset($supported['extension']) ? $supported['extension'] : '';
+        if ($extension !== '') {
+            $format_extensions[] = $extension;
+        }
+
+        $label = isset($supported['label']) ? $supported['label'] : '';
+        if ($label !== '') {
+            $format_labels_display[] = $label;
+        }
+    }
+
+    $default_format = array_key_exists('json', $supported_formats) ? 'json' : array_key_first($supported_formats);
+    $import_extensions_attr = implode(',', $format_extensions);
+    $import_accept_raw = $format_extensions ? '.' . implode(',.', $format_extensions) : '';
+    $import_formats_text = $format_labels_display ? implode(', ', $format_labels_display) : __('JSON, CSV, XML', 'yadore-monetizer');
+
     $tools_meta = array(
         array(
             'label' => esc_html__('Datenexporte', 'yadore-monetizer'),
-            'value' => esc_html__('JSON, CSV & XML', 'yadore-monetizer'),
+            'value' => esc_html($import_formats_text),
             'description' => esc_html__('Sichere Einstellungen, Keywords und Analytics.', 'yadore-monetizer'),
             'icon' => 'dashicons-download',
             'state' => 'info',
@@ -83,9 +150,14 @@
 
                                 <div class="option-group">
                                     <h4>Format</h4>
-                                    <label><input type="radio" name="export_format" value="json" checked> JSON</label>
-                                    <label><input type="radio" name="export_format" value="csv"> CSV</label>
-                                    <label><input type="radio" name="export_format" value="xml"> XML</label>
+                                    <?php foreach ($supported_formats as $format_key => $format_config) :
+                                        $label = isset($format_config['label']) ? $format_config['label'] : strtoupper($format_key);
+                                    ?>
+                                        <label>
+                                            <input type="radio" name="export_format" value="<?php echo esc_attr($format_key); ?>" <?php checked($format_key, $default_format); ?>>
+                                            <?php echo esc_html($label); ?>
+                                        </label>
+                                    <?php endforeach; ?>
                                 </div>
 
                                 <div class="option-group">
@@ -152,15 +224,15 @@
 
                             <div class="import-options">
                                 <div class="file-upload">
-                                    <div class="upload-area" id="import-upload-area">
+                                    <div class="upload-area" id="import-upload-area" data-import-extensions="<?php echo esc_attr($import_extensions_attr); ?>" data-import-labels="<?php echo esc_attr($import_formats_text); ?>">
                                         <div class="upload-icon">
                                             <span class="dashicons dashicons-upload"></span>
                                         </div>
                                         <div class="upload-text">
                                             <strong>Drop files here or click to upload</strong>
-                                            <p>Supported formats: JSON, CSV, XML</p>
+                                            <p><?php printf(esc_html__('Supported formats: %s', 'yadore-monetizer'), esc_html($import_formats_text)); ?></p>
                                         </div>
-                                        <input type="file" id="import-file" accept=".json,.csv,.xml" multiple style="display: none;">
+                                        <input type="file" id="import-file" accept="<?php echo esc_attr($import_accept_raw); ?>" multiple style="display: none;">
                                     </div>
                                 </div>
 

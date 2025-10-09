@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.47.26
+Version: 3.47.27
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.47.26');
+define('YADORE_PLUGIN_VERSION', '3.47.27');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -1092,6 +1092,33 @@ HTML
         }
     }
 
+    /**
+     * Retrieve supported export/import data formats.
+     *
+     * @since 3.47.27
+     *
+     * @return array<string, array{label:string,extension:string,mime_type:string}>
+     */
+    private function get_supported_data_formats() {
+        return array(
+            'json' => array(
+                'label' => __('JSON', 'yadore-monetizer'),
+                'extension' => 'json',
+                'mime_type' => 'application/json',
+            ),
+            'csv' => array(
+                'label' => __('CSV', 'yadore-monetizer'),
+                'extension' => 'csv',
+                'mime_type' => 'text/csv',
+            ),
+            'xml' => array(
+                'label' => __('XML', 'yadore-monetizer'),
+                'extension' => 'xml',
+                'mime_type' => 'application/xml',
+            ),
+        );
+    }
+
     private function get_page_data($page) {
         $options = array(
             'yadore_gemini_enabled' => (bool) get_option('yadore_ai_enabled', false),
@@ -1133,6 +1160,10 @@ HTML
             $data['shortcode_colors'] = $this->get_template_colors('shortcode');
             $data['overlay_colors'] = $this->get_template_colors('overlay');
             $data['color_palette'] = $this->get_color_palette();
+        }
+
+        if ($page === 'tools') {
+            $data['data_formats'] = $this->get_supported_data_formats();
         }
 
         return $data;
@@ -10680,9 +10711,16 @@ HTML
         }
 
         $format = isset($request['format']) ? sanitize_key($request['format']) : 'json';
-        $allowed_formats = array('json', 'csv', 'xml');
+        $formats = $this->get_supported_data_formats();
+        $allowed_formats = array_keys($formats);
+        $default_format = 'json';
+        if (!in_array($default_format, $allowed_formats, true) && !empty($allowed_formats)) {
+            $first = reset($allowed_formats);
+            $default_format = is_string($first) && $first !== '' ? $first : $default_format;
+        }
+
         if (!in_array($format, $allowed_formats, true)) {
-            $format = 'json';
+            $format = $default_format;
         }
 
         $date_range = isset($request['date_range']) ? sanitize_text_field($request['date_range']) : 'all';
@@ -10938,7 +10976,20 @@ HTML
     }
 
     private function convert_export_payload(array $payload, $format) {
-        $format = is_string($format) ? strtolower($format) : 'json';
+        $formats = $this->get_supported_data_formats();
+        $available = array_keys($formats);
+        $default_format = 'json';
+        if (!in_array($default_format, $available, true) && !empty($available)) {
+            $first = reset($available);
+            if (is_string($first) && $first !== '') {
+                $default_format = $first;
+            }
+        }
+
+        $format = is_string($format) ? strtolower($format) : $default_format;
+        if (!in_array($format, $available, true)) {
+            $format = $default_format;
+        }
 
         if ($format === 'csv') {
             return $this->convert_export_to_csv($payload);
@@ -11066,22 +11117,29 @@ HTML
     }
 
     private function generate_export_filename($format) {
-        $format = in_array($format, array('json', 'csv', 'xml'), true) ? $format : 'json';
+        $formats = $this->get_supported_data_formats();
+        $allowed = array_keys($formats);
+        $default_format = 'json';
+        if (!in_array($default_format, $allowed, true) && !empty($allowed)) {
+            $first = reset($allowed);
+            if (is_string($first) && $first !== '') {
+                $default_format = $first;
+            }
+        }
+
+        $format = in_array($format, $allowed, true) ? $format : $default_format;
         $timestamp = date_i18n('Ymd-His');
 
         return sprintf('yadore-export-%s.%s', $timestamp, $format);
     }
 
     private function get_export_mime_type($format) {
-        switch ($format) {
-            case 'csv':
-                return 'text/csv';
-            case 'xml':
-                return 'application/xml';
-            case 'json':
-            default:
-                return 'application/json';
+        $formats = $this->get_supported_data_formats();
+        if (isset($formats[$format]['mime_type'])) {
+            return $formats[$format]['mime_type'];
         }
+
+        return 'application/json';
     }
 
     private function ensure_scheduled_exports() {
