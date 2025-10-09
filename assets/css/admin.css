@@ -3418,6 +3418,18 @@
     border-radius: var(--yadore-radius-md);
 }
 
+@media (max-width: 600px) {
+    .maintenance-tool .cache-stat,
+    .maintenance-tool .db-stat,
+    .maintenance-tool .log-stat,
+    .maintenance-tool .cleanup-stat {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: var(--yadore-space-2);
+    }
+}
+
 .maintenance-tool .tool-actions {
     margin-top: auto;
     display: flex;
