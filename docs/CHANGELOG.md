@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.16 - 2025-10-17
+- Normalised the quick filter button group with consistent flex sizing so pills share equal widths and wrap cleanly across breakpoints.
+- Increased the pill padding and centred labels to maintain a comfortable tap target within the new fixed sizing.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.16 to document the responsive filter polish.
+
 ## 3.47.15 - 2025-10-16
 - Reworked the scanner action rows on phones so filters and export controls stack vertically with full-width alignment and equal spacing.
 - Converted the quick filter pill group to a responsive grid at ≤782 px to ensure buttons wrap evenly without clipping.
