@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.13 - 2025-10-14
+- Trimmed the mobile padding and gaps inside the Data Management tools card so the export/import columns collapse without huge whitespace on phones.
+- Forced the export and import option groups to stack as a grid on mobile while stretching selects and date/time inputs to full width for consistent visibility.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.13 to document the responsive polish.
+
 ## 3.47.12 - 2025-10-13
 - Expanded the tools container and `.regular-text` input styling so every field stretches fluidly with its card, preventing overflow and keeping the layout responsive down to 400 px wide viewports.
 - Verified the WordPress admin Tools screen at mobile widths to confirm cards remain within the viewport without horizontal scrolling.

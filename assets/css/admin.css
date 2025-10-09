@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.12 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.13 - Admin CSS (Complete) */
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
@@ -3668,6 +3668,60 @@
     .revenue-cards,
     .preview-grid {
         --yadore-card-grid-column-min: 100%;
+    }
+
+    .yadore-tools-container .yadore-card {
+        --yadore-card-padding-inline: var(--yadore-space-4);
+        --yadore-card-padding-block: var(--yadore-space-4);
+        --yadore-card-section-gap: var(--yadore-space-4);
+    }
+
+    .yadore-tools-container .yadore-card-grid.tools-grid {
+        --yadore-card-grid-gap: var(--yadore-space-3);
+        grid-auto-rows: auto;
+    }
+
+    .yadore-tools-container .tool-section {
+        padding: var(--yadore-space-4);
+        gap: var(--yadore-space-3);
+        min-height: auto;
+    }
+
+    .yadore-tools-container .tool-section .tool-content {
+        gap: var(--yadore-space-3);
+    }
+
+    .yadore-tools-container .export-options,
+    .yadore-tools-container .import-options {
+        display: grid;
+        gap: var(--yadore-space-3);
+    }
+
+    .yadore-tools-container .export-options {
+        grid-template-columns: 1fr;
+    }
+
+    .yadore-tools-container .export-options .option-group {
+        padding: var(--yadore-space-3);
+    }
+
+    .yadore-tools-container .export-options select,
+    .yadore-tools-container .export-options input[type="date"],
+    .yadore-tools-container .export-options input[type="time"],
+    .yadore-tools-container .import-options select,
+    .yadore-tools-container .import-options input[type="date"],
+    .yadore-tools-container .import-options input[type="time"] {
+        width: 100%;
+    }
+
+    .yadore-tools-container .tool-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .yadore-tools-container .tool-actions .button {
+        width: 100%;
+        justify-content: center;
     }
 }
 
