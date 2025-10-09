@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.19 - 2025-10-20
+- Rebuilt the Configuration Tools cards with responsive grid layouts so text, buttons, and checkboxes stack cleanly on phones while stretching controls to full width.
+- Added adaptive desktop breakpoints that restore side-by-side alignment for reset and optimization actions without sacrificing the improved mobile flow.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.19 to document the responsive Configuration Tools polish.
+
 ## 3.47.18 - 2025-10-19
 - Standardised admin action buttons with shared padding across default, small, and large sizes so controls align with equal heights in the scanner.
 - Updated the quick filter pills and secondary buttons to keep labels centred while enforcing a consistent minimum height.
