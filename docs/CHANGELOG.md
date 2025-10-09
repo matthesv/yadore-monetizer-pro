@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.47.22 - 2025-10-23
+- Tightened the Configuration Tools reset card grid to use a shrinkable single column on mobile while stretching content within the card.
+- Ensured the widescreen breakpoint still places the reset button beside its description by updating the responsive grid override.
+- Added explicit overflow wrapping for reset option labels so long translations break cleanly within the card on narrow viewports.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.22 to record the responsive reset card refinement.
+
 ## 3.47.21 - 2025-10-22
 - Updated the reset option checkbox label layout to use a wrapping flex container so long translations stay inside the card on narrow viewports.
 - Let the checkbox description span flex within the label to wrap naturally without overlapping or clipping adjacent controls.
