@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.19 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.21 - Admin CSS (Complete) */
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
@@ -3153,15 +3153,24 @@
 }
 
 .reset-option label {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: var(--yadore-space-2);
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 0;
     font-size: var(--yadore-font-size-sm);
     color: var(--yadore-color-text-muted);
 }
 
+.reset-option label span {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .reset-option label input {
     margin: 0;
+    flex: 0 0 auto;
 }
 
 .reset-option .button,
