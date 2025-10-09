@@ -241,8 +241,17 @@
                                         <div class="upload-text">
                                             <strong><?php esc_html_e('Drop files here or click to upload', 'yadore-monetizer'); ?></strong>
                                             <p id="<?php echo esc_attr($upload_instructions_id); ?>"><?php printf(esc_html__('Supported formats: %s', 'yadore-monetizer'), esc_html($import_formats_text)); ?></p>
+                                            <button
+                                                type="button"
+                                                class="button button-secondary upload-trigger"
+                                                id="import-upload-button"
+                                                aria-controls="import-file"
+                                            >
+                                                <span class="dashicons dashicons-media-default" aria-hidden="true"></span>
+                                                <?php esc_html_e('Choose files', 'yadore-monetizer'); ?>
+                                            </button>
                                         </div>
-                                        <input type="file" id="import-file" accept="<?php echo esc_attr($import_accept_raw); ?>" multiple style="display: none;">
+                                        <input type="file" id="import-file" accept="<?php echo esc_attr($import_accept_raw); ?>" multiple style="display: none;" aria-hidden="true">
                                     </div>
                                 </div>
 

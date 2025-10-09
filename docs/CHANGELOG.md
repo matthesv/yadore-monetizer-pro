@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.29 - 2025-10-27
+- Added a dedicated import trigger button so touch devices can reliably open the file picker without depending on drag-and-drop gestures.
+- Updated the admin tooling script to wire the new control into the existing upload flow for consistent validation and feedback.
+- Bumped the plugin metadata and bundled asset banners to 3.47.29 to document the mobile import accessibility fix.
+
 ## 3.47.28 - 2025-10-26
 - Enabled keyboard and assistive technology access to the import drop zone by giving the uploader a focusable button role, descriptive labels, and instructions tied to the supported format list.
 - Guarded the import handlers so the hidden file input only binds when the drop zone exists while allowing Enter/Space activation for accessible file selection.
