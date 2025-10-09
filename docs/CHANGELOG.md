@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.28 - 2025-10-26
+- Enabled keyboard and assistive technology access to the import drop zone by giving the uploader a focusable button role, descriptive labels, and instructions tied to the supported format list.
+- Guarded the import handlers so the hidden file input only binds when the drop zone exists while allowing Enter/Space activation for accessible file selection.
+- Bumped the plugin metadata and admin tooling banner to 3.47.28 to capture the import accessibility improvement.
+
 ## 3.47.27 - 2025-10-25
 - Enabled the Tools → Import workflow to accept every exportable format by sourcing the supported extension list from the core configuration service.
 - Synced the admin interface, uploader hints, and validation messaging with the shared format list so JSON, CSV, XML (and future additions) stay aligned without manual updates.
