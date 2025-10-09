@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.3 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.4 - Admin CSS (Complete) */
 @layer base {
     .yadore-admin-wrap {
         margin: 0;
@@ -1765,6 +1765,16 @@
 .scan-analytics-card .analytics-stats .stat-value {
     font-weight: 600;
     color: var(--yadore-color-primary-700);
+}
+
+@media (min-width: 768px) {
+    .scan-analytics-card .analytics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .scan-analytics-card .analytics-stats {
+        grid-column: span 2;
+    }
 }
 
 @media (min-width: 960px) {
