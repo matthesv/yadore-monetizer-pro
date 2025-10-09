@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.18 - 2025-10-19
+- Standardised admin action buttons with shared padding across default, small, and large sizes so controls align with equal heights in the scanner.
+- Updated the quick filter pills and secondary buttons to keep labels centred while enforcing a consistent minimum height.
+- Restored accessible contrast for primary buttons by forcing white text on the blue gradient background and documenting the visual polish release.
+
 ## 3.47.17 - 2025-10-18
 - Stacked dashboard card action controls vertically on ≤782 px viewports so dropdowns and buttons span the available width without clipping.
 - Reduced the mobile control height and padding to deliver compact, thumb-friendly tap targets inside circular action styles.
