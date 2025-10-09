@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.14 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.15 - Admin CSS (Complete) */
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
@@ -933,8 +933,27 @@
         --yadore-card-grid-column-min: 100%;
     }
 
+    .card-actions,
+    .results-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--yadore-space-3);
+    }
+
     .results-actions {
         justify-content: flex-start;
+    }
+
+    .results-filter-group,
+    .results-quick-filters,
+    #export-results {
+        width: 100%;
+    }
+
+    .results-quick-filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: var(--yadore-space-2);
     }
 }
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.15 - 2025-10-16
+- Reworked the scanner action rows on phones so filters and export controls stack vertically with full-width alignment and equal spacing.
+- Converted the quick filter pill group to a responsive grid at ≤782 px to ensure buttons wrap evenly without clipping.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.15 for the responsive action layout release.
+
 ## 3.47.14 - 2025-10-15
 - Added horizontal scrolling support to the scan results table with min-width guards so columns stay readable on narrow viewports.
 - Tuned table spacing and focus outlines to improve accessibility when navigating the scan results via keyboard or touch on mobile devices.
