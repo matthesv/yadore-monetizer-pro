@@ -79,7 +79,7 @@
     </div>
 
     <div class="yadore-scanner-container">
-        <div class="overview-analytics-grid">
+        <div class="yadore-card-grid overview-analytics-grid">
             <!-- Scanner Overview -->
             <div class="yadore-card scanner-overview">
                 <div class="card-header">
@@ -119,7 +119,7 @@
                     </div>
                 </div>
 
-                <div class="scanner-stats">
+                <div class="yadore-card-grid scanner-stats">
                     <div class="stat-card stat-total">
                         <div class="stat-icon">
                             <span class="dashicons dashicons-admin-post"></span>
@@ -183,7 +183,7 @@
                     <h2><span class="dashicons dashicons-chart-pie"></span> Scan Analytics</h2>
                 </div>
                 <div class="card-content">
-                    <div class="analytics-grid">
+                    <div class="yadore-card-grid analytics-grid">
                         <div class="analytics-panel analytics-chart">
                             <h3>Keyword Categories</h3>
                             <canvas id="keywords-chart" width="300" height="200"></canvas>
@@ -221,7 +221,7 @@
         </div>
 
         <!-- Scanner Actions -->
-        <div class="scanner-grid">
+        <div class="yadore-card-grid scanner-grid">
             <!-- Bulk Scanner -->
             <div class="yadore-card">
                 <div class="card-header">
@@ -302,7 +302,7 @@
 
                     <div class="bulk-scan-summary" id="bulk-scan-summary" aria-live="polite">
                         <h3><span class="dashicons dashicons-filter"></span> Aktive Scan-Einstellungen</h3>
-                        <div class="summary-grid">
+                        <div class="yadore-card-grid summary-grid">
                             <div class="summary-item">
                                 <span class="summary-label">Post-Typen</span>
                                 <span class="summary-value summary-post-types">–</span>

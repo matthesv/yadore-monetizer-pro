@@ -275,7 +275,7 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <div class="yadore-stats-grid">
+                    <div class="yadore-card-grid yadore-stats-grid">
                         <div class="stat-card stat-primary">
                             <div class="stat-icon">
                                 <span class="dashicons dashicons-products"></span>
@@ -338,7 +338,7 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <div class="feature-status-grid">
+                    <div class="yadore-card-grid feature-status-grid">
                         <div class="feature-item">
                             <div class="feature-icon status-active">
                                 <span class="dashicons dashicons-wordpress-alt"></span>
@@ -833,7 +833,7 @@ function yadoreGeneratePreview(shortcode) {
         previewContainer.html(`
             <div class="shortcode-preview-result">
                 <h4>${yadoreDashboardStrings.previewHeading}: ${shortcode}</h4>
-                <div class="preview-grid">
+                <div class="yadore-card-grid preview-grid">
                     <div class="preview-product">${yadoreDashboardStrings.productLabel} 1</div>
                     <div class="preview-product">${yadoreDashboardStrings.productLabel} 2</div>
                     <div class="preview-product">${yadoreDashboardStrings.productLabel} 3</div>

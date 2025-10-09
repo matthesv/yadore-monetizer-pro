@@ -1,5 +1,24 @@
-/* Yadore Monetizer Pro v3.47.4 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.8 - Admin CSS (Complete) */
 @layer base {
+    :root {
+        --yadore-card-grid-min-column: 220px;
+        --yadore-card-grid-gap: var(--yadore-space-4);
+        --yadore-card-grid-padding-block: 0;
+        --yadore-card-grid-padding-inline: 0;
+    }
+
+    @media (min-width: 640px) {
+        :root {
+            --yadore-card-grid-min-column: 240px;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        :root {
+            --yadore-card-grid-min-column: 280px;
+        }
+    }
+
     .yadore-admin-wrap {
         margin: 0;
         min-height: 100vh;
@@ -90,6 +109,36 @@
 }
 
 @layer components {
+    .yadore-card-grid {
+        display: grid;
+        gap: var(--yadore-card-grid-gap, var(--yadore-space-4));
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(
+                min(
+                    var(--yadore-card-grid-column-min, var(--yadore-card-grid-min-column)),
+                    100%
+                ),
+                1fr
+            )
+        );
+        padding-block: var(--yadore-card-grid-padding-block, 0);
+        padding-inline: var(--yadore-card-grid-padding-inline, 0);
+        align-items: var(--yadore-card-grid-align, stretch);
+    }
+
+    .yadore-card-grid[data-variant="compact"] {
+        --yadore-card-grid-gap: var(--yadore-space-3);
+    }
+
+    .yadore-card-grid[data-variant="spacious"] {
+        --yadore-card-grid-gap: var(--yadore-space-6);
+    }
+
+    .yadore-card-grid[data-variant="wide"] {
+        --yadore-card-grid-column-min: 320px;
+    }
+
     .yadore-hero {
         position: relative;
         display: grid;
@@ -394,9 +443,8 @@
 
     .token-grid,
     .component-grid {
-        display: grid;
-        gap: var(--yadore-space-4);
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        --yadore-card-grid-gap: var(--yadore-space-4);
+        --yadore-card-grid-column-min: 220px;
     }
 
     .token-card {
@@ -700,9 +748,8 @@
 }
 
 .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
+    --yadore-card-grid-column-min: 180px;
+    --yadore-card-grid-gap: 16px;
 }
 
 .summary-item {
@@ -813,7 +860,7 @@
 
 @media (max-width: 782px) {
     .summary-grid {
-        grid-template-columns: 1fr;
+        --yadore-card-grid-column-min: 100%;
     }
 
     .results-actions {
@@ -1357,9 +1404,8 @@
 
 /* Stats Grid */
 .yadore-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--yadore-space-5);
+    --yadore-card-grid-column-min: 220px;
+    --yadore-card-grid-gap: var(--yadore-space-5);
     margin-bottom: var(--yadore-space-2);
 }
 
@@ -1648,11 +1694,10 @@
 }
 
 .overview-analytics-grid {
-    display: grid;
-    gap: 28px;
-    align-items: stretch;
+    --yadore-card-grid-gap: 28px;
+    --yadore-card-grid-column-min: 320px;
+    --yadore-card-grid-align: stretch;
     margin-bottom: 32px;
-    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
 }
 
 .overview-analytics-grid .yadore-card {
@@ -1696,9 +1741,14 @@
 }
 
 .scanner-overview .scanner-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-    gap: 22px;
+    --yadore-card-grid-column-min: 220px;
+    --yadore-card-grid-gap: 22px;
+}
+
+.scanner-grid {
+    --yadore-card-grid-gap: var(--yadore-space-5);
+    --yadore-card-grid-column-min: 320px;
+    --yadore-card-grid-align: stretch;
 }
 
 .scan-analytics-card .card-content {
@@ -1710,8 +1760,9 @@
 
 
 .scan-analytics-card .analytics-grid {
-    display: grid;
-    gap: 24px;
+    --yadore-card-grid-gap: 24px;
+    --yadore-card-grid-column-min: 320px;
+    --yadore-card-grid-align: stretch;
     grid-auto-rows: auto;
 }
 
@@ -1901,9 +1952,8 @@
 
 /* Color palette controls */
 .color-settings-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px;
+    --yadore-card-grid-column-min: 260px;
+    --yadore-card-grid-gap: 24px;
     margin-top: 16px;
 }
 
@@ -1992,8 +2042,8 @@
 
 /* Feature Status */
 .feature-status-grid {
-    display: grid;
-    gap: 16px;
+    --yadore-card-grid-gap: 16px;
+    --yadore-card-grid-column-min: 100%;
 }
 
 .feature-item {
@@ -2720,10 +2770,26 @@
 }
 
 .health-status-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--yadore-space-5);
+    --yadore-card-grid-column-min: 250px;
+    --yadore-card-grid-gap: var(--yadore-space-5);
     margin-bottom: var(--yadore-space-6);
+}
+
+.debug-grid {
+    --yadore-card-grid-gap: var(--yadore-space-5);
+    --yadore-card-grid-column-min: 320px;
+    --yadore-card-grid-align: stretch;
+}
+
+.system-info-grid {
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 220px;
+}
+
+.tool-grid {
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 260px;
+    --yadore-card-grid-align: stretch;
 }
 
 .health-item {
@@ -2842,10 +2908,9 @@
 
 /* Tools specific */
 .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    align-items: stretch;
+    --yadore-card-grid-column-min: 280px;
+    --yadore-card-grid-gap: 24px;
+    --yadore-card-grid-align: stretch;
     grid-auto-rows: 1fr;
 }
 
@@ -2891,10 +2956,9 @@
 }
 
 .export-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--yadore-space-3);
-    align-items: stretch;
+    --yadore-card-grid-column-min: 220px;
+    --yadore-card-grid-gap: var(--yadore-space-3);
+    --yadore-card-grid-align: stretch;
     width: 100%;
 }
 
@@ -2957,10 +3021,15 @@
 }
 
 .maintenance-grid {
-    display: grid;
-    gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-    align-items: stretch;
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 280px;
+    --yadore-card-grid-align: stretch;
+}
+
+.utility-grid {
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 240px;
+    --yadore-card-grid-align: stretch;
 }
 
 .maintenance-tool {
@@ -3096,9 +3165,8 @@
 }
 
 .summary-stats {
-    display: grid;
-    gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 220px;
 }
 
 .performance-chart,
@@ -3125,12 +3193,6 @@
     margin: 0;
     color: var(--yadore-color-text-subtle);
     font-size: var(--yadore-font-size-sm);
-}
-
-.cloud-container {
-    display: grid;
-    gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
 }
 
 .cloud-loading,
@@ -3234,9 +3296,8 @@
 }
 
 .analytics-grid {
-    display: grid;
-    gap: var(--yadore-space-6);
-    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    --yadore-card-grid-gap: var(--yadore-space-6);
+    --yadore-card-grid-column-min: 320px;
 }
 
 .traffic-metrics {
@@ -3270,9 +3331,8 @@
 }
 
 .conversion-funnel {
-    display: grid;
-    gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 220px;
 }
 
 .funnel-step {
@@ -3427,9 +3487,8 @@
 }
 
 .keyword-stats {
-    display: grid;
-    gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 160px;
 }
 
 .keyword-stat {
@@ -3448,19 +3507,23 @@
 }
 
 .cloud-container {
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 200px;
     min-height: 180px;
-    display: grid;
-    place-items: center;
     border-radius: var(--yadore-radius-lg);
     border: 1px dashed var(--yadore-border-subtle);
     color: var(--yadore-color-text-muted);
     background: var(--yadore-color-surface);
+    align-content: start;
+    justify-content: stretch;
 }
 
 .cloud-loading {
     display: inline-flex;
     align-items: center;
     gap: var(--yadore-space-2);
+    justify-self: center;
+    align-self: center;
 }
 
 .keyword-performance table {
@@ -3473,9 +3536,13 @@
 }
 
 .revenue-cards {
-    display: grid;
-    gap: var(--yadore-space-4);
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    --yadore-card-grid-gap: var(--yadore-space-4);
+    --yadore-card-grid-column-min: 220px;
+}
+
+.preview-grid {
+    --yadore-card-grid-gap: var(--yadore-space-3);
+    --yadore-card-grid-column-min: 180px;
 }
 
 .revenue-card {
@@ -3533,24 +3600,34 @@
 
 @media (max-width: 640px) {
     .yadore-hero__meta,
+    .scan-analytics-card .analytics-grid,
+    .generator-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .token-grid,
     .component-grid,
     .yadore-stats-grid,
     .summary-grid,
     .overview-analytics-grid,
     .scanner-overview .scanner-stats,
-    .scan-analytics-card .analytics-grid,
+    .scanner-grid,
     .color-settings-grid,
-    .generator-row,
     .health-status-grid,
+    .debug-grid,
+    .system-info-grid,
+    .tool-grid,
     .tools-grid,
+    .maintenance-grid,
+    .utility-grid,
     .summary-stats,
     .cloud-container,
     .analytics-grid,
     .conversion-funnel,
     .keyword-stats,
-    .revenue-cards {
-        grid-template-columns: minmax(0, 1fr);
+    .revenue-cards,
+    .preview-grid {
+        --yadore-card-grid-column-min: 100%;
     }
 }
 
