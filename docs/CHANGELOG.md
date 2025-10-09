@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.12 - 2025-10-13
+- Expanded the tools container and `.regular-text` input styling so every field stretches fluidly with its card, preventing overflow and keeping the layout responsive down to 400 px wide viewports.
+- Verified the WordPress admin Tools screen at mobile widths to confirm cards remain within the viewport without horizontal scrolling.
+- Bumped the plugin metadata and bundled CSS banner to 3.47.12 to track the responsive fix release.
+
 ## 3.47.11 - 2025-10-12
 - Harmonised the admin hero headline/grid behaviour so icons and long titles wrap gracefully on tablets and phones instead of forcing cramped two-column layouts.
 - Tightened the hero meta cards and CTA alignment to remove uneven spacing and keep action rows vertically centred.
