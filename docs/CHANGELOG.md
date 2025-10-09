@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.17 - 2025-10-18
+- Stacked dashboard card action controls vertically on ≤782 px viewports so dropdowns and buttons span the available width without clipping.
+- Reduced the mobile control height and padding to deliver compact, thumb-friendly tap targets inside circular action styles.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.17 to document the responsive layout refinement.
+
 ## 3.47.16 - 2025-10-17
 - Normalised the quick filter button group with consistent flex sizing so pills share equal widths and wrap cleanly across breakpoints.
 - Increased the pill padding and centred labels to maintain a comfortable tap target within the new fixed sizing.
