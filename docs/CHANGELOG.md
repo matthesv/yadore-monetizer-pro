@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.21 - 2025-10-22
+- Updated the reset option checkbox label layout to use a wrapping flex container so long translations stay inside the card on narrow viewports.
+- Let the checkbox description span flex within the label to wrap naturally without overlapping or clipping adjacent controls.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.21 to record the responsive Configuration Tools refinement.
+
 ## 3.47.20 - 2025-10-21
 - Expanded the Configuration Tools cards so reset, migration, and optimization boxes retain full-width content until widescreen breakpoints, preventing text and buttons from clipping on medium displays.
 - Enlarged the migration action column with a responsive clamp so URLs, inputs, and buttons have room to render without wrapping labels.
