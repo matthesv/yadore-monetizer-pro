@@ -852,6 +852,7 @@
     backdrop-filter: blur(14px);
     width: min(100%, var(--yadore-card-max-width, 100%));
     margin-inline: auto;
+    box-sizing: border-box;
     --yadore-card-padding-inline: clamp(var(--yadore-space-4), 4vw, var(--yadore-space-6));
     --yadore-card-padding-block: clamp(var(--yadore-space-4), 3vw, var(--yadore-space-5));
     --yadore-card-section-gap: clamp(var(--yadore-space-4), 3.5vw, var(--yadore-space-5));
