@@ -75,7 +75,7 @@ endif;
                     <span class="overlay-merchant-name"><?php echo sprintf(esc_html__('Available at %s', 'yadore-monetizer'), $merchant_name); ?></span>
                 </div>
                 <a href="<?php echo $click_url; ?>"
-                   class="overlay-product-button"
+                   class="overlay-product-button yadore-cta-button"
                    target="_blank"
                    rel="nofollow noopener"
                    data-yadore-click="<?php echo $product_id; ?>">
