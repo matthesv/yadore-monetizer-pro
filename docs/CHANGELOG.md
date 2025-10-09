@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.27 - 2025-10-25
+- Enabled the Tools → Import workflow to accept every exportable format by sourcing the supported extension list from the core configuration service.
+- Synced the admin interface, uploader hints, and validation messaging with the shared format list so JSON, CSV, XML (and future additions) stay aligned without manual updates.
+- Bumped the plugin metadata and admin tooling logic to 3.47.27 to record the import compatibility improvements.
+
 ## 3.47.23 - 2025-10-24
 - Organized the maintenance tool statistic sections into spaced column layouts so cache, database, log, and cleanup metrics read cleanly on all devices.
 - Styled individual maintenance tool statistic rows with padded, bordered flex wrappers to keep labels and values aligned and legible.
