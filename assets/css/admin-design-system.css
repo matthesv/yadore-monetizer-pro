@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.29 - Admin Design System Tokens */
+/* Yadore Monetizer Pro v3.47.10 - Admin Design System Tokens */
 @layer tokens {
     :root {
         color-scheme: light;
@@ -143,6 +143,8 @@
         font-family: var(--yadore-font-family-base);
         color: var(--yadore-color-text-default);
         background-color: var(--yadore-color-surface-muted);
+        width: 100%;
+        box-sizing: border-box;
         padding: var(--yadore-space-7) var(--yadore-space-0) var(--yadore-space-8);
     }
 

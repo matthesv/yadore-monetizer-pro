@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.9 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.10 - Admin CSS (Complete) */
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
@@ -20,6 +20,8 @@
     }
 
     .yadore-admin-wrap {
+        width: 100%;
+        box-sizing: border-box;
         margin: 0;
         min-height: 100vh;
         background-image: var(--yadore-gradient-aurora);
