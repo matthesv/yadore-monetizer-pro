@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.13 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.14 - Admin CSS (Complete) */
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
@@ -816,6 +816,50 @@
     border-color: var(--yadore-color-primary-600);
     color: var(--yadore-color-text-inverse);
     box-shadow: 0 6px 14px rgba(19, 94, 150, 0.35);
+}
+
+.scan-results-table {
+    position: relative;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--yadore-space-4);
+    scrollbar-gutter: stable both-edges;
+}
+
+.scan-results-table table {
+    width: 100%;
+    min-width: clamp(600px, 85vw, 960px);
+    border-collapse: collapse;
+    scroll-snap-align: start;
+}
+
+.scan-results-table th,
+.scan-results-table td {
+    padding: var(--yadore-space-3) var(--yadore-space-4);
+    border-bottom: 1px solid var(--yadore-border-subtle);
+    white-space: nowrap;
+}
+
+.scan-results-table td:first-child,
+.scan-results-table th:first-child {
+    white-space: normal;
+    min-width: 200px;
+}
+
+.scan-results-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+@media (max-width: 480px) {
+    .scan-results-table table {
+        min-width: 520px;
+    }
+}
+
+.scan-results-table:focus-visible {
+    outline: 3px solid var(--yadore-color-primary-400);
+    outline-offset: 2px;
 }
 
 .status-legend {

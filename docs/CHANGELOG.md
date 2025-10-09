@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.14 - 2025-10-15
+- Added horizontal scrolling support to the scan results table with min-width guards so columns stay readable on narrow viewports.
+- Tuned table spacing and focus outlines to improve accessibility when navigating the scan results via keyboard or touch on mobile devices.
+- Bumped the plugin metadata and admin stylesheet banner to 3.47.14 to capture the responsive enhancement release.
+
 ## 3.47.13 - 2025-10-14
 - Trimmed the mobile padding and gaps inside the Data Management tools card so the export/import columns collapse without huge whitespace on phones.
 - Forced the export and import option groups to stack as a grid on mobile while stretching selects and date/time inputs to full width for consistent visibility.
