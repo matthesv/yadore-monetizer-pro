@@ -768,7 +768,7 @@
                         <div class="form-section">
                             <h3><span class="dashicons dashicons-art"></span> <?php esc_html_e('Template Colors', 'yadore-monetizer'); ?></h3>
                             <p class="form-description"><?php esc_html_e('Fine-tune the colors used by the built-in templates. Select a tone from the palette or enter custom hex values.', 'yadore-monetizer'); ?></p>
-                            <div class="color-settings-grid">
+                            <div class="yadore-card-grid color-settings-grid">
                                 <div class="color-settings-card">
                                     <h4><?php esc_html_e('Shortcode Templates', 'yadore-monetizer'); ?></h4>
                                     <?php foreach ($color_field_definitions as $color_key => $definition) :

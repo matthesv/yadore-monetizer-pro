@@ -74,7 +74,7 @@
             </div>
             <div class="card-content">
                 <div class="analytics-summary">
-                    <div class="summary-stats">
+                    <div class="yadore-card-grid summary-stats">
                         <div class="stat-card stat-compact">
                             <div class="stat-header">
                                 <h3>Product Views</h3>
@@ -121,7 +121,7 @@
         </div>
 
         <!-- Detailed Analytics -->
-        <div class="analytics-grid">
+        <div class="yadore-card-grid analytics-grid" data-variant="spacious">
             <!-- Traffic Analysis -->
             <div class="yadore-card">
                 <div class="card-header">
@@ -161,7 +161,7 @@
                 </div>
                 <div class="card-content">
                     <div class="conversion-stats">
-                        <div class="conversion-funnel">
+                        <div class="yadore-card-grid conversion-funnel">
                             <div class="funnel-step">
                                 <div class="step-number">1</div>
                                 <div class="step-content">
@@ -249,7 +249,7 @@
             <div class="card-content">
                 <div class="keyword-analytics">
                     <div class="keyword-overview">
-                        <div class="keyword-stats">
+                        <div class="yadore-card-grid keyword-stats">
                             <div class="keyword-stat">
                                 <span class="stat-number" id="total-keywords">Loading...</span>
                                 <span class="stat-label">Total Keywords</span>
@@ -267,7 +267,7 @@
                         <div class="keyword-cloud">
                             <h4>Most Popular Keywords</h4>
                             <p class="cloud-subtitle">Track which search terms attract the most engagement at a glance.</p>
-                            <div class="cloud-container" id="keyword-cloud" aria-live="polite">
+                            <div class="yadore-card-grid cloud-container" id="keyword-cloud" aria-live="polite">
                                 <div class="cloud-loading">
                                     <span class="dashicons dashicons-update-alt spinning"></span> Generating keyword cloud...
                                 </div>
@@ -309,7 +309,7 @@
             <div class="card-content">
                 <div class="revenue-analytics">
                     <div class="revenue-summary">
-                        <div class="revenue-cards">
+                        <div class="yadore-card-grid revenue-cards">
                             <div class="revenue-card">
                                 <h4>Estimated Monthly Revenue</h4>
                                 <div class="revenue-amount" id="monthly-revenue">$0.00</div>

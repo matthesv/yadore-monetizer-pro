@@ -62,7 +62,7 @@
                 <h2><span class="dashicons dashicons-migrate"></span> Data Management</h2>
             </div>
             <div class="card-content">
-                <div class="tools-grid">
+                <div class="yadore-card-grid tools-grid">
                     <!-- Export Tools -->
                     <div class="tool-section" id="tools-export">
                         <div class="tool-header">
@@ -197,7 +197,7 @@
             </div>
             <div class="card-content">
                 <div class="maintenance-tools">
-                    <div class="maintenance-grid">
+                    <div class="yadore-card-grid maintenance-grid">
                         <!-- Cache Management -->
                         <div class="maintenance-tool">
                             <div class="tool-icon">
@@ -439,7 +439,7 @@
             </div>
             <div class="card-content">
                 <div class="utility-tools">
-                    <div class="utility-grid">
+                    <div class="yadore-card-grid utility-grid">
                         <!-- Shortcode Generator -->
                         <div class="utility-tool">
                             <h3><span class="dashicons dashicons-shortcode"></span> Advanced Shortcode Generator</h3>

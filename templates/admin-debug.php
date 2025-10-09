@@ -83,7 +83,7 @@
                 </div>
             </div>
             <div class="card-content">
-                <div class="health-status-grid">
+                <div class="yadore-card-grid health-status-grid">
                     <div class="health-item">
                         <div class="health-icon status-active">
                             <span class="dashicons dashicons-wordpress-alt"></span>
@@ -220,7 +220,7 @@
         </div>
 
         <!-- Debug Information -->
-        <div class="debug-grid">
+        <div class="yadore-card-grid debug-grid">
             <!-- System Information -->
             <div class="yadore-card">
                 <div class="card-header">
@@ -232,7 +232,7 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <div class="system-info-grid" id="system-info-content">
+                    <div class="yadore-card-grid system-info-grid" id="system-info-content">
                         <div class="info-section">
                             <h3>WordPress</h3>
                             <div class="info-items">
@@ -354,7 +354,7 @@
             </div>
             <div class="card-content">
                 <div class="diagnostic-tools">
-                    <div class="tool-grid">
+                    <div class="yadore-card-grid tool-grid">
                         <div class="diagnostic-tool">
                             <div class="tool-icon">
                                 <span class="dashicons dashicons-admin-network"></span>

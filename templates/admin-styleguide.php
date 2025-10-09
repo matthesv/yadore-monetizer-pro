@@ -263,11 +263,11 @@ HTML;
 
         <section class="styleguide-section">
             <h2><?php esc_html_e('Farb- und Status-Tokens', 'yadore-monetizer'); ?></h2>
-            <div class="token-grid">
+            <div class="yadore-card-grid token-grid">
                 <?php foreach ($color_groups as $group) : ?>
                     <div class="token-card">
                         <strong><?php echo esc_html($group['title']); ?></strong>
-                        <div class="component-grid">
+                        <div class="yadore-card-grid component-grid">
                             <?php foreach ($group['tokens'] as $token) : ?>
                                 <?php
                                 $is_gradient = !empty($token['gradient']);
@@ -290,7 +290,7 @@ HTML;
 
         <section class="styleguide-section">
             <h2><?php esc_html_e('Spacing, Radien & Schatten', 'yadore-monetizer'); ?></h2>
-            <div class="token-grid">
+            <div class="yadore-card-grid token-grid">
                 <div class="token-card">
                     <strong><?php esc_html_e('Spacing-Skala', 'yadore-monetizer'); ?></strong>
                     <?php foreach ($spacing_tokens as $token) : ?>
@@ -329,7 +329,7 @@ HTML;
 
         <section class="styleguide-section">
             <h2><?php esc_html_e('Typografie', 'yadore-monetizer'); ?></h2>
-            <div class="token-grid">
+            <div class="yadore-card-grid token-grid">
                 <div class="token-card">
                     <strong><?php esc_html_e('Skala & Gewichte', 'yadore-monetizer'); ?></strong>
                     <?php foreach ($typography_tokens as $token) : ?>
@@ -347,7 +347,7 @@ HTML;
 
         <section class="styleguide-section">
             <h2><?php esc_html_e('Komponentenbibliothek', 'yadore-monetizer'); ?></h2>
-            <div class="component-grid">
+            <div class="yadore-card-grid component-grid">
                 <?php foreach ($component_samples as $component) : ?>
                     <div class="styleguide-component-card">
                         <header>
