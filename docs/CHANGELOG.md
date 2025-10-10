@@ -1,5 +1,15 @@
 # Changelog
 
+# 3.48.5 - 2025-11-12
+- Replaced compiled German binaries with PHP-based catalogues and runtime translation filters.
+- Added a manual translation bootstrapper and ignored generated `.mo` assets from version control.
+- Bumped plugin metadata to 3.48.5.
+
+# 3.48.4 - 2025-11-11
+- Moved translation loading to `plugins_loaded` and wired script translations so WordPress locales can translate admin strings reliably.
+- Normalised default admin JavaScript copy to English and prepared German translations via the localization files.
+- Compiled updated language assets and bumped metadata to 3.48.4.
+
 # 3.48.3 - 2025-11-10
 - Übersetzte die gesamte Analytics-Verwaltungsseite inklusive Karten, Tabellen, Auswahlfelder und Ladehinweise mit automatischer Umschaltung zwischen Deutsch und Englisch je nach Locale.
 - Hinterlegte eine wiederverwendbare Übersetzungstabelle für die Analytics-Texte, damit alle Admin-Statuselemente sauber lokalisiert werden.

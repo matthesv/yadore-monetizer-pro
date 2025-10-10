@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.3
+Version: 3.48.5
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,10 +14,12 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.3');
+define('YADORE_PLUGIN_VERSION', '3.48.5');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
+
+require_once YADORE_PLUGIN_DIR . 'includes/class-yadore-i18n.php';
 
 class YadoreMonetizer {
 
@@ -43,6 +45,7 @@ class YadoreMonetizer {
         self::$instance = $this;
         try {
             // Core WordPress hooks
+            add_action('plugins_loaded', array($this, 'load_textdomain'));
             add_action('init', array($this, 'init'));
             add_action('admin_init', array($this, 'admin_init'));
             add_action('admin_menu', array($this, 'admin_menu'));
@@ -152,10 +155,15 @@ class YadoreMonetizer {
         return self::$instance;
     }
 
+    public function load_textdomain() {
+        load_plugin_textdomain('yadore-monetizer', false, dirname(plugin_basename(YADORE_PLUGIN_FILE)) . '/languages');
+        if (class_exists('Yadore_Monetizer_I18n')) {
+            Yadore_Monetizer_I18n::boot();
+        }
+    }
+
     public function init() {
         try {
-            load_plugin_textdomain('yadore-monetizer', false, dirname(plugin_basename(YADORE_PLUGIN_FILE)) . '/languages');
-
             // v2.7: Register custom post types for advanced features
             $this->register_custom_post_types();
 
@@ -1659,6 +1667,10 @@ HTML
                 wp_enqueue_script('yadore-charts');
             }
 
+            if (function_exists('wp_set_script_translations')) {
+                wp_set_script_translations('yadore-admin-js', 'yadore-monetizer', YADORE_PLUGIN_DIR . 'languages');
+            }
+
             wp_localize_script('yadore-admin-js', 'yadore_admin', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('yadore_admin_nonce'),
@@ -1669,7 +1681,7 @@ HTML
                 'is_tools_screen' => $is_tools_screen,
                 'strings' => array(
                     'confirm_delete' => __('Are you sure you want to delete this item?', 'yadore-monetizer'),
-                    'processing' => __('Processing...', 'yadore-monetizer'),
+                    'processing' => __('Processing…', 'yadore-monetizer'),
                     'error' => __('An error occurred. Please try again.', 'yadore-monetizer'),
                     'success' => __('Operation completed successfully.', 'yadore-monetizer'),
                     'copied' => __('Copied!', 'yadore-monetizer'),
@@ -1681,14 +1693,24 @@ HTML
                     'copy_feedback_error' => __('Copy failed. Press Ctrl+C to copy manually.', 'yadore-monetizer'),
                     'show_secret' => __('Show key', 'yadore-monetizer'),
                     'hide_secret' => __('Hide key', 'yadore-monetizer'),
-                    'refreshing' => __('Aktualisierung läuft...', 'yadore-monetizer'),
-                    'no_data' => __('Noch keine Daten geladen', 'yadore-monetizer'),
-                    'just_now' => __('Gerade eben', 'yadore-monetizer'),
-                    'relative_seconds' => __('vor %s Sekunden', 'yadore-monetizer'),
-                    'relative_minutes' => __('vor %s Minuten', 'yadore-monetizer'),
-                    'relative_hours' => __('vor %s Stunden', 'yadore-monetizer'),
-                    'relative_days' => __('vor %s Tagen', 'yadore-monetizer'),
-                    'activity_empty' => __('Keine Aktivitäten vorhanden.', 'yadore-monetizer')
+                    'refreshing' => __('Refreshing…', 'yadore-monetizer'),
+                    'no_data' => __('No data loaded yet', 'yadore-monetizer'),
+                    'just_now' => __('Just now', 'yadore-monetizer'),
+                    'relative_seconds' => __('%s seconds ago', 'yadore-monetizer'),
+                    'relative_minutes' => __('%s minutes ago', 'yadore-monetizer'),
+                    'relative_hours' => __('%s hours ago', 'yadore-monetizer'),
+                    'relative_days' => __('%s days ago', 'yadore-monetizer'),
+                    'activity_empty' => __('No activity logged yet.', 'yadore-monetizer'),
+                    'scan_pending_html' => __('Still <span id="scan-pending-count">%s</span> posts pending', 'yadore-monetizer'),
+                    'scan_complete_text' => __('All posts scanned!', 'yadore-monetizer'),
+                    'pagination_page_aria' => __('Page %s', 'yadore-monetizer'),
+                    'pagination_next' => __('Next page', 'yadore-monetizer'),
+                    'pagination_previous' => __('Previous page', 'yadore-monetizer'),
+                    'pagination_summary' => __('%1$s–%2$s of %3$s', 'yadore-monetizer'),
+                    'no_selection' => __('No selection', 'yadore-monetizer'),
+                    'summary_min_words' => __('%s words', 'yadore-monetizer'),
+                    'summary_no_minimum' => __('No minimum', 'yadore-monetizer'),
+                    'summary_default_scan' => __('Standard scan', 'yadore-monetizer')
                 )
             ));
 
