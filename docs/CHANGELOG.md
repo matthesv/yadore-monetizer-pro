@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.30 - 2025-10-28
+- Replaced the hidden import input with an accessible visually-hidden control so browsers can open the native file dialog on click.
+- Added reusable styling for the hidden file input to keep it off-screen while remaining focusable for accessibility.
+- Bumped the plugin metadata and bundled asset banners to 3.47.30 to capture the import dialog reliability fix.
+
 ## 3.47.29 - 2025-10-27
 - Added a dedicated import trigger button so touch devices can reliably open the file picker without depending on drag-and-drop gestures.
 - Updated the admin tooling script to wire the new control into the existing upload flow for consistent validation and feedback.

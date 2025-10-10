@@ -1,4 +1,25 @@
-/* Yadore Monetizer Pro v3.47.29 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.30 - Admin CSS (Complete) */
+
+.yadore-hidden-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    border: 0;
+}
+
+.yadore-hidden-file-input:focus {
+    clip: auto;
+    clip-path: none;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+}
 @layer base {
     :root {
         --yadore-card-grid-min-column: 220px;
