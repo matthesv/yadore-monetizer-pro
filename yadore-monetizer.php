@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.7
+Version: 3.48.8
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.7');
+define('YADORE_PLUGIN_VERSION', '3.48.8');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -29,7 +29,7 @@ class YadoreMonetizer {
 
     public const LAST_DEFAULT_AI_PROMPT = "You are an affiliate marketing assistant. Analyze the provided blog post details and return JSON matching the schema (keyword, alternate_keywords, confidence, rationale).\n\nTitle: {title}\n\nContent:\n{content}\n\nFocus on purchase-ready product keywords (brand + model when available) and provide up to three alternates for backup searches.";
 
-    public const DEFAULT_AI_PROMPT = "You are an affiliate marketing assistant. Analyze the provided blog post details and return JSON matching the schema (keyword, alternate_keywords, confidence, rationale).\n\nTitle: {title}\n\nContent:\n{content}\n\nAlways return a tangible, purchase-ready product keyword (brand + model when available) and provide up to three alternates for backup searches. If the content primarily describes a place or location (park, beach, city, venue, attraction, etc.), infer the most relevant physical product someone would need or buy for that setting before selecting the keyword.";
+    public const DEFAULT_AI_PROMPT = "You are an affiliate marketing assistant. Analyze the provided blog post details and return JSON matching the schema (keyword, alternate_keywords, confidence, rationale).\n\nTitle: {title}\n\nContent:\n{content}\n\nPreviously selected keyword: {previous_keyword}\n\nAlways return a tangible, purchase-ready product keyword (brand + model when available) and provide up to three alternates for backup searches. If the content primarily describes a place or location (park, beach, city, venue, attraction, etc.), infer the most relevant physical product someone would need or buy for that setting before selecting the keyword.";
 
     public const LEGACY_AI_PROMPT = 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.';
 
@@ -4701,7 +4701,7 @@ HTML
         return $body;
     }
 
-    private function call_gemini_api($title, $content, $use_cache = true, $post_id = 0) {
+    private function call_gemini_api($title, $content, $use_cache = true, $post_id = 0, $previous_keyword = '') {
         try {
             $api_key = trim((string) get_option('yadore_gemini_api_key'));
             if (empty($api_key)) {
@@ -4718,12 +4718,21 @@ HTML
                 $prompt_template = self::DEFAULT_AI_PROMPT;
             }
 
+            $clean_previous_keyword = sanitize_text_field((string) $previous_keyword);
+            $previous_keyword_placeholder = $clean_previous_keyword !== ''
+                ? $clean_previous_keyword
+                : __('None', 'yadore-monetizer');
+
             $prompt = str_replace(
-                array('{title}', '{content}'),
-                array($title, $content),
+                array('{title}', '{content}', '{previous_keyword}'),
+                array($title, $content, $previous_keyword_placeholder),
                 $prompt_template
             );
             $prompt = trim($prompt);
+
+            if ($clean_previous_keyword !== '') {
+                $prompt .= "\n\nPreviously selected keyword to avoid: {$clean_previous_keyword}. Provide a different primary keyword and alternates. Do not repeat the previous keyword or trivial variations.";
+            }
 
         $cache_key = 'yadore_ai_' . md5($model . '|' . $prompt);
         if ($use_cache) {
@@ -7432,8 +7441,17 @@ HTML
         $sanitized_ai_candidates = array();
         $gemini_confidence = 0.0;
 
+        $previous_keyword = '';
+        if (is_array($existing)) {
+            if (!empty($existing['primary_keyword'])) {
+                $previous_keyword = (string) $existing['primary_keyword'];
+            } elseif (!empty($existing['fallback_keyword'])) {
+                $previous_keyword = (string) $existing['fallback_keyword'];
+            }
+        }
+
         if ($options['use_ai']) {
-            $ai_result = $this->call_gemini_api($post->post_title, wp_strip_all_tags($post->post_content), true, $post_id);
+            $ai_result = $this->call_gemini_api($post->post_title, wp_strip_all_tags($post->post_content), true, $post_id, $previous_keyword);
 
             if (is_array($ai_result) && empty($ai_result['error'])) {
                 if (isset($ai_result['keyword']) && trim((string) $ai_result['keyword']) !== '') {
