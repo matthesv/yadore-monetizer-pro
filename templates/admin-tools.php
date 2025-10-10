@@ -127,7 +127,7 @@
         <!-- Data Management Tools -->
         <div class="yadore-card">
             <div class="card-header">
-                <h2><span class="dashicons dashicons-migrate"></span> Data Management</h2>
+                <h2><span class="dashicons dashicons-migrate"></span> <?php esc_html_e('Datenverwaltung', 'yadore-monetizer'); ?></h2>
             </div>
             <div class="card-content">
                 <div class="yadore-card-grid tools-grid">
@@ -136,23 +136,23 @@
                         <header class="tool-section__header">
                             <span class="tool-section__icon dashicons dashicons-download" aria-hidden="true"></span>
                             <div class="tool-section__titles">
-                                <h3 id="tools-export-title">Export Data</h3>
-                                <p class="tool-section__description">Export your plugin data for backup or migration purposes.</p>
+                                <h3 id="tools-export-title"><?php esc_html_e('Daten exportieren', 'yadore-monetizer'); ?></h3>
+                                <p class="tool-section__description"><?php esc_html_e('Exportiere deine Plugin-Daten für Backups oder Migrationen.', 'yadore-monetizer'); ?></p>
                             </div>
                         </header>
                         <div class="tool-section__body">
                             <div class="export-options yadore-card-grid" data-variant="compact">
                                 <div class="option-group">
-                                    <h4>Data Types</h4>
-                                    <label><input type="checkbox" name="export_data[]" value="settings" checked> Plugin Settings</label>
-                                    <label><input type="checkbox" name="export_data[]" value="keywords" checked> Post Keywords</label>
-                                    <label><input type="checkbox" name="export_data[]" value="analytics" checked> Analytics Data</label>
-                                    <label><input type="checkbox" name="export_data[]" value="logs"> API Logs</label>
-                                    <label><input type="checkbox" name="export_data[]" value="cache"> AI Cache</label>
+                                    <h4><?php esc_html_e('Datentypen', 'yadore-monetizer'); ?></h4>
+                                    <label><input type="checkbox" name="export_data[]" value="settings" checked> <?php esc_html_e('Plugin-Einstellungen', 'yadore-monetizer'); ?></label>
+                                    <label><input type="checkbox" name="export_data[]" value="keywords" checked> <?php esc_html_e('Beitrags-Keywords', 'yadore-monetizer'); ?></label>
+                                    <label><input type="checkbox" name="export_data[]" value="analytics" checked> <?php esc_html_e('Analytics-Daten', 'yadore-monetizer'); ?></label>
+                                    <label><input type="checkbox" name="export_data[]" value="logs"> <?php esc_html_e('API-Protokolle', 'yadore-monetizer'); ?></label>
+                                    <label><input type="checkbox" name="export_data[]" value="cache"> <?php esc_html_e('KI-Cache', 'yadore-monetizer'); ?></label>
                                 </div>
 
                                 <div class="option-group">
-                                    <h4>Format</h4>
+                                    <h4><?php esc_html_e('Format', 'yadore-monetizer'); ?></h4>
                                     <?php foreach ($supported_formats as $format_key => $format_config) :
                                         $label = isset($format_config['label']) ? $format_config['label'] : strtoupper($format_key);
                                     ?>
@@ -164,13 +164,13 @@
                                 </div>
 
                                 <div class="option-group">
-                                    <h4>Date Range</h4>
+                                    <h4><?php esc_html_e('Zeitraum', 'yadore-monetizer'); ?></h4>
                                     <select id="export-date-range">
-                                        <option value="all">All Data</option>
-                                        <option value="30">Last 30 Days</option>
-                                        <option value="90">Last 90 Days</option>
-                                        <option value="365">Last Year</option>
-                                        <option value="custom">Custom Range</option>
+                                        <option value="all"><?php esc_html_e('Alle Daten', 'yadore-monetizer'); ?></option>
+                                        <option value="30"><?php esc_html_e('Letzte 30 Tage', 'yadore-monetizer'); ?></option>
+                                        <option value="90"><?php esc_html_e('Letzte 90 Tage', 'yadore-monetizer'); ?></option>
+                                        <option value="365"><?php esc_html_e('Letztes Jahr', 'yadore-monetizer'); ?></option>
+                                        <option value="custom"><?php esc_html_e('Benutzerdefinierter Zeitraum', 'yadore-monetizer'); ?></option>
                                     </select>
 
                                     <div id="custom-date-range" class="tool-date-range hidden" aria-hidden="true">
@@ -180,27 +180,27 @@
                                 </div>
 
                                 <div class="option-group">
-                                    <h4>Schedule Options</h4>
-                                    <label for="export-schedule-interval">Frequency</label>
+                                    <h4><?php esc_html_e('Planungsoptionen', 'yadore-monetizer'); ?></h4>
+                                    <label for="export-schedule-interval"><?php esc_html_e('Häufigkeit', 'yadore-monetizer'); ?></label>
                                     <select id="export-schedule-interval">
-                                        <option value="daily" selected>Daily</option>
-                                        <option value="twicedaily">Twice Daily</option>
-                                        <option value="weekly">Weekly</option>
-                                        <option value="hourly">Hourly</option>
+                                        <option value="daily" selected><?php esc_html_e('Täglich', 'yadore-monetizer'); ?></option>
+                                        <option value="twicedaily"><?php esc_html_e('Zweimal täglich', 'yadore-monetizer'); ?></option>
+                                        <option value="weekly"><?php esc_html_e('Wöchentlich', 'yadore-monetizer'); ?></option>
+                                        <option value="hourly"><?php esc_html_e('Stündlich', 'yadore-monetizer'); ?></option>
                                     </select>
 
-                                    <label for="export-schedule-time">Time of day</label>
+                                    <label for="export-schedule-time"><?php esc_html_e('Tageszeit', 'yadore-monetizer'); ?></label>
                                     <input type="time" id="export-schedule-time" value="02:00">
-                                    <p class="description">Schedule recurring exports with the selected cadence.</p>
+                                    <p class="description"><?php esc_html_e('Plane wiederkehrende Exporte mit der gewählten Frequenz.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </div>
                         </div>
                         <footer class="tool-section__footer tool-actions">
                             <button type="button" class="button button-primary" id="start-export">
-                                <span class="dashicons dashicons-download"></span> Export Data
+                                <span class="dashicons dashicons-download"></span> <?php esc_html_e('Daten exportieren', 'yadore-monetizer'); ?>
                             </button>
                             <button type="button" class="button button-secondary" id="schedule-export">
-                                <span class="dashicons dashicons-clock"></span> Schedule Export
+                                <span class="dashicons dashicons-clock"></span> <?php esc_html_e('Export planen', 'yadore-monetizer'); ?>
                             </button>
                         </footer>
                         <div class="tool-section__status">
@@ -209,7 +209,7 @@
                                     <div class="progress-bar">
                                         <div class="progress-fill" id="export-progress"></div>
                                     </div>
-                                    <div class="progress-text" id="export-status">Preparing export...</div>
+                                    <div class="progress-text" id="export-status"><?php esc_html_e('Export wird vorbereitet …', 'yadore-monetizer'); ?></div>
                                 </div>
                             </div>
                             <div class="export-schedule-status" id="export-schedule-status" aria-live="polite"></div>
@@ -221,8 +221,8 @@
                         <header class="tool-section__header">
                             <span class="tool-section__icon dashicons dashicons-upload" aria-hidden="true"></span>
                             <div class="tool-section__titles">
-                                <h3 id="tools-import-title">Import Data</h3>
-                                <p class="tool-section__description">Import data from backup files or other sources.</p>
+                                <h3 id="tools-import-title"><?php esc_html_e('Daten importieren', 'yadore-monetizer'); ?></h3>
+                                <p class="tool-section__description"><?php esc_html_e('Importiere Daten aus Backup-Dateien oder anderen Quellen.', 'yadore-monetizer'); ?></p>
                             </div>
                         </header>
                         <div class="tool-section__body">
@@ -234,7 +234,7 @@
                                         id="import-upload-area"
                                         role="button"
                                         tabindex="0"
-                                        aria-label="<?php echo esc_attr__('Select files to import', 'yadore-monetizer'); ?>"
+                                        aria-label="<?php echo esc_attr__('Dateien zum Import auswählen', 'yadore-monetizer'); ?>"
                                         aria-describedby="<?php echo esc_attr($upload_instructions_id); ?>"
                                         data-import-extensions="<?php echo esc_attr($import_extensions_attr); ?>"
                                         data-import-labels="<?php echo esc_attr($import_formats_text); ?>"
@@ -243,8 +243,8 @@
                                             <span class="dashicons dashicons-upload"></span>
                                         </div>
                                         <div class="upload-text">
-                                            <strong><?php esc_html_e('Drop files here or click to upload', 'yadore-monetizer'); ?></strong>
-                                            <p id="<?php echo esc_attr($upload_instructions_id); ?>"><?php printf(esc_html__('Supported formats: %s', 'yadore-monetizer'), esc_html($import_formats_text)); ?></p>
+                                            <strong><?php esc_html_e('Dateien hier ablegen oder zum Hochladen klicken', 'yadore-monetizer'); ?></strong>
+                                            <p id="<?php echo esc_attr($upload_instructions_id); ?>"><?php printf(esc_html__('Unterstützte Formate: %s', 'yadore-monetizer'), esc_html($import_formats_text)); ?></p>
                                             <button
                                                 type="button"
                                                 class="button button-secondary upload-trigger"
@@ -252,7 +252,7 @@
                                                 aria-controls="import-file"
                                             >
                                                 <span class="dashicons dashicons-media-default" aria-hidden="true"></span>
-                                                <?php esc_html_e('Choose files', 'yadore-monetizer'); ?>
+                                                <?php esc_html_e('Dateien auswählen', 'yadore-monetizer'); ?>
                                             </button>
                                         </div>
                                         <input
@@ -266,19 +266,19 @@
                                 </div>
 
                                 <div class="import-settings">
-                                    <h4>Import Options</h4>
-                                    <label><input type="checkbox" name="import_options[]" value="overwrite"> Overwrite existing data</label>
-                                    <label><input type="checkbox" name="import_options[]" value="validate" checked> Validate data before import</label>
-                                    <label><input type="checkbox" name="import_options[]" value="backup" checked> Create backup before import</label>
+                                    <h4><?php esc_html_e('Importoptionen', 'yadore-monetizer'); ?></h4>
+                                    <label><input type="checkbox" name="import_options[]" value="overwrite"> <?php esc_html_e('Bestehende Daten überschreiben', 'yadore-monetizer'); ?></label>
+                                    <label><input type="checkbox" name="import_options[]" value="validate" checked> <?php esc_html_e('Daten vor dem Import validieren', 'yadore-monetizer'); ?></label>
+                                    <label><input type="checkbox" name="import_options[]" value="backup" checked> <?php esc_html_e('Vor dem Import Sicherung erstellen', 'yadore-monetizer'); ?></label>
                                 </div>
                             </div>
                         </div>
                         <footer class="tool-section__footer tool-actions">
                             <button type="button" class="button button-primary" id="start-import" disabled>
-                                <span class="dashicons dashicons-upload"></span> Import Data
+                                <span class="dashicons dashicons-upload"></span> <?php esc_html_e('Daten importieren', 'yadore-monetizer'); ?>
                             </button>
                             <button type="button" class="button button-secondary" id="validate-import" disabled>
-                                <span class="dashicons dashicons-yes-alt"></span> Validate Only
+                                <span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Nur validieren', 'yadore-monetizer'); ?>
                             </button>
                         </footer>
                         <div class="tool-section__status">
@@ -294,7 +294,7 @@
         <!-- Maintenance Tools -->
         <div class="yadore-card">
             <div class="card-header">
-                <h2><span class="dashicons dashicons-admin-tools"></span> Maintenance Tools</h2>
+                <h2><span class="dashicons dashicons-admin-tools"></span> <?php esc_html_e('Wartungswerkzeuge', 'yadore-monetizer'); ?></h2>
             </div>
             <div class="card-content">
                 <div class="maintenance-tools">
@@ -304,32 +304,32 @@
                             <header class="tool-section__header">
                                 <span class="tool-section__icon dashicons dashicons-performance" aria-hidden="true"></span>
                                 <div class="tool-section__titles">
-                                    <h3 id="maintenance-cache-title">Cache Management</h3>
-                                    <p class="tool-section__description">Manage plugin cache and optimize performance.</p>
+                                    <h3 id="maintenance-cache-title"><?php esc_html_e('Cache-Verwaltung', 'yadore-monetizer'); ?></h3>
+                                    <p class="tool-section__description"><?php esc_html_e('Verwalte den Plugin-Cache und optimiere die Performance.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </header>
                             <div class="tool-section__body">
                                 <dl class="tool-metrics">
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Cache Size</dt>
-                                        <dd class="tool-metric__value" id="cache-size">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Cache-Größe', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="cache-size"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Cache Entries</dt>
-                                        <dd class="tool-metric__value" id="cache-entries">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Cache-Einträge', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="cache-entries"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Hit Rate</dt>
-                                        <dd class="tool-metric__value" id="cache-hit-rate">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Trefferquote', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="cache-hit-rate"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                 </dl>
                             </div>
                             <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="clear-cache">
-                                    <span class="dashicons dashicons-trash"></span> Clear Cache
+                                    <span class="dashicons dashicons-trash"></span> <?php esc_html_e('Cache leeren', 'yadore-monetizer'); ?>
                                 </button>
                                 <button type="button" class="button button-secondary" id="optimize-cache">
-                                    <span class="dashicons dashicons-performance"></span> Optimize
+                                    <span class="dashicons dashicons-performance"></span> <?php esc_html_e('Optimieren', 'yadore-monetizer'); ?>
                                 </button>
                             </footer>
                         </article>
@@ -339,32 +339,32 @@
                             <header class="tool-section__header">
                                 <span class="tool-section__icon dashicons dashicons-database" aria-hidden="true"></span>
                                 <div class="tool-section__titles">
-                                    <h3 id="maintenance-database-title">Database Maintenance</h3>
-                                    <p class="tool-section__description">Optimize database tables and clean up old data.</p>
+                                    <h3 id="maintenance-database-title"><?php esc_html_e('Datenbankpflege', 'yadore-monetizer'); ?></h3>
+                                    <p class="tool-section__description"><?php esc_html_e('Optimiere Datenbanktabellen und bereinige alte Daten.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </header>
                             <div class="tool-section__body">
                                 <dl class="tool-metrics">
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Table Size</dt>
-                                        <dd class="tool-metric__value" id="db-size">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Tabellengröße', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="db-size"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Total Records</dt>
-                                        <dd class="tool-metric__value" id="db-records">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Datensätze gesamt', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="db-records"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Overhead</dt>
-                                        <dd class="tool-metric__value" id="db-overhead">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Overhead', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="db-overhead"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                 </dl>
                             </div>
                             <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="optimize-database">
-                                    <span class="dashicons dashicons-database"></span> Optimize DB
+                                    <span class="dashicons dashicons-database"></span> <?php esc_html_e('Datenbank optimieren', 'yadore-monetizer'); ?>
                                 </button>
                                 <button type="button" class="button button-secondary" id="cleanup-old-data">
-                                    <span class="dashicons dashicons-trash"></span> Clean Old Data
+                                    <span class="dashicons dashicons-trash"></span> <?php esc_html_e('Alte Daten bereinigen', 'yadore-monetizer'); ?>
                                 </button>
                             </footer>
                         </article>
@@ -374,32 +374,32 @@
                             <header class="tool-section__header">
                                 <span class="tool-section__icon dashicons dashicons-media-text" aria-hidden="true"></span>
                                 <div class="tool-section__titles">
-                                    <h3 id="maintenance-logs-title">Log Management</h3>
-                                    <p class="tool-section__description">Manage API logs, error logs, and debug information.</p>
+                                    <h3 id="maintenance-logs-title"><?php esc_html_e('Protokollverwaltung', 'yadore-monetizer'); ?></h3>
+                                    <p class="tool-section__description"><?php esc_html_e('Verwalte API-Protokolle, Fehlermeldungen und Debug-Informationen.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </header>
                             <div class="tool-section__body">
                                 <dl class="tool-metrics">
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">API Logs</dt>
-                                        <dd class="tool-metric__value" id="api-log-count">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('API-Protokolle', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="api-log-count"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Error Logs</dt>
-                                        <dd class="tool-metric__value" id="error-log-count">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Fehlerprotokolle', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="error-log-count"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Log Size</dt>
-                                        <dd class="tool-metric__value" id="total-log-size">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Protokollgröße', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="total-log-size"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                 </dl>
                             </div>
                             <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="archive-logs">
-                                    <span class="dashicons dashicons-archive"></span> Archive Logs
+                                    <span class="dashicons dashicons-archive"></span> <?php esc_html_e('Protokolle archivieren', 'yadore-monetizer'); ?>
                                 </button>
                                 <button type="button" class="button button-secondary" id="clear-old-logs">
-                                    <span class="dashicons dashicons-trash"></span> Clear Old Logs
+                                    <span class="dashicons dashicons-trash"></span> <?php esc_html_e('Alte Protokolle löschen', 'yadore-monetizer'); ?>
                                 </button>
                             </footer>
                         </article>
@@ -409,50 +409,50 @@
                             <header class="tool-section__header">
                                 <span class="tool-section__icon dashicons dashicons-chart-line" aria-hidden="true"></span>
                                 <div class="tool-section__titles">
-                                    <h3 id="maintenance-optimizer-title">Yadore Reports</h3>
-                                    <p class="tool-section__description">Trigger a manual sync of the Yadore optimizer report to refresh analytics data on demand.</p>
+                                    <h3 id="maintenance-optimizer-title"><?php esc_html_e('Yadore-Berichte', 'yadore-monetizer'); ?></h3>
+                                    <p class="tool-section__description"><?php esc_html_e('Starte eine manuelle Synchronisierung des Yadore-Optimizer-Berichts, um Analytics-Daten bei Bedarf zu aktualisieren.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </header>
                             <div class="tool-section__body">
                                 <dl class="tool-metrics">
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Last Run</dt>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Letzte Ausführung', 'yadore-monetizer'); ?></dt>
                                         <dd class="tool-metric__value" id="optimizer-last-run">—</dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Match Rate</dt>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Matching-Rate', 'yadore-monetizer'); ?></dt>
                                         <dd class="tool-metric__value" id="optimizer-match-rate">—</dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Dates Processed</dt>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Verarbeitete Tage', 'yadore-monetizer'); ?></dt>
                                         <dd class="tool-metric__value" id="optimizer-dates-processed">—</dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Errors</dt>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Fehler', 'yadore-monetizer'); ?></dt>
                                         <dd class="tool-metric__value" id="optimizer-errors">—</dd>
                                     </div>
                                 </dl>
                                 <div class="tool-option-group">
-                                    <label for="optimizer-days">Days to sync</label>
+                                    <label for="optimizer-days"><?php esc_html_e('Tage für die Synchronisierung', 'yadore-monetizer'); ?></label>
                                     <select id="optimizer-days">
-                                        <option value="1">Last day</option>
-                                        <option value="3">Last 3 days</option>
-                                        <option value="7" selected>Last 7 days</option>
-                                        <option value="14">Last 14 days</option>
-                                        <option value="30">Last 30 days</option>
+                                        <option value="1"><?php esc_html_e('Letzter Tag', 'yadore-monetizer'); ?></option>
+                                        <option value="3"><?php esc_html_e('Letzte 3 Tage', 'yadore-monetizer'); ?></option>
+                                        <option value="7" selected><?php esc_html_e('Letzte 7 Tage', 'yadore-monetizer'); ?></option>
+                                        <option value="14"><?php esc_html_e('Letzte 14 Tage', 'yadore-monetizer'); ?></option>
+                                        <option value="30"><?php esc_html_e('Letzte 30 Tage', 'yadore-monetizer'); ?></option>
                                     </select>
 
-                                    <label for="optimizer-start-date">Start date (optional)</label>
+                                    <label for="optimizer-start-date"><?php esc_html_e('Startdatum (optional)', 'yadore-monetizer'); ?></label>
                                     <input type="date" id="optimizer-start-date">
-                                    <p class="description">Leave the start date empty to begin with yesterday.</p>
+                                    <p class="description"><?php esc_html_e('Lasse das Startdatum leer, um mit gestern zu beginnen.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </div>
                             <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="run-optimizer-sync">
-                                    <span class="dashicons dashicons-update"></span> Sync Reports
+                                    <span class="dashicons dashicons-update"></span> <?php esc_html_e('Berichte synchronisieren', 'yadore-monetizer'); ?>
                                 </button>
                                 <button type="button" class="button button-secondary" id="refresh-optimizer-sync">
-                                    <span class="dashicons dashicons-update-alt"></span> Refresh Status
+                                    <span class="dashicons dashicons-update-alt"></span> <?php esc_html_e('Status aktualisieren', 'yadore-monetizer'); ?>
                                 </button>
                             </footer>
                             <div class="tool-section__status" id="optimizer-sync-status">
@@ -465,32 +465,32 @@
                             <header class="tool-section__header">
                                 <span class="tool-section__icon dashicons dashicons-admin-generic" aria-hidden="true"></span>
                                 <div class="tool-section__titles">
-                                    <h3 id="maintenance-cleanup-title">System Cleanup</h3>
-                                    <p class="tool-section__description">Clean temporary files and optimize system performance.</p>
+                                    <h3 id="maintenance-cleanup-title"><?php esc_html_e('Systembereinigung', 'yadore-monetizer'); ?></h3>
+                                    <p class="tool-section__description"><?php esc_html_e('Bereinige temporäre Dateien und optimiere die Systemleistung.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </header>
                             <div class="tool-section__body">
                                 <dl class="tool-metrics">
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Temp Files</dt>
-                                        <dd class="tool-metric__value" id="temp-files">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Temporäre Dateien', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="temp-files"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Orphaned Data</dt>
-                                        <dd class="tool-metric__value" id="orphaned-data">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Verwaiste Daten', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="orphaned-data"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                     <div class="tool-metric">
-                                        <dt class="tool-metric__label">Space Used</dt>
-                                        <dd class="tool-metric__value" id="space-used">Loading...</dd>
+                                        <dt class="tool-metric__label"><?php esc_html_e('Belegter Speicher', 'yadore-monetizer'); ?></dt>
+                                        <dd class="tool-metric__value" id="space-used"><?php esc_html_e('Lädt …', 'yadore-monetizer'); ?></dd>
                                     </div>
                                 </dl>
                             </div>
                             <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="system-cleanup">
-                                    <span class="dashicons dashicons-admin-generic"></span> Full Cleanup
+                                    <span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e('Komplett bereinigen', 'yadore-monetizer'); ?>
                                 </button>
                                 <button type="button" class="button button-secondary" id="schedule-cleanup">
-                                    <span class="dashicons dashicons-clock"></span> Schedule Cleanup
+                                    <span class="dashicons dashicons-clock"></span> <?php esc_html_e('Bereinigung planen', 'yadore-monetizer'); ?>
                                 </button>
                             </footer>
                         </article>
@@ -502,7 +502,7 @@
         <!-- Configuration Tools -->
         <div class="yadore-card">
             <div class="card-header">
-                <h2><span class="dashicons dashicons-admin-settings"></span> Configuration Tools</h2>
+                <h2><span class="dashicons dashicons-admin-settings"></span> <?php esc_html_e('Konfigurationswerkzeuge', 'yadore-monetizer'); ?></h2>
             </div>
             <div class="card-content">
                 <div class="config-tools">
@@ -511,60 +511,60 @@
                         <header class="tool-section__header">
                             <span class="tool-section__icon dashicons dashicons-update" aria-hidden="true"></span>
                             <div class="tool-section__titles">
-                                <h3 id="config-reset-title">Reset Options</h3>
-                                <p class="tool-section__description">Return to known-good defaults or clean installations without leaving the tools screen.</p>
+                                <h3 id="config-reset-title"><?php esc_html_e('Zurücksetzen', 'yadore-monetizer'); ?></h3>
+                                <p class="tool-section__description"><?php esc_html_e('Stelle bewährte Standardwerte wieder her oder starte saubere Installationen direkt im Tool-Bereich.', 'yadore-monetizer'); ?></p>
                             </div>
                         </header>
                         <div class="tool-section__body">
                             <div class="tool-option-group reset-options">
                                 <article class="tool-option reset-option">
                                     <div class="tool-option__content">
-                                        <h4>Reset to Defaults</h4>
-                                        <p>Reset all plugin settings to their default values while preserving data.</p>
+                                        <h4><?php esc_html_e('Auf Standardwerte zurücksetzen', 'yadore-monetizer'); ?></h4>
+                                        <p><?php esc_html_e('Setzt alle Plugin-Einstellungen auf ihre Standardwerte zurück und behält dabei vorhandene Daten.', 'yadore-monetizer'); ?></p>
                                     </div>
                                     <div class="tool-option__footer">
                                         <button type="button" class="button button-secondary" id="reset-settings">
-                                            <span class="dashicons dashicons-update"></span> Reset Settings
+                                            <span class="dashicons dashicons-update"></span> <?php esc_html_e('Einstellungen zurücksetzen', 'yadore-monetizer'); ?>
                                         </button>
                                     </div>
                                 </article>
 
                                 <article class="tool-option reset-option">
                                     <div class="tool-option__content">
-                                        <h4>Restore Product Templates</h4>
-                                        <p>Recreate the default product templates if they were removed or heavily modified.</p>
+                                        <h4><?php esc_html_e('Produktvorlagen wiederherstellen', 'yadore-monetizer'); ?></h4>
+                                        <p><?php esc_html_e('Stellt die Standard-Produktvorlagen wieder her, falls sie entfernt oder stark angepasst wurden.', 'yadore-monetizer'); ?></p>
                                         <label>
                                             <input type="checkbox" id="restore-reset-selection">
-                                            <span>Reset template selection to defaults</span>
+                                            <span><?php esc_html_e('Vorlagenauswahl auf Standard zurücksetzen', 'yadore-monetizer'); ?></span>
                                         </label>
                                     </div>
                                     <div class="tool-option__footer">
                                         <button type="button" class="button button-primary" id="restore-default-templates">
-                                            <span class="dashicons dashicons-layout"></span> Restore Templates
+                                            <span class="dashicons dashicons-layout"></span> <?php esc_html_e('Vorlagen wiederherstellen', 'yadore-monetizer'); ?>
                                         </button>
                                     </div>
                                 </article>
 
                                 <article class="tool-option reset-option">
                                     <div class="tool-option__content">
-                                        <h4>Clear All Data</h4>
-                                        <p>Remove all plugin data including settings, logs, and cache. This cannot be undone.</p>
+                                        <h4><?php esc_html_e('Alle Daten löschen', 'yadore-monetizer'); ?></h4>
+                                        <p><?php esc_html_e('Entfernt alle Plugin-Daten inklusive Einstellungen, Protokollen und Cache. Dies kann nicht rückgängig gemacht werden.', 'yadore-monetizer'); ?></p>
                                     </div>
                                     <div class="tool-option__footer">
                                         <button type="button" class="button button-link-delete" id="clear-all-data">
-                                            <span class="dashicons dashicons-trash"></span> Clear All Data
+                                            <span class="dashicons dashicons-trash"></span> <?php esc_html_e('Alle Daten löschen', 'yadore-monetizer'); ?>
                                         </button>
                                     </div>
                                 </article>
 
                                 <article class="tool-option reset-option">
                                     <div class="tool-option__content">
-                                        <h4>Factory Reset</h4>
-                                        <p>Complete plugin reset - removes all data and returns to initial state.</p>
+                                        <h4><?php esc_html_e('Werkszustand wiederherstellen', 'yadore-monetizer'); ?></h4>
+                                        <p><?php esc_html_e('Vollständiger Plugin-Reset – entfernt alle Daten und stellt den Ausgangszustand wieder her.', 'yadore-monetizer'); ?></p>
                                     </div>
                                     <div class="tool-option__footer">
                                         <button type="button" class="button button-link-delete" id="factory-reset">
-                                            <span class="dashicons dashicons-warning"></span> Factory Reset
+                                            <span class="dashicons dashicons-warning"></span> <?php esc_html_e('Werksreset ausführen', 'yadore-monetizer'); ?>
                                         </button>
                                     </div>
                                 </article>
@@ -577,33 +577,33 @@
                         <header class="tool-section__header">
                             <span class="tool-section__icon dashicons dashicons-migrate" aria-hidden="true"></span>
                             <div class="tool-section__titles">
-                                <h3 id="config-migration-title">Migration Tools</h3>
-                                <p class="tool-section__description">Move configurations between environments with predictable outcomes.</p>
+                                <h3 id="config-migration-title"><?php esc_html_e('Migrationswerkzeuge', 'yadore-monetizer'); ?></h3>
+                                <p class="tool-section__description"><?php esc_html_e('Übertrage Konfigurationen zwischen Umgebungen mit nachvollziehbaren Ergebnissen.', 'yadore-monetizer'); ?></p>
                             </div>
                         </header>
                         <div class="tool-section__body">
                             <div class="tool-option-group migration-tools">
                                 <article class="tool-option migration-option">
                                     <div class="tool-option__content">
-                                        <h4>Export Configuration</h4>
-                                        <p>Export plugin configuration for deployment to other sites.</p>
+                                        <h4><?php esc_html_e('Konfiguration exportieren', 'yadore-monetizer'); ?></h4>
+                                        <p><?php esc_html_e('Exportiert die Plugin-Konfiguration für den Einsatz auf anderen Websites.', 'yadore-monetizer'); ?></p>
                                     </div>
                                     <div class="tool-option__footer">
                                         <button type="button" class="button button-primary" id="export-config">
-                                            <span class="dashicons dashicons-download"></span> Export Config
+                                            <span class="dashicons dashicons-download"></span> <?php esc_html_e('Konfiguration exportieren', 'yadore-monetizer'); ?>
                                         </button>
                                     </div>
                                 </article>
 
                                 <article class="tool-option migration-option">
                                     <div class="tool-option__content">
-                                        <h4>Clone Settings</h4>
-                                        <p>Copy settings from another WordPress site running this plugin.</p>
-                                        <input type="url" id="source-site-url" placeholder="https://source-site.com" class="regular-text">
+                                        <h4><?php esc_html_e('Einstellungen klonen', 'yadore-monetizer'); ?></h4>
+                                        <p><?php esc_html_e('Kopiert Einstellungen von einer anderen WordPress-Website mit diesem Plugin.', 'yadore-monetizer'); ?></p>
+                                        <input type="url" id="source-site-url" placeholder="<?php echo esc_attr__('https://quelle-seite.de', 'yadore-monetizer'); ?>" class="regular-text">
                                     </div>
                                     <div class="tool-option__footer">
                                         <button type="button" class="button button-secondary" id="clone-settings">
-                                            <span class="dashicons dashicons-admin-site-alt3"></span> Clone Settings
+                                            <span class="dashicons dashicons-admin-site-alt3"></span> <?php esc_html_e('Einstellungen klonen', 'yadore-monetizer'); ?>
                                         </button>
                                     </div>
                                 </article>
@@ -616,20 +616,20 @@
                         <header class="tool-section__header">
                             <span class="tool-section__icon dashicons dashicons-performance" aria-hidden="true"></span>
                             <div class="tool-section__titles">
-                                <h3 id="config-optimization-title">Optimization Tools</h3>
-                                <p class="tool-section__description">Diagnose and automate performance improvements.</p>
+                                <h3 id="config-optimization-title"><?php esc_html_e('Optimierungswerkzeuge', 'yadore-monetizer'); ?></h3>
+                                <p class="tool-section__description"><?php esc_html_e('Diagnostiziere und automatisiere Leistungsverbesserungen.', 'yadore-monetizer'); ?></p>
                             </div>
                         </header>
                         <div class="tool-section__body">
                             <div class="tool-option-group optimization-tools">
                                 <article class="tool-option optimization-option">
                                     <div class="tool-option__content">
-                                        <h4>Performance Scan</h4>
-                                        <p>Analyze plugin performance and get optimization recommendations.</p>
+                                        <h4><?php esc_html_e('Performance-Scan', 'yadore-monetizer'); ?></h4>
+                                        <p><?php esc_html_e('Analysiere die Plugin-Performance und erhalte Optimierungsempfehlungen.', 'yadore-monetizer'); ?></p>
                                     </div>
                                     <div class="tool-option__footer">
                                         <button type="button" class="button button-primary" id="performance-scan">
-                                            <span class="dashicons dashicons-performance"></span> Run Scan
+                                            <span class="dashicons dashicons-performance"></span> <?php esc_html_e('Scan starten', 'yadore-monetizer'); ?>
                                         </button>
                                     </div>
                                     <div class="tool-option__status">
@@ -639,12 +639,12 @@
 
                                 <article class="tool-option optimization-option">
                                     <div class="tool-option__content">
-                                        <h4>Auto-Optimization</h4>
-                                        <p>Apply recommended optimizations automatically.</p>
+                                        <h4><?php esc_html_e('Auto-Optimierung', 'yadore-monetizer'); ?></h4>
+                                        <p><?php esc_html_e('Wendet empfohlene Optimierungen automatisch an.', 'yadore-monetizer'); ?></p>
                                     </div>
                                     <div class="tool-option__footer">
                                         <button type="button" class="button button-primary" id="auto-optimize">
-                                            <span class="dashicons dashicons-admin-generic"></span> Auto-Optimize
+                                            <span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e('Automatisch optimieren', 'yadore-monetizer'); ?>
                                         </button>
                                     </div>
                                 </article>
@@ -658,7 +658,7 @@
         <!-- Utility Tools -->
         <div class="yadore-card">
             <div class="card-header">
-                <h2><span class="dashicons dashicons-admin-tools"></span> Utility Tools</h2>
+                <h2><span class="dashicons dashicons-admin-tools"></span> <?php esc_html_e('Hilfswerkzeuge', 'yadore-monetizer'); ?></h2>
             </div>
             <div class="card-content">
                 <div class="utility-tools">
@@ -668,13 +668,13 @@
                             <header class="tool-section__header">
                                 <span class="tool-section__icon dashicons dashicons-shortcode" aria-hidden="true"></span>
                                 <div class="tool-section__titles">
-                                    <h3 id="utility-shortcode-title">Advanced Shortcode Generator</h3>
-                                    <p class="tool-section__description">Generate shortcodes with advanced parameters and preview functionality.</p>
+                                    <h3 id="utility-shortcode-title"><?php esc_html_e('Erweiterter Shortcode-Generator', 'yadore-monetizer'); ?></h3>
+                                    <p class="tool-section__description"><?php esc_html_e('Erstelle Shortcodes mit erweiterten Parametern und Vorschau.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </header>
                             <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-monetizer'); ?>'">
-                                    <span class="dashicons dashicons-shortcode"></span> Open Generator
+                                    <span class="dashicons dashicons-shortcode"></span> <?php esc_html_e('Generator öffnen', 'yadore-monetizer'); ?>
                                 </button>
                             </footer>
                         </article>
@@ -684,13 +684,13 @@
                             <header class="tool-section__header">
                                 <span class="tool-section__icon dashicons dashicons-tag" aria-hidden="true"></span>
                                 <div class="tool-section__titles">
-                                    <h3 id="utility-keyword-title">Keyword Analyzer</h3>
-                                    <p class="tool-section__description">Analyze text content and get AI-powered keyword suggestions.</p>
+                                    <h3 id="utility-keyword-title"><?php esc_html_e('Keyword-Analyzer', 'yadore-monetizer'); ?></h3>
+                                    <p class="tool-section__description"><?php esc_html_e('Analysiere Textinhalte und erhalte KI-gestützte Keyword-Vorschläge.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </header>
                             <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="open-keyword-analyzer">
-                                    <span class="dashicons dashicons-tag"></span> Open Analyzer
+                                    <span class="dashicons dashicons-tag"></span> <?php esc_html_e('Analyzer öffnen', 'yadore-monetizer'); ?>
                                 </button>
                             </footer>
                         </article>
@@ -700,13 +700,13 @@
                             <header class="tool-section__header">
                                 <span class="tool-section__icon dashicons dashicons-editor-ul" aria-hidden="true"></span>
                                 <div class="tool-section__titles">
-                                    <h3 id="utility-bulk-title">Bulk Operations</h3>
-                                    <p class="tool-section__description">Perform bulk operations on posts, keywords, and data.</p>
+                                    <h3 id="utility-bulk-title"><?php esc_html_e('Massenaktionen', 'yadore-monetizer'); ?></h3>
+                                    <p class="tool-section__description"><?php esc_html_e('Führe Massenaktionen für Beiträge, Keywords und Daten aus.', 'yadore-monetizer'); ?></p>
                                 </div>
                             </header>
                             <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-scanner'); ?>'">
-                                    <span class="dashicons dashicons-editor-ul"></span> Open Scanner
+                                    <span class="dashicons dashicons-editor-ul"></span> <?php esc_html_e('Scanner öffnen', 'yadore-monetizer'); ?>
                                 </button>
                             </footer>
                         </article>
@@ -730,32 +730,32 @@
     <div class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="keyword-analyzer-title">Keyword Analyzer</h2>
-                <button class="modal-close" type="button" aria-label="Close keyword analyzer">&times;</button>
+                <h2 id="keyword-analyzer-title"><?php esc_html_e('Keyword-Analyzer', 'yadore-monetizer'); ?></h2>
+                <button class="modal-close" type="button" aria-label="<?php echo esc_attr__('Keyword-Analyzer schließen', 'yadore-monetizer'); ?>">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="analyzer-input">
-                    <label for="analyzer-text">Text to Analyze:</label>
-                    <textarea id="analyzer-text" rows="8" placeholder="Paste your content here for keyword analysis..."></textarea>
+                    <label for="analyzer-text"><?php esc_html_e('Zu analysierender Text:', 'yadore-monetizer'); ?></label>
+                    <textarea id="analyzer-text" rows="8" placeholder="<?php echo esc_attr__('Füge hier deine Inhalte für die Keyword-Analyse ein …', 'yadore-monetizer'); ?>"></textarea>
                 </div>
                 <div class="analyzer-options">
                     <label>
-                        <input type="checkbox" id="use-ai-analyzer" <?php checked(get_option('yadore_ai_enabled', false)); ?>> Use AI Analysis
+                        <input type="checkbox" id="use-ai-analyzer" <?php checked(get_option('yadore_ai_enabled', false)); ?>> <?php esc_html_e('KI-Analyse verwenden', 'yadore-monetizer'); ?>
                     </label>
                     <label>
-                        Max Keywords: <input type="number" id="max-keywords" min="1" max="20" value="5">
+                        <?php esc_html_e('Maximale Keywords:', 'yadore-monetizer'); ?> <input type="number" id="max-keywords" min="1" max="20" value="5">
                     </label>
                 </div>
                 <div class="analyzer-results hidden" id="analyzer-results" aria-live="polite">
-                    <h4>Suggested Keywords:</h4>
+                    <h4><?php esc_html_e('Vorgeschlagene Keywords:', 'yadore-monetizer'); ?></h4>
                     <div class="keyword-suggestions"></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="button button-primary" id="analyze-keywords">
-                    <span class="dashicons dashicons-search"></span> Analyze Keywords
+                    <span class="dashicons dashicons-search"></span> <?php esc_html_e('Keywords analysieren', 'yadore-monetizer'); ?>
                 </button>
-                <button type="button" class="button button-secondary modal-close">Close</button>
+                <button type="button" class="button button-secondary modal-close"><?php esc_html_e('Schließen', 'yadore-monetizer'); ?></button>
             </div>
         </div>
     </div>
