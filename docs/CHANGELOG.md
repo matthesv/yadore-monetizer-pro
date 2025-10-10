@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.35 - 2025-11-02
+- Left-aligned every Tools action group so export, import, maintenance, and cleanup buttons line up consistently while keeping their wrap behaviour on narrow screens.
+- Updated the button flex rules to preserve tokenized gaps, prevent stretched maintenance controls, and keep focus indicators visible when controls stack.
+- Bumped the plugin metadata and bundled asset banners to 3.47.35 to capture the Tools action alignment polish.
+
 ## 3.47.34 - 2025-11-01
 - Restricted the admin tooling script to the Tools screen, namespaced its event handlers, and reset bindings before re-adding them so export, import, and maintenance actions fire exactly once per interaction.
 - Hardened the import drop zone by guarding click/keyboard triggers, limiting file handling to real change/drop events, and converting action buttons to explicit `type="button"` controls to avoid implicit form submissions.
