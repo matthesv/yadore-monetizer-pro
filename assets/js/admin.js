@@ -18,6 +18,24 @@
     };
 
     const readBoolean = (value) => value === true || value === 1 || value === '1';
+    const formatString = (template, ...args) => {
+        const source = readString(template, '');
+        if (!source) {
+            return '';
+        }
+        if (!/%\d*\$?s/.test(source)) {
+            return source;
+        }
+        const queue = [...args];
+        return source.replace(/%(\d+\$)?s/g, (match, position) => {
+            if (position) {
+                const index = parseInt(position, 10) - 1;
+                return index >= 0 && index < args.length ? String(args[index]) : '';
+            }
+            const next = queue.shift();
+            return typeof next !== 'undefined' ? String(next) : '';
+        });
+    };
 
     // Global variables
     window.yadoreAdmin = {
@@ -206,7 +224,7 @@
                     } else {
                         const message = (response && response.data && response.data.message)
                             ? response.data.message
-                            : (yadore_admin.strings?.error || 'Fehler beim Laden der Statistiken.');
+                            : (yadore_admin.strings?.error || 'Error loading statistics.');
 
                         this.handleStatsError(message);
                     }
@@ -214,7 +232,7 @@
                 .fail((jqXHR) => {
                     const message = jqXHR?.responseJSON?.data?.message
                         || jqXHR?.statusText
-                        || (yadore_admin.strings?.error || 'Fehler beim Laden der Statistiken.');
+                        || (yadore_admin.strings?.error || 'Error loading statistics.');
 
                     this.handleStatsError(message);
                 });
@@ -262,31 +280,31 @@
             }
 
             if (diffSeconds < 10) {
-                return yadore_admin.strings?.just_now || 'Gerade eben';
+                return yadore_admin.strings?.just_now || 'Just now';
             }
 
             if (diffSeconds < 60) {
                 const seconds = Math.max(diffSeconds, 1);
-                const template = yadore_admin.strings?.relative_seconds || 'vor %s Sekunden';
+                const template = yadore_admin.strings?.relative_seconds || '%s seconds ago';
                 return template.replace('%s', seconds);
             }
 
             const diffMinutes = Math.round(diffSeconds / 60);
             if (diffMinutes < 60) {
                 const minutes = Math.max(diffMinutes, 1);
-                const template = yadore_admin.strings?.relative_minutes || 'vor %s Minuten';
+                const template = yadore_admin.strings?.relative_minutes || '%s minutes ago';
                 return template.replace('%s', minutes);
             }
 
             const diffHours = Math.round(diffMinutes / 60);
             if (diffHours < 24) {
                 const hours = Math.max(diffHours, 1);
-                const template = yadore_admin.strings?.relative_hours || 'vor %s Stunden';
+                const template = yadore_admin.strings?.relative_hours || '%s hours ago';
                 return template.replace('%s', hours);
             }
 
             const diffDays = Math.max(Math.round(diffHours / 24), 1);
-            const template = yadore_admin.strings?.relative_days || 'vor %s Tagen';
+            const template = yadore_admin.strings?.relative_days || '%s days ago';
             return template.replace('%s', diffDays);
         },
 
@@ -296,7 +314,7 @@
                 return;
             }
 
-            const loadingLabel = yadore_admin.strings?.refreshing || 'Aktualisierung läuft...';
+            const loadingLabel = yadore_admin.strings?.refreshing || 'Refreshing…';
             $timestamp.attr('data-state', 'loading').text(loadingLabel).removeAttr('datetime');
         },
 
@@ -306,7 +324,7 @@
                 return;
             }
 
-            const fallback = message || yadore_admin.strings?.error || 'Fehler beim Laden der Statistiken.';
+            const fallback = message || yadore_admin.strings?.error || 'Error loading statistics.';
             $timestamp.attr('data-state', 'error').text(fallback).removeAttr('datetime');
         },
 
@@ -318,7 +336,7 @@
 
             if (!(this.lastDashboardUpdate instanceof Date) || Number.isNaN(this.lastDashboardUpdate.getTime())) {
                 if (force) {
-                    const fallback = yadore_admin.strings?.no_data || 'Noch keine Daten geladen';
+                    const fallback = yadore_admin.strings?.no_data || 'No data loaded yet';
                     $timestamp.attr('data-state', 'idle').text(fallback).removeAttr('datetime');
                 }
                 return;
@@ -357,7 +375,7 @@
                 return;
             }
 
-            const text = message || yadore_admin.strings?.activity_empty || 'Keine Aktivitäten vorhanden.';
+            const text = message || yadore_admin.strings?.activity_empty || 'No activity logged yet.';
             $container.empty().append(
                 $('<div/>', { 'class': 'activity-empty' }).text(text)
             );
@@ -1467,11 +1485,14 @@
                         if ($pendingCount.length) {
                             $pendingCount.text(formattedPending);
                         } else {
-                            $subtext.html(`Noch <span id="scan-pending-count">${formattedPending}</span> Beiträge offen`);
+                            const template = yadore_admin.strings?.scan_pending_html;
+                            const pendingHtml = formatString(template, formattedPending) || `Still <span id="scan-pending-count">${formattedPending}</span> posts pending`;
+                            $subtext.html(pendingHtml);
                         }
                         $subtext.removeClass('is-complete');
                     } else {
-                        $subtext.addClass('is-complete').text('Alle Beiträge gescannt!');
+                        const completeText = readString(yadore_admin.strings?.scan_complete_text, 'All posts scanned!');
+                        $subtext.addClass('is-complete').text(completeText || 'All posts scanned!');
                     }
                     $('#overview-refreshed').text(new Date().toLocaleTimeString());
                 }
@@ -1614,7 +1635,7 @@
 
             pageLinks.push(createLink('&lsaquo;', Math.max(1, current - 1), {
                 className: 'page-prev',
-                ariaLabel: 'Vorherige Seite',
+                ariaLabel: readString(yadore_admin.strings?.pagination_previous, 'Previous page') || 'Previous page',
                 disabled: current <= 1
             }));
 
@@ -1626,7 +1647,7 @@
             }
 
             if (startPage > 1) {
-                pageLinks.push(createLink('1', 1, { ariaLabel: 'Seite 1' }));
+                pageLinks.push(createLink('1', 1, { ariaLabel: 'Page 1' }));
                 if (startPage > 2) {
                     pageLinks.push('<span class="page-ellipsis" aria-hidden="true">…</span>');
                 }
@@ -1635,7 +1656,7 @@
             for (let i = startPage; i <= endPage; i += 1) {
                 pageLinks.push(createLink(`${i}`, i, {
                     active: i === current,
-                    ariaLabel: `Seite ${i}`
+                    ariaLabel: formatString(yadore_admin.strings?.pagination_page_aria, i) || `Page ${i}`
                 }));
             }
 
@@ -1643,18 +1664,20 @@
                 if (endPage < totalPages - 1) {
                     pageLinks.push('<span class="page-ellipsis" aria-hidden="true">…</span>');
                 }
-                pageLinks.push(createLink(`${totalPages}`, totalPages, { ariaLabel: `Seite ${totalPages}` }));
+                const pageLabelTemplate = yadore_admin.strings?.pagination_page_aria;
+                const pageAriaLabel = formatString(pageLabelTemplate, totalPages) || `Page ${totalPages}`;
+                pageLinks.push(createLink(`${totalPages}`, totalPages, { ariaLabel: pageAriaLabel }));
             }
 
             pageLinks.push(createLink('&rsaquo;', Math.min(totalPages, current + 1), {
                 className: 'page-next',
-                ariaLabel: 'Nächste Seite',
+                ariaLabel: readString(yadore_admin.strings?.pagination_next, 'Next page') || 'Next page',
                 disabled: current >= totalPages
             }));
 
             const html = `
                 <nav class="pagination-nav" role="navigation" aria-label="Recent scan results pagination">
-                    <div class="pagination-summary">${start}–${end} von ${this.formatNumber(total)}</div>
+                    <div class="pagination-summary">${formatString(yadore_admin.strings?.pagination_summary, start, end, this.formatNumber(total)) || `${start}–${end} of ${this.formatNumber(total)}`}</div>
                     <div class="pagination-pages">${pageLinks.join('')}</div>
                 </nav>
             `;
@@ -1728,10 +1751,18 @@
                 scanOptions.push('Validate Products');
             }
 
-            $summary.find('.summary-post-types').text(postTypes.length ? postTypes.join(', ') : 'Keine Auswahl');
-            $summary.find('.summary-post-status').text(postStatus.length ? postStatus.join(', ') : 'Keine Auswahl');
-            $summary.find('.summary-min-words').text(Number.isFinite(minWords) ? `${minWords} Wörter` : 'Kein Mindestwert');
-            $summary.find('.summary-scan-options').text(scanOptions.length ? scanOptions.join(', ') : 'Standardprüfung');
+            const noSelection = readString(yadore_admin.strings?.no_selection, 'No selection') || 'No selection';
+            $summary.find('.summary-post-types').text(postTypes.length ? postTypes.join(', ') : noSelection);
+            $summary.find('.summary-post-status').text(postStatus.length ? postStatus.join(', ') : noSelection);
+            const minWordsTemplate = yadore_admin.strings?.summary_min_words;
+            const minWordsText = Number.isFinite(minWords)
+                ? formatString(minWordsTemplate, minWords) || `${minWords} words`
+                : readString(yadore_admin.strings?.summary_no_minimum, 'No minimum') || 'No minimum';
+            $summary.find('.summary-min-words').text(minWordsText);
+            const scanSummary = scanOptions.length
+                ? scanOptions.join(', ')
+                : readString(yadore_admin.strings?.summary_default_scan, 'Standard scan') || 'Standard scan';
+            $summary.find('.summary-scan-options').text(scanSummary);
         },
 
         getScanStatusLabel: function(status) {

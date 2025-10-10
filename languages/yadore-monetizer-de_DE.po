@@ -2,12 +2,12 @@
 # This file is distributed under the same license as the Yadore Monetizer Pro plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Yadore Monetizer Pro 3.47.11\n"
+"Project-Id-Version: Yadore Monetizer Pro 3.48.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yadore-monetizer-pro\n"
-"POT-Creation-Date: 2025-09-30T00:00:00+00:00\n"
-"PO-Revision-Date: 2025-09-30T00:00:00+00:00\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"POT-Creation-Date: 2025-11-11T00:00:00+00:00\n"
+"PO-Revision-Date: 2025-11-11T00:00:00+00:00\n"
+"Last-Translator: Matthes Vogel\n"
+"Language-Team: de_DE <wp-translations@example.com>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -15,6 +15,90 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: yadore-monetizer\n"
 "X-Generator: WP-CLI 2.12.0\n"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "Processing…"
+msgstr "Verarbeitung läuft …"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "Refreshing…"
+msgstr "Aktualisierung läuft …"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "No data loaded yet"
+msgstr "Noch keine Daten geladen"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "Just now"
+msgstr "Gerade eben"
+
+#: assets/js/admin.js yadore-monetizer.php
+#, php-format
+msgid "%s seconds ago"
+msgstr "vor %s Sekunden"
+
+#: assets/js/admin.js yadore-monetizer.php
+#, php-format
+msgid "%s minutes ago"
+msgstr "vor %s Minuten"
+
+#: assets/js/admin.js yadore-monetizer.php
+#, php-format
+msgid "%s hours ago"
+msgstr "vor %s Stunden"
+
+#: assets/js/admin.js yadore-monetizer.php
+#, php-format
+msgid "%s days ago"
+msgstr "vor %s Tagen"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "No activity logged yet."
+msgstr "Keine Aktivitäten vorhanden."
+
+#: assets/js/admin.js yadore-monetizer.php
+#, php-format
+msgid "Still <span id=\"scan-pending-count\">%s</span> posts pending"
+msgstr "Noch <span id=\"scan-pending-count\">%s</span> Beiträge offen"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "All posts scanned!"
+msgstr "Alle Beiträge gescannt!"
+
+#: assets/js/admin.js yadore-monetizer.php
+#, php-format
+msgid "Page %s"
+msgstr "Seite %s"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "Next page"
+msgstr "Nächste Seite"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "Previous page"
+msgstr "Vorherige Seite"
+
+#: assets/js/admin.js yadore-monetizer.php
+#, php-format
+msgid "%1$s–%2$s of %3$s"
+msgstr "%1$s–%2$s von %3$s"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "No selection"
+msgstr "Keine Auswahl"
+
+#: assets/js/admin.js yadore-monetizer.php
+#, php-format
+msgid "%s words"
+msgstr "%s Wörter"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "No minimum"
+msgstr "Kein Mindestwert"
+
+#: assets/js/admin.js yadore-monetizer.php
+msgid "Standard scan"
+msgstr "Standardprüfung"
 
 #. Plugin Name of the plugin
 #: yadore-monetizer.php yadore-monetizer.php:1057 yadore-monetizer.php:7597
