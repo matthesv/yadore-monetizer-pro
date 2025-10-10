@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.48.12 - 2025-11-19
+- Hid the decorative ranking badge before keyword chips inside scan result cards to remove the unintended blue circle.
+- Bumped plugin metadata and documentation to version 3.48.12.
+
 # 3.48.11 - 2025-11-18
 - Removed the decorative circle from the Recent Scan Results keyword pill to keep the label clean.
 - Bumped plugin metadata and documentation to version 3.48.11.

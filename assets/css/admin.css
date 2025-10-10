@@ -1016,7 +1016,8 @@
     line-height: 1.3;
 }
 
-.scan-results-table .keyword-chip::before {
+.scan-results-table .keyword-chip::before,
+.scan-result-card .keyword-chip::before {
     content: none;
     display: none;
 }
