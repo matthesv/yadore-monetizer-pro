@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.39 - 2025-11-05
+- Harmonized the market list loader with the status checker by merging `markets` and wrapped `data` responses before caching, normalizing ISO codes, and preferring API names.
+- Purged the cached `yadore_available_markets` list on deploy so the refreshed normalization can populate immediately after upgrades.
+- Bumped the plugin metadata and bundled admin asset banners to 3.47.39 to capture the market availability fixes.
+
 ## 3.47.38 - 2025-11-04
 - Rebuilt the Tools screen cards with unified headers, descriptions, and call-to-action footers so export, import, maintenance, and utility workflows stay consistent from 360px through desktop breakpoints.
 - Refactored the configuration sections onto shared tool-option components, aligning reset, migration, and optimization actions with tokenized spacing while keeping inputs full-width on touch devices.
