@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.34 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.35 - Admin CSS (Complete) */
 
 .yadore-hidden-file-input {
     position: absolute;
@@ -3296,6 +3296,13 @@
     display: flex;
     gap: var(--yadore-space-2);
     flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.tool-actions .button {
+    justify-content: flex-start;
+    text-align: left;
 }
 
 /* Tools layout refactor: align option panels and feedback states with tokenized utilities. */
@@ -3626,11 +3633,13 @@
     display: flex;
     gap: var(--yadore-space-2);
     align-items: stretch;
+    justify-content: flex-start;
+    flex-wrap: wrap;
 }
 
 .maintenance-tool .tool-actions .button {
-    flex: 1 1 0;
-    justify-content: center;
+    flex: 0 1 auto;
+    justify-content: flex-start;
     min-height: 44px;
 }
 
@@ -4224,12 +4233,12 @@
 
     .yadore-tools-container .tool-actions {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
     }
 
     .yadore-tools-container .tool-actions .button {
         width: 100%;
-        justify-content: center;
+        justify-content: flex-start;
     }
 }
 
