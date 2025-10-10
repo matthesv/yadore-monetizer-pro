@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.31 - 2025-10-29
+- Hardened the admin bootstrap so the localized configuration object is always defined, preventing the tools script from aborting before wiring up UI handlers when translations or enqueue timing fail.
+- Added runtime validation with explicit console feedback whenever the AJAX endpoint data is missing to make diagnosing enqueue issues straightforward.
+- Bumped the plugin metadata and admin JavaScript banner to 3.47.31 to record the configuration safeguard.
+
 ## 3.47.30 - 2025-10-28
 - Replaced the hidden import input with an accessible visually-hidden control so browsers can open the native file dialog on click.
 - Added reusable styling for the hidden file input to keep it off-screen while remaining focusable for accessibility.
