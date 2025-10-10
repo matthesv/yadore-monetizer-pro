@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.48.13 - 2025-11-20
+- Removed the keyword chip icon from Recent Scan Results so the label displays without a leading circle.
+- Bumped plugin metadata and documentation to version 3.48.13.
+
 # 3.48.12 - 2025-11-19
 - Hid the decorative ranking badge before keyword chips inside scan result cards to remove the unintended blue circle.
 - Bumped plugin metadata and documentation to version 3.48.12.
