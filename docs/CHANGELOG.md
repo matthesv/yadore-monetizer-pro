@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.36 - 2025-11-03
+- Converted the Tools cards to a responsive layout grid so action panels align in columns with consistent gaps on any screen width.
+- Replaced margin-based spacing inside each tool section with tokenized grid gaps, clipped shadows, and hover elevations that stop overlapping neighbours.
+- Bumped the plugin metadata and bundled asset banners to 3.47.36 to capture the Tools spacing and clipping fixes.
+
 ## 3.47.35 - 2025-11-02
 - Left-aligned every Tools action group so export, import, maintenance, and cleanup buttons line up consistently while keeping their wrap behaviour on narrow screens.
 - Updated the button flex rules to preserve tokenized gaps, prevent stretched maintenance controls, and keep focus indicators visible when controls stack.
