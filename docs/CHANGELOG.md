@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.33 - 2025-10-31
+- Refactored the Tools page layout to run on the shared card grid utilities so export, import, maintenance, and utility sections stay visually separated with consistent headings and touch-friendly CTAs from 360px through widescreen breakpoints.
+- Styled the import drop zone, option cards, and results panels with design-token spacing and borders, eliminating inline visibility hacks via a reusable JavaScript helper that toggles hidden states without breaking animations.
+- Bumped the plugin metadata and bundled asset banners to 3.47.33 to record the responsive Tools experience overhaul.
+
 ## 3.47.32 - 2025-10-30
 - Prevented the import drop zone click handler from re-triggering the hidden file input so the browser opens the picker without hitting a recursive jQuery stack overflow when Upload File is pressed.
 - Guarded keyboard activation on the drop zone to avoid re-entering the handler when the native file input fires key events while keeping Enter/Space support intact.

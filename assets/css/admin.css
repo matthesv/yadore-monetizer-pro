@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.30 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.47.33 - Admin CSS (Complete) */
 
 .yadore-hidden-file-input {
     position: absolute;
@@ -3298,11 +3298,181 @@
     flex-wrap: wrap;
 }
 
+/* Tools layout refactor: align option panels and feedback states with tokenized utilities. */
 .export-options {
     --yadore-card-grid-column-min: 220px;
     --yadore-card-grid-gap: var(--yadore-space-3);
     --yadore-card-grid-align: stretch;
     width: 100%;
+}
+
+.tool-section > .tool-content > p {
+    margin: 0;
+    color: var(--yadore-color-text-subtle);
+}
+
+.tool-date-range {
+    display: grid;
+    gap: var(--yadore-space-2);
+}
+
+.tool-date-range input[type="date"] {
+    width: 100%;
+}
+
+.import-options {
+    --yadore-card-grid-column-min: clamp(240px, 46vw, 360px);
+}
+
+.file-upload,
+.import-settings {
+    display: grid;
+    gap: var(--yadore-space-3);
+}
+
+.import-settings {
+    background: var(--yadore-color-surface-default);
+    border: 1px solid var(--yadore-border-subtle);
+    border-radius: var(--yadore-radius-md);
+    padding: var(--yadore-space-3);
+}
+
+.import-settings label,
+.export-options .option-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--yadore-space-2);
+}
+
+.upload-area {
+    display: grid;
+    gap: var(--yadore-space-3);
+    justify-items: center;
+    text-align: center;
+    padding: var(--yadore-space-5);
+    border: 2px dashed var(--yadore-border-subtle);
+    border-radius: var(--yadore-radius-xl);
+    background: var(--yadore-color-surface-default);
+    cursor: pointer;
+    transition: border-color var(--yadore-motion-duration-fast) var(--yadore-motion-easing-standard),
+        box-shadow var(--yadore-motion-duration-fast) var(--yadore-motion-easing-standard);
+}
+
+.upload-area:focus,
+.upload-area:hover {
+    border-color: var(--yadore-color-primary-400);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--yadore-color-primary-200) 45%, transparent);
+    outline: none;
+}
+
+.upload-area:focus-visible {
+    outline: none;
+    border-color: var(--yadore-color-primary-500);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--yadore-color-primary-200) 55%, transparent);
+}
+
+.upload-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--yadore-radius-pill);
+    display: grid;
+    place-items: center;
+    background: var(--yadore-color-primary-100);
+    color: var(--yadore-color-primary-600);
+    font-size: var(--yadore-font-size-xl);
+}
+
+.upload-text {
+    display: grid;
+    gap: var(--yadore-space-2);
+}
+
+.upload-text strong {
+    font-size: var(--yadore-font-size-md);
+    color: var(--yadore-color-text-strong);
+}
+
+.upload-text p {
+    margin: 0;
+    font-size: var(--yadore-font-size-sm);
+    color: var(--yadore-color-text-subtle);
+}
+
+.tool-actions .button .dashicons,
+.upload-area .dashicons {
+    font-size: 1.1em;
+}
+
+.export-results,
+.import-results,
+.scan-results,
+.analyzer-results {
+    display: grid;
+    gap: var(--yadore-space-3);
+    margin-top: var(--yadore-space-3);
+    padding: var(--yadore-space-3);
+    border: 1px solid var(--yadore-border-subtle);
+    border-radius: var(--yadore-radius-md);
+    background: var(--yadore-color-surface-default);
+}
+
+.export-progress {
+    display: grid;
+    gap: var(--yadore-space-2);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    border-radius: var(--yadore-radius-pill);
+    background: var(--yadore-color-surface-muted);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--yadore-color-primary-400), var(--yadore-color-primary-600));
+    transition: width var(--yadore-motion-duration-fast) var(--yadore-motion-easing-standard);
+}
+
+.progress-text {
+    font-size: var(--yadore-font-size-sm);
+    color: var(--yadore-color-text-subtle);
+}
+
+.import-summary {
+    display: grid;
+    gap: var(--yadore-space-2);
+    font-size: var(--yadore-font-size-sm);
+    color: var(--yadore-color-text-default);
+}
+
+.utility-tool {
+    display: grid;
+    gap: var(--yadore-space-3);
+    padding: var(--yadore-space-4);
+    border-radius: var(--yadore-radius-lg);
+    border: 1px solid var(--yadore-border-subtle);
+    background: var(--yadore-color-surface-subtle);
+    box-shadow: var(--yadore-shadow-sm);
+}
+
+.utility-tool h3 {
+    margin: 0;
+    font-size: var(--yadore-font-size-lg);
+    color: var(--yadore-color-text-strong);
+    display: flex;
+    align-items: center;
+    gap: var(--yadore-space-2);
+}
+
+.utility-tool p {
+    margin: 0;
+    color: var(--yadore-color-text-subtle);
+}
+
+.utility-tool .button {
+    justify-content: center;
 }
 
 @media (min-width: 1200px) {

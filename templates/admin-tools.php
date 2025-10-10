@@ -123,6 +123,7 @@
 
         <div class="yadore-admin-content">
             <div class="yadore-tools-container">
+                <!-- Refactor note: the tools layout now relies on yadore-card-grid utilities for consistent spacing across breakpoints. -->
         <!-- Data Management Tools -->
         <div class="yadore-card">
             <div class="card-header">
@@ -131,14 +132,14 @@
             <div class="card-content">
                 <div class="yadore-card-grid tools-grid">
                     <!-- Export Tools -->
-                    <div class="tool-section" id="tools-export">
+                    <section class="tool-section" id="tools-export" aria-labelledby="tools-export-title" role="region">
                         <div class="tool-header">
-                            <h3><span class="dashicons dashicons-download"></span> Export Data</h3>
+                            <h3 id="tools-export-title"><span class="dashicons dashicons-download"></span> Export Data</h3>
                         </div>
                         <div class="tool-content">
                             <p>Export your plugin data for backup or migration purposes.</p>
 
-                            <div class="export-options">
+                            <div class="export-options yadore-card-grid" data-variant="compact">
                                 <div class="option-group">
                                     <h4>Data Types</h4>
                                     <label><input type="checkbox" name="export_data[]" value="settings" checked> Plugin Settings</label>
@@ -170,7 +171,7 @@
                                         <option value="custom">Custom Range</option>
                                     </select>
 
-                                    <div id="custom-date-range" style="display: none;">
+                                    <div id="custom-date-range" class="tool-date-range hidden" aria-hidden="true">
                                         <input type="date" id="export-start-date">
                                         <input type="date" id="export-end-date">
                                     </div>
@@ -201,7 +202,7 @@
                                 </button>
                             </div>
 
-                            <div class="export-results" id="export-results" style="display: none;">
+                            <div class="export-results hidden" id="export-results" aria-live="polite">
                                 <div class="export-progress">
                                     <div class="progress-bar">
                                         <div class="progress-fill" id="export-progress"></div>
@@ -212,17 +213,17 @@
 
                             <div class="export-schedule-status" id="export-schedule-status" aria-live="polite"></div>
                         </div>
-                    </div>
+                    </section>
 
                     <!-- Import Tools -->
-                    <div class="tool-section">
+                    <section class="tool-section" id="tools-import" aria-labelledby="tools-import-title" role="region">
                         <div class="tool-header">
-                            <h3><span class="dashicons dashicons-upload"></span> Import Data</h3>
+                            <h3 id="tools-import-title"><span class="dashicons dashicons-upload"></span> Import Data</h3>
                         </div>
                         <div class="tool-content">
                             <p>Import data from backup files or other sources.</p>
 
-                            <div class="import-options">
+                            <div class="import-options yadore-card-grid" data-variant="compact">
                                 <div class="file-upload">
                                     <?php $upload_instructions_id = 'import-upload-instructions'; ?>
                                     <div
@@ -278,11 +279,11 @@
                                 </button>
                             </div>
 
-                            <div class="import-results" id="import-results" style="display: none;">
+                            <div class="import-results hidden" id="import-results" aria-live="polite">
                                 <div class="import-summary"></div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         </div>
@@ -296,12 +297,12 @@
                 <div class="maintenance-tools">
                     <div class="yadore-card-grid maintenance-grid">
                         <!-- Cache Management -->
-                        <div class="maintenance-tool">
+                        <article class="maintenance-tool" aria-labelledby="maintenance-cache-title">
                             <div class="tool-icon">
                                 <span class="dashicons dashicons-performance"></span>
                             </div>
                             <div class="tool-info">
-                                <h3>Cache Management</h3>
+                                <h3 id="maintenance-cache-title">Cache Management</h3>
                                 <p>Manage plugin cache and optimize performance</p>
                                 <div class="cache-stats">
                                     <div class="cache-stat">
@@ -326,15 +327,15 @@
                                     <span class="dashicons dashicons-performance"></span> Optimize
                                 </button>
                             </div>
-                        </div>
+                        </article>
 
                         <!-- Database Maintenance -->
-                        <div class="maintenance-tool">
+                        <article class="maintenance-tool" aria-labelledby="maintenance-database-title">
                             <div class="tool-icon">
                                 <span class="dashicons dashicons-database"></span>
                             </div>
                             <div class="tool-info">
-                                <h3>Database Maintenance</h3>
+                                <h3 id="maintenance-database-title">Database Maintenance</h3>
                                 <p>Optimize database tables and clean up old data</p>
                                 <div class="db-stats">
                                     <div class="db-stat">
@@ -359,15 +360,15 @@
                                     <span class="dashicons dashicons-trash"></span> Clean Old Data
                                 </button>
                             </div>
-                        </div>
+                        </article>
 
                         <!-- Log Management -->
-                        <div class="maintenance-tool">
+                        <article class="maintenance-tool" aria-labelledby="maintenance-logs-title">
                             <div class="tool-icon">
                                 <span class="dashicons dashicons-media-text"></span>
                             </div>
                             <div class="tool-info">
-                                <h3>Log Management</h3>
+                                <h3 id="maintenance-logs-title">Log Management</h3>
                                 <p>Manage API logs, error logs, and debug information</p>
                                 <div class="log-stats">
                                     <div class="log-stat">
@@ -392,15 +393,15 @@
                                     <span class="dashicons dashicons-trash"></span> Clear Old Logs
                                 </button>
                             </div>
-                        </div>
+                        </article>
 
                         <!-- System Cleanup -->
-                        <div class="maintenance-tool">
+                        <article class="maintenance-tool" aria-labelledby="maintenance-cleanup-title">
                             <div class="tool-icon">
                                 <span class="dashicons dashicons-admin-generic"></span>
                             </div>
                             <div class="tool-info">
-                                <h3>System Cleanup</h3>
+                                <h3 id="maintenance-cleanup-title">System Cleanup</h3>
                                 <p>Clean temporary files and optimize system performance</p>
                                 <div class="cleanup-stats">
                                     <div class="cleanup-stat">
@@ -425,7 +426,7 @@
                                     <span class="dashicons dashicons-clock"></span> Schedule Cleanup
                                 </button>
                             </div>
-                        </div>
+                        </article>
                     </div>
                 </div>
             </div>
@@ -439,8 +440,8 @@
             <div class="card-content">
                 <div class="config-tools">
                     <!-- Reset Tools -->
-                    <div class="config-section">
-                        <h3><span class="dashicons dashicons-update"></span> Reset Options</h3>
+                    <section class="config-section" aria-labelledby="config-reset-title" role="region">
+                        <h3 id="config-reset-title"><span class="dashicons dashicons-update"></span> Reset Options</h3>
                         <div class="reset-options">
                             <div class="reset-option">
                                 <h4>Reset to Defaults</h4>
@@ -478,11 +479,11 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
                     <!-- Migration Tools -->
-                    <div class="config-section">
-                        <h3><span class="dashicons dashicons-migrate"></span> Migration Tools</h3>
+                    <section class="config-section" aria-labelledby="config-migration-title" role="region">
+                        <h3 id="config-migration-title"><span class="dashicons dashicons-migrate"></span> Migration Tools</h3>
                         <div class="migration-tools">
                             <div class="migration-option">
                                 <h4>Export Configuration</h4>
@@ -501,11 +502,11 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
                     <!-- Optimization Tools -->
-                    <div class="config-section">
-                        <h3><span class="dashicons dashicons-performance"></span> Optimization Tools</h3>
+                    <section class="config-section" aria-labelledby="config-optimization-title" role="region">
+                        <h3 id="config-optimization-title"><span class="dashicons dashicons-performance"></span> Optimization Tools</h3>
                         <div class="optimization-tools">
                             <div class="optimization-option">
                                 <h4>Performance Scan</h4>
@@ -513,7 +514,7 @@
                                 <button class="button button-primary" id="performance-scan">
                                     <span class="dashicons dashicons-performance"></span> Run Scan
                                 </button>
-                                <div class="scan-results" id="performance-scan-results" style="display: none;"></div>
+                                <div class="scan-results hidden" id="performance-scan-results" aria-live="polite"></div>
                             </div>
 
                             <div class="optimization-option">
@@ -524,7 +525,7 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         </div>
@@ -538,31 +539,31 @@
                 <div class="utility-tools">
                     <div class="yadore-card-grid utility-grid">
                         <!-- Shortcode Generator -->
-                        <div class="utility-tool">
-                            <h3><span class="dashicons dashicons-shortcode"></span> Advanced Shortcode Generator</h3>
+                        <article class="utility-tool" aria-labelledby="utility-shortcode-title">
+                            <h3 id="utility-shortcode-title"><span class="dashicons dashicons-shortcode"></span> Advanced Shortcode Generator</h3>
                             <p>Generate shortcodes with advanced parameters and preview functionality.</p>
                             <button class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-monetizer'); ?>'">
                                 <span class="dashicons dashicons-shortcode"></span> Open Generator
                             </button>
-                        </div>
+                        </article>
 
                         <!-- Keyword Analyzer -->
-                        <div class="utility-tool">
-                            <h3><span class="dashicons dashicons-tag"></span> Keyword Analyzer</h3>
+                        <article class="utility-tool" aria-labelledby="utility-keyword-title">
+                            <h3 id="utility-keyword-title"><span class="dashicons dashicons-tag"></span> Keyword Analyzer</h3>
                             <p>Analyze text content and get AI-powered keyword suggestions.</p>
                             <button class="button button-primary" id="open-keyword-analyzer">
                                 <span class="dashicons dashicons-tag"></span> Open Analyzer
                             </button>
-                        </div>
+                        </article>
 
                         <!-- Bulk Operations -->
-                        <div class="utility-tool">
-                            <h3><span class="dashicons dashicons-editor-ul"></span> Bulk Operations</h3>
+                        <article class="utility-tool" aria-labelledby="utility-bulk-title">
+                            <h3 id="utility-bulk-title"><span class="dashicons dashicons-editor-ul"></span> Bulk Operations</h3>
                             <p>Perform bulk operations on posts, keywords, and data.</p>
                             <button class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-scanner'); ?>'">
                                 <span class="dashicons dashicons-editor-ul"></span> Open Scanner
                             </button>
-                        </div>
+                        </article>
 
                     </div>
                 </div>
@@ -572,12 +573,19 @@
 </div>
 
 <!-- Keyword Analyzer Modal -->
-<div id="keyword-analyzer-modal" class="yadore-modal" style="display: none;">
+<div
+    id="keyword-analyzer-modal"
+    class="yadore-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="keyword-analyzer-title"
+    aria-hidden="true"
+>
     <div class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Keyword Analyzer</h2>
-                <button class="modal-close">&times;</button>
+                <h2 id="keyword-analyzer-title">Keyword Analyzer</h2>
+                <button class="modal-close" type="button" aria-label="Close keyword analyzer">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="analyzer-input">
@@ -592,7 +600,7 @@
                         Max Keywords: <input type="number" id="max-keywords" min="1" max="20" value="5">
                     </label>
                 </div>
-                <div class="analyzer-results" id="analyzer-results" style="display: none;">
+                <div class="analyzer-results hidden" id="analyzer-results" aria-live="polite">
                     <h4>Suggested Keywords:</h4>
                     <div class="keyword-suggestions"></div>
                 </div>
