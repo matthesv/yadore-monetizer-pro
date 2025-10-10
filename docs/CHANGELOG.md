@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.48.8 - 2025-11-15
+- Refactored the Recent Scan Results layout into a responsive card-table hybrid with confidence meters, AI badges, and mobile-friendly labels.
+- Animated inline re-scan action buttons while requests run and improved accessibility with live-region updates.
+- Forwarded previously selected keywords to the AI scanner and instruct Gemini to avoid returning the same phrase on rescan.
+- Bumped plugin metadata, documentation, and language catalog versions to 3.48.8.
+
 # 3.48.7 - 2025-11-14
 - Enhanced the default AI prompt so Gemini always derives tangible, purchase-ready products and converts location-only content into appropriate gear recommendations.
 - Bumped plugin metadata, documentation, and language catalog versions to 3.48.7.

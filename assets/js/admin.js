@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.40 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.48.8 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
@@ -1509,10 +1509,17 @@
             const filter = this.scannerState.currentFilter || 'all';
             this.highlightResultsQuickFilter(filter);
             const tbody = $('#scan-results-body');
+            const tableRegion = $('.scan-results-table');
+            if (tableRegion.length) {
+                tableRegion.attr('aria-busy', 'true');
+            }
+
+            const loadingText = readString(yadore_admin.strings?.processing, 'Loading results...');
             tbody.html(`
                 <tr>
                     <td colspan="6" class="loading-row">
-                        <span class="dashicons dashicons-update-alt spinning"></span> ${yadore_admin.strings?.processing || 'Loading results...'}
+                        <span class="dashicons dashicons-update-alt spinning" aria-hidden="true"></span>
+                        <span>${this.escapeHtml(loadingText)}</span>
                     </td>
                 </tr>
             `);
@@ -1534,37 +1541,151 @@
                         this.showNotice(response.data, 'error');
                     }
                 }
+            }).fail(() => {
+                this.renderScanResults([]);
+                this.renderResultsPagination({});
+                const errorMessage = readString(yadore_admin.strings?.load_error, 'Failed to load scan results.');
+                if (typeof this.showNotice === 'function') {
+                    this.showNotice(errorMessage, 'error');
+                }
             });
+        },
+
+        setScanResultActionState: function($button, isLoading) {
+            if (!$button || !$button.length) {
+                return;
+            }
+
+            if (isLoading) {
+                $button.addClass('is-loading').attr('aria-busy', 'true').prop('disabled', true);
+            } else {
+                $button.removeClass('is-loading').removeAttr('aria-busy').prop('disabled', false);
+            }
+
+            const $icon = $button.find('.dashicons');
+            if ($icon.length) {
+                $icon.toggleClass('spinning', isLoading);
+            }
         },
 
         renderScanResults: function(results) {
             const tbody = $('#scan-results-body');
+            const tableRegion = $('.scan-results-table');
+            const labels = {
+                title: readString(yadore_admin.strings?.column_post_title, 'Post Title'),
+                keyword: readString(yadore_admin.strings?.column_primary_keyword, 'Primary Keyword'),
+                confidence: readString(yadore_admin.strings?.column_confidence, 'Confidence'),
+                status: readString(yadore_admin.strings?.column_status, 'Status'),
+                date: readString(yadore_admin.strings?.column_scan_date, 'Scan Date'),
+                actions: readString(yadore_admin.strings?.column_actions, 'Actions'),
+                aiBadge: readString(yadore_admin.strings?.ai_badge, 'AI'),
+                placeholder: readString(yadore_admin.strings?.placeholder_dash, '—'),
+                noResults: readString(yadore_admin.strings?.no_results, 'No scan results available.'),
+                scanAgain: readString(yadore_admin.strings?.scan_again, 'Scan again'),
+                confidenceAria: readString(yadore_admin.strings?.confidence_aria, '%s confidence'),
+                confidenceUnavailable: readString(yadore_admin.strings?.confidence_unavailable, 'Confidence not available')
+            };
+
+            const placeholder = this.escapeHtml(labels.placeholder);
+            const labelTitle = this.escapeHtml(labels.title);
+            const labelKeyword = this.escapeHtml(labels.keyword);
+            const labelConfidence = this.escapeHtml(labels.confidence);
+            const labelStatus = this.escapeHtml(labels.status);
+            const labelDate = this.escapeHtml(labels.date);
+            const labelActions = this.escapeHtml(labels.actions);
 
             if (!Array.isArray(results) || results.length === 0) {
                 tbody.html(`
                     <tr>
-                        <td colspan="6" class="no-results">${yadore_admin.strings?.no_results || 'No scan results available.'}</td>
+                        <td colspan="6" class="no-results">
+                            <span class="dashicons dashicons-info" aria-hidden="true"></span>
+                            <span>${this.escapeHtml(labels.noResults)}</span>
+                        </td>
                     </tr>
                 `);
+
+                if (tableRegion.length) {
+                    tableRegion.attr('aria-busy', 'false');
+                }
                 return;
             }
 
             const rows = results.map((item) => {
-                const keyword = item.primary_keyword || '—';
-                const confidence = item.keyword_confidence ? `${Math.round(item.keyword_confidence * 100)}%` : '—';
-                const statusLabel = item.status_label || this.getScanStatusLabel(item.scan_status);
-                const lastScanned = item.last_scanned ? item.last_scanned : '—';
+                const rawTitle = readString(item.post_title, labels.placeholder);
+                const safeTitle = this.escapeHtml(rawTitle);
+                const safeTitleAttr = this.escapeHtml(readString(item.post_title, ''));
+                const aiUsed = readBoolean(item.ai_used);
+
+                const hasKeyword = typeof item.primary_keyword === 'string' && item.primary_keyword.trim() !== '';
+                const keywordValue = hasKeyword ? this.escapeHtml(item.primary_keyword) : placeholder;
+                const keywordClass = hasKeyword ? 'keyword-chip' : 'keyword-chip is-empty';
+
+                const rawConfidence = typeof item.keyword_confidence === 'number'
+                    ? item.keyword_confidence
+                    : parseFloat(item.keyword_confidence);
+                let confidencePercent = Number.isFinite(rawConfidence) ? rawConfidence : null;
+                if (confidencePercent !== null && confidencePercent <= 1) {
+                    confidencePercent *= 100;
+                }
+                if (confidencePercent !== null) {
+                    confidencePercent = Math.max(0, Math.min(100, Math.round(confidencePercent)));
+                }
+                const confidenceDisplay = confidencePercent !== null ? `${confidencePercent}%` : labels.placeholder;
+                const safeConfidenceDisplay = this.escapeHtml(confidenceDisplay);
+                const confidenceMeterClass = confidencePercent !== null ? 'confidence-meter' : 'confidence-meter is-empty';
+                const confidenceWidth = confidencePercent !== null ? confidencePercent : 0;
+                const confidenceAria = confidencePercent !== null
+                    ? formatString(labels.confidenceAria, `${confidencePercent}%`) || `${confidencePercent}% confidence`
+                    : labels.confidenceUnavailable;
+                const safeConfidenceAria = this.escapeHtml(confidenceAria);
+
+                const statusKey = readString(item.scan_status, 'pending');
+                const statusLabel = readString(item.status_label, this.getScanStatusLabel(statusKey));
+                const safeStatusLabel = this.escapeHtml(statusLabel);
+
+                const lastScanned = readString(item.last_scanned, labels.placeholder);
+                const safeLastScanned = this.escapeHtml(lastScanned);
+
+                const scanAgainText = labels.scanAgain;
+                const safeScanAgainText = this.escapeHtml(scanAgainText);
+                const srLabelRaw = rawTitle && rawTitle !== labels.placeholder
+                    ? `${scanAgainText}: ${rawTitle}`
+                    : scanAgainText;
+                const safeSrLabel = this.escapeHtml(srLabelRaw);
+
+                const aiBadge = aiUsed
+                    ? `<span class="result-badge result-badge--ai">${this.escapeHtml(labels.aiBadge)}</span>`
+                    : '';
 
                 return `
-                    <tr>
-                        <td>${item.post_title || '—'}</td>
-                        <td>${keyword}</td>
-                        <td>${confidence}</td>
-                        <td><span class="status-label status-${item.scan_status || 'pending'}">${statusLabel}</span></td>
-                        <td>${lastScanned}</td>
-                        <td>
-                            <button type="button" class="button button-small scan-again" data-post="${item.post_id}">
-                                <span class="dashicons dashicons-update"></span>
+                    <tr class="scan-result-row" data-status="${this.escapeHtml(statusKey)}" data-ai-used="${aiUsed ? '1' : '0'}">
+                        <td class="column-title" data-label="${labelTitle}">
+                            <div class="result-title">
+                                <span class="result-title__text">${safeTitle}</span>
+                                ${aiBadge}
+                            </div>
+                        </td>
+                        <td class="column-keyword" data-label="${labelKeyword}">
+                            <span class="${keywordClass}">${keywordValue}</span>
+                        </td>
+                        <td class="column-confidence" data-label="${labelConfidence}">
+                            <div class="confidence-meter-wrapper">
+                                <div class="${confidenceMeterClass}" role="img" aria-label="${safeConfidenceAria}">
+                                    <span class="confidence-meter__fill" style="width: ${confidenceWidth}%;" aria-hidden="true"></span>
+                                </div>
+                                <span class="confidence-meter__value">${safeConfidenceDisplay}</span>
+                            </div>
+                        </td>
+                        <td class="column-status" data-label="${labelStatus}">
+                            <span class="status-label status-${this.escapeHtml(statusKey)}">${safeStatusLabel}</span>
+                        </td>
+                        <td class="column-date" data-label="${labelDate}">
+                            <span class="result-date">${safeLastScanned}</span>
+                        </td>
+                        <td class="column-actions" data-label="${labelActions}">
+                            <button type="button" class="button button-secondary button-small scan-again scan-action-button" data-post="${item.post_id}" data-title="${safeTitleAttr}" title="${safeSrLabel}" aria-label="${safeSrLabel}">
+                                <span class="dashicons dashicons-update" aria-hidden="true"></span>
+                                <span class="screen-reader-text">${safeScanAgainText}</span>
                             </button>
                         </td>
                     </tr>
@@ -1575,16 +1696,26 @@
 
             tbody.find('.scan-again').on('click', (e) => {
                 e.preventDefault();
-                const postId = parseInt($(e.currentTarget).data('post'), 10);
+                const $button = $(e.currentTarget);
+                if ($button.hasClass('is-loading')) {
+                    return;
+                }
+
+                const postId = parseInt($button.data('post'), 10);
                 if (!Number.isNaN(postId)) {
                     if (!this.scannerState) {
                         this.scannerState = {};
                     }
 
-                    this.scannerState.selectedPost = { id: postId };
-                    this.scanSinglePost(true);
+                    const selectedTitle = readString($button.data('title'), '');
+                    this.scannerState.selectedPost = { id: postId, title: selectedTitle };
+                    this.scanSinglePost(true, $button);
                 }
             });
+
+            if (tableRegion.length) {
+                tableRegion.attr('aria-busy', 'false');
+            }
         },
 
         renderResultsPagination: function(pagination) {
@@ -1835,16 +1966,26 @@
             }
         },
 
-        scanSinglePost: function(forceRescan) {
+        scanSinglePost: function(forceRescan, triggerButton = null) {
+            const $triggerButton = triggerButton && triggerButton.length ? triggerButton : null;
+
             if (!this.scannerState || !this.scannerState.selectedPost || !this.scannerState.selectedPost.id) {
+                if ($triggerButton) {
+                    this.setScanResultActionState($triggerButton, false);
+                }
                 alert('Please select a post to scan.');
                 return;
             }
 
             const shouldForceRescan = typeof forceRescan === 'boolean' ? forceRescan : false;
             const forceRescanFlag = shouldForceRescan || $('#single-force-rescan').is(':checked');
-            const button = $('#scan-single-post');
-            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Scanning...');
+            const primaryButton = $('#scan-single-post');
+
+            if ($triggerButton) {
+                this.setScanResultActionState($triggerButton, true);
+            } else {
+                primaryButton.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Scanning...');
+            }
 
             $.post(this.ajax_url, {
                 action: 'yadore_scan_single_post',
@@ -1871,7 +2012,11 @@
                     this.showNotice('Scan failed due to an unexpected error.', 'error');
                 }
             }).always(() => {
-                button.prop('disabled', false).html('<span class="dashicons dashicons-search"></span> Scan This Post');
+                if ($triggerButton) {
+                    this.setScanResultActionState($triggerButton, false);
+                } else {
+                    primaryButton.prop('disabled', false).html('<span class="dashicons dashicons-search"></span> Scan This Post');
+                }
             });
         },
 
