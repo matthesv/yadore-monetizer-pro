@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.48.2 - 2025-11-09
+- Übersetzte die gesamte Tools-Seite ins Deutsche und stellte alle Texte über Internationalisierungsfunktionen bereit.
+- Regenerierte die Sprachvorlage, damit alle neuen deutschen Zeichenketten in `yadore-monetizer.pot` verfügbar sind.
+
 # 3.48.1 - 2025-11-08
 - Added manual Yadore optimizer report syncing controls under Tools with selectable date ranges and live status feedback.
 - Refactored the optimizer sync pipeline to expose reusable summaries for cron and manual executions.
