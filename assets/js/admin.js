@@ -740,6 +740,30 @@
                 $('#temperature-value').text($(this).val());
             });
 
+            $('.setup-list__action').on('click', (event) => {
+                event.preventDefault();
+
+                const $button = $(event.currentTarget);
+                const tabTarget = $button.data('tabTarget');
+
+                if (tabTarget) {
+                    const $targetTab = $tabs.filter(`[data-tab="${tabTarget}"]`).first();
+                    if ($targetTab.length) {
+                        activateTab($targetTab, true);
+                    }
+                }
+
+                const focusTarget = $button.data('focusTarget');
+                if (focusTarget) {
+                    window.requestAnimationFrame(() => {
+                        const $target = $(focusTarget);
+                        if ($target && $target.length) {
+                            $target.trigger('focus');
+                        }
+                    });
+                }
+            });
+
             $('#reset-ai-prompt').on('click', () => {
                 const $promptField = $('#yadore_ai_prompt');
                 if (!$promptField.length) {

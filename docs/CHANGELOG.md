@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.48.14 - 2025-11-21
+- Added a guided setup checklist on the settings dashboard with quick actions to focus missing configuration items.
+- Surfaced configuration status indicators in the settings navigation so admins can spot pending tasks instantly.
+- Bumped plugin metadata and documentation to version 3.48.14.
+
 # 3.48.13 - 2025-11-20
 - Removed the keyword chip icon from Recent Scan Results so the label displays without a leading circle.
 - Bumped plugin metadata and documentation to version 3.48.13.

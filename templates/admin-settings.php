@@ -11,7 +11,9 @@
         ? $options['yadore_market']
         : get_option('yadore_market', $default_market_code);
     $current_market = strtoupper((string) $current_market);
-    if ($current_market !== '' && !isset($market_options[$current_market])) {
+    $market_is_configured = $current_market !== '';
+    $market_is_known_market = $market_is_configured && isset($market_options[$current_market]);
+    if ($market_is_configured && !$market_is_known_market) {
         $market_options[$current_market] = esc_html__('Manuell hinterlegt', 'yadore-monetizer');
     }
     $default_ai_prompt = YadoreMonetizer::DEFAULT_AI_PROMPT;
@@ -38,6 +40,93 @@
     $auto_scan_enabled = (bool) get_option('yadore_auto_scan_posts', true);
     $shortcode_enabled = (bool) get_option('yadore_shortcode_enabled', true);
     $debug_mode_enabled = (bool) get_option('yadore_debug_mode', false);
+
+    $automation_toggles = array(
+        'overlay' => $overlay_enabled,
+        'auto_detection' => $auto_detection_enabled,
+        'auto_scan' => $auto_scan_enabled,
+    );
+    $automation_active = in_array(true, $automation_toggles, true);
+
+    $api_task_description = $has_api_key
+        ? esc_html__('Wir nutzen deinen Schlüssel bereits für Live-Produktdaten.', 'yadore-monetizer')
+        : esc_html__('Trage deinen API-Schlüssel ein, um Produktdaten abzurufen.', 'yadore-monetizer');
+
+    $market_task_description = !$market_is_configured
+        ? esc_html__('Wähle den Markt, für den du bei Yadore freigeschaltet bist.', 'yadore-monetizer')
+        : ($market_is_known_market
+            ? esc_html__('Dein Standard-Markt steht fest. Du kannst ihn jederzeit anpassen.', 'yadore-monetizer')
+            : esc_html__('Der Markt wurde manuell eingetragen. Prüfe, ob der Code zu deinem Konto passt.', 'yadore-monetizer'));
+
+    $automation_task_description = $automation_active
+        ? esc_html__('Mindestens eine Automatisierung kümmert sich um Einbindungen und Scans.', 'yadore-monetizer')
+        : esc_html__('Aktiviere Overlay, Auto-Einbindung oder Auto-Scan, um Inhalte automatisch zu monetarisieren.', 'yadore-monetizer');
+
+    $setup_checklist = array(
+        array(
+            'key' => 'api',
+            'label' => esc_html__('Yadore API verbinden', 'yadore-monetizer'),
+            'description' => $api_task_description,
+            'completed' => $has_api_key,
+            'state' => $has_api_key ? 'success' : 'warning',
+            'icon' => $has_api_key ? 'dashicons-yes-alt' : 'dashicons-warning',
+            'sr_text' => $has_api_key
+                ? esc_html__('Yadore API verbunden', 'yadore-monetizer')
+                : esc_html__('Yadore API benötigt Konfiguration', 'yadore-monetizer'),
+            'action_label' => $has_api_key
+                ? esc_html__('Verbindung testen', 'yadore-monetizer')
+                : esc_html__('API-Key hinterlegen', 'yadore-monetizer'),
+            'action_focus' => '#yadore_api_key',
+            'action_tab' => 'general',
+        ),
+        array(
+            'key' => 'market',
+            'label' => esc_html__('Standard-Markt festlegen', 'yadore-monetizer'),
+            'description' => $market_task_description,
+            'completed' => $market_is_configured && $market_is_known_market,
+            'state' => ($market_is_configured && $market_is_known_market) ? 'success' : 'warning',
+            'icon' => ($market_is_configured && $market_is_known_market) ? 'dashicons-yes-alt' : 'dashicons-admin-site-alt3',
+            'sr_text' => ($market_is_configured && $market_is_known_market)
+                ? esc_html__('Standard-Markt ist hinterlegt', 'yadore-monetizer')
+                : esc_html__('Standard-Markt prüfen oder ergänzen', 'yadore-monetizer'),
+            'action_label' => $market_is_configured
+                ? esc_html__('Markt prüfen', 'yadore-monetizer')
+                : esc_html__('Markt auswählen', 'yadore-monetizer'),
+            'action_focus' => '#yadore_market',
+            'action_tab' => 'general',
+        ),
+        array(
+            'key' => 'automation',
+            'label' => esc_html__('Automatisierungen aktivieren', 'yadore-monetizer'),
+            'description' => $automation_task_description,
+            'completed' => $automation_active,
+            'state' => $automation_active ? 'success' : 'info',
+            'icon' => $automation_active ? 'dashicons-controls-repeat' : 'dashicons-lightbulb',
+            'sr_text' => $automation_active
+                ? esc_html__('Automatisierungen sind aktiv', 'yadore-monetizer')
+                : esc_html__('Automatisierungen sind deaktiviert', 'yadore-monetizer'),
+            'action_label' => $automation_active
+                ? esc_html__('Automatisierungen ansehen', 'yadore-monetizer')
+                : esc_html__('Automatisierung aktivieren', 'yadore-monetizer'),
+            'action_focus' => '#yadore_auto_detection',
+            'action_tab' => 'automation',
+        ),
+    );
+
+    $nav_states = array(
+        'general' => array(
+            'type' => ($has_api_key && $market_is_configured && $market_is_known_market) ? 'success' : 'warning',
+            'text' => ($has_api_key && $market_is_configured && $market_is_known_market)
+                ? esc_html__('Basis-Setup abgeschlossen', 'yadore-monetizer')
+                : esc_html__('Basis-Setup benötigt Eingaben', 'yadore-monetizer'),
+        ),
+        'automation' => array(
+            'type' => $automation_active ? 'success' : 'info',
+            'text' => $automation_active
+                ? esc_html__('Automatisierungen aktiv', 'yadore-monetizer')
+                : esc_html__('Automatisierungen ausgeschaltet', 'yadore-monetizer'),
+        ),
+    );
 
     $settings_actions = array(
         array(
@@ -177,8 +266,16 @@
                         aria-controls="panel-general"
                         tabindex="0"
                     >
-                        <span class="dashicons dashicons-admin-generic" aria-hidden="true"></span>
-                        <?php echo esc_html__('General', 'yadore-monetizer'); ?>
+                        <span class="nav-tab__label">
+                            <span class="dashicons dashicons-admin-generic" aria-hidden="true"></span>
+                            <span><?php echo esc_html__('General', 'yadore-monetizer'); ?></span>
+                        </span>
+                        <?php if (isset($nav_states['general'])) :
+                            $general_state = $nav_states['general'];
+                        ?>
+                            <span class="nav-tab__status nav-tab__status--<?php echo esc_attr($general_state['type']); ?>" aria-hidden="true"></span>
+                            <span class="screen-reader-text"><?php echo esc_html($general_state['text']); ?></span>
+                        <?php endif; ?>
                     </button>
                     <button
                         type="button"
@@ -190,8 +287,16 @@
                         aria-controls="panel-automation"
                         tabindex="-1"
                     >
-                        <span class="dashicons dashicons-update" aria-hidden="true"></span>
-                        <?php echo esc_html__('Automation', 'yadore-monetizer'); ?>
+                        <span class="nav-tab__label">
+                            <span class="dashicons dashicons-update" aria-hidden="true"></span>
+                            <span><?php echo esc_html__('Automation', 'yadore-monetizer'); ?></span>
+                        </span>
+                        <?php if (isset($nav_states['automation'])) :
+                            $automation_state = $nav_states['automation'];
+                        ?>
+                            <span class="nav-tab__status nav-tab__status--<?php echo esc_attr($automation_state['type']); ?>" aria-hidden="true"></span>
+                            <span class="screen-reader-text"><?php echo esc_html($automation_state['text']); ?></span>
+                        <?php endif; ?>
                     </button>
                     <button
                         type="button"
@@ -203,8 +308,10 @@
                         aria-controls="panel-ai"
                         tabindex="-1"
                     >
-                        <span class="dashicons dashicons-admin-customizer" aria-hidden="true"></span>
-                        <?php echo esc_html__('AI Settings', 'yadore-monetizer'); ?>
+                        <span class="nav-tab__label">
+                            <span class="dashicons dashicons-admin-customizer" aria-hidden="true"></span>
+                            <span><?php echo esc_html__('AI Settings', 'yadore-monetizer'); ?></span>
+                        </span>
                     </button>
                     <button
                         type="button"
@@ -216,8 +323,10 @@
                         aria-controls="panel-display"
                         tabindex="-1"
                     >
-                        <span class="dashicons dashicons-visibility" aria-hidden="true"></span>
-                        <?php echo esc_html__('Display', 'yadore-monetizer'); ?>
+                        <span class="nav-tab__label">
+                            <span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+                            <span><?php echo esc_html__('Display', 'yadore-monetizer'); ?></span>
+                        </span>
                     </button>
                     <button
                         type="button"
@@ -229,8 +338,10 @@
                         aria-controls="panel-performance"
                         tabindex="-1"
                     >
-                        <span class="dashicons dashicons-performance" aria-hidden="true"></span>
-                        <?php echo esc_html__('Performance', 'yadore-monetizer'); ?>
+                        <span class="nav-tab__label">
+                            <span class="dashicons dashicons-performance" aria-hidden="true"></span>
+                            <span><?php echo esc_html__('Performance', 'yadore-monetizer'); ?></span>
+                        </span>
                     </button>
                     <button
                         type="button"
@@ -242,14 +353,79 @@
                         aria-controls="panel-advanced"
                         tabindex="-1"
                     >
-                        <span class="dashicons dashicons-admin-tools" aria-hidden="true"></span>
-                        <?php echo esc_html__('Advanced', 'yadore-monetizer'); ?>
+                        <span class="nav-tab__label">
+                            <span class="dashicons dashicons-admin-tools" aria-hidden="true"></span>
+                            <span><?php echo esc_html__('Advanced', 'yadore-monetizer'); ?></span>
+                        </span>
                     </button>
                 </div>
             </nav>
 
             <!-- General Settings -->
             <div class="settings-panel active" id="panel-general" role="tabpanel" aria-labelledby="tab-general" tabindex="0">
+                <div class="yadore-card yadore-card--status">
+                    <div class="card-header">
+                        <h2><span class="dashicons dashicons-yes" aria-hidden="true"></span> <?php echo esc_html__('Setup-Checkliste', 'yadore-monetizer'); ?></h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-intro">
+                            <?php esc_html_e('Überprüfe die wichtigsten Schritte, um den Monetizer einsatzbereit zu machen.', 'yadore-monetizer'); ?>
+                        </p>
+                        <?php if (!empty($setup_checklist)) : ?>
+                            <ul class="setup-list" role="list">
+                                <?php foreach ($setup_checklist as $item) :
+                                    if (empty($item['label'])) {
+                                        continue;
+                                    }
+
+                                    $item_classes = array('setup-list__item');
+                                    if (!empty($item['state'])) {
+                                        $item_classes[] = 'setup-list__item--' . sanitize_html_class($item['state']);
+                                    }
+                                    if (!empty($item['completed'])) {
+                                        $item_classes[] = 'is-complete';
+                                    }
+
+                                    $icon_class = !empty($item['icon']) ? $item['icon'] : 'dashicons-info';
+                                    $sr_text = !empty($item['sr_text']) ? $item['sr_text'] : '';
+                                    $description = !empty($item['description']) ? $item['description'] : '';
+                                    $action_label = !empty($item['action_label']) ? $item['action_label'] : '';
+                                    $action_focus = !empty($item['action_focus']) ? $item['action_focus'] : '';
+                                    $action_tab = !empty($item['action_tab']) ? $item['action_tab'] : '';
+                                    $action_attributes = array();
+
+                                    if ($action_focus !== '') {
+                                        $action_attributes[] = 'data-focus-target="' . esc_attr($action_focus) . '"';
+                                    }
+
+                                    if ($action_tab !== '') {
+                                        $action_attributes[] = 'data-tab-target="' . esc_attr($action_tab) . '"';
+                                    }
+                                    ?>
+                                    <li class="<?php echo esc_attr(implode(' ', array_map('sanitize_html_class', $item_classes))); ?>" role="listitem">
+                                        <div class="setup-list__indicator">
+                                            <span class="setup-list__icon dashicons <?php echo esc_attr($icon_class); ?>" aria-hidden="true"></span>
+                                            <?php if ($sr_text !== '') : ?>
+                                                <span class="screen-reader-text"><?php echo esc_html($sr_text); ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="setup-list__content">
+                                            <span class="setup-list__label"><?php echo esc_html($item['label']); ?></span>
+                                            <?php if ($description !== '') : ?>
+                                                <p class="setup-list__description"><?php echo esc_html($description); ?></p>
+                                            <?php endif; ?>
+                                            <?php if ($action_label !== '') : ?>
+                                                <button type="button" class="button button-link setup-list__action"<?php echo !empty($action_attributes) ? ' ' . implode(' ', $action_attributes) : ''; ?>>
+                                                    <?php echo esc_html($action_label); ?>
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </div>
+                </div>
                 <div class="yadore-card">
                     <div class="card-header">
                         <h2><span class="dashicons dashicons-admin-network" aria-hidden="true"></span> <?php echo esc_html__('API Configuration', 'yadore-monetizer'); ?></h2>

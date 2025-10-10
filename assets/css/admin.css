@@ -2768,11 +2768,47 @@
     transition: background var(--yadore-motion-duration-medium) var(--yadore-motion-easing-standard),
         color var(--yadore-motion-duration-medium) var(--yadore-motion-easing-standard),
         box-shadow var(--yadore-motion-duration-medium) var(--yadore-motion-easing-standard);
+    position: relative;
+    padding-right: calc(var(--yadore-space-4) + 14px);
 }
 
 .nav-tab:hover {
     background: rgba(37, 99, 235, 0.08);
     color: var(--yadore-color-primary-600);
+}
+
+.nav-tab__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--yadore-space-2);
+}
+
+.nav-tab__status {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    border: 2px solid var(--yadore-color-surface-strong);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06);
+    pointer-events: none;
+}
+
+.nav-tab.nav-tab-active .nav-tab__status {
+    border-color: var(--yadore-color-surface);
+}
+
+.nav-tab__status--success {
+    background: var(--yadore-color-status-success);
+}
+
+.nav-tab__status--warning {
+    background: var(--yadore-color-status-warning-accent);
+}
+
+.nav-tab__status--info {
+    background: var(--yadore-color-primary-500);
 }
 
 .nav-tab:focus-visible {
@@ -2896,6 +2932,127 @@
     display: flex;
     align-items: center;
     gap: var(--yadore-space-2);
+}
+
+.yadore-card--status .card-header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--yadore-space-2);
+    margin: 0;
+}
+
+.setup-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--yadore-space-3);
+}
+
+.setup-list__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--yadore-space-3);
+    padding: var(--yadore-space-3) var(--yadore-space-4);
+    border-radius: var(--yadore-radius-md);
+    border: 1px solid var(--yadore-border-subtle);
+    background: var(--yadore-color-surface-strong);
+    transition: border-color var(--yadore-motion-duration-medium) var(--yadore-motion-easing-standard),
+        box-shadow var(--yadore-motion-duration-medium) var(--yadore-motion-easing-standard);
+}
+
+.setup-list__item.is-complete {
+    background: var(--yadore-color-surface);
+}
+
+.setup-list__item--warning {
+    border-color: var(--yadore-color-status-warning-accent);
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.15);
+}
+
+.setup-list__item--info {
+    border-color: var(--yadore-color-primary-200, rgba(59, 130, 246, 0.3));
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+.setup-list__item--success {
+    border-color: var(--yadore-color-status-success);
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.16);
+}
+
+.setup-list__indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: var(--yadore-color-surface);
+    color: var(--yadore-color-neutral-700);
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px var(--yadore-border-subtle);
+}
+
+.setup-list__item.is-complete .setup-list__indicator {
+    background: var(--yadore-color-status-success-tint, rgba(34, 197, 94, 0.16));
+    color: var(--yadore-color-status-success);
+    box-shadow: none;
+}
+
+.setup-list__item--warning .setup-list__indicator {
+    background: var(--yadore-color-status-warning-tint, rgba(251, 191, 36, 0.16));
+    color: var(--yadore-color-status-warning-accent);
+    box-shadow: none;
+}
+
+.setup-list__item--info .setup-list__indicator {
+    background: rgba(37, 99, 235, 0.12);
+    color: var(--yadore-color-primary-600);
+    box-shadow: none;
+}
+
+.setup-list__icon {
+    font-size: 18px;
+}
+
+.setup-list__content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.setup-list__label {
+    font-weight: 600;
+    color: var(--yadore-color-neutral-900);
+}
+
+.setup-list__description {
+    margin: 0;
+    color: var(--yadore-color-text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.setup-list__action {
+    align-self: flex-start;
+    padding-left: 0;
+    padding-right: 0;
+    font-weight: 600;
+}
+
+.setup-list__action.button-link::after {
+    transform: translateY(2px);
+}
+
+@media (max-width: 782px) {
+    .setup-list__item {
+        flex-direction: column;
+    }
+
+    .setup-list__indicator {
+        width: 36px;
+        height: 36px;
+    }
 }
 
 .checkbox-group {
