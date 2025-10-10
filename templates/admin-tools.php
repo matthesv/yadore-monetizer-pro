@@ -194,10 +194,10 @@
                             </div>
 
                             <div class="tool-actions">
-                                <button class="button button-primary" id="start-export">
+                                <button type="button" class="button button-primary" id="start-export">
                                     <span class="dashicons dashicons-download"></span> Export Data
                                 </button>
-                                <button class="button button-secondary" id="schedule-export">
+                                <button type="button" class="button button-secondary" id="schedule-export">
                                     <span class="dashicons dashicons-clock"></span> Schedule Export
                                 </button>
                             </div>
@@ -271,10 +271,10 @@
                             </div>
 
                             <div class="tool-actions">
-                                <button class="button button-primary" id="start-import" disabled>
+                                <button type="button" class="button button-primary" id="start-import" disabled>
                                     <span class="dashicons dashicons-upload"></span> Import Data
                                 </button>
-                                <button class="button button-secondary" id="validate-import" disabled>
+                                <button type="button" class="button button-secondary" id="validate-import" disabled>
                                     <span class="dashicons dashicons-yes-alt"></span> Validate Only
                                 </button>
                             </div>
@@ -320,10 +320,10 @@
                                 </div>
                             </div>
                             <div class="tool-actions">
-                                <button class="button button-primary" id="clear-cache">
+                                <button type="button" class="button button-primary" id="clear-cache">
                                     <span class="dashicons dashicons-trash"></span> Clear Cache
                                 </button>
-                                <button class="button button-secondary" id="optimize-cache">
+                                <button type="button" class="button button-secondary" id="optimize-cache">
                                     <span class="dashicons dashicons-performance"></span> Optimize
                                 </button>
                             </div>
@@ -353,10 +353,10 @@
                                 </div>
                             </div>
                             <div class="tool-actions">
-                                <button class="button button-primary" id="optimize-database">
+                                <button type="button" class="button button-primary" id="optimize-database">
                                     <span class="dashicons dashicons-database"></span> Optimize DB
                                 </button>
-                                <button class="button button-secondary" id="cleanup-old-data">
+                                <button type="button" class="button button-secondary" id="cleanup-old-data">
                                     <span class="dashicons dashicons-trash"></span> Clean Old Data
                                 </button>
                             </div>
@@ -386,10 +386,10 @@
                                 </div>
                             </div>
                             <div class="tool-actions">
-                                <button class="button button-primary" id="archive-logs">
+                                <button type="button" class="button button-primary" id="archive-logs">
                                     <span class="dashicons dashicons-archive"></span> Archive Logs
                                 </button>
-                                <button class="button button-secondary" id="clear-old-logs">
+                                <button type="button" class="button button-secondary" id="clear-old-logs">
                                     <span class="dashicons dashicons-trash"></span> Clear Old Logs
                                 </button>
                             </div>
@@ -419,10 +419,10 @@
                                 </div>
                             </div>
                             <div class="tool-actions">
-                                <button class="button button-primary" id="system-cleanup">
+                                <button type="button" class="button button-primary" id="system-cleanup">
                                     <span class="dashicons dashicons-admin-generic"></span> Full Cleanup
                                 </button>
-                                <button class="button button-secondary" id="schedule-cleanup">
+                                <button type="button" class="button button-secondary" id="schedule-cleanup">
                                     <span class="dashicons dashicons-clock"></span> Schedule Cleanup
                                 </button>
                             </div>
@@ -446,7 +446,7 @@
                             <div class="reset-option">
                                 <h4>Reset to Defaults</h4>
                                 <p>Reset all plugin settings to their default values while preserving data.</p>
-                                <button class="button button-secondary" id="reset-settings">
+                                <button type="button" class="button button-secondary" id="reset-settings">
                                     <span class="dashicons dashicons-update"></span> Reset Settings
                                 </button>
                             </div>
@@ -454,7 +454,7 @@
                             <div class="reset-option">
                                 <h4>Restore Product Templates</h4>
                                 <p>Recreate the default product templates if they were removed or heavily modified.</p>
-                                <button class="button button-primary" id="restore-default-templates">
+                                <button type="button" class="button button-primary" id="restore-default-templates">
                                     <span class="dashicons dashicons-layout"></span> Restore Templates
                                 </button>
                                 <label>
@@ -466,7 +466,7 @@
                             <div class="reset-option">
                                 <h4>Clear All Data</h4>
                                 <p>Remove all plugin data including settings, logs, and cache. This cannot be undone.</p>
-                                <button class="button button-link-delete" id="clear-all-data">
+                                <button type="button" class="button button-link-delete" id="clear-all-data">
                                     <span class="dashicons dashicons-trash"></span> Clear All Data
                                 </button>
                             </div>
@@ -474,7 +474,7 @@
                             <div class="reset-option">
                                 <h4>Factory Reset</h4>
                                 <p>Complete plugin reset - removes all data and returns to initial state.</p>
-                                <button class="button button-link-delete" id="factory-reset">
+                                <button type="button" class="button button-link-delete" id="factory-reset">
                                     <span class="dashicons dashicons-warning"></span> Factory Reset
                                 </button>
                             </div>
@@ -488,7 +488,7 @@
                             <div class="migration-option">
                                 <h4>Export Configuration</h4>
                                 <p>Export plugin configuration for deployment to other sites.</p>
-                                <button class="button button-primary" id="export-config">
+                                <button type="button" class="button button-primary" id="export-config">
                                     <span class="dashicons dashicons-download"></span> Export Config
                                 </button>
                             </div>
@@ -497,7 +497,7 @@
                                 <h4>Clone Settings</h4>
                                 <p>Copy settings from another WordPress site running this plugin.</p>
                                 <input type="url" id="source-site-url" placeholder="https://source-site.com" class="regular-text">
-                                <button class="button button-secondary" id="clone-settings">
+                                <button type="button" class="button button-secondary" id="clone-settings">
                                     <span class="dashicons dashicons-admin-site-alt3"></span> Clone Settings
                                 </button>
                             </div>
@@ -511,7 +511,7 @@
                             <div class="optimization-option">
                                 <h4>Performance Scan</h4>
                                 <p>Analyze plugin performance and get optimization recommendations.</p>
-                                <button class="button button-primary" id="performance-scan">
+                                <button type="button" class="button button-primary" id="performance-scan">
                                     <span class="dashicons dashicons-performance"></span> Run Scan
                                 </button>
                                 <div class="scan-results hidden" id="performance-scan-results" aria-live="polite"></div>
@@ -520,7 +520,7 @@
                             <div class="optimization-option">
                                 <h4>Auto-Optimization</h4>
                                 <p>Apply recommended optimizations automatically.</p>
-                                <button class="button button-primary" id="auto-optimize">
+                                <button type="button" class="button button-primary" id="auto-optimize">
                                     <span class="dashicons dashicons-admin-generic"></span> Auto-Optimize
                                 </button>
                             </div>
@@ -542,7 +542,7 @@
                         <article class="utility-tool" aria-labelledby="utility-shortcode-title">
                             <h3 id="utility-shortcode-title"><span class="dashicons dashicons-shortcode"></span> Advanced Shortcode Generator</h3>
                             <p>Generate shortcodes with advanced parameters and preview functionality.</p>
-                            <button class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-monetizer'); ?>'">
+                            <button type="button" class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-monetizer'); ?>'">
                                 <span class="dashicons dashicons-shortcode"></span> Open Generator
                             </button>
                         </article>
@@ -551,7 +551,7 @@
                         <article class="utility-tool" aria-labelledby="utility-keyword-title">
                             <h3 id="utility-keyword-title"><span class="dashicons dashicons-tag"></span> Keyword Analyzer</h3>
                             <p>Analyze text content and get AI-powered keyword suggestions.</p>
-                            <button class="button button-primary" id="open-keyword-analyzer">
+                            <button type="button" class="button button-primary" id="open-keyword-analyzer">
                                 <span class="dashicons dashicons-tag"></span> Open Analyzer
                             </button>
                         </article>
@@ -560,7 +560,7 @@
                         <article class="utility-tool" aria-labelledby="utility-bulk-title">
                             <h3 id="utility-bulk-title"><span class="dashicons dashicons-editor-ul"></span> Bulk Operations</h3>
                             <p>Perform bulk operations on posts, keywords, and data.</p>
-                            <button class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-scanner'); ?>'">
+                            <button type="button" class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-scanner'); ?>'">
                                 <span class="dashicons dashicons-editor-ul"></span> Open Scanner
                             </button>
                         </article>
@@ -606,10 +606,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="button button-primary" id="analyze-keywords">
+                <button type="button" class="button button-primary" id="analyze-keywords">
                     <span class="dashicons dashicons-search"></span> Analyze Keywords
                 </button>
-                <button class="button button-secondary modal-close">Close</button>
+                <button type="button" class="button button-secondary modal-close">Close</button>
             </div>
         </div>
     </div>
