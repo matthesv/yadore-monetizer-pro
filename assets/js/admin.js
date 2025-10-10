@@ -1,13 +1,34 @@
-/* Yadore Monetizer Pro v3.47.30 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.47.31 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
+    const yadore_admin = (typeof window !== 'undefined' && typeof window.yadore_admin === 'object' && window.yadore_admin !== null)
+        ? window.yadore_admin
+        : {};
+
+    if (typeof window !== 'undefined') {
+        window.yadore_admin = yadore_admin;
+    }
+
+    const readString = (value, fallback = '') => {
+        if (typeof value === 'string' && value.length) {
+            return value;
+        }
+        return fallback;
+    };
+
+    const readBoolean = (value) => value === true || value === 1 || value === '1';
+
     // Global variables
     window.yadoreAdmin = {
-        version: (window.yadore_admin && window.yadore_admin.version) ? window.yadore_admin.version : '3.47.30',
-        ajax_url: yadore_admin.ajax_url,
-        nonce: yadore_admin.nonce,
-        debug: yadore_admin.debug || false,
+        version: readString(yadore_admin.version, '3.47.31'),
+        ajax_url: readString(yadore_admin.ajax_url),
+        nonce: readString(yadore_admin.nonce),
+        debug: readBoolean(yadore_admin.debug),
+        stringsCache: (yadore_admin && typeof yadore_admin.strings === 'object' && yadore_admin.strings !== null)
+            ? yadore_admin.strings
+            : {},
+        configReady: false,
         scannerState: null,
         scannerCharts: {
             keywords: null,
@@ -35,8 +56,8 @@
                 return typeof fallback === 'string' ? fallback : '';
             }
 
-            const strings = window.yadore_admin && window.yadore_admin.strings
-                ? window.yadore_admin.strings
+            const strings = (this && typeof this.stringsCache === 'object')
+                ? this.stringsCache
                 : {};
 
             if (strings && Object.prototype.hasOwnProperty.call(strings, key)) {
@@ -49,8 +70,29 @@
             return typeof fallback === 'string' ? fallback : '';
         },
 
+        validateAjaxConfig: function() {
+            const missing = [];
+            if (!this.ajax_url) {
+                missing.push('ajax_url');
+            }
+            if (!this.nonce) {
+                missing.push('nonce');
+            }
+
+            if (missing.length) {
+                console.error(`Yadore Monetizer Pro admin config is missing: ${missing.join(', ')}`);
+                return false;
+            }
+
+            return true;
+        },
+
         // Initialize all admin functionality
         init: function() {
+            this.configReady = this.validateAjaxConfig();
+            if (!this.configReady) {
+                this.error('Admin JavaScript initialized with missing AJAX configuration. Functionality may be limited.');
+            }
             this.initDashboard();
             this.initSettings();
             this.initShortcodeGenerator();
