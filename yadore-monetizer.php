@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.47.40
+Version: 3.47.41
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.47.40');
+define('YADORE_PLUGIN_VERSION', '3.47.41');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -3193,6 +3193,7 @@ HTML
                 merchant_name varchar(255),
                 placement_id varchar(190),
                 sales_amount decimal(12,2) DEFAULT 0.00,
+                currency varchar(3) DEFAULT '',
                 raw_payload longtext,
                 synced_at datetime DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (id),
@@ -3230,9 +3231,36 @@ HTML
             if (version_compare($baseline_version, '3.0', '<')) {
                 $this->create_tables();
             }
+
+            if (version_compare($baseline_version, '3.47.41', '<')) {
+                $this->ensure_click_currency_column();
+                $this->reset_click_sync_log();
+            }
         } catch (Exception $e) {
             $this->log_error('Database upgrade routine failed', $e, 'high');
         }
+    }
+
+    private function ensure_click_currency_column() {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'yadore_api_clicks';
+        if (!$this->table_exists($table)) {
+            return;
+        }
+
+        $table_safe = str_replace('`', '``', $table);
+        $column_exists = $wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM `{$table_safe}` LIKE %s", 'currency'));
+
+        if ($column_exists) {
+            return;
+        }
+
+        $wpdb->query("ALTER TABLE `{$table_safe}` ADD COLUMN `currency` varchar(3) DEFAULT '' AFTER `sales_amount`");
+    }
+
+    private function reset_click_sync_log() {
+        delete_option('yadore_click_sync_log');
     }
 
     // v2.7: Advanced helper methods
@@ -6429,7 +6457,7 @@ HTML
                 return strtoupper($matches[1]);
             }
         } elseif (is_array($value)) {
-            foreach (array('code', 'currency', 'currency_code', 'currencyCode') as $key) {
+            foreach (array('code', 'currency', 'currency_code', 'currencyCode', 'revenue_currency', 'revenueCurrency', 'payout_currency', 'payoutCurrency') as $key) {
                 if (isset($value[$key])) {
                     $code = $this->normalize_currency_code($value[$key], '');
                     if ($code !== '') {
@@ -8474,11 +8502,89 @@ HTML
                 $placement_id = sanitize_text_field((string) $click['placementId']);
             }
 
-            $sales_amount = 0.0;
-            if (isset($click['sales']) && is_numeric($click['sales'])) {
-                $sales_amount = (float) $click['sales'];
+            $revenue_amount = 0.0;
+            $amount_candidates = array('revenue', 'amount', 'value', 'commission', 'saleAmount', 'sale_amount', 'sales');
+            foreach ($amount_candidates as $amount_key) {
+                if (!isset($click[$amount_key])) {
+                    continue;
+                }
+
+                $value = $click[$amount_key];
+                if (is_array($value)) {
+                    foreach (array('amount', 'value', 'revenue', 'total') as $nested_key) {
+                        if (isset($value[$nested_key])) {
+                            $value = $value[$nested_key];
+                            break;
+                        }
+                    }
+                }
+
+                if (is_numeric($value)) {
+                    $revenue_amount = (float) $value;
+                    break;
+                }
+
+                if (is_string($value)) {
+                    $normalized_string = str_replace(',', '.', $value);
+                    $numeric = preg_replace('/[^0-9\.\-]/', '', $normalized_string);
+                    if ($numeric !== '' && is_numeric($numeric)) {
+                        $revenue_amount = (float) $numeric;
+                        break;
+                    }
+                }
             }
 
+            $currency_sources = array($click);
+            if (isset($click['revenue']) && is_array($click['revenue'])) {
+                $currency_sources[] = $click['revenue'];
+            }
+            if (isset($click['meta']) && is_array($click['meta'])) {
+                $currency_sources[] = $click['meta'];
+            }
+            if (!empty($merchant)) {
+                $currency_sources[] = $merchant;
+            }
+            if (isset($payload['currency'])) {
+                $currency_sources[] = array('currency' => $payload['currency']);
+            }
+            if (isset($payload['meta']) && is_array($payload['meta'])) {
+                $currency_sources[] = $payload['meta'];
+            }
+
+            $currency_code = '';
+            foreach ($currency_sources as $source) {
+                if (is_array($source)) {
+                    foreach (array('currency', 'currency_code', 'currencyCode', 'revenue_currency', 'revenueCurrency', 'payout_currency', 'payoutCurrency', 'code') as $key) {
+                        if (!isset($source[$key])) {
+                            continue;
+                        }
+
+                        $candidate = $this->normalize_currency_code($source[$key], '');
+                        if ($candidate !== '') {
+                            $currency_code = $candidate;
+                            break 2;
+                        }
+                    }
+
+                    $candidate = $this->normalize_currency_code($source, '');
+                    if ($candidate !== '') {
+                        $currency_code = $candidate;
+                        break;
+                    }
+                } else {
+                    $candidate = $this->normalize_currency_code($source, '');
+                    if ($candidate !== '') {
+                        $currency_code = $candidate;
+                        break;
+                    }
+                }
+            }
+
+            if ($currency_code !== 'EUR') {
+                continue;
+            }
+
+            $sales_amount = $revenue_amount;
             $raw_payload = function_exists('wp_json_encode') ? wp_json_encode($click) : json_encode($click);
 
             $wpdb->insert(
@@ -8491,10 +8597,11 @@ HTML
                     'merchant_name' => $merchant_name,
                     'placement_id' => $placement_id,
                     'sales_amount' => $sales_amount,
+                    'currency' => $currency_code,
                     'raw_payload' => $raw_payload,
                     'synced_at' => gmdate('Y-m-d H:i:s'),
                 ),
-                array('%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s')
+                array('%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s')
             );
 
             $event_payload = array(
@@ -8503,13 +8610,17 @@ HTML
                 'market' => $market,
                 'merchant_id' => $merchant_id,
                 'merchant_name' => $merchant_name,
-                'sales' => $sales_amount,
+                'amount' => $revenue_amount,
+                'revenue' => $revenue_amount,
+                'sales' => $revenue_amount,
+                'currency' => $currency_code,
+                'currency_code' => $currency_code,
             );
 
             $wpdb->insert(
                 $analytics_table,
                 array(
-                    'event_type' => 'product_click',
+                    'event_type' => 'conversion',
                     'event_data' => function_exists('wp_json_encode') ? wp_json_encode($event_payload) : json_encode($event_payload),
                     'post_id' => 0,
                     'user_id' => 0,
@@ -10303,7 +10414,7 @@ HTML
             'yadore_api_logs' => array('id', 'api_type', 'endpoint_url', 'request_method', 'request_headers', 'request_body', 'response_code', 'response_headers', 'response_body', 'response_time_ms', 'success', 'error_message', 'post_id', 'user_id', 'ip_address', 'user_agent', 'created_at'),
             'yadore_error_logs' => array('id', 'error_type', 'error_message', 'error_code', 'stack_trace', 'context_data', 'post_id', 'user_id', 'ip_address', 'user_agent', 'request_uri', 'severity', 'resolved', 'resolution_notes', 'created_at', 'resolved_at'),
             'yadore_analytics' => array('id', 'event_type', 'event_data', 'post_id', 'user_id', 'session_id', 'ip_address', 'user_agent', 'created_at'),
-            'yadore_api_clicks' => array('id', 'click_id', 'clicked_at', 'market', 'merchant_id', 'merchant_name', 'placement_id', 'sales_amount', 'raw_payload', 'synced_at'),
+            'yadore_api_clicks' => array('id', 'click_id', 'clicked_at', 'market', 'merchant_id', 'merchant_name', 'placement_id', 'sales_amount', 'currency', 'raw_payload', 'synced_at'),
         );
 
         $details = array();
