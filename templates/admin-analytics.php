@@ -1,5 +1,7 @@
 <div class="wrap yadore-admin-wrap">
     <?php
+    require_once __DIR__ . '/partials/admin-analytics-translations.php';
+
     $analytics_actions = array(
         array(
             'label' => esc_html__('Live-Daten aktualisieren', 'yadore-monetizer'),
@@ -59,16 +61,16 @@
         <!-- Analytics Overview -->
         <div class="yadore-card">
             <div class="card-header">
-                <h2><span class="dashicons dashicons-dashboard"></span> Analytics Overview</h2>
+                <h2><span class="dashicons dashicons-dashboard"></span> <?php echo esc_html(yadore_get_analytics_text('analytics_overview_title')); ?></h2>
                 <div class="card-actions">
                     <select id="analytics-period">
-                        <option value="7">Last 7 Days</option>
-                        <option value="30" selected>Last 30 Days</option>
-                        <option value="90">Last 90 Days</option>
-                        <option value="365">Last Year</option>
+                        <option value="7"><?php echo esc_html(yadore_get_analytics_text('analytics_period_7')); ?></option>
+                        <option value="30" selected><?php echo esc_html(yadore_get_analytics_text('analytics_period_30')); ?></option>
+                        <option value="90"><?php echo esc_html(yadore_get_analytics_text('analytics_period_90')); ?></option>
+                        <option value="365"><?php echo esc_html(yadore_get_analytics_text('analytics_period_365')); ?></option>
                     </select>
                     <button class="button button-secondary" id="refresh-analytics">
-                        <span class="dashicons dashicons-update"></span> Refresh Data
+                        <span class="dashicons dashicons-update"></span> <?php echo esc_html(yadore_get_analytics_text('analytics_refresh')); ?>
                     </button>
                 </div>
             </div>
@@ -77,43 +79,43 @@
                     <div class="yadore-card-grid summary-stats">
                         <div class="stat-card stat-compact">
                             <div class="stat-header">
-                                <h3>Product Views</h3>
+                                <h3><?php echo esc_html(yadore_get_analytics_text('analytics_views_title')); ?></h3>
                                 <span class="stat-trend positive" id="views-trend">+15.3%</span>
                             </div>
-                            <div class="stat-number" id="total-product-views">Loading...</div>
-                            <div class="stat-subtitle">Total product impressions</div>
+                            <div class="stat-number" id="total-product-views"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></div>
+                            <div class="stat-subtitle"><?php echo esc_html(yadore_get_analytics_text('analytics_views_subtitle')); ?></div>
                         </div>
 
                         <div class="stat-card stat-compact">
                             <div class="stat-header">
-                                <h3>Overlay Displays</h3>
+                                <h3><?php echo esc_html(yadore_get_analytics_text('analytics_overlays_title')); ?></h3>
                                 <span class="stat-trend positive" id="overlays-trend">+8.7%</span>
                             </div>
-                            <div class="stat-number" id="total-overlays">Loading...</div>
-                            <div class="stat-subtitle">Overlay activations</div>
+                            <div class="stat-number" id="total-overlays"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></div>
+                            <div class="stat-subtitle"><?php echo esc_html(yadore_get_analytics_text('analytics_overlays_subtitle')); ?></div>
                         </div>
 
                         <div class="stat-card stat-compact">
                             <div class="stat-header">
-                                <h3>Click-Through Rate</h3>
+                                <h3><?php echo esc_html(yadore_get_analytics_text('analytics_ctr_title')); ?></h3>
                                 <span class="stat-trend negative" id="ctr-trend">-2.1%</span>
                             </div>
-                            <div class="stat-number" id="average-ctr">Loading...</div>
-                            <div class="stat-subtitle">Average CTR</div>
+                            <div class="stat-number" id="average-ctr"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></div>
+                            <div class="stat-subtitle"><?php echo esc_html(yadore_get_analytics_text('analytics_ctr_subtitle')); ?></div>
                         </div>
 
                         <div class="stat-card stat-compact">
                             <div class="stat-header">
-                                <h3>AI Analysis</h3>
+                                <h3><?php echo esc_html(yadore_get_analytics_text('analytics_ai_title')); ?></h3>
                                 <span class="stat-trend positive" id="ai-trend">+24.5%</span>
                             </div>
-                            <div class="stat-number" id="ai-analyses">Loading...</div>
-                            <div class="stat-subtitle">Content analyzed</div>
+                            <div class="stat-number" id="ai-analyses"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></div>
+                            <div class="stat-subtitle"><?php echo esc_html(yadore_get_analytics_text('analytics_ai_subtitle')); ?></div>
                         </div>
                     </div>
 
                     <div class="performance-chart">
-                        <h3>Performance Over Time</h3>
+                        <h3><?php echo esc_html(yadore_get_analytics_text('analytics_performance_title')); ?></h3>
                         <canvas id="performance-chart" width="800" height="300"></canvas>
                     </div>
                 </div>
@@ -125,30 +127,30 @@
             <!-- Traffic Analysis -->
             <div class="yadore-card">
                 <div class="card-header">
-                    <h2><span class="dashicons dashicons-visibility"></span> Traffic Analysis</h2>
+                    <h2><span class="dashicons dashicons-visibility"></span> <?php echo esc_html(yadore_get_analytics_text('traffic_analysis_title')); ?></h2>
                 </div>
                 <div class="card-content">
                     <div class="traffic-metrics">
                         <div class="metric-row">
-                            <span class="metric-label">Daily Average Visitors:</span>
-                            <span class="metric-value" id="daily-visitors">Loading...</span>
+                            <span class="metric-label"><?php echo esc_html(yadore_get_analytics_text('traffic_metric_daily_visitors')); ?></span>
+                            <span class="metric-value" id="daily-visitors"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label">Product Page Views:</span>
-                            <span class="metric-value" id="product-pages">Loading...</span>
+                            <span class="metric-label"><?php echo esc_html(yadore_get_analytics_text('traffic_metric_product_views')); ?></span>
+                            <span class="metric-value" id="product-pages"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label">Bounce Rate:</span>
-                            <span class="metric-value" id="bounce-rate">Loading...</span>
+                            <span class="metric-label"><?php echo esc_html(yadore_get_analytics_text('traffic_metric_bounce_rate')); ?></span>
+                            <span class="metric-value" id="bounce-rate"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label">Session Duration:</span>
-                            <span class="metric-value" id="session-duration">Loading...</span>
+                            <span class="metric-label"><?php echo esc_html(yadore_get_analytics_text('traffic_metric_session_duration')); ?></span>
+                            <span class="metric-value" id="session-duration"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
                         </div>
                     </div>
 
                     <div class="traffic-chart">
-                        <h4>Daily Traffic</h4>
+                        <h4><?php echo esc_html(yadore_get_analytics_text('traffic_chart_title')); ?></h4>
                         <canvas id="traffic-chart" width="400" height="200"></canvas>
                     </div>
                 </div>
@@ -157,7 +159,7 @@
             <!-- Conversion Metrics -->
             <div class="yadore-card">
                 <div class="card-header">
-                    <h2><span class="dashicons dashicons-chart-pie"></span> Conversion Metrics</h2>
+                    <h2><span class="dashicons dashicons-chart-pie"></span> <?php echo esc_html(yadore_get_analytics_text('conversion_metrics_title')); ?></h2>
                 </div>
                 <div class="card-content">
                     <div class="conversion-stats">
@@ -165,8 +167,8 @@
                             <div class="funnel-step">
                                 <div class="step-number">1</div>
                                 <div class="step-content">
-                                    <h4>Page Views</h4>
-                                    <span class="step-count" id="funnel-views">Loading...</span>
+                                    <h4><?php echo esc_html(yadore_get_analytics_text('conversion_step_page_views')); ?></h4>
+                                    <span class="step-count" id="funnel-views"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
                                 </div>
                                 <div class="step-rate">100%</div>
                             </div>
@@ -174,28 +176,28 @@
                             <div class="funnel-step">
                                 <div class="step-number">2</div>
                                 <div class="step-content">
-                                    <h4>Product Displays</h4>
-                                    <span class="step-count" id="funnel-displays">Loading...</span>
+                                    <h4><?php echo esc_html(yadore_get_analytics_text('conversion_step_displays')); ?></h4>
+                                    <span class="step-count" id="funnel-displays"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
                                 </div>
-                                <div class="step-rate" id="display-rate">Loading...</div>
+                                <div class="step-rate" id="display-rate"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></div>
                             </div>
 
                             <div class="funnel-step">
                                 <div class="step-number">3</div>
                                 <div class="step-content">
-                                    <h4>Product Clicks</h4>
-                                    <span class="step-count" id="funnel-clicks">Loading...</span>
+                                    <h4><?php echo esc_html(yadore_get_analytics_text('conversion_step_clicks')); ?></h4>
+                                    <span class="step-count" id="funnel-clicks"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
                                 </div>
-                                <div class="step-rate" id="click-rate">Loading...</div>
+                                <div class="step-rate" id="click-rate"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></div>
                             </div>
 
                             <div class="funnel-step">
                                 <div class="step-number">4</div>
                                 <div class="step-content">
-                                    <h4>Conversions</h4>
-                                    <span class="step-count" id="funnel-conversions">Loading...</span>
+                                    <h4><?php echo esc_html(yadore_get_analytics_text('conversion_step_conversions')); ?></h4>
+                                    <span class="step-count" id="funnel-conversions"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
                                 </div>
-                                <div class="step-rate" id="conversion-rate">Loading...</div>
+                                <div class="step-rate" id="conversion-rate"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></div>
                             </div>
                         </div>
                     </div>
@@ -206,13 +208,13 @@
         <!-- Top Performing Content -->
         <div class="yadore-card">
             <div class="card-header">
-                <h2><span class="dashicons dashicons-star-filled"></span> Top Performing Content</h2>
+                <h2><span class="dashicons dashicons-star-filled"></span> <?php echo esc_html(yadore_get_analytics_text('top_content_title')); ?></h2>
                 <div class="card-actions">
                     <select id="performance-metric">
-                        <option value="views">Most Viewed</option>
-                        <option value="clicks">Most Clicked</option>
-                        <option value="ctr">Highest CTR</option>
-                        <option value="revenue">Highest Revenue</option>
+                        <option value="views"><?php echo esc_html(yadore_get_analytics_text('metric_option_views')); ?></option>
+                        <option value="clicks"><?php echo esc_html(yadore_get_analytics_text('metric_option_clicks')); ?></option>
+                        <option value="ctr"><?php echo esc_html(yadore_get_analytics_text('metric_option_ctr')); ?></option>
+                        <option value="revenue"><?php echo esc_html(yadore_get_analytics_text('metric_option_revenue')); ?></option>
                     </select>
                 </div>
             </div>
@@ -221,18 +223,18 @@
                     <table class="wp-list-table widefat fixed striped">
                         <thead>
                             <tr>
-                                <th scope="col" class="col-title">Post Title</th>
-                                <th scope="col" class="col-keyword">Keywords</th>
-                                <th scope="col" class="col-metric">Views</th>
-                                <th scope="col" class="col-metric">Clicks</th>
-                                <th scope="col" class="col-metric">CTR</th>
-                                <th scope="col" class="col-metric">Est. Revenue</th>
+                                <th scope="col" class="col-title"><?php echo esc_html(yadore_get_analytics_text('table_header_post_title')); ?></th>
+                                <th scope="col" class="col-keyword"><?php echo esc_html(yadore_get_analytics_text('table_header_keywords')); ?></th>
+                                <th scope="col" class="col-metric"><?php echo esc_html(yadore_get_analytics_text('table_header_views')); ?></th>
+                                <th scope="col" class="col-metric"><?php echo esc_html(yadore_get_analytics_text('table_header_clicks')); ?></th>
+                                <th scope="col" class="col-metric"><?php echo esc_html(yadore_get_analytics_text('table_header_ctr')); ?></th>
+                                <th scope="col" class="col-metric"><?php echo esc_html(yadore_get_analytics_text('table_header_revenue')); ?></th>
                             </tr>
                         </thead>
                         <tbody id="performance-table-body">
                             <tr>
                                 <td colspan="6" class="loading-row">
-                                    <span class="dashicons dashicons-update-alt spinning"></span> Loading performance data...
+                                    <span class="dashicons dashicons-update-alt spinning"></span> <?php echo esc_html(yadore_get_analytics_text('loading_performance_data')); ?>
                                 </td>
                             </tr>
                         </tbody>
@@ -244,54 +246,54 @@
         <!-- Keyword Analytics -->
         <div class="yadore-card">
             <div class="card-header">
-                <h2><span class="dashicons dashicons-tag"></span> Keyword Analytics</h2>
+                <h2><span class="dashicons dashicons-tag"></span> <?php echo esc_html(yadore_get_analytics_text('keyword_analytics_title')); ?></h2>
             </div>
             <div class="card-content">
                 <div class="keyword-analytics">
                     <div class="keyword-overview">
                         <div class="yadore-card-grid keyword-stats">
                             <div class="keyword-stat">
-                                <span class="stat-number" id="total-keywords">Loading...</span>
-                                <span class="stat-label">Total Keywords</span>
+                                <span class="stat-number" id="total-keywords"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
+                                <span class="stat-label"><?php echo esc_html(yadore_get_analytics_text('keyword_stat_total')); ?></span>
                             </div>
                             <div class="keyword-stat">
-                                <span class="stat-number" id="active-keywords">Loading...</span>
-                                <span class="stat-label">Active Keywords</span>
+                                <span class="stat-number" id="active-keywords"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
+                                <span class="stat-label"><?php echo esc_html(yadore_get_analytics_text('keyword_stat_active')); ?></span>
                             </div>
                             <div class="keyword-stat">
-                                <span class="stat-number" id="ai-keywords">Loading...</span>
-                                <span class="stat-label">AI Detected</span>
+                                <span class="stat-number" id="ai-keywords"><?php echo esc_html(yadore_get_analytics_text('loading')); ?></span>
+                                <span class="stat-label"><?php echo esc_html(yadore_get_analytics_text('keyword_stat_ai')); ?></span>
                             </div>
                         </div>
 
                         <div class="keyword-cloud">
-                            <h4>Most Popular Keywords</h4>
-                            <p class="cloud-subtitle">Track which search terms attract the most engagement at a glance.</p>
+                            <h4><?php echo esc_html(yadore_get_analytics_text('keyword_cloud_title')); ?></h4>
+                            <p class="cloud-subtitle"><?php echo esc_html(yadore_get_analytics_text('keyword_cloud_subtitle')); ?></p>
                             <div class="yadore-card-grid cloud-container" id="keyword-cloud" aria-live="polite">
                                 <div class="cloud-loading">
-                                    <span class="dashicons dashicons-update-alt spinning"></span> Generating keyword cloud...
+                                    <span class="dashicons dashicons-update-alt spinning"></span> <?php echo esc_html(yadore_get_analytics_text('keyword_cloud_loading')); ?>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="keyword-performance">
-                        <h4>Keyword Performance</h4>
+                        <h4><?php echo esc_html(yadore_get_analytics_text('keyword_performance_title')); ?></h4>
                         <table class="wp-list-table widefat fixed striped">
                             <thead>
                                 <tr>
-                                    <th scope="col" class="col-keyword">Keyword</th>
-                                    <th scope="col" class="col-metric">Usage Count</th>
-                                    <th scope="col" class="col-metric">Avg. CTR</th>
-                                    <th scope="col" class="col-metric">Total Clicks</th>
-                                    <th scope="col" class="col-metric">Confidence</th>
-                                    <th scope="col" class="col-source">Source</th>
+                                    <th scope="col" class="col-keyword"><?php echo esc_html(yadore_get_analytics_text('keyword_column_keyword')); ?></th>
+                                    <th scope="col" class="col-metric"><?php echo esc_html(yadore_get_analytics_text('keyword_column_usage')); ?></th>
+                                    <th scope="col" class="col-metric"><?php echo esc_html(yadore_get_analytics_text('keyword_column_avg_ctr')); ?></th>
+                                    <th scope="col" class="col-metric"><?php echo esc_html(yadore_get_analytics_text('keyword_column_total_clicks')); ?></th>
+                                    <th scope="col" class="col-metric"><?php echo esc_html(yadore_get_analytics_text('keyword_column_confidence')); ?></th>
+                                    <th scope="col" class="col-source"><?php echo esc_html(yadore_get_analytics_text('keyword_column_source')); ?></th>
                                 </tr>
                             </thead>
                             <tbody id="keyword-performance-body">
                                 <tr>
                                     <td colspan="6" class="loading-row">
-                                        <span class="dashicons dashicons-update-alt spinning"></span> Loading keyword data...
+                                        <span class="dashicons dashicons-update-alt spinning"></span> <?php echo esc_html(yadore_get_analytics_text('loading_keyword_data')); ?>
                                     </td>
                                 </tr>
                             </tbody>
@@ -304,34 +306,34 @@
         <!-- Revenue Analytics -->
         <div class="yadore-card">
             <div class="card-header">
-                <h2><span class="dashicons dashicons-money-alt"></span> Revenue Analytics</h2>
+                <h2><span class="dashicons dashicons-money-alt"></span> <?php echo esc_html(yadore_get_analytics_text('revenue_analytics_title')); ?></h2>
             </div>
             <div class="card-content">
                 <div class="revenue-analytics">
                     <div class="revenue-summary">
                         <div class="yadore-card-grid revenue-cards">
                             <div class="revenue-card">
-                                <h4>Estimated Monthly Revenue</h4>
-                                <div class="revenue-amount" id="monthly-revenue">$0.00</div>
-                                <div class="revenue-change positive" id="revenue-change">+0%</div>
+                                <h4><?php echo esc_html(yadore_get_analytics_text('revenue_summary_title')); ?></h4>
+                                <div class="revenue-amount" id="monthly-revenue"><?php echo esc_html(yadore_get_analytics_text('revenue_amount_placeholder')); ?></div>
+                                <div class="revenue-change positive" id="revenue-change"><?php echo esc_html(yadore_get_analytics_text('revenue_change_placeholder')); ?></div>
                             </div>
 
                             <div class="revenue-card">
-                                <h4>Revenue Per Click</h4>
-                                <div class="revenue-amount" id="rpc">$0.00</div>
-                                <div class="revenue-subtitle">Average RPC</div>
+                                <h4><?php echo esc_html(yadore_get_analytics_text('revenue_rpc_title')); ?></h4>
+                                <div class="revenue-amount" id="rpc"><?php echo esc_html(yadore_get_analytics_text('revenue_amount_placeholder')); ?></div>
+                                <div class="revenue-subtitle"><?php echo esc_html(yadore_get_analytics_text('revenue_rpc_subtitle')); ?></div>
                             </div>
 
                             <div class="revenue-card">
-                                <h4>Top Earning Category</h4>
-                                <div class="revenue-category" id="top-category">Loading...</div>
-                                <div class="revenue-subtitle" id="category-earnings">$0.00 earned</div>
+                                <h4><?php echo esc_html(yadore_get_analytics_text('revenue_top_category_title')); ?></h4>
+                                <div class="revenue-category" id="top-category"><?php echo esc_html(yadore_get_analytics_text('revenue_category_placeholder')); ?></div>
+                                <div class="revenue-subtitle" id="category-earnings"><?php echo esc_html(yadore_get_analytics_text('revenue_category_earnings_placeholder')); ?></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="revenue-chart">
-                        <h4>Revenue Trend</h4>
+                        <h4><?php echo esc_html(yadore_get_analytics_text('revenue_trend_title')); ?></h4>
                         <canvas id="revenue-chart" width="600" height="250"></canvas>
                     </div>
                 </div>

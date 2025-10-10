@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.48.3 - 2025-11-10
+- Übersetzte die gesamte Analytics-Verwaltungsseite inklusive Karten, Tabellen, Auswahlfelder und Ladehinweise mit automatischer Umschaltung zwischen Deutsch und Englisch je nach Locale.
+- Hinterlegte eine wiederverwendbare Übersetzungstabelle für die Analytics-Texte, damit alle Admin-Statuselemente sauber lokalisiert werden.
+- Aktualisierte die Plugin-Metadaten und Dokumentation auf Version 3.48.3.
+
 # 3.48.2 - 2025-11-09
 - Übersetzte die gesamte Tools-Seite ins Deutsche und stellte alle Texte über Internationalisierungsfunktionen bereit.
 - Regenerierte die Sprachvorlage, damit alle neuen deutschen Zeichenketten in `yadore-monetizer.pot` verfügbar sind.
