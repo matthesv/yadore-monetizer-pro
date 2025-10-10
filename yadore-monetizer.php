@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.6
+Version: 3.48.7
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.6');
+define('YADORE_PLUGIN_VERSION', '3.48.7');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -27,7 +27,9 @@ class YadoreMonetizer {
 
     public const PREVIOUS_DEFAULT_AI_PROMPT = 'Analyze the title and content to find the most relevant purchase-ready product keyword (brand + model when available). Provide up to three alternate keywords for backup searches and return JSON that matches the schema (keyword, alternate_keywords, confidence, rationale).';
 
-    public const DEFAULT_AI_PROMPT = "You are an affiliate marketing assistant. Analyze the provided blog post details and return JSON matching the schema (keyword, alternate_keywords, confidence, rationale).\n\nTitle: {title}\n\nContent:\n{content}\n\nFocus on purchase-ready product keywords (brand + model when available) and provide up to three alternates for backup searches.";
+    public const LAST_DEFAULT_AI_PROMPT = "You are an affiliate marketing assistant. Analyze the provided blog post details and return JSON matching the schema (keyword, alternate_keywords, confidence, rationale).\n\nTitle: {title}\n\nContent:\n{content}\n\nFocus on purchase-ready product keywords (brand + model when available) and provide up to three alternates for backup searches.";
+
+    public const DEFAULT_AI_PROMPT = "You are an affiliate marketing assistant. Analyze the provided blog post details and return JSON matching the schema (keyword, alternate_keywords, confidence, rationale).\n\nTitle: {title}\n\nContent:\n{content}\n\nAlways return a tangible, purchase-ready product keyword (brand + model when available) and provide up to three alternates for backup searches. If the content primarily describes a place or location (park, beach, city, venue, attraction, etc.), infer the most relevant physical product someone would need or buy for that setting before selecting the keyword.";
 
     public const LEGACY_AI_PROMPT = 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.';
 
@@ -554,9 +556,12 @@ class YadoreMonetizer {
             }
 
             $legacy_prompt = self::LEGACY_AI_PROMPT;
-            $previous_default_prompt = self::PREVIOUS_DEFAULT_AI_PROMPT;
+            $previous_prompts = array(
+                self::PREVIOUS_DEFAULT_AI_PROMPT,
+                self::LAST_DEFAULT_AI_PROMPT,
+            );
             $stored_prompt = get_option('yadore_ai_prompt', '');
-            if ($stored_prompt === $legacy_prompt || $stored_prompt === $previous_default_prompt) {
+            if ($stored_prompt === $legacy_prompt || in_array($stored_prompt, $previous_prompts, true)) {
                 update_option('yadore_ai_prompt', self::DEFAULT_AI_PROMPT);
             }
 

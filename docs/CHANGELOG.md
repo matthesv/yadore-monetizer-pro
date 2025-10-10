@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.48.7 - 2025-11-14
+- Enhanced the default AI prompt so Gemini always derives tangible, purchase-ready products and converts location-only content into appropriate gear recommendations.
+- Bumped plugin metadata, documentation, and language catalog versions to 3.48.7.
+
 # 3.48.6 - 2025-11-13
 - Moved the automation controls into a dedicated configuration tab that follows the admin design system navigation pattern.
 - Bumped plugin metadata, documentation, and language catalog versions to 3.48.6.
