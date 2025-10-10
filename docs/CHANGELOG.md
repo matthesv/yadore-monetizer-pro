@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.40 - 2025-11-06
+- Added currency code propagation to the analytics report so the admin dashboard knows when Euro-only revenue summaries are available.
+- Filtered analytics revenue aggregations to ignore non-EUR conversions and return the Euro code for consistent formatting in charts and metrics.
+- Updated the admin dashboard formatter to respect dynamic currency codes (defaulting to EUR) and refreshed bundle metadata to 3.47.40.
+
 ## 3.47.39 - 2025-11-05
 - Harmonized the market list loader with the status checker by merging `markets` and wrapped `data` responses before caching, normalizing ISO codes, and preferring API names.
 - Purged the cached `yadore_available_markets` list on deploy so the refreshed normalization can populate immediately after upgrades.
