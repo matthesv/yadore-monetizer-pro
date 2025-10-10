@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.47.38
+Version: 3.47.39
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.47.38');
+define('YADORE_PLUGIN_VERSION', '3.47.39');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -538,6 +538,7 @@ class YadoreMonetizer {
             $stored_version = (string) get_option('yadore_plugin_version', '');
             if ($stored_version !== YADORE_PLUGIN_VERSION) {
                 $this->maybe_upgrade_database($stored_version);
+                delete_transient('yadore_available_markets');
                 update_option('yadore_plugin_version', YADORE_PLUGIN_VERSION);
             }
 
@@ -1209,23 +1210,83 @@ HTML
         if ($status >= 200 && $status < 300 && is_array($decoded)) {
             $markets = array();
 
+            $collections = array();
+
             if (isset($decoded['markets']) && is_array($decoded['markets'])) {
-                foreach ($decoded['markets'] as $market) {
+                $collections[] = $decoded['markets'];
+            }
+
+            if (isset($decoded['data']) && is_array($decoded['data'])) {
+                $data_section = $decoded['data'];
+
+                if (isset($data_section['markets']) && is_array($data_section['markets'])) {
+                    $collections[] = $data_section['markets'];
+                } else {
+                    $collections[] = $data_section;
+                }
+            }
+
+            if (empty($collections)) {
+                $collections[] = $decoded;
+            }
+
+            foreach ($collections as $collection) {
+                if (!is_array($collection)) {
+                    continue;
+                }
+
+                foreach ($collection as $market) {
                     if (!is_array($market)) {
                         continue;
                     }
 
-                    $id = isset($market['id']) ? $this->sanitize_market($market['id']) : '';
-                    if ($id === '') {
-                        continue;
+                    $market_candidates = array();
+                    if (isset($market[0]) && is_array($market[0])) {
+                        $market_candidates = $market;
+                    } else {
+                        $market_candidates[] = $market;
                     }
 
-                    $label = isset($market['name']) ? sanitize_text_field((string) $market['name']) : strtoupper($id);
-                    $markets[$id] = $label;
+                    foreach ($market_candidates as $market_candidate) {
+                        if (!is_array($market_candidate)) {
+                            continue;
+                        }
+
+                        $raw_id = '';
+                        $possible_keys = array('id', 'code', 'market', 'country_code', 'countryCode', 'country', 'iso_code', 'isoCode', 'iso');
+
+                        foreach ($possible_keys as $possible_key) {
+                            if (isset($market_candidate[$possible_key])) {
+                                $raw_id = $this->sanitize_market($market_candidate[$possible_key]);
+                            }
+
+                            if ($raw_id !== '') {
+                                break;
+                            }
+                        }
+
+                        if ($raw_id === '') {
+                            continue;
+                        }
+
+                        $label = '';
+                        if (isset($market_candidate['name'])) {
+                            $label = sanitize_text_field((string) $market_candidate['name']);
+                        } elseif (isset($market_candidate['label'])) {
+                            $label = sanitize_text_field((string) $market_candidate['label']);
+                        }
+
+                        if ($label === '') {
+                            $label = $raw_id;
+                        }
+
+                        $markets[$raw_id] = $label;
+                    }
                 }
             }
 
             if (!empty($markets)) {
+                ksort($markets);
                 set_transient($transient_key, $markets, DAY_IN_SECONDS);
                 return $markets;
             }
