@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.48.6 - 2025-11-13
+- Moved the automation controls into a dedicated configuration tab that follows the admin design system navigation pattern.
+- Bumped plugin metadata, documentation, and language catalog versions to 3.48.6.
+
 # 3.48.5 - 2025-11-12
 - Replaced compiled German binaries with PHP-based catalogues and runtime translation filters.
 - Added a manual translation bootstrapper and ignored generated `.mo` assets from version control.
