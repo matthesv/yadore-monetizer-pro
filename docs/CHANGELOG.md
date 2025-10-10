@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.38 - 2025-11-04
+- Rebuilt the Tools screen cards with unified headers, descriptions, and call-to-action footers so export, import, maintenance, and utility workflows stay consistent from 360px through desktop breakpoints.
+- Refactored the configuration sections onto shared tool-option components, aligning reset, migration, and optimization actions with tokenized spacing while keeping inputs full-width on touch devices.
+- Bumped the plugin metadata and bundled admin asset banners to 3.47.38 to capture the responsive Tools layout overhaul.
+
 ## 3.47.37 - 2025-11-03
 - Broadened the admin hook detection so the tools assets initialize on every `yadore-tools` screen variant and continue to wire AJAX actions.
 
