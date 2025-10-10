@@ -404,6 +404,62 @@
                             </footer>
                         </article>
 
+                        <!-- Yadore Reports -->
+                        <article class="tool-section tool-section--maintenance" aria-labelledby="maintenance-optimizer-title">
+                            <header class="tool-section__header">
+                                <span class="tool-section__icon dashicons dashicons-chart-line" aria-hidden="true"></span>
+                                <div class="tool-section__titles">
+                                    <h3 id="maintenance-optimizer-title">Yadore Reports</h3>
+                                    <p class="tool-section__description">Trigger a manual sync of the Yadore optimizer report to refresh analytics data on demand.</p>
+                                </div>
+                            </header>
+                            <div class="tool-section__body">
+                                <dl class="tool-metrics">
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Last Run</dt>
+                                        <dd class="tool-metric__value" id="optimizer-last-run">—</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Match Rate</dt>
+                                        <dd class="tool-metric__value" id="optimizer-match-rate">—</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Dates Processed</dt>
+                                        <dd class="tool-metric__value" id="optimizer-dates-processed">—</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Errors</dt>
+                                        <dd class="tool-metric__value" id="optimizer-errors">—</dd>
+                                    </div>
+                                </dl>
+                                <div class="tool-option-group">
+                                    <label for="optimizer-days">Days to sync</label>
+                                    <select id="optimizer-days">
+                                        <option value="1">Last day</option>
+                                        <option value="3">Last 3 days</option>
+                                        <option value="7" selected>Last 7 days</option>
+                                        <option value="14">Last 14 days</option>
+                                        <option value="30">Last 30 days</option>
+                                    </select>
+
+                                    <label for="optimizer-start-date">Start date (optional)</label>
+                                    <input type="date" id="optimizer-start-date">
+                                    <p class="description">Leave the start date empty to begin with yesterday.</p>
+                                </div>
+                            </div>
+                            <footer class="tool-section__footer tool-actions">
+                                <button type="button" class="button button-primary" id="run-optimizer-sync">
+                                    <span class="dashicons dashicons-update"></span> Sync Reports
+                                </button>
+                                <button type="button" class="button button-secondary" id="refresh-optimizer-sync">
+                                    <span class="dashicons dashicons-update-alt"></span> Refresh Status
+                                </button>
+                            </footer>
+                            <div class="tool-section__status" id="optimizer-sync-status">
+                                <div id="optimizer-sync-result" class="hidden" aria-live="polite"></div>
+                            </div>
+                        </article>
+
                         <!-- System Cleanup -->
                         <article class="tool-section tool-section--maintenance" aria-labelledby="maintenance-cleanup-title">
                             <header class="tool-section__header">

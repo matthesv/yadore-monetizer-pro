@@ -2873,6 +2873,8 @@
             bindToolAction('#cleanup-old-data', () => this.cleanupOldData());
             bindToolAction('#archive-logs', () => this.archiveLogs());
             bindToolAction('#clear-old-logs', () => this.clearOldLogs());
+            bindToolAction('#run-optimizer-sync', () => this.runOptimizerSync());
+            bindToolAction('#refresh-optimizer-sync', () => this.loadToolStats());
             bindToolAction('#system-cleanup', () => this.systemCleanup());
             bindToolAction('#schedule-cleanup', () => this.scheduleCleanup());
             bindToolAction('#reset-settings', () => this.resetSettings());
@@ -3668,6 +3670,107 @@
             });
         },
 
+        runOptimizerSync: function() {
+            const button = $('#run-optimizer-sync');
+            const originalHtml = button.html();
+            const statusBox = $('#optimizer-sync-result');
+            const days = parseInt($('#optimizer-days').val(), 10) || 7;
+            const startDate = ($('#optimizer-start-date').val() || '').trim();
+
+            const runningMessage = this.getString('optimizer_sync_running', 'Running optimizer sync...');
+            button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Syncing...');
+            statusBox.removeClass('hidden').html(`<p><span class="dashicons dashicons-update-alt spinning"></span> ${this.escapeHtml(runningMessage)}</p>`);
+
+            $.post(this.ajax_url, {
+                action: 'yadore_run_optimizer_sync',
+                nonce: this.nonce,
+                days,
+                start_date: startDate
+            }).done((response) => {
+                if (response && response.success) {
+                    const payload = response.data || {};
+                    const message = payload.message || this.getString('optimizer_sync_success', 'Optimizer sync completed.');
+                    const overview = payload.overview || {};
+                    this.updateOptimizerStatus(overview, message, true);
+                    alert(message);
+                } else {
+                    const message = response?.data || this.getString('optimizer_sync_failed', 'Optimizer sync failed.');
+                    this.updateOptimizerStatus({}, message, true);
+                    alert(message);
+                }
+            }).fail((xhr) => {
+                const message = xhr?.responseJSON?.data || this.getString('optimizer_sync_failed', 'Optimizer sync failed.');
+                this.updateOptimizerStatus({}, message, true);
+                alert(message);
+            }).always(() => {
+                button.prop('disabled', false).html(originalHtml);
+                this.loadToolStats();
+            });
+        },
+
+        resetOptimizerStatus: function(message = '') {
+            $('#optimizer-last-run').text('—');
+            $('#optimizer-match-rate').text('—');
+            $('#optimizer-dates-processed').text('—');
+            $('#optimizer-errors').text('—');
+
+            const statusBox = $('#optimizer-sync-result');
+            if (message) {
+                statusBox.removeClass('hidden').html(`<p>${this.escapeHtml(message)}</p>`);
+            } else {
+                statusBox.addClass('hidden').empty();
+            }
+        },
+
+        updateOptimizerStatus: function(overview = {}, message = '', forceMessage = false) {
+            const lastRun = (overview && (overview.last_run_human || overview.last_run)) || '';
+            $('#optimizer-last-run').text(lastRun ? lastRun : '—');
+
+            const rateRaw = overview?.match_rate;
+            let rateText = '0%';
+            if (typeof rateRaw === 'number' && !Number.isNaN(rateRaw)) {
+                const decimals = Math.abs(rateRaw) < 1 && rateRaw !== 0 ? 2 : 0;
+                rateText = `${rateRaw.toFixed(decimals)}%`;
+            } else if (typeof rateRaw === 'string' && rateRaw.trim() !== '') {
+                const trimmed = rateRaw.trim();
+                rateText = trimmed.endsWith('%') ? trimmed : `${trimmed}%`;
+            }
+            $('#optimizer-match-rate').text(rateText);
+
+            const hasProcessed = overview && Object.prototype.hasOwnProperty.call(overview, 'dates_processed');
+            const hasErrors = overview && Object.prototype.hasOwnProperty.call(overview, 'errors');
+            $('#optimizer-dates-processed').text(
+                hasProcessed ? this.formatNumber(Number(overview.dates_processed) || 0) : '—'
+            );
+            $('#optimizer-errors').text(
+                hasErrors ? this.formatNumber(Number(overview.errors) || 0) : '—'
+            );
+
+            const statusBox = $('#optimizer-sync-result');
+            const processedDates = Array.isArray(overview?.processed_dates) ? overview.processed_dates : [];
+            const parts = [];
+
+            const finalMessage = message || overview?.message || '';
+            if (finalMessage) {
+                parts.push(`<p>${this.escapeHtml(finalMessage)}</p>`);
+            }
+
+            if (processedDates.length) {
+                const label = this.getString('optimizer_processed_dates', 'Processed dates');
+                const renderedDates = processedDates.map((date) => this.escapeHtml(String(date))).join(', ');
+                parts.push(`<p><strong>${this.escapeHtml(label)}:</strong> ${renderedDates}</p>`);
+            }
+
+            if (parts.length) {
+                statusBox.removeClass('hidden').html(parts.join(''));
+            } else if (forceMessage) {
+                const fallback = message || this.getString('optimizer_sync_success', 'Optimizer sync completed.');
+                statusBox.removeClass('hidden').html(`<p>${this.escapeHtml(fallback)}</p>`);
+            } else {
+                statusBox.addClass('hidden').empty();
+            }
+        },
+
         base64ToBlob: function(base64, mimeType = 'application/octet-stream') {
             try {
                 const binary = atob(base64);
@@ -3752,7 +3855,8 @@
                     '#cache-size', '#cache-entries', '#cache-hit-rate',
                     '#db-size', '#db-records', '#db-overhead',
                     '#temp-files', '#orphaned-data', '#space-used',
-                    '#api-log-count', '#error-log-count', '#total-log-size'
+                    '#api-log-count', '#error-log-count', '#total-log-size',
+                    '#optimizer-last-run', '#optimizer-match-rate', '#optimizer-dates-processed', '#optimizer-errors'
                 ];
 
                 selectors.forEach((selector) => {
@@ -3761,6 +3865,7 @@
 
                 const message = this.getString('tool_stats_unavailable', 'Tool statistics are temporarily unavailable.');
                 this.updateScheduleStatus('', message);
+                this.resetOptimizerStatus(this.getString('optimizer_status_unavailable', 'Optimizer status unavailable.'));
             };
 
             $.ajax({
@@ -3778,6 +3883,7 @@
                     const database = data.database || {};
                     const cleanup = data.cleanup || {};
                     const logs = data.logs || {};
+                    const optimizer = data.optimizer || {};
 
                     const hitRateRaw = cache.hit_rate;
                     let hitRateText;
@@ -3806,6 +3912,8 @@
                     $('#api-log-count').text(this.formatNumber(logs.api_logs));
                     $('#error-log-count').text(this.formatNumber(logs.error_logs));
                     $('#total-log-size').text(logs.total_size || '0 KB');
+
+                    this.updateOptimizerStatus(optimizer);
 
                     const schedule = data.schedule || {};
                     const nextRun = typeof schedule.next_run_human === 'string' ? schedule.next_run_human : '';

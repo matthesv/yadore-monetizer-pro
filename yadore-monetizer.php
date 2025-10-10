@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.0
+Version: 3.48.1
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.0');
+define('YADORE_PLUGIN_VERSION', '3.48.1');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -103,6 +103,7 @@ class YadoreMonetizer {
             add_action('wp_ajax_yadore_export_config', array($this, 'ajax_export_config'));
             add_action('wp_ajax_yadore_clone_settings', array($this, 'ajax_clone_settings'));
             add_action('wp_ajax_yadore_auto_optimize', array($this, 'ajax_auto_optimize'));
+            add_action('wp_ajax_yadore_run_optimizer_sync', array($this, 'ajax_run_optimizer_sync'));
             add_action('wp_ajax_yadore_analyze_keywords', array($this, 'ajax_analyze_keywords'));
 
             // Content integration
@@ -2351,6 +2352,7 @@ HTML
                 'logs' => $this->get_log_statistics(),
                 'cleanup' => $this->get_cleanup_statistics(),
                 'schedule' => $this->get_schedule_overview(),
+                'optimizer' => $this->get_optimizer_sync_overview(),
             );
 
             wp_send_json_success($stats);
@@ -2920,6 +2922,50 @@ HTML
             ));
         } catch (Exception $e) {
             $this->log_error('Auto optimization failed', $e);
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function ajax_run_optimizer_sync() {
+        try {
+            check_ajax_referer('yadore_admin_nonce', 'nonce');
+
+            if (!current_user_can('manage_options')) {
+                throw new Exception(__('Insufficient permissions', 'yadore-monetizer'));
+            }
+
+            $days = isset($_POST['days']) ? (int) $_POST['days'] : 7;
+            $days = max(1, min(30, $days));
+
+            $start_date = null;
+            if (isset($_POST['start_date'])) {
+                $raw_start = sanitize_text_field(wp_unslash((string) $_POST['start_date']));
+                if ($raw_start !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw_start)) {
+                    try {
+                        $start = new \DateTimeImmutable($raw_start, new \DateTimeZone('UTC'));
+                        $start_date = $start->format('Y-m-d');
+                    } catch (Exception $date_error) {
+                        // Invalid start date is handled gracefully below.
+                    }
+                }
+            }
+
+            $summary = $this->execute_optimizer_sync($days, $start_date, 'manual');
+            $overview = $this->get_optimizer_sync_overview();
+
+            $message = isset($summary['message']) && $summary['message'] !== ''
+                ? $summary['message']
+                : ($summary['errors'] > 0
+                    ? __('Optimizer sync completed with warnings. Check the debug log for details.', 'yadore-monetizer')
+                    : __('Optimizer sync completed successfully.', 'yadore-monetizer'));
+
+            wp_send_json_success(array(
+                'message' => $message,
+                'summary' => $summary,
+                'overview' => $overview,
+            ));
+        } catch (Exception $e) {
+            $this->log_error('Manual optimizer sync failed', $e, 'warning');
             wp_send_json_error($e->getMessage());
         }
     }
@@ -8765,37 +8811,68 @@ HTML
         return $new_records;
     }
 
-    public function run_daily_yadore_match_sync() {
+    private function execute_optimizer_sync($days = 7, $start_date = null, $context = 'cron') {
+        $days = max(1, min(30, (int) $days));
+
         $summary = array(
+            'context' => $context,
+            'requested_days' => $days,
+            'start_date' => '',
+            'processed_dates' => array(),
             'dates_processed' => 0,
             'clicks' => array('processed' => 0, 'inserted' => 0, 'updated' => 0, 'skipped' => 0),
             'conversions' => array('processed' => 0, 'inserted' => 0, 'updated' => 0, 'skipped' => 0),
             'matches' => array('processed' => 0, 'matched' => 0, 'created' => 0, 'updated' => 0, 'click_id' => 0, 'statistical' => 0),
             'errors' => 0,
             'match_rate' => 0.0,
+            'message' => '',
         );
 
         $api_key = $this->sanitize_api_key(get_option('yadore_api_key', ''));
         if ($api_key === '') {
             $summary['errors']++;
+            $summary['message'] = __('Yadore API key is missing. Configure the integration before running the sync.', 'yadore-monetizer');
             $this->log('Skipping optimizer sync because no Yadore API key is configured', 'warning');
             $this->persist_optimizer_sync_summary($summary);
-            return;
+            return $summary;
         }
 
         $market_setting = $this->sanitize_market(get_option('yadore_market', ''));
         $market_param = $market_setting !== '' ? strtolower($market_setting) : '';
 
+        $utc = new \DateTimeZone('UTC');
         try {
-            $utc = new \DateTimeZone('UTC');
-            $today = new \DateTime('now', $utc);
-            $today->setTime(0, 0, 0);
+            if ($start_date !== null) {
+                $base_date = new \DateTimeImmutable($start_date, $utc);
+            } else {
+                $base_date = new \DateTimeImmutable('now', $utc);
+                $base_date = $base_date->modify('-1 day');
+            }
+        } catch (Exception $e) {
+            $summary['errors']++;
+            $summary['message'] = __('Invalid start date provided. Using the previous day instead.', 'yadore-monetizer');
+            $this->log_error('Invalid start date for optimizer sync', $e, 'warning');
+            $base_date = new \DateTimeImmutable('now', $utc);
+            $base_date = $base_date->modify('-1 day');
+        }
 
-            for ($offset = 1; $offset <= 7; $offset++) {
-                $target = clone $today;
-                $target->modify(sprintf('-%d day', $offset));
+        if (!$base_date instanceof \DateTimeImmutable) {
+            $base_date = new \DateTimeImmutable('now', $utc);
+            $base_date = $base_date->modify('-1 day');
+        }
+
+        $base_date = $base_date->setTime(0, 0, 0);
+        $summary['start_date'] = $base_date->format('Y-m-d');
+
+        try {
+            for ($offset = 0; $offset < $days; $offset++) {
+                $target = $base_date->modify(sprintf('-%d day', $offset));
+                if (!$target instanceof \DateTimeImmutable) {
+                    continue;
+                }
+
                 $date_string = $target->format('Y-m-d');
-
+                $summary['processed_dates'][] = $date_string;
                 $summary['dates_processed']++;
 
                 $report_response = $this->fetch_optimizer_report_for_date('/v2/report/detail', $date_string, $api_key, $market_param);
@@ -8824,6 +8901,9 @@ HTML
             }
         } catch (Exception $e) {
             $summary['errors']++;
+            if ($summary['message'] === '') {
+                $summary['message'] = __('Optimizer sync failed unexpectedly. See the error logs for details.', 'yadore-monetizer');
+            }
             $this->log_error('Daily Yadore optimizer sync failed', $e, 'high');
         }
 
@@ -8833,11 +8913,22 @@ HTML
             $summary['match_rate'] = 0.0;
         }
 
+        if ($summary['message'] === '') {
+            if ($summary['errors'] > 0) {
+                $summary['message'] = __('Optimizer sync completed with warnings. Review the logs for more information.', 'yadore-monetizer');
+            } elseif ($summary['dates_processed'] === 0) {
+                $summary['message'] = __('No dates were processed during the optimizer sync.', 'yadore-monetizer');
+            } else {
+                $summary['message'] = __('Optimizer sync completed successfully.', 'yadore-monetizer');
+            }
+        }
+
         $this->persist_optimizer_sync_summary($summary);
 
         $this->log(
             sprintf(
-                'Yadore optimizer sync processed %d days with %d/%d matches (%.2f%%) and %d errors',
+                'Yadore optimizer sync (%s) processed %d days with %d/%d matches (%.2f%%) and %d errors',
+                strtoupper($context),
                 $summary['dates_processed'],
                 $summary['matches']['matched'],
                 $summary['matches']['processed'],
@@ -8846,6 +8937,12 @@ HTML
             ),
             $summary['errors'] > 0 ? 'warning' : 'info'
         );
+
+        return $summary;
+    }
+
+    public function run_daily_yadore_match_sync() {
+        $this->execute_optimizer_sync(7, null, 'cron');
     }
 
     private function fetch_optimizer_report_for_date($path, $date_string, $api_key, $market) {
@@ -9527,6 +9624,72 @@ HTML
 
         update_option('yadore_optimizer_sync_history', $history, false);
         update_option('yadore_optimizer_last_sync', $summary_with_time, false);
+    }
+
+    private function get_optimizer_sync_overview() {
+        $last = get_option('yadore_optimizer_last_sync', array());
+        if (!is_array($last)) {
+            $last = array();
+        }
+
+        $timestamp = 0;
+        $raw_timestamp = isset($last['timestamp']) ? (string) $last['timestamp'] : '';
+        if ($raw_timestamp !== '') {
+            try {
+                $dt = new \DateTimeImmutable($raw_timestamp, new \DateTimeZone('UTC'));
+                $timestamp = $dt->getTimestamp();
+            } catch (Exception $e) {
+                $timestamp = strtotime($raw_timestamp);
+            }
+        }
+
+        $processed_dates = array();
+        if (!empty($last['processed_dates']) && is_array($last['processed_dates'])) {
+            foreach ($last['processed_dates'] as $date) {
+                $candidate = sanitize_text_field((string) $date);
+                if ($candidate !== '') {
+                    $processed_dates[] = $candidate;
+                }
+            }
+        }
+
+        $history = get_option('yadore_optimizer_sync_history', array());
+        if (!is_array($history)) {
+            $history = array();
+        }
+
+        $history_slice = array_slice($history, -5);
+        $history_summary = array();
+        foreach ($history_slice as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+
+            $history_timestamp = isset($entry['timestamp']) ? (string) $entry['timestamp'] : '';
+            $history_summary[] = array(
+                'timestamp' => $history_timestamp,
+                'dates_processed' => isset($entry['dates_processed']) ? (int) $entry['dates_processed'] : 0,
+                'match_rate' => isset($entry['match_rate']) ? (float) $entry['match_rate'] : 0.0,
+                'errors' => isset($entry['errors']) ? (int) $entry['errors'] : 0,
+            );
+        }
+
+        return array(
+            'last_run' => $raw_timestamp,
+            'last_run_timestamp' => $timestamp,
+            'last_run_human' => $timestamp ? $this->format_timestamp_for_display($timestamp) : '',
+            'match_rate' => isset($last['match_rate']) ? (float) $last['match_rate'] : 0.0,
+            'dates_processed' => isset($last['dates_processed']) ? (int) $last['dates_processed'] : 0,
+            'errors' => isset($last['errors']) ? (int) $last['errors'] : 0,
+            'clicks' => isset($last['clicks']) && is_array($last['clicks']) ? $last['clicks'] : array(),
+            'conversions' => isset($last['conversions']) && is_array($last['conversions']) ? $last['conversions'] : array(),
+            'matches' => isset($last['matches']) && is_array($last['matches']) ? $last['matches'] : array(),
+            'message' => isset($last['message']) ? (string) $last['message'] : '',
+            'processed_dates' => $processed_dates,
+            'requested_days' => isset($last['requested_days']) ? (int) $last['requested_days'] : 0,
+            'context' => isset($last['context']) ? (string) $last['context'] : 'cron',
+            'history' => $history_summary,
+        );
     }
 
     private function accumulate_optimizer_counts($base, $increment) {
