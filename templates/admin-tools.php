@@ -132,13 +132,15 @@
             <div class="card-content">
                 <div class="yadore-card-grid tools-grid">
                     <!-- Export Tools -->
-                    <section class="tool-section" id="tools-export" aria-labelledby="tools-export-title" role="region">
-                        <div class="tool-header">
-                            <h3 id="tools-export-title"><span class="dashicons dashicons-download"></span> Export Data</h3>
-                        </div>
-                        <div class="tool-content">
-                            <p>Export your plugin data for backup or migration purposes.</p>
-
+                    <article class="tool-section" id="tools-export" aria-labelledby="tools-export-title" role="region">
+                        <header class="tool-section__header">
+                            <span class="tool-section__icon dashicons dashicons-download" aria-hidden="true"></span>
+                            <div class="tool-section__titles">
+                                <h3 id="tools-export-title">Export Data</h3>
+                                <p class="tool-section__description">Export your plugin data for backup or migration purposes.</p>
+                            </div>
+                        </header>
+                        <div class="tool-section__body">
                             <div class="export-options yadore-card-grid" data-variant="compact">
                                 <div class="option-group">
                                     <h4>Data Types</h4>
@@ -192,16 +194,16 @@
                                     <p class="description">Schedule recurring exports with the selected cadence.</p>
                                 </div>
                             </div>
-
-                            <div class="tool-actions">
-                                <button type="button" class="button button-primary" id="start-export">
-                                    <span class="dashicons dashicons-download"></span> Export Data
-                                </button>
-                                <button type="button" class="button button-secondary" id="schedule-export">
-                                    <span class="dashicons dashicons-clock"></span> Schedule Export
-                                </button>
-                            </div>
-
+                        </div>
+                        <footer class="tool-section__footer tool-actions">
+                            <button type="button" class="button button-primary" id="start-export">
+                                <span class="dashicons dashicons-download"></span> Export Data
+                            </button>
+                            <button type="button" class="button button-secondary" id="schedule-export">
+                                <span class="dashicons dashicons-clock"></span> Schedule Export
+                            </button>
+                        </footer>
+                        <div class="tool-section__status">
                             <div class="export-results hidden" id="export-results" aria-live="polite">
                                 <div class="export-progress">
                                     <div class="progress-bar">
@@ -210,19 +212,20 @@
                                     <div class="progress-text" id="export-status">Preparing export...</div>
                                 </div>
                             </div>
-
                             <div class="export-schedule-status" id="export-schedule-status" aria-live="polite"></div>
                         </div>
-                    </section>
+                    </article>
 
                     <!-- Import Tools -->
-                    <section class="tool-section" id="tools-import" aria-labelledby="tools-import-title" role="region">
-                        <div class="tool-header">
-                            <h3 id="tools-import-title"><span class="dashicons dashicons-upload"></span> Import Data</h3>
-                        </div>
-                        <div class="tool-content">
-                            <p>Import data from backup files or other sources.</p>
-
+                    <article class="tool-section" id="tools-import" aria-labelledby="tools-import-title" role="region">
+                        <header class="tool-section__header">
+                            <span class="tool-section__icon dashicons dashicons-upload" aria-hidden="true"></span>
+                            <div class="tool-section__titles">
+                                <h3 id="tools-import-title">Import Data</h3>
+                                <p class="tool-section__description">Import data from backup files or other sources.</p>
+                            </div>
+                        </header>
+                        <div class="tool-section__body">
                             <div class="import-options yadore-card-grid" data-variant="compact">
                                 <div class="file-upload">
                                     <?php $upload_instructions_id = 'import-upload-instructions'; ?>
@@ -269,21 +272,21 @@
                                     <label><input type="checkbox" name="import_options[]" value="backup" checked> Create backup before import</label>
                                 </div>
                             </div>
-
-                            <div class="tool-actions">
-                                <button type="button" class="button button-primary" id="start-import" disabled>
-                                    <span class="dashicons dashicons-upload"></span> Import Data
-                                </button>
-                                <button type="button" class="button button-secondary" id="validate-import" disabled>
-                                    <span class="dashicons dashicons-yes-alt"></span> Validate Only
-                                </button>
-                            </div>
-
+                        </div>
+                        <footer class="tool-section__footer tool-actions">
+                            <button type="button" class="button button-primary" id="start-import" disabled>
+                                <span class="dashicons dashicons-upload"></span> Import Data
+                            </button>
+                            <button type="button" class="button button-secondary" id="validate-import" disabled>
+                                <span class="dashicons dashicons-yes-alt"></span> Validate Only
+                            </button>
+                        </footer>
+                        <div class="tool-section__status">
                             <div class="import-results hidden" id="import-results" aria-live="polite">
                                 <div class="import-summary"></div>
                             </div>
                         </div>
-                    </section>
+                    </article>
                 </div>
             </div>
         </div>
@@ -297,135 +300,143 @@
                 <div class="maintenance-tools">
                     <div class="yadore-card-grid maintenance-grid">
                         <!-- Cache Management -->
-                        <article class="maintenance-tool" aria-labelledby="maintenance-cache-title">
-                            <div class="tool-icon">
-                                <span class="dashicons dashicons-performance"></span>
-                            </div>
-                            <div class="tool-info">
-                                <h3 id="maintenance-cache-title">Cache Management</h3>
-                                <p>Manage plugin cache and optimize performance</p>
-                                <div class="cache-stats">
-                                    <div class="cache-stat">
-                                        <span class="stat-label">Cache Size:</span>
-                                        <span class="stat-value" id="cache-size">Loading...</span>
-                                    </div>
-                                    <div class="cache-stat">
-                                        <span class="stat-label">Cache Entries:</span>
-                                        <span class="stat-value" id="cache-entries">Loading...</span>
-                                    </div>
-                                    <div class="cache-stat">
-                                        <span class="stat-label">Hit Rate:</span>
-                                        <span class="stat-value" id="cache-hit-rate">Loading...</span>
-                                    </div>
+                        <article class="tool-section tool-section--maintenance" aria-labelledby="maintenance-cache-title">
+                            <header class="tool-section__header">
+                                <span class="tool-section__icon dashicons dashicons-performance" aria-hidden="true"></span>
+                                <div class="tool-section__titles">
+                                    <h3 id="maintenance-cache-title">Cache Management</h3>
+                                    <p class="tool-section__description">Manage plugin cache and optimize performance.</p>
                                 </div>
+                            </header>
+                            <div class="tool-section__body">
+                                <dl class="tool-metrics">
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Cache Size</dt>
+                                        <dd class="tool-metric__value" id="cache-size">Loading...</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Cache Entries</dt>
+                                        <dd class="tool-metric__value" id="cache-entries">Loading...</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Hit Rate</dt>
+                                        <dd class="tool-metric__value" id="cache-hit-rate">Loading...</dd>
+                                    </div>
+                                </dl>
                             </div>
-                            <div class="tool-actions">
+                            <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="clear-cache">
                                     <span class="dashicons dashicons-trash"></span> Clear Cache
                                 </button>
                                 <button type="button" class="button button-secondary" id="optimize-cache">
                                     <span class="dashicons dashicons-performance"></span> Optimize
                                 </button>
-                            </div>
+                            </footer>
                         </article>
 
                         <!-- Database Maintenance -->
-                        <article class="maintenance-tool" aria-labelledby="maintenance-database-title">
-                            <div class="tool-icon">
-                                <span class="dashicons dashicons-database"></span>
-                            </div>
-                            <div class="tool-info">
-                                <h3 id="maintenance-database-title">Database Maintenance</h3>
-                                <p>Optimize database tables and clean up old data</p>
-                                <div class="db-stats">
-                                    <div class="db-stat">
-                                        <span class="stat-label">Table Size:</span>
-                                        <span class="stat-value" id="db-size">Loading...</span>
-                                    </div>
-                                    <div class="db-stat">
-                                        <span class="stat-label">Total Records:</span>
-                                        <span class="stat-value" id="db-records">Loading...</span>
-                                    </div>
-                                    <div class="db-stat">
-                                        <span class="stat-label">Overhead:</span>
-                                        <span class="stat-value" id="db-overhead">Loading...</span>
-                                    </div>
+                        <article class="tool-section tool-section--maintenance" aria-labelledby="maintenance-database-title">
+                            <header class="tool-section__header">
+                                <span class="tool-section__icon dashicons dashicons-database" aria-hidden="true"></span>
+                                <div class="tool-section__titles">
+                                    <h3 id="maintenance-database-title">Database Maintenance</h3>
+                                    <p class="tool-section__description">Optimize database tables and clean up old data.</p>
                                 </div>
+                            </header>
+                            <div class="tool-section__body">
+                                <dl class="tool-metrics">
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Table Size</dt>
+                                        <dd class="tool-metric__value" id="db-size">Loading...</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Total Records</dt>
+                                        <dd class="tool-metric__value" id="db-records">Loading...</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Overhead</dt>
+                                        <dd class="tool-metric__value" id="db-overhead">Loading...</dd>
+                                    </div>
+                                </dl>
                             </div>
-                            <div class="tool-actions">
+                            <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="optimize-database">
                                     <span class="dashicons dashicons-database"></span> Optimize DB
                                 </button>
                                 <button type="button" class="button button-secondary" id="cleanup-old-data">
                                     <span class="dashicons dashicons-trash"></span> Clean Old Data
                                 </button>
-                            </div>
+                            </footer>
                         </article>
 
                         <!-- Log Management -->
-                        <article class="maintenance-tool" aria-labelledby="maintenance-logs-title">
-                            <div class="tool-icon">
-                                <span class="dashicons dashicons-media-text"></span>
-                            </div>
-                            <div class="tool-info">
-                                <h3 id="maintenance-logs-title">Log Management</h3>
-                                <p>Manage API logs, error logs, and debug information</p>
-                                <div class="log-stats">
-                                    <div class="log-stat">
-                                        <span class="stat-label">API Logs:</span>
-                                        <span class="stat-value" id="api-log-count">Loading...</span>
-                                    </div>
-                                    <div class="log-stat">
-                                        <span class="stat-label">Error Logs:</span>
-                                        <span class="stat-value" id="error-log-count">Loading...</span>
-                                    </div>
-                                    <div class="log-stat">
-                                        <span class="stat-label">Log Size:</span>
-                                        <span class="stat-value" id="total-log-size">Loading...</span>
-                                    </div>
+                        <article class="tool-section tool-section--maintenance" aria-labelledby="maintenance-logs-title">
+                            <header class="tool-section__header">
+                                <span class="tool-section__icon dashicons dashicons-media-text" aria-hidden="true"></span>
+                                <div class="tool-section__titles">
+                                    <h3 id="maintenance-logs-title">Log Management</h3>
+                                    <p class="tool-section__description">Manage API logs, error logs, and debug information.</p>
                                 </div>
+                            </header>
+                            <div class="tool-section__body">
+                                <dl class="tool-metrics">
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">API Logs</dt>
+                                        <dd class="tool-metric__value" id="api-log-count">Loading...</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Error Logs</dt>
+                                        <dd class="tool-metric__value" id="error-log-count">Loading...</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Log Size</dt>
+                                        <dd class="tool-metric__value" id="total-log-size">Loading...</dd>
+                                    </div>
+                                </dl>
                             </div>
-                            <div class="tool-actions">
+                            <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="archive-logs">
                                     <span class="dashicons dashicons-archive"></span> Archive Logs
                                 </button>
                                 <button type="button" class="button button-secondary" id="clear-old-logs">
                                     <span class="dashicons dashicons-trash"></span> Clear Old Logs
                                 </button>
-                            </div>
+                            </footer>
                         </article>
 
                         <!-- System Cleanup -->
-                        <article class="maintenance-tool" aria-labelledby="maintenance-cleanup-title">
-                            <div class="tool-icon">
-                                <span class="dashicons dashicons-admin-generic"></span>
-                            </div>
-                            <div class="tool-info">
-                                <h3 id="maintenance-cleanup-title">System Cleanup</h3>
-                                <p>Clean temporary files and optimize system performance</p>
-                                <div class="cleanup-stats">
-                                    <div class="cleanup-stat">
-                                        <span class="stat-label">Temp Files:</span>
-                                        <span class="stat-value" id="temp-files">Loading...</span>
-                                    </div>
-                                    <div class="cleanup-stat">
-                                        <span class="stat-label">Orphaned Data:</span>
-                                        <span class="stat-value" id="orphaned-data">Loading...</span>
-                                    </div>
-                                    <div class="cleanup-stat">
-                                        <span class="stat-label">Space Used:</span>
-                                        <span class="stat-value" id="space-used">Loading...</span>
-                                    </div>
+                        <article class="tool-section tool-section--maintenance" aria-labelledby="maintenance-cleanup-title">
+                            <header class="tool-section__header">
+                                <span class="tool-section__icon dashicons dashicons-admin-generic" aria-hidden="true"></span>
+                                <div class="tool-section__titles">
+                                    <h3 id="maintenance-cleanup-title">System Cleanup</h3>
+                                    <p class="tool-section__description">Clean temporary files and optimize system performance.</p>
                                 </div>
+                            </header>
+                            <div class="tool-section__body">
+                                <dl class="tool-metrics">
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Temp Files</dt>
+                                        <dd class="tool-metric__value" id="temp-files">Loading...</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Orphaned Data</dt>
+                                        <dd class="tool-metric__value" id="orphaned-data">Loading...</dd>
+                                    </div>
+                                    <div class="tool-metric">
+                                        <dt class="tool-metric__label">Space Used</dt>
+                                        <dd class="tool-metric__value" id="space-used">Loading...</dd>
+                                    </div>
+                                </dl>
                             </div>
-                            <div class="tool-actions">
+                            <footer class="tool-section__footer tool-actions">
                                 <button type="button" class="button button-primary" id="system-cleanup">
                                     <span class="dashicons dashicons-admin-generic"></span> Full Cleanup
                                 </button>
                                 <button type="button" class="button button-secondary" id="schedule-cleanup">
                                     <span class="dashicons dashicons-clock"></span> Schedule Cleanup
                                 </button>
-                            </div>
+                            </footer>
                         </article>
                     </div>
                 </div>
@@ -440,89 +451,147 @@
             <div class="card-content">
                 <div class="config-tools">
                     <!-- Reset Tools -->
-                    <section class="config-section" aria-labelledby="config-reset-title" role="region">
-                        <h3 id="config-reset-title"><span class="dashicons dashicons-update"></span> Reset Options</h3>
-                        <div class="reset-options">
-                            <div class="reset-option">
-                                <h4>Reset to Defaults</h4>
-                                <p>Reset all plugin settings to their default values while preserving data.</p>
-                                <button type="button" class="button button-secondary" id="reset-settings">
-                                    <span class="dashicons dashicons-update"></span> Reset Settings
-                                </button>
+                    <section class="config-section tool-section" aria-labelledby="config-reset-title" role="region">
+                        <header class="tool-section__header">
+                            <span class="tool-section__icon dashicons dashicons-update" aria-hidden="true"></span>
+                            <div class="tool-section__titles">
+                                <h3 id="config-reset-title">Reset Options</h3>
+                                <p class="tool-section__description">Return to known-good defaults or clean installations without leaving the tools screen.</p>
                             </div>
+                        </header>
+                        <div class="tool-section__body">
+                            <div class="tool-option-group reset-options">
+                                <article class="tool-option reset-option">
+                                    <div class="tool-option__content">
+                                        <h4>Reset to Defaults</h4>
+                                        <p>Reset all plugin settings to their default values while preserving data.</p>
+                                    </div>
+                                    <div class="tool-option__footer">
+                                        <button type="button" class="button button-secondary" id="reset-settings">
+                                            <span class="dashicons dashicons-update"></span> Reset Settings
+                                        </button>
+                                    </div>
+                                </article>
 
-                            <div class="reset-option">
-                                <h4>Restore Product Templates</h4>
-                                <p>Recreate the default product templates if they were removed or heavily modified.</p>
-                                <button type="button" class="button button-primary" id="restore-default-templates">
-                                    <span class="dashicons dashicons-layout"></span> Restore Templates
-                                </button>
-                                <label>
-                                    <input type="checkbox" id="restore-reset-selection">
-                                    <span>Reset template selection to defaults</span>
-                                </label>
-                            </div>
+                                <article class="tool-option reset-option">
+                                    <div class="tool-option__content">
+                                        <h4>Restore Product Templates</h4>
+                                        <p>Recreate the default product templates if they were removed or heavily modified.</p>
+                                        <label>
+                                            <input type="checkbox" id="restore-reset-selection">
+                                            <span>Reset template selection to defaults</span>
+                                        </label>
+                                    </div>
+                                    <div class="tool-option__footer">
+                                        <button type="button" class="button button-primary" id="restore-default-templates">
+                                            <span class="dashicons dashicons-layout"></span> Restore Templates
+                                        </button>
+                                    </div>
+                                </article>
 
-                            <div class="reset-option">
-                                <h4>Clear All Data</h4>
-                                <p>Remove all plugin data including settings, logs, and cache. This cannot be undone.</p>
-                                <button type="button" class="button button-link-delete" id="clear-all-data">
-                                    <span class="dashicons dashicons-trash"></span> Clear All Data
-                                </button>
-                            </div>
+                                <article class="tool-option reset-option">
+                                    <div class="tool-option__content">
+                                        <h4>Clear All Data</h4>
+                                        <p>Remove all plugin data including settings, logs, and cache. This cannot be undone.</p>
+                                    </div>
+                                    <div class="tool-option__footer">
+                                        <button type="button" class="button button-link-delete" id="clear-all-data">
+                                            <span class="dashicons dashicons-trash"></span> Clear All Data
+                                        </button>
+                                    </div>
+                                </article>
 
-                            <div class="reset-option">
-                                <h4>Factory Reset</h4>
-                                <p>Complete plugin reset - removes all data and returns to initial state.</p>
-                                <button type="button" class="button button-link-delete" id="factory-reset">
-                                    <span class="dashicons dashicons-warning"></span> Factory Reset
-                                </button>
+                                <article class="tool-option reset-option">
+                                    <div class="tool-option__content">
+                                        <h4>Factory Reset</h4>
+                                        <p>Complete plugin reset - removes all data and returns to initial state.</p>
+                                    </div>
+                                    <div class="tool-option__footer">
+                                        <button type="button" class="button button-link-delete" id="factory-reset">
+                                            <span class="dashicons dashicons-warning"></span> Factory Reset
+                                        </button>
+                                    </div>
+                                </article>
                             </div>
                         </div>
                     </section>
 
                     <!-- Migration Tools -->
-                    <section class="config-section" aria-labelledby="config-migration-title" role="region">
-                        <h3 id="config-migration-title"><span class="dashicons dashicons-migrate"></span> Migration Tools</h3>
-                        <div class="migration-tools">
-                            <div class="migration-option">
-                                <h4>Export Configuration</h4>
-                                <p>Export plugin configuration for deployment to other sites.</p>
-                                <button type="button" class="button button-primary" id="export-config">
-                                    <span class="dashicons dashicons-download"></span> Export Config
-                                </button>
+                    <section class="config-section tool-section" aria-labelledby="config-migration-title" role="region">
+                        <header class="tool-section__header">
+                            <span class="tool-section__icon dashicons dashicons-migrate" aria-hidden="true"></span>
+                            <div class="tool-section__titles">
+                                <h3 id="config-migration-title">Migration Tools</h3>
+                                <p class="tool-section__description">Move configurations between environments with predictable outcomes.</p>
                             </div>
+                        </header>
+                        <div class="tool-section__body">
+                            <div class="tool-option-group migration-tools">
+                                <article class="tool-option migration-option">
+                                    <div class="tool-option__content">
+                                        <h4>Export Configuration</h4>
+                                        <p>Export plugin configuration for deployment to other sites.</p>
+                                    </div>
+                                    <div class="tool-option__footer">
+                                        <button type="button" class="button button-primary" id="export-config">
+                                            <span class="dashicons dashicons-download"></span> Export Config
+                                        </button>
+                                    </div>
+                                </article>
 
-                            <div class="migration-option">
-                                <h4>Clone Settings</h4>
-                                <p>Copy settings from another WordPress site running this plugin.</p>
-                                <input type="url" id="source-site-url" placeholder="https://source-site.com" class="regular-text">
-                                <button type="button" class="button button-secondary" id="clone-settings">
-                                    <span class="dashicons dashicons-admin-site-alt3"></span> Clone Settings
-                                </button>
+                                <article class="tool-option migration-option">
+                                    <div class="tool-option__content">
+                                        <h4>Clone Settings</h4>
+                                        <p>Copy settings from another WordPress site running this plugin.</p>
+                                        <input type="url" id="source-site-url" placeholder="https://source-site.com" class="regular-text">
+                                    </div>
+                                    <div class="tool-option__footer">
+                                        <button type="button" class="button button-secondary" id="clone-settings">
+                                            <span class="dashicons dashicons-admin-site-alt3"></span> Clone Settings
+                                        </button>
+                                    </div>
+                                </article>
                             </div>
                         </div>
                     </section>
 
                     <!-- Optimization Tools -->
-                    <section class="config-section" aria-labelledby="config-optimization-title" role="region">
-                        <h3 id="config-optimization-title"><span class="dashicons dashicons-performance"></span> Optimization Tools</h3>
-                        <div class="optimization-tools">
-                            <div class="optimization-option">
-                                <h4>Performance Scan</h4>
-                                <p>Analyze plugin performance and get optimization recommendations.</p>
-                                <button type="button" class="button button-primary" id="performance-scan">
-                                    <span class="dashicons dashicons-performance"></span> Run Scan
-                                </button>
-                                <div class="scan-results hidden" id="performance-scan-results" aria-live="polite"></div>
+                    <section class="config-section tool-section" aria-labelledby="config-optimization-title" role="region">
+                        <header class="tool-section__header">
+                            <span class="tool-section__icon dashicons dashicons-performance" aria-hidden="true"></span>
+                            <div class="tool-section__titles">
+                                <h3 id="config-optimization-title">Optimization Tools</h3>
+                                <p class="tool-section__description">Diagnose and automate performance improvements.</p>
                             </div>
+                        </header>
+                        <div class="tool-section__body">
+                            <div class="tool-option-group optimization-tools">
+                                <article class="tool-option optimization-option">
+                                    <div class="tool-option__content">
+                                        <h4>Performance Scan</h4>
+                                        <p>Analyze plugin performance and get optimization recommendations.</p>
+                                    </div>
+                                    <div class="tool-option__footer">
+                                        <button type="button" class="button button-primary" id="performance-scan">
+                                            <span class="dashicons dashicons-performance"></span> Run Scan
+                                        </button>
+                                    </div>
+                                    <div class="tool-option__status">
+                                        <div class="scan-results hidden" id="performance-scan-results" aria-live="polite"></div>
+                                    </div>
+                                </article>
 
-                            <div class="optimization-option">
-                                <h4>Auto-Optimization</h4>
-                                <p>Apply recommended optimizations automatically.</p>
-                                <button type="button" class="button button-primary" id="auto-optimize">
-                                    <span class="dashicons dashicons-admin-generic"></span> Auto-Optimize
-                                </button>
+                                <article class="tool-option optimization-option">
+                                    <div class="tool-option__content">
+                                        <h4>Auto-Optimization</h4>
+                                        <p>Apply recommended optimizations automatically.</p>
+                                    </div>
+                                    <div class="tool-option__footer">
+                                        <button type="button" class="button button-primary" id="auto-optimize">
+                                            <span class="dashicons dashicons-admin-generic"></span> Auto-Optimize
+                                        </button>
+                                    </div>
+                                </article>
                             </div>
                         </div>
                     </section>
@@ -539,30 +608,51 @@
                 <div class="utility-tools">
                     <div class="yadore-card-grid utility-grid">
                         <!-- Shortcode Generator -->
-                        <article class="utility-tool" aria-labelledby="utility-shortcode-title">
-                            <h3 id="utility-shortcode-title"><span class="dashicons dashicons-shortcode"></span> Advanced Shortcode Generator</h3>
-                            <p>Generate shortcodes with advanced parameters and preview functionality.</p>
-                            <button type="button" class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-monetizer'); ?>'">
-                                <span class="dashicons dashicons-shortcode"></span> Open Generator
-                            </button>
+                        <article class="tool-section tool-section--utility" aria-labelledby="utility-shortcode-title">
+                            <header class="tool-section__header">
+                                <span class="tool-section__icon dashicons dashicons-shortcode" aria-hidden="true"></span>
+                                <div class="tool-section__titles">
+                                    <h3 id="utility-shortcode-title">Advanced Shortcode Generator</h3>
+                                    <p class="tool-section__description">Generate shortcodes with advanced parameters and preview functionality.</p>
+                                </div>
+                            </header>
+                            <footer class="tool-section__footer tool-actions">
+                                <button type="button" class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-monetizer'); ?>'">
+                                    <span class="dashicons dashicons-shortcode"></span> Open Generator
+                                </button>
+                            </footer>
                         </article>
 
                         <!-- Keyword Analyzer -->
-                        <article class="utility-tool" aria-labelledby="utility-keyword-title">
-                            <h3 id="utility-keyword-title"><span class="dashicons dashicons-tag"></span> Keyword Analyzer</h3>
-                            <p>Analyze text content and get AI-powered keyword suggestions.</p>
-                            <button type="button" class="button button-primary" id="open-keyword-analyzer">
-                                <span class="dashicons dashicons-tag"></span> Open Analyzer
-                            </button>
+                        <article class="tool-section tool-section--utility" aria-labelledby="utility-keyword-title">
+                            <header class="tool-section__header">
+                                <span class="tool-section__icon dashicons dashicons-tag" aria-hidden="true"></span>
+                                <div class="tool-section__titles">
+                                    <h3 id="utility-keyword-title">Keyword Analyzer</h3>
+                                    <p class="tool-section__description">Analyze text content and get AI-powered keyword suggestions.</p>
+                                </div>
+                            </header>
+                            <footer class="tool-section__footer tool-actions">
+                                <button type="button" class="button button-primary" id="open-keyword-analyzer">
+                                    <span class="dashicons dashicons-tag"></span> Open Analyzer
+                                </button>
+                            </footer>
                         </article>
 
                         <!-- Bulk Operations -->
-                        <article class="utility-tool" aria-labelledby="utility-bulk-title">
-                            <h3 id="utility-bulk-title"><span class="dashicons dashicons-editor-ul"></span> Bulk Operations</h3>
-                            <p>Perform bulk operations on posts, keywords, and data.</p>
-                            <button type="button" class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-scanner'); ?>'">
-                                <span class="dashicons dashicons-editor-ul"></span> Open Scanner
-                            </button>
+                        <article class="tool-section tool-section--utility" aria-labelledby="utility-bulk-title">
+                            <header class="tool-section__header">
+                                <span class="tool-section__icon dashicons dashicons-editor-ul" aria-hidden="true"></span>
+                                <div class="tool-section__titles">
+                                    <h3 id="utility-bulk-title">Bulk Operations</h3>
+                                    <p class="tool-section__description">Perform bulk operations on posts, keywords, and data.</p>
+                                </div>
+                            </header>
+                            <footer class="tool-section__footer tool-actions">
+                                <button type="button" class="button button-primary" onclick="window.location.href='<?php echo admin_url('admin.php?page=yadore-scanner'); ?>'">
+                                    <span class="dashicons dashicons-editor-ul"></span> Open Scanner
+                                </button>
+                            </footer>
                         </article>
 
                     </div>
