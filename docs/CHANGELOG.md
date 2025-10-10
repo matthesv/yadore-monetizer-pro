@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.47.37 - 2025-11-03
+- Broadened the admin hook detection so the tools assets initialize on every `yadore-tools` screen variant and continue to wire AJAX actions.
+
 ## 3.47.36 - 2025-11-03
 - Converted the Tools cards to a responsive layout grid so action panels align in columns with consistent gaps on any screen width.
 - Replaced margin-based spacing inside each tool section with tokenized grid gaps, clipped shadows, and hover elevations that stop overlapping neighbours.

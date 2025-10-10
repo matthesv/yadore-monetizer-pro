@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.36 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.47.37 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
@@ -21,7 +21,7 @@
 
     // Global variables
     window.yadoreAdmin = {
-        version: readString(yadore_admin.version, '3.47.36'),
+        version: readString(yadore_admin.version, '3.47.37'),
         ajax_url: readString(yadore_admin.ajax_url),
         nonce: readString(yadore_admin.nonce),
         debug: readBoolean(yadore_admin.debug),
@@ -2715,7 +2715,7 @@
         // Tools functionality
         initTools: function() {
             const $toolsContainer = $('.yadore-tools-container');
-            const onToolsScreen = this.isToolsScreen || this.currentScreen === 'toplevel_page_yadore-tools';
+            const onToolsScreen = this.isToolsScreen || (typeof this.currentScreen === 'string' && this.currentScreen.includes('yadore-tools'));
 
             if (!onToolsScreen || !$toolsContainer.length) {
                 return;
