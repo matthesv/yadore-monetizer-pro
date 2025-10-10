@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.48.11 - 2025-11-18
+- Removed the decorative circle from the Recent Scan Results keyword pill to keep the label clean.
+- Bumped plugin metadata and documentation to version 3.48.11.
+
 # 3.48.10 - 2025-11-17
 - Redesigned the Recent Scan Results into compact responsive cards that halve their height and fit neatly within the container on desktop and mobile.
 - Bumped plugin assets and metadata to version 3.48.10.
