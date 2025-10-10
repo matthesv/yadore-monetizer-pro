@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.48.9 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.48.10 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
@@ -1508,20 +1508,18 @@
 
             const filter = this.scannerState.currentFilter || 'all';
             this.highlightResultsQuickFilter(filter);
-            const tbody = $('#scan-results-body');
+            const container = $('#scan-results-body');
             const tableRegion = $('.scan-results-table');
             if (tableRegion.length) {
                 tableRegion.attr('aria-busy', 'true');
             }
 
             const loadingText = readString(yadore_admin.strings?.processing, 'Loading results...');
-            tbody.html(`
-                <tr>
-                    <td colspan="6" class="loading-row">
-                        <span class="dashicons dashicons-update-alt spinning" aria-hidden="true"></span>
-                        <span>${this.escapeHtml(loadingText)}</span>
-                    </td>
-                </tr>
+            container.html(`
+                <div class="scan-results-placeholder loading-row" role="status">
+                    <span class="dashicons dashicons-update-alt spinning" aria-hidden="true"></span>
+                    <span>${this.escapeHtml(loadingText)}</span>
+                </div>
             `);
 
             $.post(this.ajax_url, {
@@ -1569,7 +1567,7 @@
         },
 
         renderScanResults: function(results) {
-            const tbody = $('#scan-results-body');
+            const container = $('#scan-results-body');
             const tableRegion = $('.scan-results-table');
             const labels = {
                 title: readString(yadore_admin.strings?.column_post_title, 'Post Title'),
@@ -1587,21 +1585,16 @@
             };
 
             const placeholder = this.escapeHtml(labels.placeholder);
-            const labelTitle = this.escapeHtml(labels.title);
             const labelKeyword = this.escapeHtml(labels.keyword);
             const labelConfidence = this.escapeHtml(labels.confidence);
-            const labelStatus = this.escapeHtml(labels.status);
             const labelDate = this.escapeHtml(labels.date);
-            const labelActions = this.escapeHtml(labels.actions);
 
             if (!Array.isArray(results) || results.length === 0) {
-                tbody.html(`
-                    <tr>
-                        <td colspan="6" class="no-results">
-                            <span class="dashicons dashicons-info" aria-hidden="true"></span>
-                            <span>${this.escapeHtml(labels.noResults)}</span>
-                        </td>
-                    </tr>
+                container.html(`
+                    <div class="scan-results-placeholder no-results" role="status">
+                        <span class="dashicons dashicons-info" aria-hidden="true"></span>
+                        <span>${this.escapeHtml(labels.noResults)}</span>
+                    </div>
                 `);
 
                 if (tableRegion.length) {
@@ -1610,7 +1603,7 @@
                 return;
             }
 
-            const rows = results.map((item) => {
+            const cards = results.map((item) => {
                 const rawTitle = readString(item.post_title, labels.placeholder);
                 const safeTitle = this.escapeHtml(rawTitle);
                 const safeTitleAttr = this.escapeHtml(readString(item.post_title, ''));
@@ -1657,44 +1650,58 @@
                     ? `<span class="result-badge result-badge--ai">${this.escapeHtml(labels.aiBadge)}</span>`
                     : '';
 
+                const srParts = [
+                    `${labels.title}: ${rawTitle}`,
+                    `${labels.status}: ${statusLabel}`,
+                    `${labels.keyword}: ${hasKeyword ? readString(item.primary_keyword, labels.placeholder) : labels.placeholder}`,
+                    `${labels.confidence}: ${confidenceDisplay}`,
+                    `${labels.date}: ${lastScanned}`
+                ];
+                const srCardLabel = this.escapeHtml(srParts.join(' • '));
+
                 return `
-                    <tr class="scan-result-row" data-status="${this.escapeHtml(statusKey)}" data-ai-used="${aiUsed ? '1' : '0'}">
-                        <td class="column-title" data-label="${labelTitle}">
-                            <div class="result-title">
+                    <article class="scan-result-card" data-status="${this.escapeHtml(statusKey)}" data-ai-used="${aiUsed ? '1' : '0'}" role="listitem" aria-label="${srCardLabel}">
+                        <header class="scan-result-card__header">
+                            <div class="scan-result-card__title">
                                 <span class="result-title__text">${safeTitle}</span>
                                 ${aiBadge}
                             </div>
-                        </td>
-                        <td class="column-keyword" data-label="${labelKeyword}">
-                            <span class="${keywordClass}">${keywordValue}</span>
-                        </td>
-                        <td class="column-confidence" data-label="${labelConfidence}">
-                            <div class="confidence-meter-wrapper">
-                                <div class="${confidenceMeterClass}" role="img" aria-label="${safeConfidenceAria}">
-                                    <span class="confidence-meter__fill" style="width: ${confidenceWidth}%;" aria-hidden="true"></span>
-                                </div>
-                                <span class="confidence-meter__value">${safeConfidenceDisplay}</span>
-                            </div>
-                        </td>
-                        <td class="column-status" data-label="${labelStatus}">
                             <span class="status-label status-${this.escapeHtml(statusKey)}">${safeStatusLabel}</span>
-                        </td>
-                        <td class="column-date" data-label="${labelDate}">
-                            <span class="result-date">${safeLastScanned}</span>
-                        </td>
-                        <td class="column-actions" data-label="${labelActions}">
+                        </header>
+                        <div class="scan-result-card__body">
+                            <div class="scan-result-card__meta">
+                                <div class="scan-result-card__meta-item">
+                                    <span class="scan-result-card__meta-label">${labelKeyword}</span>
+                                    <span class="${keywordClass}">${keywordValue}</span>
+                                </div>
+                                <div class="scan-result-card__meta-item">
+                                    <span class="scan-result-card__meta-label">${labelConfidence}</span>
+                                    <div class="confidence-meter-wrapper">
+                                        <div class="${confidenceMeterClass}" role="img" aria-label="${safeConfidenceAria}">
+                                            <span class="confidence-meter__fill" style="--confidence-width: ${confidenceWidth}%;" aria-hidden="true"></span>
+                                        </div>
+                                        <span class="confidence-meter__value">${safeConfidenceDisplay}</span>
+                                    </div>
+                                </div>
+                                <div class="scan-result-card__meta-item">
+                                    <span class="scan-result-card__meta-label">${labelDate}</span>
+                                    <span class="result-date">${safeLastScanned}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <footer class="scan-result-card__footer">
                             <button type="button" class="button button-secondary button-small scan-again scan-action-button" data-post="${item.post_id}" data-title="${safeTitleAttr}" title="${safeSrLabel}" aria-label="${safeSrLabel}">
                                 <span class="dashicons dashicons-update" aria-hidden="true"></span>
                                 <span class="screen-reader-text">${safeScanAgainText}</span>
                             </button>
-                        </td>
-                    </tr>
+                        </footer>
+                    </article>
                 `;
             }).join('');
 
-            tbody.html(rows);
+            container.html(cards);
 
-            tbody.find('.scan-again').on('click', (e) => {
+            container.find('.scan-again').on('click', (e) => {
                 e.preventDefault();
                 const $button = $(e.currentTarget);
                 if ($button.hasClass('is-loading')) {

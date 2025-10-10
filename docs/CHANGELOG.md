@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.48.10 - 2025-11-17
+- Redesigned the Recent Scan Results into compact responsive cards that halve their height and fit neatly within the container on desktop and mobile.
+- Bumped plugin assets and metadata to version 3.48.10.
+
 # 3.48.9 - 2025-11-16
 - Improved the mobile layout of scan results keywords by stacking labels and keyword chips for narrow screens.
 - Allowed keyword chips to wrap on small viewports so long product names remain fully visible.

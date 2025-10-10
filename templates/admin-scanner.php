@@ -410,26 +410,12 @@
             </div>
             <div class="card-content">
                 <div class="scan-results-table" role="region" aria-live="polite" aria-busy="false">
-                    <table class="wp-list-table widefat fixed striped scan-results-responsive">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="column-title">Post Title</th>
-                                <th scope="col" class="column-keyword">Primary Keyword</th>
-                                <th scope="col" class="column-confidence">Confidence</th>
-                                <th scope="col" class="column-status">Status</th>
-                                <th scope="col" class="column-date">Scan Date</th>
-                                <th scope="col" class="column-actions">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="scan-results-body">
-                            <tr>
-                                <td colspan="6" class="loading-row">
-                                    <span class="dashicons dashicons-update-alt spinning" aria-hidden="true"></span>
-                                    <span>Loading scan results...</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="scan-results-list" id="scan-results-body" role="list">
+                        <div class="scan-results-placeholder loading-row" role="status">
+                            <span class="dashicons dashicons-update-alt spinning" aria-hidden="true"></span>
+                            <span>Loading scan results...</span>
+                        </div>
+                    </div>
 
                     <div class="table-pagination" id="results-pagination">
                         <!-- Pagination will be inserted here -->
