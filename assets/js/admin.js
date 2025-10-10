@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.33 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.47.34 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
@@ -21,13 +21,15 @@
 
     // Global variables
     window.yadoreAdmin = {
-        version: readString(yadore_admin.version, '3.47.33'),
+        version: readString(yadore_admin.version, '3.47.34'),
         ajax_url: readString(yadore_admin.ajax_url),
         nonce: readString(yadore_admin.nonce),
         debug: readBoolean(yadore_admin.debug),
         stringsCache: (yadore_admin && typeof yadore_admin.strings === 'object' && yadore_admin.strings !== null)
             ? yadore_admin.strings
             : {},
+        currentScreen: readString(yadore_admin.screen_hook),
+        isToolsScreen: readBoolean(yadore_admin.is_tools_screen),
         configReady: false,
         scannerState: null,
         scannerCharts: {
@@ -47,6 +49,7 @@
         importFiles: [],
         importAllowedExtensions: ['json', 'csv', 'xml'],
         importAllowedFormatsLabel: 'JSON, CSV, XML',
+        toolsInitialized: false,
         clipboardFeedbackTimer: null,
         lastDashboardUpdate: null,
         statsTimestampInterval: null,
@@ -2711,12 +2714,25 @@
 
         // Tools functionality
         initTools: function() {
-            if (!$('.yadore-tools-container').length) return;
+            const $toolsContainer = $('.yadore-tools-container');
+            const onToolsScreen = this.isToolsScreen || this.currentScreen === 'toplevel_page_yadore-tools';
 
+            if (!onToolsScreen || !$toolsContainer.length) {
+                return;
+            }
+
+            if (this.toolsInitialized) {
+                return;
+            }
+
+            this.toolsInitialized = true;
             this.importFiles = [];
+
+            const ns = '.yadoreTools';
             const $uploadArea = $('#import-upload-area');
             const $fileInput = $('#import-file');
             const $uploadButton = $('#import-upload-button');
+
             if ($uploadArea.length) {
                 const rawExtensions = ($uploadArea.data('importExtensions') || '').toString();
                 const parsedExtensions = rawExtensions.split(',')
@@ -2737,167 +2753,139 @@
 
             this.setupExportDateRangeToggle();
 
-            // Export tools
-            $('#start-export').on('click', (e) => {
-                e.preventDefault();
-                this.startExport();
-            });
+            const bindToolAction = (selector, callback) => {
+                const $element = $(selector);
+                if (!$element.length) {
+                    return;
+                }
 
-            $('#schedule-export').on('click', (e) => {
-                e.preventDefault();
-                this.scheduleExport();
-            });
+                $element.off('click' + ns).on('click' + ns, (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    callback.call(this, event);
+                });
+            };
+
+            // Export tools
+            bindToolAction('#start-export', () => this.startExport());
+            bindToolAction('#schedule-export', () => this.scheduleExport());
 
             // Import tools
-            $('#start-import').on('click', (e) => {
-                e.preventDefault();
-                this.startImport('import');
-            });
-
-            $('#validate-import').on('click', (e) => {
-                e.preventDefault();
-                this.startImport('validate');
-            });
+            bindToolAction('#start-import', () => this.startImport('import'));
+            bindToolAction('#validate-import', () => this.startImport('validate'));
 
             // Maintenance tools
-            $('#clear-cache').on('click', (e) => {
-                e.preventDefault();
-                this.clearCache();
-            });
-
-            $('#optimize-cache').on('click', (e) => {
-                e.preventDefault();
-                this.optimizeCache();
-            });
-
-            $('#optimize-database').on('click', (e) => {
-                e.preventDefault();
-                this.optimizeDatabase();
-            });
-
-            $('#cleanup-old-data').on('click', (e) => {
-                e.preventDefault();
-                this.cleanupOldData();
-            });
-
-            $('#archive-logs').on('click', (e) => {
-                e.preventDefault();
-                this.archiveLogs();
-            });
-
-            $('#clear-old-logs').on('click', (e) => {
-                e.preventDefault();
-                this.clearOldLogs();
-            });
-
-            $('#system-cleanup').on('click', (e) => {
-                e.preventDefault();
-                this.systemCleanup();
-            });
-
-            $('#schedule-cleanup').on('click', (e) => {
-                e.preventDefault();
-                this.scheduleCleanup();
-            });
-
-            $('#reset-settings').on('click', (e) => {
-                e.preventDefault();
-                this.resetSettings();
-            });
-
-            $('#clear-all-data').on('click', (e) => {
-                e.preventDefault();
-                this.clearAllData();
-            });
-
-            $('#factory-reset').on('click', (e) => {
-                e.preventDefault();
-                this.factoryReset();
-            });
-
-            $('#export-config').on('click', (e) => {
-                e.preventDefault();
-                this.exportConfiguration();
-            });
-
-            $('#clone-settings').on('click', (e) => {
-                e.preventDefault();
-                this.cloneSettings();
-            });
-
-            $('#performance-scan').on('click', (e) => {
-                e.preventDefault();
-                this.runPerformanceScan();
-            });
-
-            $('#auto-optimize').on('click', (e) => {
-                e.preventDefault();
-                this.autoOptimize();
-            });
-
-            $('#restore-default-templates').on('click', (e) => {
-                e.preventDefault();
+            bindToolAction('#clear-cache', () => this.clearCache());
+            bindToolAction('#optimize-cache', () => this.optimizeCache());
+            bindToolAction('#optimize-database', () => this.optimizeDatabase());
+            bindToolAction('#cleanup-old-data', () => this.cleanupOldData());
+            bindToolAction('#archive-logs', () => this.archiveLogs());
+            bindToolAction('#clear-old-logs', () => this.clearOldLogs());
+            bindToolAction('#system-cleanup', () => this.systemCleanup());
+            bindToolAction('#schedule-cleanup', () => this.scheduleCleanup());
+            bindToolAction('#reset-settings', () => this.resetSettings());
+            bindToolAction('#clear-all-data', () => this.clearAllData());
+            bindToolAction('#factory-reset', () => this.factoryReset());
+            bindToolAction('#export-config', () => this.exportConfiguration());
+            bindToolAction('#clone-settings', () => this.cloneSettings());
+            bindToolAction('#performance-scan', () => this.runPerformanceScan());
+            bindToolAction('#auto-optimize', () => this.autoOptimize());
+            bindToolAction('#restore-default-templates', () => {
                 const resetSelection = $('#restore-reset-selection').is(':checked');
                 this.restoreDefaultTemplates(resetSelection);
             });
 
             // File upload handling
+            const triggerFileDialog = () => {
+                if (!$fileInput.length || $fileInput.prop('disabled')) {
+                    return;
+                }
+
+                $fileInput.trigger('click');
+            };
+
+            const processFiles = (files) => {
+                if (files && typeof files.length === 'number' && files.length > 0) {
+                    this.handleFileUpload(files);
+                }
+            };
+
             if ($uploadArea.length && $fileInput.length) {
-                $uploadArea.on('click', (e) => {
-                    if (e.target === $fileInput[0]) {
-                        return;
-                    }
+                $uploadArea
+                    .off('click' + ns)
+                    .on('click' + ns, (event) => {
+                        if (event.target === $fileInput[0]) {
+                            return;
+                        }
 
-                    e.preventDefault();
-                    $fileInput.trigger('click');
-                }).on('keydown', (e) => {
-                    if (e.target === $fileInput[0]) {
-                        return;
-                    }
+                        event.preventDefault();
+                        event.stopPropagation();
+                        triggerFileDialog();
+                    })
+                    .off('keydown' + ns)
+                    .on('keydown' + ns, (event) => {
+                        if (event.target === $fileInput[0]) {
+                            return;
+                        }
 
-                    const key = e.key || e.keyCode;
-                    if (key === 'Enter' || key === ' ' || key === 13 || key === 32) {
-                        e.preventDefault();
-                        $fileInput.trigger('click');
-                    }
-                }).on('dragover dragenter', (e) => {
-                    e.preventDefault();
-                    $(e.currentTarget).addClass('drag-over');
-                }).on('dragleave dragend drop', (e) => {
-                    e.preventDefault();
-                    $(e.currentTarget).removeClass('drag-over');
-                    if (e.type === 'drop') {
-                        this.handleFileUpload(e.originalEvent.dataTransfer.files);
-                    }
-                });
+                        const key = event.key || event.keyCode;
+                        if (key === 'Enter' || key === ' ' || key === 13 || key === 32) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            triggerFileDialog();
+                        }
+                    })
+                    .off('dragover' + ns + ' dragenter' + ns)
+                    .on('dragover' + ns + ' dragenter' + ns, (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        $(event.currentTarget).addClass('drag-over');
+                    })
+                    .off('dragleave' + ns + ' dragend' + ns + ' drop' + ns)
+                    .on('dragleave' + ns + ' dragend' + ns + ' drop' + ns, (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        $(event.currentTarget).removeClass('drag-over');
 
-                $fileInput.on('change', (e) => {
-                    this.handleFileUpload(e.target.files);
-                });
+                        if (event.type === 'drop') {
+                            const droppedFiles = event.originalEvent?.dataTransfer?.files;
+                            processFiles(droppedFiles);
+                        }
+                    });
+
+                $fileInput
+                    .off('change' + ns)
+                    .on('change' + ns, (event) => {
+                        processFiles(event.target?.files);
+                    });
             }
 
-            if ($uploadButton && $uploadButton.length && $fileInput.length) {
-                $uploadButton.on('click', (e) => {
-                    e.preventDefault();
-                    $fileInput.trigger('click');
-                });
+            if ($uploadButton.length && $fileInput.length) {
+                $uploadButton
+                    .off('click' + ns)
+                    .on('click' + ns, (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        triggerFileDialog();
+                    });
             }
 
             // Modal functionality
-            $('.modal-close').on('click', (event) => {
-                const $modal = $(event.currentTarget).closest('.yadore-modal');
-                this.setElementVisibility($modal, false);
-            });
+            $('.yadore-modal .modal-close')
+                .off('click' + ns)
+                .on('click' + ns, (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const $modal = $(event.currentTarget).closest('.yadore-modal');
+                    this.setElementVisibility($modal, false);
+                });
 
             // Keyword analyzer
-            $('#open-keyword-analyzer').on('click', () => {
+            bindToolAction('#open-keyword-analyzer', () => {
                 this.setElementVisibility($('#keyword-analyzer-modal'), true);
             });
 
-            $('#analyze-keywords').on('click', (e) => {
-                e.preventDefault();
-                this.analyzeKeywords();
-            });
+            bindToolAction('#analyze-keywords', () => this.analyzeKeywords());
 
             this.loadToolStats();
         },
@@ -3128,6 +3116,11 @@
 
         handleFileUpload: function(fileList) {
             const files = Array.from(fileList || []);
+
+            if (!files.length) {
+                $('#import-file').val('');
+                return;
+            }
             const allowedExtensions = Array.isArray(this.importAllowedExtensions) && this.importAllowedExtensions.length
                 ? this.importAllowedExtensions
                 : ['json', 'csv', 'xml'];

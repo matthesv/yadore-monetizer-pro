@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.47.33
+Version: 3.47.34
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.47.33');
+define('YADORE_PLUGIN_VERSION', '3.47.34');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -1540,6 +1540,7 @@ HTML
     public function admin_enqueue_scripts($hook) {
         try {
             $is_plugin_screen = strpos($hook, 'yadore') !== false;
+            $is_tools_screen = $hook === 'toplevel_page_yadore-tools';
             $recent_error = $this->get_latest_unresolved_error();
             $needs_notice_assets = $recent_error !== null;
 
@@ -1600,6 +1601,8 @@ HTML
                 'debug' => get_option('yadore_debug_mode', false),
                 'version' => YADORE_PLUGIN_VERSION,
                 'plugin_url' => YADORE_PLUGIN_URL,
+                'screen_hook' => $hook,
+                'is_tools_screen' => $is_tools_screen,
                 'strings' => array(
                     'confirm_delete' => __('Are you sure you want to delete this item?', 'yadore-monetizer'),
                     'processing' => __('Processing...', 'yadore-monetizer'),
