@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.47.39
+Version: 3.47.40
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.47.39');
+define('YADORE_PLUGIN_VERSION', '3.47.40');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -5669,7 +5669,10 @@ HTML
             'conversion_rate' => 0,
         );
 
+        $revenue_currency = 'EUR';
+
         $revenue = array(
+            'currency' => $revenue_currency,
             'monthly_estimate' => 0.0,
             'revenue_per_click' => 0.0,
             'top_category' => __('No data', 'yadore-monetizer'),
@@ -5901,7 +5904,14 @@ HTML
 
             if (is_array($conversion_rows)) {
                 foreach ($conversion_rows as $row) {
-                    $amount = $this->extract_amount_from_event_data($row['event_data']);
+                    $detected_currency = '';
+                    $amount = $this->extract_amount_from_event_data($row['event_data'], $detected_currency);
+                    $currency = $detected_currency !== '' ? strtoupper($detected_currency) : $revenue_currency;
+
+                    if ($currency !== $revenue_currency) {
+                        continue;
+                    }
+
                     if ($amount !== 0.0) {
                         $revenue_total += $amount;
                     }
@@ -6393,7 +6403,46 @@ HTML
         );
     }
 
-    private function extract_amount_from_event_data($event_data) {
+    private function normalize_currency_code($value, $fallback = '') {
+        if (is_string($value)) {
+            $trimmed = trim($value);
+            if ($trimmed === '') {
+                return $fallback;
+            }
+
+            if (preg_match('/^[A-Za-z]{3}$/', $trimmed)) {
+                return strtoupper($trimmed);
+            }
+
+            $symbol_map = array(
+                '€' => 'EUR',
+                '$' => 'USD',
+                '£' => 'GBP',
+                '¥' => 'JPY',
+            );
+
+            if (isset($symbol_map[$trimmed])) {
+                return $symbol_map[$trimmed];
+            }
+
+            if (preg_match('/([A-Za-z]{3})/', $trimmed, $matches)) {
+                return strtoupper($matches[1]);
+            }
+        } elseif (is_array($value)) {
+            foreach (array('code', 'currency', 'currency_code', 'currencyCode') as $key) {
+                if (isset($value[$key])) {
+                    $code = $this->normalize_currency_code($value[$key], '');
+                    if ($code !== '') {
+                        return $code;
+                    }
+                }
+            }
+        }
+
+        return $fallback;
+    }
+
+    private function extract_amount_from_event_data($event_data, &$currency = null) {
         if (is_array($event_data)) {
             $data = $event_data;
         } else {
@@ -6401,30 +6450,79 @@ HTML
             $data = is_array($decoded) ? $decoded : null;
         }
 
+        $sources = array();
         if (is_array($data)) {
+            $sources[] = $data;
+
+            foreach (array('order', 'transaction', 'purchase', 'meta', 'price', 'details') as $nested_key) {
+                if (isset($data[$nested_key]) && is_array($data[$nested_key])) {
+                    $sources[] = $data[$nested_key];
+                }
+            }
+        }
+
+        $currency_code = '';
+        foreach ($sources as $source) {
+            foreach (array('currency', 'currency_code', 'currencyCode', 'currency_symbol', 'currencySymbol') as $key) {
+                if (!isset($source[$key])) {
+                    continue;
+                }
+
+                $candidate = $this->normalize_currency_code($source[$key], '');
+                if ($candidate !== '') {
+                    $currency_code = $candidate;
+                    break 2;
+                }
+            }
+        }
+
+        if ($currency_code === '' && is_string($event_data)) {
+            $raw = (string) $event_data;
+            if (stripos($raw, 'EUR') !== false || strpos($raw, '€') !== false) {
+                $currency_code = 'EUR';
+            } elseif (stripos($raw, 'USD') !== false || strpos($raw, '$') !== false) {
+                $currency_code = 'USD';
+            } elseif (stripos($raw, 'GBP') !== false || strpos($raw, '£') !== false) {
+                $currency_code = 'GBP';
+            } elseif (stripos($raw, 'JPY') !== false || strpos($raw, '¥') !== false) {
+                $currency_code = 'JPY';
+            }
+        }
+
+        $amount = 0.0;
+        foreach ($sources as $source) {
             foreach (array('amount', 'value', 'revenue', 'total') as $key) {
-                if (isset($data[$key])) {
-                    $value = $data[$key];
-                    if (is_numeric($value)) {
-                        return (float) $value;
-                    }
-                    if (is_string($value)) {
-                        $numeric = preg_replace('/[^0-9\.\-]/', '', $value);
-                        if ($numeric !== '' && is_numeric($numeric)) {
-                            return (float) $numeric;
-                        }
+                if (!isset($source[$key])) {
+                    continue;
+                }
+
+                $value = $source[$key];
+                if (is_numeric($value)) {
+                    $amount = (float) $value;
+                    break 2;
+                }
+
+                if (is_string($value)) {
+                    $numeric = preg_replace('/[^0-9\.\-]/', '', $value);
+                    if ($numeric !== '' && is_numeric($numeric)) {
+                        $amount = (float) $numeric;
+                        break 2;
                     }
                 }
             }
         }
 
-        if (is_string($event_data)) {
+        if ($amount === 0.0 && is_string($event_data)) {
             if (preg_match('/-?[0-9]+(?:\.[0-9]+)?/', $event_data, $matches)) {
-                return (float) $matches[0];
+                $amount = (float) $matches[0];
             }
         }
 
-        return 0.0;
+        if ($currency !== null) {
+            $currency = $currency_code;
+        }
+
+        return $amount;
     }
 
     private function extract_category_from_event_data($event_data) {

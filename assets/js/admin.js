@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.39 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.47.40 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
@@ -21,7 +21,7 @@
 
     // Global variables
     window.yadoreAdmin = {
-        version: readString(yadore_admin.version, '3.47.39'),
+        version: readString(yadore_admin.version, '3.47.40'),
         ajax_url: readString(yadore_admin.ajax_url),
         nonce: readString(yadore_admin.nonce),
         debug: readBoolean(yadore_admin.debug),
@@ -40,6 +40,7 @@
         performanceChart: null,
         trafficChart: null,
         revenueChart: null,
+        revenueCurrency: 'EUR',
         performanceTableData: null,
         keywordData: null,
         errorLogFilter: 'all',
@@ -2308,15 +2309,18 @@
         },
 
         updateRevenueMetrics: function(revenue = {}) {
+            const currencyCode = this.normalizeCurrencyCode(revenue?.currency, 'EUR');
+            this.revenueCurrency = currencyCode;
+
             const monthly = Number(revenue?.monthly_estimate) || 0;
             const rpc = Number(revenue?.revenue_per_click) || 0;
             const topCategory = revenue?.top_category || 'No data';
             const categoryEarnings = Number(revenue?.category_earnings) || 0;
 
-            $('#monthly-revenue').text(this.formatCurrency(monthly));
-            $('#rpc').text(this.formatCurrency(rpc));
+            $('#monthly-revenue').text(this.formatCurrency(monthly, currencyCode));
+            $('#rpc').text(this.formatCurrency(rpc, currencyCode));
             $('#top-category').text(topCategory);
-            $('#category-earnings').text(`${this.formatCurrency(categoryEarnings)} earned`);
+            $('#category-earnings').text(`${this.formatCurrency(categoryEarnings, currencyCode)} earned`);
         },
 
         updateAnalyticsCharts: function(data = {}) {
@@ -2344,10 +2348,54 @@
                 this.trafficChart.update();
             }
 
-            const revenue = data?.revenue?.trend || {};
+            const revenueData = data?.revenue || {};
+            const revenueCurrency = this.normalizeCurrencyCode(revenueData.currency, 'EUR');
+            this.revenueCurrency = revenueCurrency;
+            const revenue = revenueData.trend || {};
             if (this.revenueChart) {
                 this.revenueChart.data.labels = Array.isArray(revenue.labels) ? revenue.labels : [];
                 this.revenueChart.data.datasets[0].data = Array.isArray(revenue.values) ? revenue.values : [];
+                this.revenueChart.data.datasets[0].label = `Revenue (${revenueCurrency})`;
+
+                if (!this.revenueChart.options) {
+                    this.revenueChart.options = {};
+                }
+
+                if (!this.revenueChart.options.scales) {
+                    this.revenueChart.options.scales = {};
+                }
+
+                if (!this.revenueChart.options.scales.y) {
+                    this.revenueChart.options.scales.y = {};
+                }
+
+                this.revenueChart.options.scales.y.ticks = Object.assign(
+                    {},
+                    this.revenueChart.options.scales.y.ticks,
+                    {
+                        callback: (value) => this.formatCurrency(value, revenueCurrency)
+                    }
+                );
+
+                if (!this.revenueChart.options.plugins) {
+                    this.revenueChart.options.plugins = {};
+                }
+
+                if (!this.revenueChart.options.plugins.tooltip) {
+                    this.revenueChart.options.plugins.tooltip = {};
+                }
+
+                if (!this.revenueChart.options.plugins.tooltip.callbacks) {
+                    this.revenueChart.options.plugins.tooltip.callbacks = {};
+                }
+
+                this.revenueChart.options.plugins.tooltip.callbacks.label = (context) => {
+                    const value = Number(context?.parsed?.y);
+                    const formattedValue = this.formatCurrency(value, revenueCurrency);
+                    const label = context?.dataset?.label || 'Revenue';
+                    return `${label}: ${formattedValue}`;
+                };
+
                 this.revenueChart.update();
             }
         },
@@ -2659,18 +2707,62 @@
             });
         },
 
-        formatCurrency: function(value) {
+        normalizeCurrencyCode: function(code, fallback = 'EUR') {
+            if (typeof code === 'string') {
+                const trimmed = code.trim();
+                if (/^[A-Za-z]{3}$/.test(trimmed)) {
+                    return trimmed.toUpperCase();
+                }
+
+                const mappedSymbol = trimmed.replace(/&.+?;|[^\w\u20ac$£¥]/g, '').toUpperCase();
+                if (/^[A-Z]{3}$/.test(mappedSymbol)) {
+                    return mappedSymbol;
+                }
+
+                const entity = trimmed.toLowerCase();
+                if (entity === '&euro;') {
+                    return 'EUR';
+                }
+                if (entity === '&pound;') {
+                    return 'GBP';
+                }
+                if (entity === '&yen;') {
+                    return 'JPY';
+                }
+
+                if (trimmed === '€') {
+                    return 'EUR';
+                }
+                if (trimmed === '$') {
+                    return 'USD';
+                }
+                if (trimmed === '£') {
+                    return 'GBP';
+                }
+                if (trimmed === '¥') {
+                    return 'JPY';
+                }
+            }
+
+            return fallback;
+        },
+
+        formatCurrency: function(value, currencyCode = 'EUR') {
+            const normalizedCurrency = this.normalizeCurrencyCode(currencyCode, 'EUR');
             const numeric = Number.parseFloat(value);
-            if (Number.isFinite(numeric)) {
-                return numeric.toLocaleString(undefined, {
+            const amount = Number.isFinite(numeric) ? numeric : 0;
+
+            try {
+                return amount.toLocaleString(undefined, {
                     style: 'currency',
-                    currency: 'USD',
+                    currency: normalizedCurrency,
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
+            } catch (error) {
+                const fallbackValue = amount.toFixed(2);
+                return `${fallbackValue} ${normalizedCurrency}`;
             }
-
-            return '$0.00';
         },
 
         formatDuration: function(value) {
