@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.48.0 - 2025-11-07
+- Added a seven-day rolling optimizer sync that fetches daily click and conversion reports, stores them idempotently, and links them by `clickId` with statistical fallbacks for reporting.
+- Created dedicated reporting tables for raw clicks, conversions, and resolved matches, complete with loggable import metrics and historical sync summaries.
+- Scheduled the new reconciliation routine for 03:30 UTC and bumped the plugin bundle metadata to 3.48.0.
+
 ## 3.47.40 - 2025-11-06
 - Added currency code propagation to the analytics report so the admin dashboard knows when Euro-only revenue summaries are available.
 - Filtered analytics revenue aggregations to ignore non-EUR conversions and return the Euro code for consistent formatting in charts and metrics.

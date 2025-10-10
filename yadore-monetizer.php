@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.47.41
+Version: 3.48.0
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.47.41');
+define('YADORE_PLUGIN_VERSION', '3.48.0');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -137,6 +137,7 @@ class YadoreMonetizer {
             add_action('admin_bar_menu', array($this, 'add_admin_bar_menu'), 999);
             add_action('yadore_run_scheduled_export', array($this, 'run_scheduled_export'), 10, 1);
             add_action('yadore_run_system_cleanup', array($this, 'run_system_cleanup'), 10, 0);
+            add_action('yadore_daily_match_sync', array($this, 'run_daily_yadore_match_sync'));
 
             $this->log(sprintf('Plugin v%s initialized successfully with complete feature set', YADORE_PLUGIN_VERSION), 'info');
 
@@ -213,6 +214,7 @@ class YadoreMonetizer {
             wp_clear_scheduled_hook('yadore_cleanup_logs');
             wp_clear_scheduled_hook('yadore_daily_maintenance');
             wp_clear_scheduled_hook('yadore_weekly_reports');
+            wp_clear_scheduled_hook('yadore_daily_match_sync');
 
             $this->log('Plugin deactivated successfully', 'info');
 
@@ -3203,6 +3205,87 @@ HTML
                 KEY merchant_id (merchant_id)
             ) $charset_collate;";
 
+            $optimizer_clicks_table = $wpdb->prefix . 'yadore_clicks';
+            $sql7 = "CREATE TABLE $optimizer_clicks_table (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                click_id varchar(191) NOT NULL,
+                report_date date NOT NULL,
+                clicked_at datetime DEFAULT NULL,
+                market varchar(10) DEFAULT '',
+                merchant_id varchar(191) DEFAULT '',
+                merchant_name varchar(255) DEFAULT '',
+                placement_id varchar(191) DEFAULT '',
+                revenue decimal(12,4) DEFAULT 0.0000,
+                currency char(3) DEFAULT '',
+                raw_payload longtext,
+                stat_signature varchar(191) DEFAULT '',
+                is_synthetic tinyint(1) DEFAULT 0,
+                created_at datetime DEFAULT CURRENT_TIMESTAMP,
+                updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY  (id),
+                UNIQUE KEY unique_click_id (click_id),
+                KEY report_date (report_date),
+                KEY market (market),
+                KEY merchant_id (merchant_id),
+                KEY placement_id (placement_id),
+                KEY stat_signature (stat_signature)
+            ) $charset_collate;";
+
+            $optimizer_conversions_table = $wpdb->prefix . 'yadore_conversions';
+            $sql8 = "CREATE TABLE $optimizer_conversions_table (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                conversion_id varchar(191) DEFAULT '',
+                click_id varchar(191) NOT NULL,
+                report_date date NOT NULL,
+                converted_at datetime DEFAULT NULL,
+                market varchar(10) DEFAULT '',
+                merchant_id varchar(191) DEFAULT '',
+                merchant_name varchar(255) DEFAULT '',
+                placement_id varchar(191) DEFAULT '',
+                revenue decimal(12,4) DEFAULT 0.0000,
+                currency char(3) DEFAULT '',
+                status varchar(50) DEFAULT '',
+                raw_payload longtext,
+                stat_signature varchar(191) DEFAULT '',
+                is_synthetic tinyint(1) DEFAULT 0,
+                created_at datetime DEFAULT CURRENT_TIMESTAMP,
+                updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY  (id),
+                UNIQUE KEY unique_conversion_click (click_id),
+                KEY conversion_id (conversion_id),
+                KEY report_date (report_date),
+                KEY market (market),
+                KEY merchant_id (merchant_id),
+                KEY placement_id (placement_id),
+                KEY stat_signature (stat_signature)
+            ) $charset_collate;";
+
+            $optimizer_matches_table = $wpdb->prefix . 'yadore_matches';
+            $sql9 = "CREATE TABLE $optimizer_matches_table (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                click_id varchar(191) NOT NULL,
+                conversion_id varchar(191) DEFAULT '',
+                click_row_id bigint(20) unsigned DEFAULT 0,
+                conversion_row_id bigint(20) unsigned DEFAULT 0,
+                report_date date NOT NULL,
+                match_type varchar(50) DEFAULT '',
+                match_score decimal(6,4) DEFAULT 0.0000,
+                market varchar(10) DEFAULT '',
+                merchant_id varchar(191) DEFAULT '',
+                merchant_name varchar(255) DEFAULT '',
+                placement_id varchar(191) DEFAULT '',
+                revenue decimal(12,4) DEFAULT 0.0000,
+                currency char(3) DEFAULT '',
+                created_at datetime DEFAULT CURRENT_TIMESTAMP,
+                updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY  (id),
+                UNIQUE KEY unique_match_click (click_id),
+                KEY conversion_id (conversion_id),
+                KEY report_date (report_date),
+                KEY match_type (match_type),
+                KEY market (market)
+            ) $charset_collate;";
+
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
             dbDelta($sql1);
@@ -3211,10 +3294,13 @@ HTML
             dbDelta($sql4);
             dbDelta($sql5);
             dbDelta($sql6);
+            dbDelta($sql7);
+            dbDelta($sql8);
+            dbDelta($sql9);
 
             $this->reset_table_exists_cache();
 
-            $this->log('Enhanced database tables created successfully for v3.32', 'info');
+            $this->log('Enhanced database tables created successfully for v3.48.0', 'info');
 
         } catch (Exception $e) {
             $this->log_error('Database table creation failed', $e, 'critical');
@@ -3235,6 +3321,10 @@ HTML
             if (version_compare($baseline_version, '3.47.41', '<')) {
                 $this->ensure_click_currency_column();
                 $this->reset_click_sync_log();
+            }
+
+            if (version_compare($baseline_version, '3.48.0', '<')) {
+                $this->ensure_optimizer_reporting_tables();
             }
         } catch (Exception $e) {
             $this->log_error('Database upgrade routine failed', $e, 'high');
@@ -3263,6 +3353,14 @@ HTML
         delete_option('yadore_click_sync_log');
     }
 
+    private function ensure_optimizer_reporting_tables() {
+        try {
+            $this->create_tables();
+        } catch (Exception $e) {
+            $this->log_error('Failed to ensure optimizer reporting tables', $e, 'high');
+        }
+    }
+
     // v2.7: Advanced helper methods
     private function register_custom_post_types() {
         // Register custom post type for product templates
@@ -3285,6 +3383,15 @@ HTML
 
         if (!wp_next_scheduled('yadore_weekly_reports')) {
             wp_schedule_event(time(), 'weekly', 'yadore_weekly_reports');
+        }
+
+        if (!wp_next_scheduled('yadore_daily_match_sync')) {
+            $first_run = $this->calculate_next_utc_timestamp(3, 30);
+            if (!is_int($first_run) || $first_run <= 0) {
+                $first_run = time() + DAY_IN_SECONDS;
+            }
+
+            wp_schedule_event($first_run, 'daily', 'yadore_daily_match_sync');
         }
 
         $this->ensure_scheduled_exports();
@@ -7924,6 +8031,26 @@ HTML
         $this->table_exists_cache = array();
     }
 
+    private function calculate_next_utc_timestamp($hour, $minute) {
+        try {
+            $hour = max(0, min(23, (int) $hour));
+            $minute = max(0, min(59, (int) $minute));
+
+            $now = new \DateTime('now', new \DateTimeZone('UTC'));
+            $target = clone $now;
+            $target->setTime($hour, $minute, 0);
+
+            if ($target <= $now) {
+                $target->modify('+1 day');
+            }
+
+            return $target->getTimestamp();
+        } catch (Exception $e) {
+            $this->log_error('Failed to calculate UTC timestamp for optimizer schedule', $e, 'low');
+            return time() + DAY_IN_SECONDS;
+        }
+    }
+
     private function escape_like_value($value) {
         $value = (string) $value;
 
@@ -8636,6 +8763,782 @@ HTML
         }
 
         return $new_records;
+    }
+
+    public function run_daily_yadore_match_sync() {
+        $summary = array(
+            'dates_processed' => 0,
+            'clicks' => array('processed' => 0, 'inserted' => 0, 'updated' => 0, 'skipped' => 0),
+            'conversions' => array('processed' => 0, 'inserted' => 0, 'updated' => 0, 'skipped' => 0),
+            'matches' => array('processed' => 0, 'matched' => 0, 'created' => 0, 'updated' => 0, 'click_id' => 0, 'statistical' => 0),
+            'errors' => 0,
+            'match_rate' => 0.0,
+        );
+
+        $api_key = $this->sanitize_api_key(get_option('yadore_api_key', ''));
+        if ($api_key === '') {
+            $summary['errors']++;
+            $this->log('Skipping optimizer sync because no Yadore API key is configured', 'warning');
+            $this->persist_optimizer_sync_summary($summary);
+            return;
+        }
+
+        $market_setting = $this->sanitize_market(get_option('yadore_market', ''));
+        $market_param = $market_setting !== '' ? strtolower($market_setting) : '';
+
+        try {
+            $utc = new \DateTimeZone('UTC');
+            $today = new \DateTime('now', $utc);
+            $today->setTime(0, 0, 0);
+
+            for ($offset = 1; $offset <= 7; $offset++) {
+                $target = clone $today;
+                $target->modify(sprintf('-%d day', $offset));
+                $date_string = $target->format('Y-m-d');
+
+                $summary['dates_processed']++;
+
+                $report_response = $this->fetch_optimizer_report_for_date('/v2/report/detail', $date_string, $api_key, $market_param);
+                if ($report_response['success']) {
+                    $click_counts = $this->import_optimizer_clicks($report_response['data'], $date_string);
+                    $summary['clicks'] = $this->accumulate_optimizer_counts($summary['clicks'], $click_counts);
+                } else {
+                    $summary['errors']++;
+                }
+
+                $conversion_response = $this->fetch_optimizer_report_for_date('/v2/conversion/detail', $date_string, $api_key, $market_param);
+                if ($conversion_response['success']) {
+                    $conversion_counts = $this->import_optimizer_conversions($conversion_response['data'], $date_string);
+                    $summary['conversions'] = $this->accumulate_optimizer_counts($summary['conversions'], $conversion_counts);
+                } else {
+                    $summary['errors']++;
+                }
+
+                $match_counts = $this->generate_optimizer_matches_for_date($date_string);
+                $summary['matches']['processed'] += $match_counts['processed'];
+                $summary['matches']['matched'] += $match_counts['matched'];
+                $summary['matches']['created'] += $match_counts['created'];
+                $summary['matches']['updated'] += $match_counts['updated'];
+                $summary['matches']['click_id'] += $match_counts['click_id'];
+                $summary['matches']['statistical'] += $match_counts['statistical'];
+            }
+        } catch (Exception $e) {
+            $summary['errors']++;
+            $this->log_error('Daily Yadore optimizer sync failed', $e, 'high');
+        }
+
+        if ($summary['matches']['processed'] > 0) {
+            $summary['match_rate'] = round(($summary['matches']['matched'] / max(1, $summary['matches']['processed'])) * 100, 2);
+        } else {
+            $summary['match_rate'] = 0.0;
+        }
+
+        $this->persist_optimizer_sync_summary($summary);
+
+        $this->log(
+            sprintf(
+                'Yadore optimizer sync processed %d days with %d/%d matches (%.2f%%) and %d errors',
+                $summary['dates_processed'],
+                $summary['matches']['matched'],
+                $summary['matches']['processed'],
+                $summary['match_rate'],
+                $summary['errors']
+            ),
+            $summary['errors'] > 0 ? 'warning' : 'info'
+        );
+    }
+
+    private function fetch_optimizer_report_for_date($path, $date_string, $api_key, $market) {
+        $endpoint = 'https://api.yadore.com' . $path;
+        $query_args = array(
+            'date' => $date_string,
+            'format' => 'json',
+        );
+
+        if (is_string($market) && $market !== '') {
+            $query_args['market'] = strtolower($market);
+        }
+
+        $url = add_query_arg($query_args, $endpoint);
+
+        $args = array(
+            'headers' => array(
+                'Accept' => 'application/json',
+                'API-Key' => $api_key,
+                'User-Agent' => 'YadoreMonetizer/' . YADORE_PLUGIN_VERSION,
+            ),
+            'timeout' => 30,
+        );
+
+        $response = wp_remote_get($url, $args);
+
+        if (is_wp_error($response)) {
+            $this->log_error(
+                'Yadore optimizer report fetch failed: ' . $response->get_error_message(),
+                null,
+                'warning',
+                array('date' => $date_string, 'path' => $path)
+            );
+            $this->log_api_call('yadore', $url, 'error', array('message' => $response->get_error_message()));
+            return array('success' => false);
+        }
+
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+        $decoded = json_decode($body, true);
+
+        if ($code >= 200 && $code < 300 && is_array($decoded)) {
+            $this->log_api_call('yadore', $url, 'success', array(
+                'date' => $date_string,
+                'path' => $path,
+            ));
+
+            return array('success' => true, 'data' => $decoded);
+        }
+
+        $this->log_error(
+            'Unexpected Yadore optimizer report response',
+            null,
+            'warning',
+            array(
+                'date' => $date_string,
+                'path' => $path,
+                'status' => $code,
+                'body' => is_string($body) ? $body : '',
+            )
+        );
+        $this->log_api_call('yadore', $url, 'error', array('status' => $code, 'body' => $body));
+
+        return array('success' => false);
+    }
+
+    private function import_optimizer_clicks($payload, $default_date) {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'yadore_clicks';
+        if (!$this->table_exists($table)) {
+            return array('processed' => 0, 'inserted' => 0, 'updated' => 0, 'skipped' => 0);
+        }
+
+        $records = $this->extract_optimizer_records($payload);
+        if (empty($records)) {
+            return array('processed' => 0, 'inserted' => 0, 'updated' => 0, 'skipped' => 0);
+        }
+
+        $counts = array('processed' => count($records), 'inserted' => 0, 'updated' => 0, 'skipped' => 0);
+
+        foreach ($records as $record) {
+            $normalized = $this->normalize_optimizer_click_record($record, $default_date);
+            if (!$normalized) {
+                $counts['skipped']++;
+                continue;
+            }
+
+            if (!$normalized['is_synthetic'] && $normalized['stat_signature'] !== '') {
+                $wpdb->query($wpdb->prepare(
+                    "DELETE FROM {$table} WHERE stat_signature = %s AND is_synthetic = 1",
+                    $normalized['stat_signature']
+                ));
+            }
+
+            $result = $wpdb->replace($table, $normalized['data'], $normalized['formats']);
+
+            if ($result === false) {
+                $counts['skipped']++;
+                continue;
+            }
+
+            if ($result === 1) {
+                $counts['inserted']++;
+            } elseif ($result === 2) {
+                $counts['updated']++;
+            }
+        }
+
+        return $counts;
+    }
+
+    private function import_optimizer_conversions($payload, $default_date) {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'yadore_conversions';
+        if (!$this->table_exists($table)) {
+            return array('processed' => 0, 'inserted' => 0, 'updated' => 0, 'skipped' => 0);
+        }
+
+        $records = $this->extract_optimizer_records($payload);
+        if (empty($records)) {
+            return array('processed' => 0, 'inserted' => 0, 'updated' => 0, 'skipped' => 0);
+        }
+
+        $counts = array('processed' => count($records), 'inserted' => 0, 'updated' => 0, 'skipped' => 0);
+
+        foreach ($records as $record) {
+            $normalized = $this->normalize_optimizer_conversion_record($record, $default_date);
+            if (!$normalized) {
+                $counts['skipped']++;
+                continue;
+            }
+
+            if (!$normalized['is_synthetic'] && $normalized['stat_signature'] !== '') {
+                $wpdb->query($wpdb->prepare(
+                    "DELETE FROM {$table} WHERE stat_signature = %s AND is_synthetic = 1",
+                    $normalized['stat_signature']
+                ));
+            }
+
+            $result = $wpdb->replace($table, $normalized['data'], $normalized['formats']);
+
+            if ($result === false) {
+                $counts['skipped']++;
+                continue;
+            }
+
+            if ($result === 1) {
+                $counts['inserted']++;
+            } elseif ($result === 2) {
+                $counts['updated']++;
+            }
+        }
+
+        return $counts;
+    }
+
+    private function extract_optimizer_records($payload) {
+        if (!is_array($payload)) {
+            return array();
+        }
+
+        $candidates = array('clicks', 'conversions', 'records', 'items', 'data', 'results', 'rows');
+        foreach ($candidates as $key) {
+            if (isset($payload[$key]) && is_array($payload[$key])) {
+                return $payload[$key];
+            }
+        }
+
+        $keys = array_keys($payload);
+        if ($keys === array_keys($keys)) {
+            return $payload;
+        }
+
+        return array();
+    }
+
+    private function normalize_optimizer_click_record($record, $default_date) {
+        if (!is_array($record)) {
+            return null;
+        }
+
+        list($report_date, $datetime) = $this->extract_optimizer_dates($record, $default_date);
+
+        $market = '';
+        if (isset($record['market'])) {
+            $candidate = $this->sanitize_market($record['market']);
+            $market = $candidate !== '' ? strtolower($candidate) : strtolower(trim((string) $record['market']));
+        }
+
+        $merchant = is_array($record['merchant'] ?? null) ? $record['merchant'] : array();
+        $merchant_id = isset($merchant['id']) ? sanitize_text_field((string) $merchant['id']) : '';
+        $merchant_name = isset($merchant['name']) ? sanitize_text_field((string) $merchant['name']) : '';
+
+        $placement_id = '';
+        foreach (array('placementId', 'placement_id', 'placement') as $placement_key) {
+            if (isset($record[$placement_key]) && $record[$placement_key] !== '') {
+                $placement_id = sanitize_text_field((string) $record[$placement_key]);
+                break;
+            }
+        }
+
+        $revenue = $this->extract_optimizer_revenue($record);
+        $currency = $this->detect_optimizer_currency($record, $merchant);
+
+        $stat_signature = $this->build_optimizer_stat_signature($report_date, $market, $merchant_id, $placement_id);
+        list($click_id, $is_synthetic) = $this->resolve_optimizer_click_identifier($record, $report_date, $stat_signature, 'rep');
+
+        if ($click_id === '') {
+            return null;
+        }
+
+        $timestamp = gmdate('Y-m-d H:i:s');
+        $raw_payload = function_exists('wp_json_encode') ? wp_json_encode($record) : json_encode($record);
+
+        $data = array(
+            'click_id' => $click_id,
+            'report_date' => $report_date,
+            'clicked_at' => $datetime,
+            'market' => $market,
+            'merchant_id' => $merchant_id,
+            'merchant_name' => $merchant_name,
+            'placement_id' => $placement_id,
+            'revenue' => $revenue,
+            'currency' => $currency,
+            'raw_payload' => $raw_payload,
+            'stat_signature' => $stat_signature,
+            'is_synthetic' => $is_synthetic ? 1 : 0,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        );
+
+        $formats = array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s', '%d', '%s', '%s');
+
+        return array(
+            'data' => $data,
+            'formats' => $formats,
+            'is_synthetic' => $is_synthetic,
+            'stat_signature' => $stat_signature,
+        );
+    }
+
+    private function normalize_optimizer_conversion_record($record, $default_date) {
+        if (!is_array($record)) {
+            return null;
+        }
+
+        list($report_date, $datetime) = $this->extract_optimizer_dates($record, $default_date);
+
+        $market = '';
+        if (isset($record['market'])) {
+            $candidate = $this->sanitize_market($record['market']);
+            $market = $candidate !== '' ? strtolower($candidate) : strtolower(trim((string) $record['market']));
+        }
+
+        $merchant = is_array($record['merchant'] ?? null) ? $record['merchant'] : array();
+        $merchant_id = isset($merchant['id']) ? sanitize_text_field((string) $merchant['id']) : '';
+        $merchant_name = isset($merchant['name']) ? sanitize_text_field((string) $merchant['name']) : '';
+
+        $placement_id = '';
+        foreach (array('placementId', 'placement_id', 'placement') as $placement_key) {
+            if (isset($record[$placement_key]) && $record[$placement_key] !== '') {
+                $placement_id = sanitize_text_field((string) $record[$placement_key]);
+                break;
+            }
+        }
+
+        $revenue = $this->extract_optimizer_revenue($record);
+        $currency = $this->detect_optimizer_currency($record, $merchant);
+
+        $stat_signature = $this->build_optimizer_stat_signature($report_date, $market, $merchant_id, $placement_id);
+        list($click_id, $is_synthetic) = $this->resolve_optimizer_click_identifier($record, $report_date, $stat_signature, 'conv');
+
+        if ($click_id === '') {
+            return null;
+        }
+
+        $conversion_id = '';
+        foreach (array('conversionId', 'conversion_id', 'id', 'transactionId', 'orderId') as $conversion_key) {
+            if (isset($record[$conversion_key]) && $record[$conversion_key] !== '') {
+                $conversion_id = sanitize_text_field((string) $record[$conversion_key]);
+                break;
+            }
+        }
+
+        $status = '';
+        foreach (array('status', 'state', 'conversionStatus') as $status_key) {
+            if (isset($record[$status_key]) && $record[$status_key] !== '') {
+                $status = sanitize_text_field((string) $record[$status_key]);
+                break;
+            }
+        }
+
+        $timestamp = gmdate('Y-m-d H:i:s');
+        $raw_payload = function_exists('wp_json_encode') ? wp_json_encode($record) : json_encode($record);
+
+        $data = array(
+            'conversion_id' => $conversion_id,
+            'click_id' => $click_id,
+            'report_date' => $report_date,
+            'converted_at' => $datetime,
+            'market' => $market,
+            'merchant_id' => $merchant_id,
+            'merchant_name' => $merchant_name,
+            'placement_id' => $placement_id,
+            'revenue' => $revenue,
+            'currency' => $currency,
+            'status' => $status,
+            'raw_payload' => $raw_payload,
+            'stat_signature' => $stat_signature,
+            'is_synthetic' => $is_synthetic ? 1 : 0,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        );
+
+        $formats = array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s', '%s', '%d', '%s', '%s');
+
+        return array(
+            'data' => $data,
+            'formats' => $formats,
+            'is_synthetic' => $is_synthetic,
+            'stat_signature' => $stat_signature,
+        );
+    }
+
+    private function extract_optimizer_dates($record, $default_date) {
+        $timestamp = false;
+        $candidates = array('date', 'reportDate', 'clickedAt', 'clickDate', 'conversionDate', 'convertedAt', 'conversion_date', 'createdAt', 'timestamp');
+
+        foreach ($candidates as $candidate) {
+            if (!isset($record[$candidate])) {
+                continue;
+            }
+
+            $value = $record[$candidate];
+
+            if (is_numeric($value)) {
+                $timestamp = (int) $value;
+            } elseif (is_string($value) && $value !== '') {
+                $timestamp = strtotime($value);
+            } elseif (is_array($value)) {
+                foreach (array('date', 'timestamp', 'value', 'utc') as $nested) {
+                    if (!isset($value[$nested])) {
+                        continue;
+                    }
+
+                    $nested_value = $value[$nested];
+                    if (is_numeric($nested_value)) {
+                        $timestamp = (int) $nested_value;
+                    } elseif (is_string($nested_value) && $nested_value !== '') {
+                        $timestamp = strtotime($nested_value);
+                    }
+
+                    if ($timestamp !== false && $timestamp > 0) {
+                        break;
+                    }
+                }
+            }
+
+            if ($timestamp !== false && $timestamp > 0) {
+                break;
+            }
+        }
+
+        if ($timestamp === false || $timestamp <= 0) {
+            $timestamp = strtotime($default_date . ' 00:00:00 UTC');
+        }
+
+        if ($timestamp === false || $timestamp <= 0) {
+            $timestamp = time();
+        }
+
+        $report_date = gmdate('Y-m-d', $timestamp);
+        $datetime = gmdate('Y-m-d H:i:s', $timestamp);
+
+        return array($report_date, $datetime);
+    }
+
+    private function extract_optimizer_revenue($record) {
+        $revenue = 0.0;
+        $candidates = array('revenue', 'amount', 'value', 'commission', 'saleAmount', 'sale_amount', 'sales', 'payout', 'conversionValue');
+
+        foreach ($candidates as $candidate) {
+            if (!isset($record[$candidate])) {
+                continue;
+            }
+
+            $value = $record[$candidate];
+
+            if (is_array($value)) {
+                foreach (array('amount', 'value', 'revenue', 'total') as $nested_key) {
+                    if (isset($value[$nested_key])) {
+                        $value = $value[$nested_key];
+                        break;
+                    }
+                }
+            }
+
+            if (is_numeric($value)) {
+                $revenue = (float) $value;
+                break;
+            }
+
+            if (is_string($value)) {
+                $normalized = str_replace(',', '.', $value);
+                $numeric = preg_replace('/[^0-9\.\-]/', '', $normalized);
+                if ($numeric !== '' && is_numeric($numeric)) {
+                    $revenue = (float) $numeric;
+                    break;
+                }
+            }
+        }
+
+        return $revenue;
+    }
+
+    private function detect_optimizer_currency($record, $merchant) {
+        $sources = array();
+
+        if (is_array($record)) {
+            $sources[] = $record;
+            if (isset($record['revenue']) && is_array($record['revenue'])) {
+                $sources[] = $record['revenue'];
+            }
+            if (isset($record['payout']) && is_array($record['payout'])) {
+                $sources[] = $record['payout'];
+            }
+            if (isset($record['meta']) && is_array($record['meta'])) {
+                $sources[] = $record['meta'];
+            }
+        }
+
+        if (is_array($merchant) && !empty($merchant)) {
+            $sources[] = $merchant;
+        }
+
+        foreach ($sources as $source) {
+            if (is_array($source)) {
+                foreach (array('currency', 'currency_code', 'currencyCode', 'revenue_currency', 'revenueCurrency', 'payout_currency', 'payoutCurrency', 'code') as $key) {
+                    if (!isset($source[$key])) {
+                        continue;
+                    }
+
+                    $candidate = $this->normalize_currency_code($source[$key], '');
+                    if ($candidate !== '') {
+                        return $candidate;
+                    }
+                }
+
+                $candidate = $this->normalize_currency_code($source, '');
+                if ($candidate !== '') {
+                    return $candidate;
+                }
+            } else {
+                $candidate = $this->normalize_currency_code($source, '');
+                if ($candidate !== '') {
+                    return $candidate;
+                }
+            }
+        }
+
+        if (isset($record['currency'])) {
+            $candidate = $this->normalize_currency_code($record['currency'], '');
+            if ($candidate !== '') {
+                return $candidate;
+            }
+        }
+
+        return '';
+    }
+
+    private function resolve_optimizer_click_identifier($record, $report_date, $stat_signature, $prefix) {
+        foreach (array('clickId', 'click_id', 'id') as $key) {
+            if (isset($record[$key])) {
+                $candidate = trim((string) $record[$key]);
+                if ($candidate !== '') {
+                    return array($candidate, false);
+                }
+            }
+        }
+
+        if ($stat_signature !== '') {
+            return array($prefix . '-' . $stat_signature, true);
+        }
+
+        $payload = function_exists('wp_json_encode') ? wp_json_encode($record) : json_encode($record);
+        if (is_string($payload) && $payload !== '' && $report_date !== '') {
+            return array($prefix . '-' . sha1($report_date . '|' . $payload), true);
+        }
+
+        return array('', true);
+    }
+
+    private function build_optimizer_stat_signature($date, $market, $merchant_id, $placement_id) {
+        $parts = array(
+            (string) $date,
+            strtolower(trim((string) $market)),
+            strtolower(trim((string) $merchant_id)),
+            strtolower(trim((string) $placement_id)),
+        );
+
+        $combined = implode('|', $parts);
+        $normalized = trim(str_replace('|', '', $combined));
+
+        if ($normalized === '') {
+            return '';
+        }
+
+        return sha1($combined);
+    }
+
+    private function generate_optimizer_matches_for_date($date_string) {
+        global $wpdb;
+
+        $click_table = $wpdb->prefix . 'yadore_clicks';
+        $conversion_table = $wpdb->prefix . 'yadore_conversions';
+        $match_table = $wpdb->prefix . 'yadore_matches';
+
+        if (!$this->table_exists($click_table) || !$this->table_exists($conversion_table) || !$this->table_exists($match_table)) {
+            return array('processed' => 0, 'matched' => 0, 'created' => 0, 'updated' => 0, 'click_id' => 0, 'statistical' => 0);
+        }
+
+        $conversions = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$conversion_table} WHERE report_date = %s", $date_string), ARRAY_A);
+        if (empty($conversions)) {
+            return array('processed' => 0, 'matched' => 0, 'created' => 0, 'updated' => 0, 'click_id' => 0, 'statistical' => 0);
+        }
+
+        $click_rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$click_table} WHERE report_date = %s", $date_string), ARRAY_A);
+
+        $click_map = array();
+        $signature_map = array();
+        foreach ($click_rows as $click) {
+            if (!isset($click['click_id'])) {
+                continue;
+            }
+
+            $click_id = (string) $click['click_id'];
+            $click_map[$click_id] = $click;
+
+            if (!empty($click['stat_signature'])) {
+                $signature = (string) $click['stat_signature'];
+                if (!isset($signature_map[$signature])) {
+                    $signature_map[$signature] = array();
+                }
+                $signature_map[$signature][] = $click;
+            }
+        }
+
+        $counts = array('processed' => count($conversions), 'matched' => 0, 'created' => 0, 'updated' => 0, 'click_id' => 0, 'statistical' => 0);
+
+        $matched_clicks = array();
+
+        foreach ($conversions as $conversion) {
+            $match_click = null;
+            $match_type = '';
+
+            $conversion_click_id = isset($conversion['click_id']) ? (string) $conversion['click_id'] : '';
+
+            if ($conversion_click_id !== '' && isset($click_map[$conversion_click_id])) {
+                $match_click = $click_map[$conversion_click_id];
+                $match_type = 'click_id';
+            }
+
+            if (!$match_click && !empty($conversion['stat_signature'])) {
+                $signature = (string) $conversion['stat_signature'];
+                if (isset($signature_map[$signature])) {
+                    foreach ($signature_map[$signature] as $candidate) {
+                        $candidate_click_id = isset($candidate['click_id']) ? (string) $candidate['click_id'] : '';
+                        if ($candidate_click_id === '' || isset($matched_clicks[$candidate_click_id])) {
+                            continue;
+                        }
+
+                        $match_click = $candidate;
+                        $match_type = 'statistical';
+                        break;
+                    }
+                }
+            }
+
+            if (!$match_click) {
+                continue;
+            }
+
+            $click_id = isset($match_click['click_id']) ? (string) $match_click['click_id'] : '';
+            if ($click_id === '') {
+                continue;
+            }
+
+            $counts['matched']++;
+            if ($match_type === 'click_id') {
+                $counts['click_id']++;
+            } else {
+                $counts['statistical']++;
+            }
+
+            $matched_clicks[$click_id] = true;
+
+            $conversion_id = isset($conversion['conversion_id']) ? (string) $conversion['conversion_id'] : '';
+            $timestamp = gmdate('Y-m-d H:i:s');
+            $match_score = $match_type === 'click_id' ? 1.0 : 0.6;
+
+            $market = $conversion['market'] !== '' ? $conversion['market'] : ($match_click['market'] ?? '');
+            $merchant_id = $conversion['merchant_id'] !== '' ? $conversion['merchant_id'] : ($match_click['merchant_id'] ?? '');
+            $merchant_name = $conversion['merchant_name'] !== '' ? $conversion['merchant_name'] : ($match_click['merchant_name'] ?? '');
+            $placement_id = $conversion['placement_id'] !== '' ? $conversion['placement_id'] : ($match_click['placement_id'] ?? '');
+            $revenue = isset($conversion['revenue']) && (float) $conversion['revenue'] > 0 ? (float) $conversion['revenue'] : (float) ($match_click['revenue'] ?? 0);
+            $currency = $conversion['currency'] !== '' ? $conversion['currency'] : ($match_click['currency'] ?? '');
+
+            $match_data = array(
+                'click_id' => $click_id,
+                'conversion_id' => $conversion_id,
+                'click_row_id' => isset($match_click['id']) ? (int) $match_click['id'] : 0,
+                'conversion_row_id' => isset($conversion['id']) ? (int) $conversion['id'] : 0,
+                'report_date' => $conversion['report_date'],
+                'match_type' => $match_type,
+                'match_score' => $match_score,
+                'market' => $market,
+                'merchant_id' => $merchant_id,
+                'merchant_name' => $merchant_name,
+                'placement_id' => $placement_id,
+                'revenue' => $revenue,
+                'currency' => $currency,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            );
+
+            $formats = array('%s', '%s', '%d', '%d', '%s', '%s', '%f', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s');
+
+            $result = $wpdb->replace($match_table, $match_data, $formats);
+
+            if ($result === 1) {
+                $counts['created']++;
+            } elseif ($result === 2) {
+                $counts['updated']++;
+            }
+
+            if ((int) ($conversion['is_synthetic'] ?? 0) === 1 && $match_type === 'statistical' && $conversion_click_id !== $click_id) {
+                $existing = $wpdb->get_var($wpdb->prepare(
+                    "SELECT id FROM {$conversion_table} WHERE click_id = %s AND id <> %d",
+                    $click_id,
+                    isset($conversion['id']) ? (int) $conversion['id'] : 0
+                ));
+
+                if (!$existing && isset($conversion['id'])) {
+                    $wpdb->update(
+                        $conversion_table,
+                        array(
+                            'click_id' => $click_id,
+                            'is_synthetic' => 0,
+                            'updated_at' => $timestamp,
+                        ),
+                        array('id' => (int) $conversion['id']),
+                        array('%s', '%d', '%s'),
+                        array('%d')
+                    );
+                }
+            }
+        }
+
+        return $counts;
+    }
+
+    private function persist_optimizer_sync_summary($summary) {
+        $timestamp = gmdate('Y-m-d H:i:s');
+        $summary_with_time = $summary;
+        $summary_with_time['timestamp'] = $timestamp;
+
+        $history = get_option('yadore_optimizer_sync_history', array());
+        if (!is_array($history)) {
+            $history = array();
+        }
+
+        $history[] = $summary_with_time;
+
+        if (count($history) > 30) {
+            $history = array_slice($history, -30);
+        }
+
+        update_option('yadore_optimizer_sync_history', $history, false);
+        update_option('yadore_optimizer_last_sync', $summary_with_time, false);
+    }
+
+    private function accumulate_optimizer_counts($base, $increment) {
+        $keys = array('processed', 'inserted', 'updated', 'skipped');
+        $result = is_array($base) ? $base : array();
+
+        foreach ($keys as $key) {
+            $result[$key] = (isset($result[$key]) ? (int) $result[$key] : 0)
+                + (isset($increment[$key]) ? (int) $increment[$key] : 0);
+        }
+
+        return $result;
     }
 
     private function parse_click_timestamp($raw_date, $fallback_date) {
