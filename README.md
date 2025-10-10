@@ -296,7 +296,7 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-**Current Version: 3.48.5** - Production-Ready Market Release
+**Current Version: 3.48.6** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

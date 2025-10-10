@@ -183,6 +183,19 @@
                     <button
                         type="button"
                         class="nav-tab"
+                        data-tab="automation"
+                        id="tab-automation"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="panel-automation"
+                        tabindex="-1"
+                    >
+                        <span class="dashicons dashicons-update" aria-hidden="true"></span>
+                        <?php echo esc_html__('Automation', 'yadore-monetizer'); ?>
+                    </button>
+                    <button
+                        type="button"
+                        class="nav-tab"
                         data-tab="ai"
                         id="tab-ai"
                         role="tab"
@@ -339,55 +352,58 @@
                 </div>
             </div>
 
-            <div class="yadore-card">
-                <div class="card-header">
-                    <h2><span class="dashicons dashicons-update" aria-hidden="true"></span> <?php echo esc_html__('Automatisierung', 'yadore-monetizer'); ?></h2>
-                </div>
-                <div class="card-content">
-                    <p class="card-intro">
-                        <?php esc_html_e('Steuere, welche Automatisierungen auf deinen Beiträgen aktiv sind und ob der KI-Scan beim Speichern ausgeführt wird.', 'yadore-monetizer'); ?>
-                    </p>
-
-                    <div class="form-group">
-                        <label class="form-label" for="yadore_overlay_enabled">
-                            <input type="checkbox"
-                                   name="yadore_overlay_enabled"
-                                   id="yadore_overlay_enabled"
-                                   value="1"
-                                   <?php checked($overlay_enabled); ?>>
-                            <strong><?php esc_html_e('Produkt-Overlay aktivieren', 'yadore-monetizer'); ?></strong>
-                        </label>
-                        <p class="form-description">
-                            <?php esc_html_e('Blendet ein Overlay mit Produktempfehlungen auf Beitragsseiten ein.', 'yadore-monetizer'); ?>
-                        </p>
+            <!-- Automation Settings -->
+            <div class="settings-panel" id="panel-automation" role="tabpanel" aria-labelledby="tab-automation" tabindex="0" hidden>
+                <div class="yadore-card">
+                    <div class="card-header">
+                        <h2><span class="dashicons dashicons-update" aria-hidden="true"></span> <?php echo esc_html__('Automatisierung', 'yadore-monetizer'); ?></h2>
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="yadore_auto_detection">
-                            <input type="checkbox"
-                                   name="yadore_auto_detection"
-                                   id="yadore_auto_detection"
-                                   value="1"
-                                   <?php checked($auto_detection_enabled); ?>>
-                            <strong><?php esc_html_e('Automatische Produktempfehlungen einfügen', 'yadore-monetizer'); ?></strong>
-                        </label>
-                        <p class="form-description">
-                            <?php esc_html_e('Fügt passende Produkte automatisch in den Beitragsinhalt ein.', 'yadore-monetizer'); ?>
+                    <div class="card-content">
+                        <p class="card-intro">
+                            <?php esc_html_e('Steuere, welche Automatisierungen auf deinen Beiträgen aktiv sind und ob der KI-Scan beim Speichern ausgeführt wird.', 'yadore-monetizer'); ?>
                         </p>
-                    </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="yadore_auto_scan_posts">
-                            <input type="checkbox"
-                                   name="yadore_auto_scan_posts"
-                                   id="yadore_auto_scan_posts"
-                                   value="1"
-                                   <?php checked($auto_scan_enabled); ?>>
-                            <strong><?php esc_html_e('Automatischen Beitrags-Scan aktivieren', 'yadore-monetizer'); ?></strong>
-                        </label>
-                        <p class="form-description">
-                            <?php esc_html_e('Führt bei jedem Speichern einen KI-Scan aus und hält Produktempfehlungen aktuell.', 'yadore-monetizer'); ?>
-                        </p>
+                        <div class="form-group">
+                            <label class="form-label" for="yadore_overlay_enabled">
+                                <input type="checkbox"
+                                       name="yadore_overlay_enabled"
+                                       id="yadore_overlay_enabled"
+                                       value="1"
+                                       <?php checked($overlay_enabled); ?>>
+                                <strong><?php esc_html_e('Produkt-Overlay aktivieren', 'yadore-monetizer'); ?></strong>
+                            </label>
+                            <p class="form-description">
+                                <?php esc_html_e('Blendet ein Overlay mit Produktempfehlungen auf Beitragsseiten ein.', 'yadore-monetizer'); ?>
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="yadore_auto_detection">
+                                <input type="checkbox"
+                                       name="yadore_auto_detection"
+                                       id="yadore_auto_detection"
+                                       value="1"
+                                       <?php checked($auto_detection_enabled); ?>>
+                                <strong><?php esc_html_e('Automatische Produktempfehlungen einfügen', 'yadore-monetizer'); ?></strong>
+                            </label>
+                            <p class="form-description">
+                                <?php esc_html_e('Fügt passende Produkte automatisch in den Beitragsinhalt ein.', 'yadore-monetizer'); ?>
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="yadore_auto_scan_posts">
+                                <input type="checkbox"
+                                       name="yadore_auto_scan_posts"
+                                       id="yadore_auto_scan_posts"
+                                       value="1"
+                                       <?php checked($auto_scan_enabled); ?>>
+                                <strong><?php esc_html_e('Automatischen Beitrags-Scan aktivieren', 'yadore-monetizer'); ?></strong>
+                            </label>
+                            <p class="form-description">
+                                <?php esc_html_e('Führt bei jedem Speichern einen KI-Scan aus und hält Produktempfehlungen aktuell.', 'yadore-monetizer'); ?>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
