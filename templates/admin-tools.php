@@ -251,7 +251,13 @@
                                                 <?php esc_html_e('Choose files', 'yadore-monetizer'); ?>
                                             </button>
                                         </div>
-                                        <input type="file" id="import-file" accept="<?php echo esc_attr($import_accept_raw); ?>" multiple style="display: none;" aria-hidden="true">
+                                        <input
+                                            type="file"
+                                            id="import-file"
+                                            class="yadore-hidden-file-input screen-reader-text"
+                                            accept="<?php echo esc_attr($import_accept_raw); ?>"
+                                            multiple
+                                        >
                                     </div>
                                 </div>
 
