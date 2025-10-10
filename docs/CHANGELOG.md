@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.47.32 - 2025-10-30
+- Prevented the import drop zone click handler from re-triggering the hidden file input so the browser opens the picker without hitting a recursive jQuery stack overflow when Upload File is pressed.
+- Guarded keyboard activation on the drop zone to avoid re-entering the handler when the native file input fires key events while keeping Enter/Space support intact.
+- Bumped the plugin metadata and admin tooling banner to 3.47.32 to capture the uploader stability fix.
+
 ## 3.47.31 - 2025-10-29
 - Hardened the admin bootstrap so the localized configuration object is always defined, preventing the tools script from aborting before wiring up UI handlers when translations or enqueue timing fail.
 - Added runtime validation with explicit console feedback whenever the AJAX endpoint data is missing to make diagnosing enqueue issues straightforward.

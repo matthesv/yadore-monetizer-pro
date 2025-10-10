@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.31 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.47.32 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
@@ -21,7 +21,7 @@
 
     // Global variables
     window.yadoreAdmin = {
-        version: readString(yadore_admin.version, '3.47.31'),
+        version: readString(yadore_admin.version, '3.47.32'),
         ajax_url: readString(yadore_admin.ajax_url),
         nonce: readString(yadore_admin.nonce),
         debug: readBoolean(yadore_admin.debug),
@@ -2809,9 +2809,18 @@
 
             // File upload handling
             if ($uploadArea.length && $fileInput.length) {
-                $uploadArea.on('click', () => {
+                $uploadArea.on('click', (e) => {
+                    if (e.target === $fileInput[0]) {
+                        return;
+                    }
+
+                    e.preventDefault();
                     $fileInput.trigger('click');
                 }).on('keydown', (e) => {
+                    if (e.target === $fileInput[0]) {
+                        return;
+                    }
+
                     const key = e.key || e.keyCode;
                     if (key === 'Enter' || key === ' ' || key === 13 || key === 32) {
                         e.preventDefault();
