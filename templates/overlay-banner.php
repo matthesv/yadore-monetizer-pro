@@ -1,7 +1,13 @@
 <?php
-if (!get_option('yadore_overlay_enabled', true) || is_admin()) {
+if (is_admin()) {
     return;
 }
+
+$overlay_context = isset($overlay_context) && is_array($overlay_context)
+    ? $overlay_context
+    : array();
+
+$overlay_ai_enabled = !empty($overlay_context['ai_enabled']);
 ?>
 
 <div id="yadore-overlay-banner" style="display: none;">
@@ -16,7 +22,7 @@ if (!get_option('yadore_overlay_enabled', true) || is_admin()) {
             <div class="overlay-loading">
                 <div class="loading-spinner"></div>
                 <p>Empfehlungen werden geladen...</p>
-                <?php if (get_option('yadore_ai_enabled', false)): ?>
+                <?php if ($overlay_ai_enabled): ?>
                     <small>KI analysiert den Inhalt für die beste Empfehlung</small>
                 <?php endif; ?>
             </div>

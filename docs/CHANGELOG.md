@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.48.15 - 2025-11-22
+- Cached frequently accessed plugin settings and normalised boolean flags to avoid repeated database reads during front-end requests.
+- Hardened automatic content injection by validating context, sanitising template choices, and skipping non-main queries for safer rendering.
+- Optimised the overlay banner bootstrap to reuse cached AI availability information instead of querying options within the template.
+- Bumped plugin metadata and documentation to version 3.48.15.
+
 # 3.48.14 - 2025-11-21
 - Added a guided setup checklist on the settings dashboard with quick actions to focus missing configuration items.
 - Surfaced configuration status indicators in the settings navigation so admins can spot pending tasks instantly.

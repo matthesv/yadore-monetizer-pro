@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.14
+Version: 3.48.15
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.14');
+define('YADORE_PLUGIN_VERSION', '3.48.15');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -42,6 +42,7 @@ class YadoreMonetizer {
     private $latest_error_notice = null;
     private $latest_error_notice_checked = false;
     private $table_exists_cache = array();
+    private $settings_cache = array();
 
     public function __construct() {
         self::$instance = $this;
@@ -7275,6 +7276,64 @@ HTML
         return $options;
     }
 
+    private function get_setting($option_name, $default = null, ?callable $sanitize_callback = null) {
+        if (array_key_exists($option_name, $this->settings_cache)) {
+            return $this->settings_cache[$option_name];
+        }
+
+        $value = get_option($option_name, $default);
+
+        if ($value === null && $default !== null) {
+            $value = $default;
+        }
+
+        if ($sanitize_callback !== null) {
+            $value = call_user_func($sanitize_callback, $value, $default);
+        }
+
+        $this->settings_cache[$option_name] = $value;
+
+        return $value;
+    }
+
+    private function get_bool_setting($option_name, $default = false) {
+        $value = $this->get_setting(
+            $option_name,
+            $default,
+            function ($raw) use ($default) {
+                if ($raw === null || $raw === '') {
+                    return $default;
+                }
+
+                if (is_bool($raw)) {
+                    return $raw;
+                }
+
+                if (is_numeric($raw)) {
+                    return intval($raw) === 1;
+                }
+
+                $raw_string = strtolower(trim((string) $raw));
+
+                if ($raw_string === '') {
+                    return $default;
+                }
+
+                if (in_array($raw_string, array('1', 'true', 'yes', 'on'), true)) {
+                    return true;
+                }
+
+                if (in_array($raw_string, array('0', 'false', 'no', 'off'), true)) {
+                    return false;
+                }
+
+                return (bool) $raw;
+            }
+        );
+
+        return (bool) $value;
+    }
+
     private function interpret_boolean_flag($value) {
         if (is_bool($value)) {
             return $value;
@@ -8178,7 +8237,7 @@ HTML
 
     // v2.7: Shortcode Implementation (Enhanced)
     public function shortcode_products($atts) {
-        if (!get_option('yadore_shortcode_enabled', true)) {
+        if (!$this->get_bool_setting('yadore_shortcode_enabled', true)) {
             return '';
         }
 
@@ -8256,8 +8315,16 @@ HTML
             }
 
             if ($template_key === '') {
+                $default_template = $this->get_setting(
+                    'yadore_default_shortcode_template',
+                    'default-grid',
+                    function ($value) {
+                        return is_string($value) ? sanitize_text_field($value) : 'default-grid';
+                    }
+                );
+
                 $template_key = $this->sanitize_template_selection(
-                    get_option('yadore_default_shortcode_template', 'default-grid'),
+                    $default_template,
                     'shortcode',
                     'default-grid'
                 );
@@ -8295,7 +8362,15 @@ HTML
 
     // v2.7: Enhanced Auto-Injection
     public function auto_inject_products($content) {
-        if (!get_option('yadore_auto_detection', true) || !is_single() || is_admin()) {
+        if (!$this->get_bool_setting('yadore_auto_detection', true) || !is_single() || is_admin()) {
+            return $content;
+        }
+
+        if (function_exists('in_the_loop') && !in_the_loop()) {
+            return $content;
+        }
+
+        if (function_exists('is_main_query') && !is_main_query()) {
             return $content;
         }
 
@@ -8323,11 +8398,40 @@ HTML
             }
 
             // v2.7: Intelligent content injection
-            $injection_method = get_option('yadore_injection_method', 'after_paragraph');
-            $injection_position = get_option('yadore_injection_position', 2);
+            $injection_method = $this->get_setting(
+                'yadore_injection_method',
+                'after_paragraph',
+                function ($value) {
+                    $allowed = array('after_paragraph', 'end_of_content', 'before_content');
+                    $candidate = is_string($value) ? sanitize_key($value) : '';
+
+                    if ($candidate === '' || !in_array($candidate, $allowed, true)) {
+                        return 'after_paragraph';
+                    }
+
+                    return $candidate;
+                }
+            );
+
+            $injection_position = $this->get_setting(
+                'yadore_injection_position',
+                2,
+                function ($value) {
+                    $position = is_numeric($value) ? intval($value) : 2;
+                    return max(1, $position);
+                }
+            );
+
+            $template_setting = $this->get_setting(
+                'yadore_auto_injection_template',
+                'default-inline',
+                function ($value) {
+                    return is_string($value) ? sanitize_text_field($value) : 'default-inline';
+                }
+            );
 
             $template_key = $this->sanitize_template_selection(
-                get_option('yadore_auto_injection_template', 'default-inline'),
+                $template_setting,
                 'shortcode',
                 'default-inline'
             );
@@ -8341,6 +8445,10 @@ HTML
                 'limit' => 3,
                 'template' => $template_key,
             ));
+
+            if (!is_string($injected_markup) || $injected_markup === '') {
+                return $content;
+            }
 
             switch ($injection_method) {
                 case 'after_paragraph':
@@ -11046,13 +11154,16 @@ HTML
     }
 
     public function render_overlay() {
-        if (!get_option('yadore_overlay_enabled', true) || is_admin() || !is_single()) {
+        if (!$this->get_bool_setting('yadore_overlay_enabled', true) || is_admin() || !is_single()) {
             return;
         }
 
         try {
             $template_file = YADORE_PLUGIN_DIR . 'templates/overlay-banner.php';
             if (file_exists($template_file)) {
+                $overlay_context = array(
+                    'ai_enabled' => $this->get_bool_setting('yadore_ai_enabled', false),
+                );
                 include $template_file;
             }
         } catch (Exception $e) {
