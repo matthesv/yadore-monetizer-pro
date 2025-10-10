@@ -1611,7 +1611,7 @@
 
                 const hasKeyword = typeof item.primary_keyword === 'string' && item.primary_keyword.trim() !== '';
                 const keywordValue = hasKeyword ? this.escapeHtml(item.primary_keyword) : placeholder;
-                const keywordClass = hasKeyword ? 'keyword-chip' : 'keyword-chip is-empty';
+                const keywordClass = hasKeyword ? 'scan-result-keyword' : 'scan-result-keyword is-empty';
 
                 const rawConfidence = typeof item.keyword_confidence === 'number'
                     ? item.keyword_confidence

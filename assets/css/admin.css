@@ -1001,7 +1001,7 @@
     font-weight: var(--yadore-font-weight-semibold, 600);
 }
 
-.scan-results-table .keyword-chip {
+.scan-result-keyword {
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
@@ -1016,13 +1016,7 @@
     line-height: 1.3;
 }
 
-.scan-results-table .keyword-chip::before,
-.scan-result-card .keyword-chip::before {
-    content: none;
-    display: none;
-}
-
-.scan-results-table .keyword-chip.is-empty {
+.scan-result-keyword.is-empty {
     background: var(--yadore-color-surface-subtle);
     color: var(--yadore-color-text-subtle);
     border: 1px dashed var(--yadore-border-subtle);
