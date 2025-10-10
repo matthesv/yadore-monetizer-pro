@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.39 - Admin CSS (Complete) */
+/* Yadore Monetizer Pro v3.48.9 - Admin CSS (Complete) */
 
 .yadore-hidden-file-input {
     position: absolute;
@@ -1041,6 +1041,8 @@
     font-weight: var(--yadore-font-weight-medium, 500);
     max-width: 100%;
     word-break: break-word;
+    flex-wrap: wrap;
+    white-space: normal;
 }
 
 .scan-results-table .keyword-chip.is-empty {
@@ -1163,6 +1165,15 @@
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
         gap: var(--yadore-space-3);
+    }
+
+    .scan-results-table td.column-keyword {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+    }
+
+    .scan-results-table td.column-keyword::before {
+        margin-bottom: var(--yadore-space-2);
     }
 
     .scan-results-table td::before {

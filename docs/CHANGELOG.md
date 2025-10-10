@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.48.9 - 2025-11-16
+- Improved the mobile layout of scan results keywords by stacking labels and keyword chips for narrow screens.
+- Allowed keyword chips to wrap on small viewports so long product names remain fully visible.
+- Bumped plugin metadata, documentation, and language catalog versions to 3.48.9.
+
 # 3.48.8 - 2025-11-15
 - Refactored the Recent Scan Results layout into a responsive card-table hybrid with confidence meters, AI badges, and mobile-friendly labels.
 - Animated inline re-scan action buttons while requests run and improved accessibility with live-region updates.

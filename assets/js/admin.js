@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.48.8 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.48.9 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
