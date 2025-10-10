@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.47.32 - Admin JavaScript (Complete) */
+/* Yadore Monetizer Pro v3.47.33 - Admin JavaScript (Complete) */
 (function($) {
     'use strict';
 
@@ -21,7 +21,7 @@
 
     // Global variables
     window.yadoreAdmin = {
-        version: readString(yadore_admin.version, '3.47.32'),
+        version: readString(yadore_admin.version, '3.47.33'),
         ajax_url: readString(yadore_admin.ajax_url),
         nonce: readString(yadore_admin.nonce),
         debug: readBoolean(yadore_admin.debug),
@@ -68,6 +68,51 @@
             }
 
             return typeof fallback === 'string' ? fallback : '';
+        },
+
+        // Utility helper: keeps the tools layout in sync with the "hidden" utility without relying on inline display toggles.
+        setElementVisibility: function($element, shouldShow, options = {}) {
+            if (!$element || !$element.length) {
+                return;
+            }
+
+            const settings = Object.assign({
+                animate: false,
+                duration: 150
+            }, options);
+
+            const cleanupDisplay = () => {
+                if ($element.attr('style') && /display:/i.test($element.attr('style'))) {
+                    $element.css('display', '');
+                }
+            };
+
+            if (shouldShow) {
+                $element.removeClass('hidden').attr('aria-hidden', 'false');
+
+                if (settings.animate) {
+                    $element.stop(true, true).hide().slideDown(settings.duration, () => {
+                        cleanupDisplay();
+                    });
+                } else {
+                    cleanupDisplay();
+                }
+
+                return;
+            }
+
+            const finalizeHide = () => {
+                $element.addClass('hidden').attr('aria-hidden', 'true');
+                cleanupDisplay();
+            };
+
+            if (settings.animate) {
+                $element.stop(true, true).slideUp(settings.duration, () => {
+                    finalizeHide();
+                });
+            } else {
+                finalizeHide();
+            }
         },
 
         validateAjaxConfig: function() {
@@ -2656,18 +2701,7 @@
 
             const applyState = (animate) => {
                 const shouldShow = $select.val() === 'custom';
-
-                if (animate) {
-                    if (shouldShow) {
-                        $custom.stop(true, true).slideDown(150);
-                    } else {
-                        $custom.stop(true, true).slideUp(150);
-                    }
-                } else if (shouldShow) {
-                    $custom.stop(true, true).show();
-                } else {
-                    $custom.stop(true, true).hide();
-                }
+                this.setElementVisibility($custom, shouldShow, { animate });
             };
 
             applyState(false);
@@ -2850,13 +2884,14 @@
             }
 
             // Modal functionality
-            $('.modal-close').on('click', function() {
-                $(this).closest('.yadore-modal').hide();
+            $('.modal-close').on('click', (event) => {
+                const $modal = $(event.currentTarget).closest('.yadore-modal');
+                this.setElementVisibility($modal, false);
             });
 
             // Keyword analyzer
             $('#open-keyword-analyzer').on('click', () => {
-                $('#keyword-analyzer-modal').show();
+                this.setElementVisibility($('#keyword-analyzer-modal'), true);
             });
 
             $('#analyze-keywords').on('click', (e) => {
@@ -3029,13 +3064,15 @@
         },
 
         resetExportFeedback: function() {
-            $('#export-results').hide();
+            const $results = $('#export-results');
+            this.setElementVisibility($results, false);
             this.setExportProgress(0);
             $('#export-status').text('');
         },
 
         updateExportStatus: function(message) {
-            $('#export-results').show();
+            const $results = $('#export-results');
+            this.setElementVisibility($results, true);
             $('#export-status').text(message);
         },
 
@@ -3109,7 +3146,7 @@
 
             if (!accepted.length) {
                 this.importFiles = [];
-                $('#import-results').hide();
+                this.setElementVisibility($('#import-results'), false);
                 $('#start-import, #validate-import').prop('disabled', true);
                 alert(`Only ${formatsLabel} files are supported.`);
                 $('#import-file').val('');
@@ -3122,7 +3159,9 @@
                 return `<li><strong>${this.escapeHtml(file.name)}</strong> <em>(${size})</em>`;
             }).join('');
 
-            $('#import-results').show().find('.import-summary').html(`
+            const $results = $('#import-results');
+            this.setElementVisibility($results, true);
+            $results.find('.import-summary').html(`
                 <p>${accepted.length} file(s) ready for processing:</p>
                 <ul class="import-file-list">${summary}</ul>
             `);
@@ -3153,7 +3192,8 @@
             this.importFiles.forEach((file) => formData.append('files[]', file));
 
             button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Processing...');
-            resultsBox.show().find('.import-summary').html('<p><span class="dashicons dashicons-update-alt spinning"></span> Processing import...</p>');
+            this.setElementVisibility(resultsBox, true);
+            resultsBox.find('.import-summary').html('<p><span class="dashicons dashicons-update-alt spinning"></span> Processing import...</p>');
 
             $.ajax({
                 url: this.ajax_url,
@@ -3190,6 +3230,8 @@
             if (!box.length) {
                 return;
             }
+
+            this.setElementVisibility(box, true);
 
             const stats = data?.stats || {};
             const messages = Array.isArray(data?.messages) ? data.messages : [];
@@ -3488,7 +3530,8 @@
             const resultsBox = $('#performance-scan-results');
 
             button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt spinning"></span> Running...');
-            resultsBox.show().html('<p><span class="dashicons dashicons-update-alt spinning"></span> Collecting diagnostics...</p>');
+            this.setElementVisibility(resultsBox, true);
+            resultsBox.html('<p><span class="dashicons dashicons-update-alt spinning"></span> Collecting diagnostics...</p>');
 
             $.post(this.ajax_url, {
                 action: 'yadore_test_performance',
@@ -3719,7 +3762,9 @@
                         ? keywords.map((keyword) => `<span class="keyword-pill">${this.escapeHtml(keyword)}</span>`).join('')
                         : '<p>No keywords detected.</p>';
 
-                    $('#analyzer-results').show().find('.keyword-suggestions').html(`
+                    const $results = $('#analyzer-results');
+                    this.setElementVisibility($results, true);
+                    $results.find('.keyword-suggestions').html(`
                         ${suggestions}
                         ${summary ? `<p class="keyword-summary">${this.escapeHtml(summary)}</p>` : ''}
                     `);
