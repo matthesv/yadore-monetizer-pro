@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.17
+Version: 3.48.18
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.17');
+define('YADORE_PLUGIN_VERSION', '3.48.18');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -976,6 +976,7 @@ HTML
         }
 
         $entries = array();
+        $defaults = $this->get_default_translation_catalog();
 
         foreach ($keys as $index => $raw_key) {
             $key = sanitize_text_field($raw_key);
@@ -988,9 +989,18 @@ HTML
 
             foreach ($locales as $locale => $label) {
                 $value = '';
+                $default_value = '';
+
+                if (isset($defaults[$key][$locale]['default']) && is_string($defaults[$key][$locale]['default'])) {
+                    $default_value = sanitize_textarea_field($defaults[$key][$locale]['default']);
+                }
 
                 if (isset($values[$locale]) && is_array($values[$locale]) && array_key_exists($index, $values[$locale])) {
                     $value = sanitize_textarea_field($values[$locale][$index]);
+                }
+
+                if ($value !== '' && $default_value !== '' && $value === $default_value) {
+                    $value = '';
                 }
 
                 if ($value !== '') {
@@ -1280,8 +1290,14 @@ HTML
         }
 
         if ($page === 'translations') {
-            $data['custom_translations'] = $this->get_custom_translations();
-            $data['translation_locales'] = $this->get_translation_locales();
+            $locales = $this->get_translation_locales();
+            $custom_translations = $this->get_custom_translations();
+            $default_catalog = $this->get_default_translation_catalog();
+
+            $data['custom_translations'] = $custom_translations;
+            $data['translation_locales'] = $locales;
+            $data['translation_defaults'] = $default_catalog;
+            $data['translation_entries'] = $this->build_translation_entries($default_catalog, $custom_translations, array_keys($locales));
             $data['translation_notices'] = $this->get_translation_notices();
         }
 
@@ -1293,6 +1309,123 @@ HTML
             'de_DE' => __('German (de_DE)', 'yadore-monetizer'),
             'en_US' => __('English (en_US)', 'yadore-monetizer'),
         );
+    }
+
+    private function get_default_translation_catalog() {
+        $locales = array_keys($this->get_translation_locales());
+        $catalog = array();
+
+        foreach ($locales as $locale) {
+            $entries = $this->load_locale_translation_entries($locale);
+
+            if (empty($entries)) {
+                continue;
+            }
+
+            foreach ($entries as $key => $value) {
+                if (!is_string($key) || $key === '') {
+                    continue;
+                }
+
+                if (!isset($catalog[$key])) {
+                    $catalog[$key] = array();
+                }
+
+                $catalog[$key][$locale] = array(
+                    'default' => $value,
+                );
+            }
+        }
+
+        if (!empty($catalog)) {
+            ksort($catalog, SORT_STRING);
+        }
+
+        return $catalog;
+    }
+
+    private function load_locale_translation_entries($locale) {
+        $file = YADORE_PLUGIN_DIR . 'languages/yadore-monetizer-' . $locale . '.php';
+
+        if (!file_exists($file)) {
+            return array();
+        }
+
+        $data = include $file;
+
+        if (!is_array($data)) {
+            return array();
+        }
+
+        $entries = array();
+
+        $sections = array('messages', 'singular');
+
+        foreach ($sections as $section) {
+            if (!isset($data[$section]) || !is_array($data[$section])) {
+                continue;
+            }
+
+            foreach ($data[$section] as $key => $value) {
+                $string_value = $this->normalize_catalog_value($value);
+
+                if ($string_value === '' || !is_string($key) || $key === '') {
+                    continue;
+                }
+
+                $entries[$key] = $string_value;
+            }
+        }
+
+        if (isset($data['plural']) && is_array($data['plural'])) {
+            foreach ($data['plural'] as $key => $value) {
+                $string_value = $this->normalize_catalog_value($value);
+
+                if ($string_value === '' || !is_string($key) || $key === '') {
+                    continue;
+                }
+
+                $entries[$key] = $string_value;
+            }
+        }
+
+        if (!empty($entries)) {
+            ksort($entries, SORT_STRING);
+        }
+
+        return $entries;
+    }
+
+    private function normalize_catalog_value($value) {
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+
+        if (is_array($value)) {
+            $parts = array();
+
+            foreach ($value as $part) {
+                if (is_scalar($part)) {
+                    $string_part = (string) $part;
+
+                    if ($string_part === '') {
+                        continue;
+                    }
+
+                    $parts[] = $string_part;
+                }
+            }
+
+            if (!empty($parts)) {
+                return implode("\n", $parts);
+            }
+        }
+
+        return '';
     }
 
     private function get_custom_translations() {
@@ -1339,6 +1472,63 @@ HTML
         }
 
         return $sanitized;
+    }
+
+    private function build_translation_entries(array $defaults, array $custom, array $locales) {
+        $all_keys = array_unique(array_merge(array_keys($defaults), array_keys($custom)));
+        sort($all_keys, SORT_STRING);
+
+        $rows = array();
+
+        foreach ($all_keys as $key) {
+            if (!is_string($key) || $key === '') {
+                continue;
+            }
+
+            $row_locales = array();
+
+            foreach ($locales as $locale) {
+                $default_value = '';
+
+                if (isset($defaults[$key][$locale]['default']) && is_string($defaults[$key][$locale]['default'])) {
+                    $default_value = $defaults[$key][$locale]['default'];
+                }
+
+                $custom_value = '';
+
+                if (isset($custom[$key]) && isset($custom[$key][$locale]) && is_string($custom[$key][$locale])) {
+                    $custom_value = $custom[$key][$locale];
+                }
+
+                $row_locales[$locale] = array(
+                    'default' => $default_value,
+                    'value' => $custom_value,
+                );
+            }
+
+            $rows[] = array(
+                'key' => $key,
+                'locales' => $row_locales,
+            );
+        }
+
+        if (empty($rows)) {
+            $blank_locales = array();
+
+            foreach ($locales as $locale) {
+                $blank_locales[$locale] = array(
+                    'default' => '',
+                    'value' => '',
+                );
+            }
+
+            $rows[] = array(
+                'key' => '',
+                'locales' => $blank_locales,
+            );
+        }
+
+        return $rows;
     }
 
     private function get_translation_notices() {

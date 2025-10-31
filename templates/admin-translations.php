@@ -12,21 +12,51 @@ if (empty($locales)) {
     );
 }
 
-$translations = array();
+$entries = array();
 
-if (isset($custom_translations) && is_array($custom_translations) && !empty($custom_translations)) {
+if (isset($translation_entries) && is_array($translation_entries)) {
+    $entries = array_values($translation_entries);
+} elseif (isset($custom_translations) && is_array($custom_translations)) {
     foreach ($custom_translations as $key => $values) {
-        $translations[] = array(
+        if (!is_string($key)) {
+            continue;
+        }
+
+        $locale_entries = array();
+
+        if (is_array($values)) {
+            foreach ($values as $locale_key => $value) {
+                if (!is_string($locale_key)) {
+                    continue;
+                }
+
+                $locale_entries[$locale_key] = array(
+                    'default' => '',
+                    'value' => is_string($value) ? $value : '',
+                );
+            }
+        }
+
+        $entries[] = array(
             'key' => $key,
-            'values' => is_array($values) ? $values : array(),
+            'locales' => $locale_entries,
         );
     }
 }
 
-if (empty($translations)) {
-    $translations[] = array(
+if (empty($entries)) {
+    $blank_locales = array();
+
+    foreach ($locales as $locale => $label) {
+        $blank_locales[$locale] = array(
+            'default' => '',
+            'value' => '',
+        );
+    }
+
+    $entries[] = array(
         'key' => '',
-        'values' => array(),
+        'locales' => $blank_locales,
     );
 }
 
@@ -89,9 +119,9 @@ $notices = isset($translation_notices) && is_array($translation_notices) ? $tran
                 </tr>
             </thead>
             <tbody id="yadore-translation-rows">
-                <?php foreach ($translations as $index => $translation) :
+                <?php foreach ($entries as $index => $translation) :
                     $row_key = isset($translation['key']) ? (string) $translation['key'] : '';
-                    $row_values = isset($translation['values']) && is_array($translation['values']) ? $translation['values'] : array();
+                    $row_locales = isset($translation['locales']) && is_array($translation['locales']) ? $translation['locales'] : array();
                     ?>
                     <tr>
                         <td class="column-primary">
@@ -108,7 +138,10 @@ $notices = isset($translation_notices) && is_array($translation_notices) ? $tran
                             />
                         </td>
                         <?php foreach ($locales as $locale => $label) :
-                            $value = isset($row_values[$locale]) ? (string) $row_values[$locale] : '';
+                            $locale_data = isset($row_locales[$locale]) && is_array($row_locales[$locale]) ? $row_locales[$locale] : array();
+                            $default_text = isset($locale_data['default']) ? (string) $locale_data['default'] : '';
+                            $custom_value = isset($locale_data['value']) ? (string) $locale_data['value'] : '';
+                            $textarea_value = $custom_value !== '' ? $custom_value : $default_text;
                             ?>
                             <td>
                                 <label class="screen-reader-text" for="yadore-translation-value-<?php echo esc_attr($locale); ?>-<?php echo (int) $index; ?>">
@@ -126,7 +159,13 @@ $notices = isset($translation_notices) && is_array($translation_notices) ? $tran
                                     rows="2"
                                     class="widefat"
                                     placeholder="<?php echo esc_attr(sprintf(/* translators: %s: Locale code. */ __('Translation (%s)', 'yadore-monetizer'), $locale)); ?>"
-                                ><?php echo esc_textarea($value); ?></textarea>
+                                ><?php echo esc_textarea($textarea_value); ?></textarea>
+                                <?php if ($default_text !== '') : ?>
+                                    <p class="description yadore-default-translation">
+                                        <strong><?php esc_html_e('Default:', 'yadore-monetizer'); ?></strong>
+                                        <span><?php echo esc_html($default_text); ?></span>
+                                    </p>
+                                <?php endif; ?>
                             </td>
                         <?php endforeach; ?>
                         <td class="yadore-translation-actions">
