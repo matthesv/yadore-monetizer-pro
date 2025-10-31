@@ -1,11 +1,11 @@
-# Yadore Monetizer Pro v3.47.11 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.48.16 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.47.11 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.48.16 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
-✅ **7 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
+✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
 ✅ **AI Content Analysis** - Gemini 2.5 & Live Preview Model Support mit intelligenter Keyword-Erkennung
 ✅ **Advanced Analytics** - Umfassende Performance-Berichte und Statistiken  
 ✅ **Bulk Post Scanner** - Automatische Content-Analyse für alle Posts  
@@ -15,16 +15,16 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.47.11**
+## 🌟 **NEU IN VERSION 3.48.16**
 
-- 🎯 **Hero Layout Polish** – Headline, Icon und CTA-Gruppen justieren sich nun automatisch auf Tablet & Mobile, sodass lange Titel nicht mehr gestaucht werden und Buttons sauber mittig bleiben.
-- 📱 **Scanner Intro Responsiveness** – Das Onboarding-Panel stapelt sich elegant, hält gleichmäßige Abstände und verhindert abgeschnittene Texte in kleineren Viewports.
-- ♻️ **Version Refresh** – Alle Assets, Überschriften und Dokumentationen reflektieren die aktuelle Release-Version 3.47.11.
+- 🗣️ **Custom Translation Manager** – Neue Admin-Seite „Translations“ zum Pflegen von Schlüssel-Wert-Übersetzungen für Deutsch und Englisch, inklusive dynamischer Formularzeilen.
+- 💾 **Optionen-Merge** – Speichert Anpassungen in der Option `yadore_custom_translations` und lädt sie vor den gettext-Filtern, sodass eigene Strings sofort greifen.
+- 🧩 **Asset-Update** – Frische JS- und Dokumentationsstände für Version 3.48.16 inklusive Übersetzungs-Helfer.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
 ### **WordPress Admin Integration (Alle Features):**
-✅ **WordPress Admin Menu** - 6 Admin-Seiten vollständig verfügbar
+✅ **WordPress Admin Menu** - 8 Admin-Seiten vollständig verfügbar
 ✅ **Plugin Lifecycle** - Proper activation/deactivation mit Setup  
 ✅ **Settings Management** - WordPress-native Einstellungen mit 5 Tabs  
 ✅ **AJAX Security** - WordPress nonces für alle 22 Endpoints
@@ -36,13 +36,14 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **Custom Post Types** - Erweiterte WordPress-Features  
 ✅ **Cron Jobs** - Automatische Maintenance-Tasks  
 
-### **7 WordPress Admin Pages (Alle verfügbar):**
+### **8 WordPress Admin Pages (Alle verfügbar):**
 🏠 **Dashboard** - Enhanced mit Stats, Shortcode Generator, System Status
 ⚙️ **Settings** - 5 Tabs: General, AI, Display, Performance, Advanced
 📄 **Post Scanner** - Bulk Scanner, Single Post Scanner, Results Analytics
 🔍 **Debug & Errors** - System Health, Error Logs, Diagnostic Tools
 📊 **Analytics** - Performance Reports, Traffic Analysis, Revenue Metrics
 🧭 **Styleguide** - Token-Referenz, Komponentenbibliothek & Copy-Snippets
+🌐 **Translations** - Benutzerdefinierte Übersetzungen für gespeicherte Strings verwalten
 🛠️ **Tools** - Data Export/Import, Maintenance, Configuration Tools
 
 ## 🎯 **SHORTCODE SYSTEM - ERWEITERTE FUNKTIONALITÄT:**
@@ -65,7 +66,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.47.11:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.48.16:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -76,11 +77,11 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 
 ### **Plugin Architecture:**
 - **Plugin Files:** Modular Core inklusive Update-Checker-Bibliothek
-- **Templates:** 7 Admin + 4 Frontend Templates
+- **Templates:** 8 Admin + 4 Frontend Templates
 - **Database Tables:** 5 enhanced tables
 - **AJAX Endpoints:** 22 vollständig implementiert (inkl. Cache- & Diagnose-Tools)
 - **CSS Files:** 3 (Design System + Admin + Frontend)
-- **JavaScript Files:** 2 (Admin + Frontend)
+- **JavaScript Files:** 3 (Admin + Frontend + Übersetzungshelfer)
 
 ### **Enhanced Database Schema:**
 ```sql
@@ -121,12 +122,13 @@ wp_yadore_analytics        - Performance Analytics (NEW)
 1. **Plugin hochladen:** Upload nach `/wp-content/plugins/yadore-monetizer-pro/`
 2. **Plugin aktivieren:** Über WordPress Admin aktivieren
 3. **✅ Alle Features verfügbar** - Vollständige Funktionalität sofort
-4. **Admin Menu:** "Yadore Monetizer" mit 6 Seiten verfügbar
+4. **Admin Menu:** "Yadore Monetizer" mit 8 Seiten verfügbar
 5. **Konfiguration:** API-Keys in Settings einrichten
 
 ### **Verifikation (Alle Features funktional):**
-✅ "Yadore Monetizer" erscheint im WordPress Admin Menu  
-✅ Alle 6 Admin-Seiten sind ohne Fehler erreichbar
+✅ "Yadore Monetizer" erscheint im WordPress Admin Menu
+✅ Alle 8 Admin-Seiten sind ohne Fehler erreichbar
+✅ Neue „Translations“-Seite speichert individuelle Übersetzungen sicher per Nonce
 ✅ Dashboard zeigt vollständige System-Übersicht  
 ✅ Shortcode funktioniert: `[yadore_products keyword="smartphone"]`  
 ✅ AI Analysis verfügbar (nach Gemini API Key Setup)  
@@ -271,18 +273,18 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.47.11 - FUTURE-PROOF EXPERIENCE RELEASE!**
+## 🎉 **v3.48.16 - FUTURE-PROOF EXPERIENCE RELEASE!**
 
-### **Neue Highlights in v3.47.11:**
-- 🧭 **Hero Alignment Refresh** – Das Dashboard-Header-Grid sorgt für klare Zeilenumbrüche, gleichmäßige CTA-Abstände und ein perfekt mittiges Layout – selbst bei langen Seitentiteln.
-- 📊 **Meta Card Consistency** – Die Kennzahlen-Badges greifen auf harmonisierte Mindestbreiten zurück, sodass Karten niemals springen oder abgeschnittene Texte zeigen.
-- 🪄 **Scanner Intro Experience** – Das Einstiegsbanner reagiert jetzt fluid auf Tablet & Mobile, inklusive flexibler Kartenhöhe und wohldosierter Gaps für bessere Lesbarkeit.
+### **Neue Highlights in v3.48.16:**
+- 🗣️ **Translations Admin Hub** – Eigenständige „Translations“-Seite mit dynamischen Formularzeilen für deutsch- und englischsprachige Overrides.
+- 🔄 **Runtime Merge** – Persistente Übersetzungen aus `yadore_custom_translations` werden vor den gettext-Filtern in die Kataloge injiziert.
+- 🧰 **Version Sync** – Aktualisierte Assets und Dokumentation spiegeln die neue Release-Version samt Übersetzungs-Workflow wider.
 
 **Alle Features sind verfügbar und voll funktional – jetzt mit Premium-UX!**
 
 ✅ **Status:** ALLE FUNKTIONEN INTEGRIERT
 ✅ **WordPress Integration:** 100% VOLLSTÄNDIG
-✅ **Admin Pages:** ALLE 7 SEITEN VERFÜGBAR
+✅ **Admin Pages:** ALLE 8 SEITEN VERFÜGBAR
 ✅ **Features:** COMPLETE FEATURE SET
 ✅ **AJAX Endpoints:** ALLE 22 FUNKTIONIEREN
 ✅ **Database:** ENHANCED SCHEMA
@@ -292,11 +294,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.47.11 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.48.16 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.48.10** - Production-Ready Market Release
+**Current Version: 3.48.16** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

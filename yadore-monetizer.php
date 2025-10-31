@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.15
+Version: 3.48.16
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.15');
+define('YADORE_PLUGIN_VERSION', '3.48.16');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -32,6 +32,8 @@ class YadoreMonetizer {
     public const DEFAULT_AI_PROMPT = "You are an affiliate marketing assistant. Analyze the provided blog post details and return JSON matching the schema (keyword, alternate_keywords, confidence, rationale).\n\nTitle: {title}\n\nContent:\n{content}\n\nPreviously selected keyword: {previous_keyword}\n\nAlways return a tangible, purchase-ready product keyword (brand + model when available) and provide up to three alternates for backup searches. If the content primarily describes a place or location (park, beach, city, venue, attraction, etc.), infer the most relevant physical product someone would need or buy for that setting before selecting the keyword.";
 
     public const LEGACY_AI_PROMPT = 'Analyze this content and identify the main product category that readers would be interested in purchasing. Return only the product keyword.';
+
+    public const CUSTOM_TRANSLATIONS_OPTION = 'yadore_custom_translations';
 
     private $debug_log = [];
     private $error_log = [];
@@ -190,6 +192,9 @@ class YadoreMonetizer {
 
             // v2.7: Advanced admin features
             $this->setup_advanced_admin_features();
+
+            // v3.48.16: Custom translation handling
+            $this->handle_translation_form();
 
             $this->log('Admin initialized successfully with advanced features', 'info');
 
@@ -941,6 +946,96 @@ HTML
         }
     }
 
+    private function handle_translation_form() {
+        if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
+
+        if ($page !== 'yadore-translations') {
+            return;
+        }
+
+        if (!isset($_POST['yadore_translations_nonce'])) {
+            return;
+        }
+
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        check_admin_referer('yadore_save_translations', 'yadore_translations_nonce');
+
+        $locales = $this->get_translation_locales();
+        $keys = isset($_POST['translation_keys']) ? (array) wp_unslash($_POST['translation_keys']) : array();
+        $values = array();
+
+        if (isset($_POST['translation_values']) && is_array($_POST['translation_values'])) {
+            $values = wp_unslash($_POST['translation_values']);
+        }
+
+        $entries = array();
+
+        foreach ($keys as $index => $raw_key) {
+            $key = sanitize_text_field($raw_key);
+
+            if ($key === '') {
+                continue;
+            }
+
+            $entry = array();
+
+            foreach ($locales as $locale => $label) {
+                $value = '';
+
+                if (isset($values[$locale]) && is_array($values[$locale]) && array_key_exists($index, $values[$locale])) {
+                    $value = sanitize_textarea_field($values[$locale][$index]);
+                }
+
+                if ($value !== '') {
+                    $entry[$locale] = $value;
+                }
+            }
+
+            if (!empty($entry)) {
+                $entries[$key] = $entry;
+            }
+        }
+
+        $stored = get_option(self::CUSTOM_TRANSLATIONS_OPTION, array());
+
+        $new_data = array(
+            'entries' => $entries,
+        );
+
+        if (isset($stored['plural']) && is_array($stored['plural']) && !empty($stored['plural'])) {
+            $new_data['plural'] = $stored['plural'];
+        }
+
+        update_option(self::CUSTOM_TRANSLATIONS_OPTION, $new_data);
+
+        $notices = array(
+            array(
+                'type' => 'success',
+                'message' => __('Custom translations saved.', 'yadore-monetizer'),
+            ),
+        );
+
+        set_transient('yadore_translations_notices', $notices, 30);
+
+        $redirect_url = add_query_arg(
+            array(
+                'page' => 'yadore-translations',
+                'yadore-translations-updated' => '1',
+            ),
+            admin_url('admin.php')
+        );
+
+        wp_safe_redirect($redirect_url);
+        exit;
+    }
+
     private function handle_settings_save() {
         try {
             if (!current_user_can('manage_options')) {
@@ -1184,7 +1279,78 @@ HTML
             $data['data_formats'] = $this->get_supported_data_formats();
         }
 
+        if ($page === 'translations') {
+            $data['custom_translations'] = $this->get_custom_translations();
+            $data['translation_locales'] = $this->get_translation_locales();
+            $data['translation_notices'] = $this->get_translation_notices();
+        }
+
         return $data;
+    }
+
+    private function get_translation_locales() {
+        return array(
+            'de_DE' => __('German (de_DE)', 'yadore-monetizer'),
+            'en_US' => __('English (en_US)', 'yadore-monetizer'),
+        );
+    }
+
+    private function get_custom_translations() {
+        $stored = get_option(self::CUSTOM_TRANSLATIONS_OPTION, array());
+
+        if (isset($stored['entries']) && is_array($stored['entries'])) {
+            $entries = $stored['entries'];
+        } elseif (isset($stored['singular']) && is_array($stored['singular'])) {
+            $entries = $stored['singular'];
+        } elseif (is_array($stored)) {
+            $entries = $stored;
+        } else {
+            $entries = array();
+        }
+
+        $sanitized = array();
+
+        foreach ($entries as $key => $locales) {
+            if (!is_string($key) || $key === '') {
+                continue;
+            }
+
+            if (!is_array($locales)) {
+                continue;
+            }
+
+            $prepared_locales = array();
+
+            foreach ($locales as $locale => $value) {
+                if (!is_string($locale) || $locale === '') {
+                    continue;
+                }
+
+                if (!is_scalar($value)) {
+                    continue;
+                }
+
+                $prepared_locales[$locale] = (string) $value;
+            }
+
+            if (!empty($prepared_locales)) {
+                $sanitized[$key] = $prepared_locales;
+            }
+        }
+
+        return $sanitized;
+    }
+
+    private function get_translation_notices() {
+        $notices = get_transient('yadore_translations_notices');
+
+        if ($notices === false) {
+            return array();
+        }
+
+        delete_transient('yadore_translations_notices');
+
+        return is_array($notices) ? $notices : array();
     }
 
     private function get_available_markets($force_refresh = false) {
@@ -1548,6 +1714,16 @@ HTML
                 array($this, 'admin_styleguide_page')
             );
 
+            // v3.48.16: Custom translation management
+            add_submenu_page(
+                'yadore-monetizer',
+                'Custom Translations',
+                'Translations',
+                'manage_options',
+                'yadore-translations',
+                array($this, 'admin_translations_page')
+            );
+
             // v2.7: Tools page
             add_submenu_page(
                 'yadore-monetizer',
@@ -1594,6 +1770,10 @@ HTML
         $this->render_admin_page('styleguide');
     }
 
+    public function admin_translations_page() {
+        $this->render_admin_page('translations');
+    }
+
     private function render_admin_page($page) {
         try {
             $template_file = YADORE_PLUGIN_DIR . "templates/admin-{$page}.php";
@@ -1619,6 +1799,7 @@ HTML
         try {
             $is_plugin_screen = strpos($hook, 'yadore') !== false;
             $is_tools_screen = strpos($hook, 'yadore-tools') !== false;
+            $is_translations_screen = strpos($hook, 'yadore-translations') !== false;
             $recent_error = $this->get_latest_unresolved_error();
             $needs_notice_assets = $recent_error !== null;
 
@@ -1671,6 +1852,16 @@ HTML
 
             if ($is_plugin_screen) {
                 wp_enqueue_script('yadore-charts');
+            }
+
+            if ($is_translations_screen) {
+                wp_enqueue_script(
+                    'yadore-admin-translations',
+                    YADORE_PLUGIN_URL . 'assets/js/admin-translations.js',
+                    array(),
+                    YADORE_PLUGIN_VERSION,
+                    true
+                );
             }
 
             if (function_exists('wp_set_script_translations')) {
