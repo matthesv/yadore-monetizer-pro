@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.20
+Version: 3.48.21
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.20');
+define('YADORE_PLUGIN_VERSION', '3.48.21');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -969,7 +969,14 @@ HTML
 
         $locales = $this->get_translation_locales();
         $keys = isset($_POST['translation_keys']) ? (array) wp_unslash($_POST['translation_keys']) : array();
+        $original_keys = isset($_POST['translation_original_keys']) ? (array) wp_unslash($_POST['translation_original_keys']) : array();
+        $removed_keys_input = isset($_POST['translation_removed_keys']) ? (array) wp_unslash($_POST['translation_removed_keys']) : array();
         $values = array();
+        $current_page = 1;
+
+        if (isset($_POST['paged'])) {
+            $current_page = max(1, (int) sanitize_text_field(wp_unslash($_POST['paged'])));
+        }
 
         if (isset($_POST['translation_values']) && is_array($_POST['translation_values'])) {
             $values = wp_unslash($_POST['translation_values']);
@@ -977,6 +984,22 @@ HTML
 
         $entries = array();
         $defaults = $this->get_default_translation_catalog();
+        $existing_entries = $this->get_custom_translations();
+        $removed_keys = array();
+
+        foreach ($removed_keys_input as $removed_key) {
+            if (!is_string($removed_key)) {
+                continue;
+            }
+
+            $sanitized_removed_key = trim((string) wp_check_invalid_utf8($removed_key));
+
+            if ($sanitized_removed_key === '') {
+                continue;
+            }
+
+            $removed_keys[$sanitized_removed_key] = true;
+        }
 
         foreach ($keys as $index => $raw_key) {
             if (!is_string($raw_key)) {
@@ -986,7 +1009,13 @@ HTML
             $key = wp_check_invalid_utf8($raw_key);
             $key = trim((string) $key);
 
-            if ($key === '') {
+            $original_key = '';
+
+            if (isset($original_keys[$index]) && is_string($original_keys[$index])) {
+                $original_key = trim((string) wp_check_invalid_utf8($original_keys[$index]));
+            }
+
+            if ($key === '' && $original_key === '') {
                 continue;
             }
 
@@ -996,7 +1025,7 @@ HTML
                 $value = '';
                 $default_value = '';
 
-                if (isset($defaults[$key][$locale]['default']) && is_string($defaults[$key][$locale]['default'])) {
+                if ($key !== '' && isset($defaults[$key][$locale]['default']) && is_string($defaults[$key][$locale]['default'])) {
                     $default_value = sanitize_textarea_field($defaults[$key][$locale]['default']);
                 }
 
@@ -1013,15 +1042,35 @@ HTML
                 }
             }
 
-            if (!empty($entry)) {
+            if (!empty($entry) && $key !== '') {
                 $entries[$key] = $entry;
+
+                if ($original_key !== '' && $original_key !== $key) {
+                    $removed_keys[$original_key] = true;
+                }
+            } elseif ($original_key !== '') {
+                $removed_keys[$original_key] = true;
             }
+        }
+
+        foreach ($removed_keys as $removed_key => $flag) {
+            if (isset($existing_entries[$removed_key])) {
+                unset($existing_entries[$removed_key]);
+            }
+        }
+
+        foreach ($entries as $key => $locales_values) {
+            $existing_entries[$key] = $locales_values;
+        }
+
+        if (!empty($existing_entries)) {
+            ksort($existing_entries, SORT_STRING);
         }
 
         $stored = get_option(self::CUSTOM_TRANSLATIONS_OPTION, array());
 
         $new_data = array(
-            'entries' => $entries,
+            'entries' => $existing_entries,
         );
 
         if (isset($stored['plural']) && is_array($stored['plural']) && !empty($stored['plural'])) {
@@ -1039,13 +1088,16 @@ HTML
 
         set_transient('yadore_translations_notices', $notices, 30);
 
-        $redirect_url = add_query_arg(
-            array(
-                'page' => 'yadore-translations',
-                'yadore-translations-updated' => '1',
-            ),
-            admin_url('admin.php')
+        $redirect_args = array(
+            'page' => 'yadore-translations',
+            'yadore-translations-updated' => '1',
         );
+
+        if ($current_page > 1) {
+            $redirect_args['paged'] = $current_page;
+        }
+
+        $redirect_url = add_query_arg($redirect_args, admin_url('admin.php'));
 
         wp_safe_redirect($redirect_url);
         exit;
@@ -1299,10 +1351,28 @@ HTML
             $custom_translations = $this->get_custom_translations();
             $default_catalog = $this->get_default_translation_catalog();
 
+            $current_page = 1;
+
+            if (isset($_GET['paged'])) {
+                $current_page = max(1, (int) sanitize_text_field(wp_unslash($_GET['paged'])));
+            } elseif (isset($_POST['paged'])) {
+                $current_page = max(1, (int) sanitize_text_field(wp_unslash($_POST['paged'])));
+            }
+
+            $per_page = $this->get_translation_entries_per_page();
+            $entries = $this->build_translation_entries($default_catalog, $custom_translations, array_keys($locales), $current_page, $per_page);
+
             $data['custom_translations'] = $custom_translations;
             $data['translation_locales'] = $locales;
             $data['translation_defaults'] = $default_catalog;
-            $data['translation_entries'] = $this->build_translation_entries($default_catalog, $custom_translations, array_keys($locales));
+            $data['translation_entries'] = $entries['items'];
+            $data['translation_pagination'] = array(
+                'current_page' => $entries['current_page'],
+                'total_pages' => $entries['total_pages'],
+                'total_items' => $entries['total_items'],
+                'per_page' => $entries['per_page'],
+                'offset' => $entries['offset'],
+            );
             $data['translation_notices'] = $this->get_translation_notices();
         }
 
@@ -1479,7 +1549,17 @@ HTML
         return $sanitized;
     }
 
-    private function build_translation_entries(array $defaults, array $custom, array $locales) {
+    private function get_translation_entries_per_page() {
+        $per_page = (int) apply_filters('yadore_translations_per_page', 100);
+
+        if ($per_page < 1) {
+            $per_page = 1;
+        }
+
+        return $per_page;
+    }
+
+    private function build_translation_entries(array $defaults, array $custom, array $locales, $page = 1, $per_page = 100) {
         $all_keys = array_unique(array_merge(array_keys($defaults), array_keys($custom)));
         sort($all_keys, SORT_STRING);
 
@@ -1517,6 +1597,8 @@ HTML
             );
         }
 
+        $total_items = count($rows);
+
         if (empty($rows)) {
             $blank_locales = array();
 
@@ -1527,13 +1609,53 @@ HTML
                 );
             }
 
-            $rows[] = array(
+            $rows = array(
                 'key' => '',
                 'locales' => $blank_locales,
             );
+            $total_items = 0;
         }
 
-        return $rows;
+        $per_page = max(1, (int) $per_page);
+        $total_pages = max(1, (int) ceil($total_items / $per_page));
+        $page = max(1, (int) $page);
+
+        if ($total_items > 0 && $page > $total_pages) {
+            $page = $total_pages;
+        }
+
+        $offset = ($page - 1) * $per_page;
+
+        if ($total_items > 0) {
+            $rows = array_slice($rows, $offset, $per_page);
+        }
+
+        if ($total_items === 0 && empty($rows)) {
+            $blank_locales = array();
+
+            foreach ($locales as $locale) {
+                $blank_locales[$locale] = array(
+                    'default' => '',
+                    'value' => '',
+                );
+            }
+
+            $rows = array(
+                array(
+                    'key' => '',
+                    'locales' => $blank_locales,
+                ),
+            );
+        }
+
+        return array(
+            'items' => array_values($rows),
+            'total_items' => $total_items,
+            'total_pages' => $total_pages,
+            'current_page' => $page,
+            'per_page' => $per_page,
+            'offset' => $offset,
+        );
     }
 
     private function get_translation_notices() {
