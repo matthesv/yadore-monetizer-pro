@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.48.21 - 2025-12-03
+- Added pagination metadata to the translations controller and sliced entries per page to stay below `max_input_vars` limits.
+- Updated the admin translations template with pagination links, hidden paged fields, and removal markers for renamed keys.
+- Enhanced the JavaScript helper so removing rows queues hidden deletion markers and works seamlessly with paginated data.
+- Bumped plugin metadata, documentation, and asset banners to version 3.48.21.
+
 # 3.48.20 - 2025-12-02
 - Corrected the German call-to-action label for "Zum Angebot →" and synchronised the PHP and PO catalogues.
 - Bumped plugin metadata, documentation, and language headers to version 3.48.20.

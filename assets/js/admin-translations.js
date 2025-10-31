@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.48.20 - Admin Translations Helper */
+/* Yadore Monetizer Pro v3.48.21 - Admin Translations Helper */
 
 (function () {
     'use strict';
@@ -16,8 +16,9 @@
         var rowsContainer = document.querySelector('#yadore-translation-rows');
         var addButton = document.querySelector('#yadore-add-translation');
         var template = document.querySelector('#yadore-translation-row-template');
+        var removedContainer = document.querySelector('#yadore-translation-removed');
 
-        if (!rowsContainer || !addButton || !template) {
+        if (!rowsContainer || !addButton || !template || !removedContainer) {
             return;
         }
 
@@ -68,13 +69,36 @@
                 return;
             }
 
+            var originalInput = row.querySelector('input[name="translation_original_keys[]"]');
+            var originalValue = originalInput && originalInput.value ? originalInput.value.trim() : '';
+
             var rows = rowsContainer.querySelectorAll('tr');
 
             if (rows.length <= 1) {
+                if (originalValue !== '') {
+                    var hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'translation_removed_keys[]';
+                    hidden.value = originalValue;
+                    removedContainer.appendChild(hidden);
+                }
+
                 Array.prototype.forEach.call(row.querySelectorAll('input, textarea'), function (field) {
                     field.value = '';
                 });
+
+                if (originalInput) {
+                    originalInput.value = '';
+                }
                 return;
+            }
+
+            if (originalValue !== '') {
+                var removedInput = document.createElement('input');
+                removedInput.type = 'hidden';
+                removedInput.name = 'translation_removed_keys[]';
+                removedInput.value = originalValue;
+                removedContainer.appendChild(removedInput);
             }
 
             row.parentNode.removeChild(row);

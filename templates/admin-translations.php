@@ -12,6 +12,13 @@ if (empty($locales)) {
     );
 }
 
+$pagination = isset($translation_pagination) && is_array($translation_pagination) ? $translation_pagination : array();
+$current_page = isset($pagination['current_page']) ? max(1, (int) $pagination['current_page']) : 1;
+$per_page = isset($pagination['per_page']) ? max(1, (int) $pagination['per_page']) : 1;
+$total_items = isset($pagination['total_items']) ? max(0, (int) $pagination['total_items']) : 0;
+$total_pages = isset($pagination['total_pages']) ? max(1, (int) $pagination['total_pages']) : 1;
+$offset = isset($pagination['offset']) ? max(0, (int) $pagination['offset']) : ($current_page - 1) * $per_page;
+
 $entries = array();
 
 if (isset($translation_entries) && is_array($translation_entries)) {
@@ -61,6 +68,24 @@ if (empty($entries)) {
 }
 
 $notices = isset($translation_notices) && is_array($translation_notices) ? $translation_notices : array();
+
+$displayed_items = count($entries);
+$start_item = $total_items > 0 ? $offset + 1 : 0;
+$end_item = $total_items > 0 ? min($offset + $displayed_items, $total_items) : 0;
+$base_url = add_query_arg(array('page' => 'yadore-translations'), admin_url('admin.php'));
+$pagination_links = array();
+
+if ($total_pages > 1) {
+    $pagination_links = paginate_links(array(
+        'base' => esc_url_raw(add_query_arg('paged', '%#%', $base_url)),
+        'format' => '',
+        'current' => $current_page,
+        'total' => $total_pages,
+        'type' => 'array',
+        'prev_text' => __('« Previous', 'yadore-monetizer'),
+        'next_text' => __('Next »', 'yadore-monetizer'),
+    ));
+}
 ?>
 <div class="wrap yadore-admin-wrap">
     <h1><?php esc_html_e('Custom Translation Manager', 'yadore-monetizer'); ?></h1>
@@ -101,6 +126,8 @@ $notices = isset($translation_notices) && is_array($translation_notices) ? $tran
 
     <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=yadore-translations')); ?>" class="yadore-translations-form">
         <?php wp_nonce_field('yadore_save_translations', 'yadore_translations_nonce'); ?>
+        <input type="hidden" name="paged" value="<?php echo (int) $current_page; ?>" />
+        <div id="yadore-translation-removed" aria-hidden="true"></div>
 
         <table class="widefat fixed striped">
             <thead>
@@ -128,6 +155,7 @@ $notices = isset($translation_notices) && is_array($translation_notices) ? $tran
                             <label class="screen-reader-text" for="yadore-translation-key-<?php echo (int) $index; ?>">
                                 <?php esc_html_e('Original string', 'yadore-monetizer'); ?>
                             </label>
+                            <input type="hidden" name="translation_original_keys[]" value="<?php echo esc_attr($row_key); ?>" />
                             <input
                                 type="text"
                                 id="yadore-translation-key-<?php echo (int) $index; ?>"
@@ -178,6 +206,34 @@ $notices = isset($translation_notices) && is_array($translation_notices) ? $tran
             </tbody>
         </table>
 
+        <p class="tablenav-paging-text">
+            <?php
+            if ($total_items > 0) {
+                printf(
+                    /* translators: 1: first item number on the page, 2: last item number on the page, 3: total items. */
+                    esc_html__('Displaying %1$s–%2$s of %3$s entries', 'yadore-monetizer'),
+                    esc_html(number_format_i18n($start_item)),
+                    esc_html(number_format_i18n($end_item)),
+                    esc_html(number_format_i18n($total_items))
+                );
+            } else {
+                esc_html_e('No translation entries found yet.', 'yadore-monetizer');
+            }
+            ?>
+        </p>
+
+        <?php if (!empty($pagination_links)) : ?>
+            <div class="tablenav bottom">
+                <div class="tablenav-pages">
+                    <span class="pagination-links">
+                        <?php foreach ($pagination_links as $link) : ?>
+                            <?php echo wp_kses_post($link); ?>
+                        <?php endforeach; ?>
+                    </span>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <p>
             <button type="button" class="button button-secondary" id="yadore-add-translation">
                 <?php esc_html_e('Add translation row', 'yadore-monetizer'); ?>
@@ -191,6 +247,7 @@ $notices = isset($translation_notices) && is_array($translation_notices) ? $tran
         <tr>
             <td class="column-primary">
                 <label class="screen-reader-text" for="yadore-translation-key-new"><?php esc_html_e('Original string', 'yadore-monetizer'); ?></label>
+                <input type="hidden" name="translation_original_keys[]" value="" />
                 <input
                     type="text"
                     id="yadore-translation-key-new"
