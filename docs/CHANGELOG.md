@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.48.16 - 2025-11-23
+- Introduced a dedicated translations admin page with nonce-protected forms for managing German and English string overrides.
+- Stored custom translations in the `yadore_custom_translations` option and merged them into the runtime catalogue before gettext filters run.
+- Added lightweight admin JavaScript for dynamic translation rows and bumped plugin assets and metadata to 3.48.16.
+
 # 3.48.15 - 2025-11-22
 - Cached frequently accessed plugin settings and normalised boolean flags to avoid repeated database reads during front-end requests.
 - Hardened automatic content injection by validating context, sanitising template choices, and skipping non-main queries for safer rendering.
