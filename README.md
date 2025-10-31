@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.48.19 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.48.20 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.48.19 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.48.20 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -14,6 +14,10 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **Data Management Tools** - Export/Import, Backup und Migration  
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
+
+## 🌟 **NEU IN VERSION 3.48.20**
+
+- 📝 **Fehlerhafte Button-Übersetzung korrigiert** – Der Call-to-Action „Zum Angebot →“ erscheint jetzt korrekt im Standardkatalog und auf der Übersetzungsseite.
 
 ## 🌟 **NEU IN VERSION 3.48.19**
 
@@ -73,7 +77,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.48.19:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.48.20:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -280,9 +284,9 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.48.19 - FUTURE-PROOF EXPERIENCE RELEASE!**
+## 🎉 **v3.48.20 - FUTURE-PROOF EXPERIENCE RELEASE!**
 
-### **Neue Highlights in v3.48.19:**
+### **Neue Highlights in v3.48.20:**
 - 🔤 **HTML-fähige Übersetzungsschlüssel** – Inline-Markup wie `<span>` bleibt beim Speichern erhalten und kann weiterhin auf bestehende Katalogeinträge gemappt werden.
 - 🧩 **Standardkatalog-Defaults** – PHP-Sprachdateien werden automatisch eingelesen und liefern Ausgangswerte für jede Locale.
 - 💾 **Saubere Speicherung** – Unveränderte Standardtexte werden nicht mehr persistiert, wodurch nur echte Overrides bleiben.
@@ -301,11 +305,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.48.19 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.48.20 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.48.19** - Production-Ready Market Release
+**Current Version: 3.48.20** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

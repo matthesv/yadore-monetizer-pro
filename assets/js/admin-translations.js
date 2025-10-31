@@ -1,4 +1,4 @@
-/* Yadore Monetizer Pro v3.48.17 - Admin Translations Helper */
+/* Yadore Monetizer Pro v3.48.20 - Admin Translations Helper */
 
 (function () {
     'use strict';
