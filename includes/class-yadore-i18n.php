@@ -257,10 +257,16 @@ if (!class_exists('Yadore_Monetizer_I18n')) {
                 $variants[] = $locale;
 
                 if (strpos($locale, '_') !== false) {
-                    $base = substr($locale, 0, strpos($locale, '_'));
+                    $segments = explode('_', $locale);
 
-                    if ($base !== '') {
-                        $variants[] = $base;
+                    while (count($segments) > 1) {
+                        array_pop($segments);
+
+                        $variant = implode('_', $segments);
+
+                        if ($variant !== '') {
+                            $variants[] = $variant;
+                        }
                     }
                 }
             }
