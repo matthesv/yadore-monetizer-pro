@@ -2,11 +2,11 @@
 # This file is distributed under the same license as the Yadore Monetizer Pro plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Yadore Monetizer Pro 3.48.10\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yadore-monetizer-pro\n"
-"POT-Creation-Date: 2025-11-11T00:00:00+00:00\n"
-"PO-Revision-Date: 2025-11-11T00:00:00+00:00\n"
-"Last-Translator: Matthes Vogel\n"
+"Project-Id-Version: Yadore Monetizer Pro 3.48.17\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yadore-monetizer\n"
+"POT-Creation-Date: 2025-10-31T12:00:34+00:00\n"
+"PO-Revision-Date: 2025-10-31 12:03+0000\n"
+"Last-Translator: Automation Bot <bot@yadore.example>\n"
 "Language-Team: en_US <wp-translations@example.com>\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr ""
 "X-Generator: WP-CLI 2.12.0\n"
 
 #. Plugin Name of the plugin
-#: yadore-monetizer.php yadore-monetizer.php:1057 yadore-monetizer.php:7597
+#: yadore-monetizer.php yadore-monetizer.php:1495 yadore-monetizer.php:10855
 msgid "Yadore Monetizer Pro"
 msgstr "Yadore Monetizer Pro"
 
@@ -31,402 +31,372 @@ msgstr "Professional Affiliate Marketing Plugin with Complete Feature Set"
 msgid "Matthes Vogel"
 msgstr "Matthes Vogel"
 
-#: templates/admin-dashboard.php:4
-msgid "Yadore Monetizer Pro – Übersicht"
-msgstr "Yadore Monetizer Pro – Overview"
-
-#: templates/admin-dashboard.php:14
-#, php-format
-msgid "Yadore Monetizer Pro v%s wurde erfolgreich aktiviert!"
-msgstr "Yadore Monetizer Pro v%s was activated successfully!"
-
-#: templates/admin-dashboard.php:19
-msgid "Alle Funktionen stehen jetzt zur Verfügung."
-msgstr "All features are now available."
-
-#: templates/admin-dashboard.php:34 templates/admin-dashboard.php:44
-#: templates/admin-dashboard.php:54 templates/admin-dashboard.php:64
-msgid "Wird geladen..."
-msgstr "Loading..."
-
-#: templates/admin-dashboard.php:35
-msgid "Ausgespielte Produkte"
-msgstr "Displayed products"
-
-#: templates/admin-dashboard.php:45
-msgid "Gescannte Beiträge"
-msgstr "Scanned posts"
-
-#: templates/admin-dashboard.php:55
-msgid "Overlay-Aufrufe"
-msgstr "Overlay views"
-
-#: templates/admin-dashboard.php:65
-msgid "Konversionsrate"
-msgstr "Conversion rate"
-
-#: templates/admin-dashboard.php:73
-msgid "Funktionsstatus"
-msgstr "Feature status"
-
-#: templates/admin-dashboard.php:76 templates/admin-dashboard.php:238
-msgid "Aktualisieren"
-msgstr "Aktualisieren"
-
-#: templates/admin-dashboard.php:87 templates/admin-dashboard.php:315
-msgid "WordPress-Integration"
-msgstr "WordPress-Integration"
-
-#: templates/admin-dashboard.php:88
-msgid "Umfassende WordPress-Integration mit sechs Admin-Seiten"
-msgstr "Comprehensive WordPress integration with six admin pages"
-
-#: templates/admin-dashboard.php:89 templates/admin-dashboard.php:101
-#: templates/admin-dashboard.php:114 templates/admin-dashboard.php:127
-#: templates/admin-dashboard.php:140 templates/admin-dashboard.php:152
-msgid "Aktiv"
-msgstr "Aktiv"
-
-#: templates/admin-dashboard.php:98
-msgid "KI-Inhaltsanalyse"
-msgstr "KI-Inhaltsanalyse"
-
-#: templates/admin-dashboard.php:99
-msgid "Gemini-KI-Integration zur intelligenten Produkterkennung"
-msgstr "Gemini AI integration for intelligent product detection"
-
-#: templates/admin-dashboard.php:101 templates/admin-dashboard.php:114
-#: templates/admin-dashboard.php:127 templates/admin-dashboard.php:140
-msgid "Inaktiv"
-msgstr "Inaktiv"
-
-#: templates/admin-dashboard.php:111
-msgid "Produkt-Overlay"
-msgstr "Product overlay"
-
-#: templates/admin-dashboard.php:112
-msgid "Dynamische Produktempfehlungen als Overlay"
-msgstr "Dynamic product recommendations as an overlay"
-
-#: templates/admin-dashboard.php:124
-msgid "Automatischer Beitrags-Scan"
-msgstr "Automatic post scan"
-
-#: templates/admin-dashboard.php:125
-msgid "Automatische Inhaltsanalyse und Produkterkennung"
-msgstr "Automatic content analysis and product detection"
-
-#: templates/admin-dashboard.php:137
-msgid "Analysen & Tracking"
-msgstr "Analysen & Tracking"
-
-#: templates/admin-dashboard.php:138
-msgid "Umfassende Analysen und Leistungsüberwachung"
-msgstr "Comprehensive analytics and performance monitoring"
-
-#: templates/admin-dashboard.php:150
-msgid "Shortcode-System"
-msgstr "Shortcode-System"
-
-#: templates/admin-dashboard.php:151
-msgid "[yadore_products]-Shortcode mit erweiterten Funktionen"
-msgstr "[yadore_products] shortcode with advanced features"
-
-#: templates/admin-dashboard.php:162
-msgid "Erweiterter Shortcode-Generator"
-msgstr "Advanced shortcode generator"
-
-#: templates/admin-dashboard.php:168
-msgid "Produkt-Keyword *"
-msgstr "Product keyword *"
-
-#: templates/admin-dashboard.php:170
-msgid ""
-"Gib die wichtigste Produktkategorie oder einen konkreten Produktnamen ein."
-msgstr "Enter the primary product category or a specific product name."
-
-#: templates/admin-dashboard.php:174
-msgid "Anzahl der Produkte"
-msgstr "Number of products"
-
-#: templates/admin-dashboard.php:176 templates/admin-dashboard.php:177
-#: templates/admin-dashboard.php:178 templates/admin-dashboard.php:179
-msgid "Produkte"
-msgstr "Products"
-
-#: templates/admin-dashboard.php:184
-msgid "Darstellungsformat"
-msgstr "Darstellungsformat"
-
-#: templates/admin-dashboard.php:186
-msgid "Rasterdarstellung"
-msgstr "Grid layout"
-
-#: templates/admin-dashboard.php:187
-msgid "Listenansicht"
-msgstr "List view"
-
-#: templates/admin-dashboard.php:188
-msgid "Inline-Integration"
-msgstr "Inline-Integration"
-
-#: templates/admin-dashboard.php:195
-msgid "Caching aktivieren"
-msgstr "Enable caching"
-
-#: templates/admin-dashboard.php:197
-msgid "Ja (empfohlen)"
-msgstr "Yes (recommended)"
-
-#: templates/admin-dashboard.php:198
-msgid "Nein"
-msgstr "No"
-
-#: templates/admin-dashboard.php:203
-msgid "Eigene CSS-Klasse"
-msgstr "Custom CSS class"
-
-#: templates/admin-dashboard.php:205
-msgid "Optional: Eigene CSS-Klasse für individuelles Styling hinzufügen."
-msgstr "Optional: add a custom CSS class for individual styling."
-
-#: templates/admin-dashboard.php:210
-msgid "Generierter Shortcode:"
-msgstr "Generated shortcode:"
-
-#: templates/admin-dashboard.php:214 templates/admin-dashboard.php:421
-msgid "Kopieren"
-msgstr "Copy"
-
-#: templates/admin-dashboard.php:220 templates/admin-dashboard.php:423
-msgid "Vorschau"
-msgstr "Preview"
-
-#: templates/admin-dashboard.php:224 templates/admin-dashboard.php:422
-msgid "Vorschau wird erstellt..."
-msgstr "Generating preview..."
-
-#: templates/admin-dashboard.php:235
-msgid "Aktuelle Aktivitäten"
-msgstr "Current activities"
-
-#: templates/admin-dashboard.php:246
-msgid "Aktuelle Aktivitäten werden geladen..."
-msgstr "Loading current activities..."
-
-#: templates/admin-dashboard.php:258
-msgid "Schnellaktionen"
-msgstr "Quick actions"
-
-#: templates/admin-dashboard.php:265
-msgid "Plugin-Einstellungen"
-msgstr "Plugin settings"
-
-#: templates/admin-dashboard.php:266
-msgid "Alle Plugin-Optionen konfigurieren"
-msgstr "Configure all plugin options"
-
-#: templates/admin-dashboard.php:273
-msgid "Beitrags-Scanner"
-msgstr "Post scanner"
-
-#: templates/admin-dashboard.php:274
-msgid "Beiträge scannen und analysieren"
-msgstr "Scan and analyse posts"
-
-#: templates/admin-dashboard.php:281
-msgid "Analysen"
-msgstr "Analysen"
-
-#: templates/admin-dashboard.php:282
-msgid "Leistungsberichte anzeigen"
-msgstr "View performance reports"
-
-#: templates/admin-dashboard.php:289
-msgid "Debug & Fehler"
-msgstr "Debug & errors"
-
-#: templates/admin-dashboard.php:290
-msgid "Systemdiagnose"
-msgstr "System diagnosis"
-
-#: templates/admin-dashboard.php:297
-msgid "Werkzeuge"
-msgstr "Tools"
-
-#: templates/admin-dashboard.php:298
-msgid "Import/Export & Werkzeuge"
-msgstr "Import/export & tools"
-
-#: templates/admin-dashboard.php:308
-msgid "Systemstatus"
-msgstr "System status"
-
-#: templates/admin-dashboard.php:316
-#, php-format
-msgid "v%s – Alle Systeme betriebsbereit"
-msgstr "v%s – all systems operational"
-
-#: templates/admin-dashboard.php:323
-msgid "Yadore-API"
-msgstr "Yadore-API"
-
-#: templates/admin-dashboard.php:324 templates/admin-dashboard.php:332
-msgid "Verbunden"
-msgstr "Connected"
-
-#: templates/admin-dashboard.php:324
-msgid "API-Schlüssel erforderlich"
-msgstr "API key required"
-
-#: templates/admin-dashboard.php:331
-msgid "Gemini-KI"
-msgstr "Gemini AI"
-
-#: templates/admin-dashboard.php:332
-msgid "Nicht konfiguriert"
-msgstr "Not configured"
-
-#: templates/admin-dashboard.php:339
-msgid "Datenbank"
-msgstr "Database"
-
-#: templates/admin-dashboard.php:340
-msgid "Alle Tabellen funktionsfähig"
-msgstr "All tables functional"
-
-#: templates/admin-dashboard.php:391
-msgid "Video-Tutorial"
-msgstr "Video-Tutorial"
-
-#: templates/admin-dashboard.php:395
-msgid "Tastenkürzel"
-msgstr "Keyboard shortcuts"
-
-#: templates/admin-dashboard.php:420
-msgid "Kopiert!"
-msgstr "Copied!"
-
-#: templates/admin-dashboard.php:424
-msgid ""
-"Dies ist eine vereinfachte Vorschau. Der tatsächliche Shortcode zeigt reale "
-"Produkte."
-msgstr ""
-"This is a simplified preview. The actual shortcode shows live products."
-
-#: templates/admin-dashboard.php:425
-msgid "Produkt"
-msgstr "product"
-
-#: templates/admin-dashboard.php:426
-msgid "Dashboard gestartet"
-msgstr "Dashboard opened"
-
-#: templates/admin-settings.php:20
+#: templates/admin-settings.php:5
+msgid "Settings saved successfully!"
+msgstr "Operation completed successfully."
+
+#: templates/admin-settings.php:17
 msgid "Manuell hinterlegt"
 msgstr "Manually stored"
 
-#: templates/admin-settings.php:41
+#: templates/admin-settings.php:52
+msgid "Wir nutzen deinen Schlüssel bereits für Live-Produktdaten."
+msgstr "We are already using your key for live product data."
+
+#: templates/admin-settings.php:53
+msgid "Trage deinen API-Schlüssel ein, um Produktdaten abzurufen."
+msgstr "Enter your API key to fetch product data."
+
+#: templates/admin-settings.php:56
+msgid "Wähle den Markt, für den du bei Yadore freigeschaltet bist."
+msgstr "Choose the market your Yadore account is approved for."
+
+#: templates/admin-settings.php:58
+msgid "Dein Standard-Markt steht fest. Du kannst ihn jederzeit anpassen."
+msgstr "Your default market is set. You can adjust it at any time."
+
+#: templates/admin-settings.php:59
+msgid ""
+"Der Markt wurde manuell eingetragen. Prüfe, ob der Code zu deinem Konto "
+"passt."
+msgstr ""
+"The market was entered manually. Confirm that the code matches your account."
+
+#: templates/admin-settings.php:62
+msgid ""
+"Mindestens eine Automatisierung kümmert sich um Einbindungen und Scans."
+msgstr "At least one automation handles embeds and scans."
+
+#: templates/admin-settings.php:63
+msgid ""
+"Aktiviere Overlay, Auto-Einbindung oder Auto-Scan, um Inhalte automatisch zu"
+" monetarisieren."
+msgstr ""
+"Enable the overlay, auto-insert, or auto-scan to monetize content "
+"automatically."
+
+#: templates/admin-settings.php:68
+msgid "Yadore API verbinden"
+msgstr "Yadore API"
+
+#: templates/admin-settings.php:74
+msgid "Yadore API verbunden"
+msgstr "Yadore API"
+
+#: templates/admin-settings.php:75
+msgid "Yadore API benötigt Konfiguration"
+msgstr "API Configuration"
+
+#: templates/admin-settings.php:77
+msgid "Verbindung testen"
+msgstr "Connected"
+
+#: templates/admin-settings.php:78
+msgid "API-Key hinterlegen"
+msgstr "Add API key"
+
+#: templates/admin-settings.php:84
+msgid "Standard-Markt festlegen"
+msgstr "Set default market"
+
+#: templates/admin-settings.php:90
+msgid "Standard-Markt ist hinterlegt"
+msgstr "Default market stored"
+
+#: templates/admin-settings.php:91
+msgid "Standard-Markt prüfen oder ergänzen"
+msgstr "Review or complete default market"
+
+#: templates/admin-settings.php:93
+msgid "Markt prüfen"
+msgstr "Review market"
+
+#: templates/admin-settings.php:94
+msgid "Markt auswählen"
+msgstr "Select market"
+
+#: templates/admin-settings.php:100
+msgid "Automatisierungen aktivieren"
+msgstr "Enable caching"
+
+#: templates/admin-settings.php:106
+msgid "Automatisierungen sind aktiv"
+msgstr "Automations are active"
+
+#: templates/admin-settings.php:107
+msgid "Automatisierungen sind deaktiviert"
+msgstr "Automations are inactive"
+
+#: templates/admin-settings.php:109
+msgid "Automatisierungen ansehen"
+msgstr "Automatic scan"
+
+#: templates/admin-settings.php:110
+msgid "Automatisierung aktivieren"
+msgstr "Enable caching"
+
+#: templates/admin-settings.php:120
+msgid "Basis-Setup abgeschlossen"
+msgstr "Scan completed (%s)."
+
+#: templates/admin-settings.php:121
+msgid "Basis-Setup benötigt Eingaben"
+msgstr "Basic setup requires input"
+
+#: templates/admin-settings.php:126
+msgid "Automatisierungen aktiv"
+msgstr "Automatic scan"
+
+#: templates/admin-settings.php:127
+msgid "Automatisierungen ausgeschaltet"
+msgstr "Automations switched off"
+
+#: templates/admin-settings.php:133
+msgid "Design System öffnen"
+msgstr "Open design system"
+
+#: templates/admin-settings.php:139
+msgid "Scanner starten"
+msgstr "Start scanner"
+
+#: templates/admin-settings.php:148 yadore-monetizer.php:11574
+msgid "Yadore API"
+msgstr "Yadore API"
+
+#: templates/admin-settings.php:150
+msgid "Verbunden"
+msgstr "Connected"
+
+#: templates/admin-settings.php:151
+msgid "Fehlt"
+msgstr "Missing"
+
+#: templates/admin-settings.php:153
+msgid "Produkt- und Preisfeeds werden synchronisiert."
+msgstr "Product and price feeds are synchronized."
+
+#: templates/admin-settings.php:154
+msgid "Hinterlege deinen API-Schlüssel für Live-Daten."
+msgstr "Provide your API key for live data."
+
+#: templates/admin-settings.php:159
+msgid "KI-Automation"
+msgstr "AI automation"
+
+#: templates/admin-settings.php:161
+msgid "Gemini aktiv"
+msgstr "Inaktiv"
+
+#: templates/admin-settings.php:162
+msgid "Optional"
+msgstr "Optional"
+
+#: templates/admin-settings.php:164
+msgid "Automatischer Beitrags-Scan ist eingeschaltet."
+msgstr "Automatic post scan"
+
+#: templates/admin-settings.php:165
+msgid ""
+"Aktiviere den Auto-Scan in den Einstellungen für kontinuierliche "
+"Optimierung."
+msgstr "Enable auto-scan in the settings for continuous optimization."
+
+#: templates/admin-settings.php:170
+msgid "Overlay & Templates"
+msgstr "Overlay Template"
+
+#: templates/admin-settings.php:172
+msgid "Overlay aktiv"
+msgstr "Overlay"
+
+#: templates/admin-settings.php:173
+msgid "Overlay deaktiviert"
+msgstr "Overlay Template"
+
+#: templates/admin-settings.php:174
+msgid "Passe Farben, Typografie und Layout zentral an."
+msgstr "Adjust colors, typography, and layout centrally."
+
+#: templates/admin-settings.php:182
+msgid "Konfiguration"
+msgstr "API Configuration"
+
+#: templates/admin-settings.php:184
+msgid "Plugin-Einstellungen"
+msgstr "Plugin settings"
+
+#: templates/admin-settings.php:185
+msgid ""
+"Definiere Datenquellen, Automatisierung und Darstellung aus einer einzigen "
+"Schaltzentrale."
+msgstr ""
+"Define data sources, automation, and presentation from a single control "
+"center."
+
+#: templates/admin-settings.php:193
 msgid "Primary color"
 msgstr "Primary color"
 
-#: templates/admin-settings.php:42
+#: templates/admin-settings.php:194
 msgid "Used for buttons, highlights and interactive elements."
 msgstr "Used for buttons, highlights and interactive elements."
 
-#: templates/admin-settings.php:45
+#: templates/admin-settings.php:197
 msgid "Primary text"
 msgstr "Primary text"
 
-#: templates/admin-settings.php:46
+#: templates/admin-settings.php:198
 msgid "Text color for primary buttons and overlays."
 msgstr "Text color for primary buttons and overlays."
 
-#: templates/admin-settings.php:49
+#: templates/admin-settings.php:201
 msgid "Accent color"
 msgstr "Accent color"
 
-#: templates/admin-settings.php:50
+#: templates/admin-settings.php:202
 msgid "Applies to prices and emphasis text."
 msgstr "Applies to prices and emphasis text."
 
-#: templates/admin-settings.php:53
+#: templates/admin-settings.php:205
 msgid "Heading text"
 msgstr "Heading text"
 
-#: templates/admin-settings.php:54
+#: templates/admin-settings.php:206
 msgid "Used for product titles and main copy."
 msgstr "Used for product titles and main copy."
 
-#: templates/admin-settings.php:57
+#: templates/admin-settings.php:209
 msgid "Muted text"
 msgstr "Muted text"
 
-#: templates/admin-settings.php:58
+#: templates/admin-settings.php:210
 msgid "Secondary information such as merchants or disclaimers."
 msgstr "Secondary information such as merchants or disclaimers."
 
-#: templates/admin-settings.php:61
+#: templates/admin-settings.php:213
 msgid "Borders"
 msgstr "Borders"
 
-#: templates/admin-settings.php:62
+#: templates/admin-settings.php:214
 msgid "Card outlines, separators and focus rings."
 msgstr "Card outlines, separators and focus rings."
 
-#: templates/admin-settings.php:65
+#: templates/admin-settings.php:217
 msgid "Template background"
 msgstr "Template background"
 
-#: templates/admin-settings.php:66
+#: templates/admin-settings.php:218
 msgid "Wrapper background for template containers."
 msgstr "Wrapper background for template containers."
 
-#: templates/admin-settings.php:69
+#: templates/admin-settings.php:221
 msgid "Card surface"
 msgstr "Card surface"
 
-#: templates/admin-settings.php:70
+#: templates/admin-settings.php:222
 msgid "Individual product cards and overlays."
 msgstr "Individual product cards and overlays."
 
-#: templates/admin-settings.php:73
+#: templates/admin-settings.php:225
 msgid "Placeholder background"
 msgstr "Placeholder background"
 
-#: templates/admin-settings.php:74
+#: templates/admin-settings.php:226
 msgid "Image placeholders and loading states."
 msgstr "Image placeholders and loading states."
 
-#: templates/admin-settings.php:77
+#: templates/admin-settings.php:229
 msgid "Placeholder icon"
 msgstr "Placeholder icon"
 
-#: templates/admin-settings.php:78
+#: templates/admin-settings.php:230
 msgid "Icon color for placeholders and subtle text."
 msgstr "Icon color for placeholders and subtle text."
 
-#: templates/admin-settings.php:81
+#: templates/admin-settings.php:233
 msgid "Badge background"
 msgstr "Badge background"
 
-#: templates/admin-settings.php:82
+#: templates/admin-settings.php:234
 msgid "Promo badges and highlight ribbons."
 msgstr "Promo badges and highlight ribbons."
 
-#: templates/admin-settings.php:85
+#: templates/admin-settings.php:237
 msgid "Badge text"
 msgstr "Badge text"
 
-#: templates/admin-settings.php:86
+#: templates/admin-settings.php:238
 msgid "Text color for promotional badges."
 msgstr "Text color for promotional badges."
 
-#: templates/admin-settings.php:154
+#: templates/admin-settings.php:257
+msgid "Plugin settings navigation"
+msgstr "Plugin settings navigation"
+
+#: templates/admin-settings.php:271
+msgid "General"
+msgstr "General"
+
+#: templates/admin-settings.php:292
+msgid "Automation"
+msgstr "Automatic scan"
+
+#: templates/admin-settings.php:313
+msgid "AI Settings"
+msgstr "AI Settings"
+
+#: templates/admin-settings.php:328
+msgid "Display"
+msgstr "Display"
+
+#: templates/admin-settings.php:343
+msgid "Performance"
+msgstr "Performance"
+
+#: templates/admin-settings.php:358
+msgid "Advanced"
+msgstr "Advanced"
+
+#: templates/admin-settings.php:368
+msgid "Setup-Checkliste"
+msgstr "Setup checklist"
+
+#: templates/admin-settings.php:372
+msgid ""
+"Überprüfe die wichtigsten Schritte, um den Monetizer einsatzbereit zu "
+"machen."
+msgstr "Review the key steps to get the Monetizer ready to use."
+
+#: templates/admin-settings.php:431
+msgid "API Configuration"
+msgstr "API Configuration"
+
+#: templates/admin-settings.php:445
+msgid "Enter your Yadore API key"
+msgstr "Enter your Yadore API key"
+
+#: templates/admin-settings.php:453 templates/admin-settings.php:629
+#: yadore-monetizer.php:1891
+msgid "Show key"
+msgstr "Show key"
+
+#: templates/admin-settings.php:456
+msgid "Test Connection"
+msgstr "Test Connection"
+
+#: templates/admin-settings.php:460
+msgid "Your Yadore API key is required to fetch product data."
+msgstr "Your Yadore API key is required to fetch product data."
+
+#: templates/admin-settings.php:461
+msgid "Get your API key here"
+msgstr "Get your API key here"
+
+#: templates/admin-settings.php:468
 msgid "Default Market"
 msgstr "Default Market"
 
-#: templates/admin-settings.php:171
+#: templates/admin-settings.php:485
 msgid ""
 "Choose the market that matches your approved Yadore account. Only markets "
 "returned by the Yadore API are listed."
@@ -434,11 +404,11 @@ msgstr ""
 "Choose the market that matches your approved Yadore account. Only markets "
 "returned by the Yadore API are listed."
 
-#: templates/admin-settings.php:181
+#: templates/admin-settings.php:495
 msgid "Use the two-letter uppercase market code, e.g. DE, AT, FR."
 msgstr "Use the two-letter uppercase market code, e.g. DE, AT, FR."
 
-#: templates/admin-settings.php:183
+#: templates/admin-settings.php:497
 msgid ""
 "Enter the two-letter market code (ISO 3166-1 alpha-2) you are approved for, "
 "such as DE or AT. The value must match a market enabled for your API key."
@@ -446,7 +416,58 @@ msgstr ""
 "Enter the two-letter market code (ISO 3166-1 alpha-2) you are approved for, "
 "such as DE or AT. The value must match a market enabled for your API key."
 
-#: templates/admin-settings.php:288
+#: templates/admin-settings.php:535
+msgid "Automatisierung"
+msgstr "Automatic scan"
+
+#: templates/admin-settings.php:539
+msgid ""
+"Steuere, welche Automatisierungen auf deinen Beiträgen aktiv sind und ob der"
+" KI-Scan beim Speichern ausgeführt wird."
+msgstr ""
+"Control which automations run on your posts and whether the AI scan runs on "
+"save."
+
+#: templates/admin-settings.php:549
+msgid "Produkt-Overlay aktivieren"
+msgstr "Product overlay"
+
+#: templates/admin-settings.php:552
+msgid "Blendet ein Overlay mit Produktempfehlungen auf Beitragsseiten ein."
+msgstr "Displays an overlay with product recommendations on post pages."
+
+#: templates/admin-settings.php:563
+msgid "Automatische Produktempfehlungen einfügen"
+msgstr "Automatic product recommendation inserted."
+
+#: templates/admin-settings.php:566
+msgid "Fügt passende Produkte automatisch in den Beitragsinhalt ein."
+msgstr "Automatically inserts matching products into the post content."
+
+#: templates/admin-settings.php:577
+msgid "Automatischen Beitrags-Scan aktivieren"
+msgstr "Automatic post scan"
+
+#: templates/admin-settings.php:580
+msgid ""
+"Führt bei jedem Speichern einen KI-Scan aus und hält Produktempfehlungen "
+"aktuell."
+msgstr ""
+"Runs an AI scan on every save to keep product recommendations up to date."
+
+#: templates/admin-settings.php:591
+msgid "Gemini AI Configuration"
+msgstr "Gemini AI Configuration"
+
+#: templates/admin-settings.php:620
+msgid "Enter your Gemini API key"
+msgstr "Enter your Gemini API key"
+
+#: templates/admin-settings.php:632
+msgid "Test AI"
+msgstr "Test AI"
+
+#: templates/admin-settings.php:641
 msgid ""
 "A Gemini API key is currently stored securely. Leave the field blank to keep"
 " the existing key."
@@ -454,33 +475,75 @@ msgstr ""
 "A Gemini API key is currently stored securely. Leave the field blank to keep"
 " the existing key."
 
-#: templates/admin-settings.php:292
+#: templates/admin-settings.php:645
 msgid ""
 "Enter your Gemini API key and save the settings to activate AI features."
 msgstr ""
 "Enter your Gemini API key and save the settings to activate AI features."
 
-#: templates/admin-settings.php:300
+#: templates/admin-settings.php:653
 msgid "Remove the stored key when saving"
 msgstr "Remove the stored key when saving"
 
-#: templates/admin-settings.php:331
+#: templates/admin-settings.php:666 yadore-monetizer.php:12348
+msgid "Gemini 2.5 Flash - Fastest next-gen"
+msgstr "Gemini 2.5 Flash – fastest next-gen"
+
+#: templates/admin-settings.php:667 yadore-monetizer.php:12351
+msgid "Gemini 2.5 Pro - Highest quality"
+msgstr "Gemini 2.5 Pro - Highest quality"
+
+#: templates/admin-settings.php:668 yadore-monetizer.php:12354
+msgid "Gemini 2.5 Flash Lite - Efficient"
+msgstr "Gemini 2.5 Flash Lite - Efficient"
+
+#: templates/admin-settings.php:669 yadore-monetizer.php:12357
+msgid "Gemini 2.5 Flash Preview (Sep 2025)"
+msgstr "Live 2.5 Flash Preview"
+
+#: templates/admin-settings.php:670 yadore-monetizer.php:12360
+msgid "Gemini 2.5 Flash Lite Preview (Sep 2025)"
+msgstr "Gemini 2.5 Flash Lite - Efficient"
+
+#: templates/admin-settings.php:671 yadore-monetizer.php:12363
+msgid "Gemini 2.5 Flash Native Audio Preview (Sep 2025)"
+msgstr "Gemini 2.5 Flash Native Audio Preview (Sep 2025)"
+
+#: templates/admin-settings.php:672 yadore-monetizer.php:12366
+msgid "Gemini 2.5 Flash Experimental Native Audio Thinking Dialog"
+msgstr "Gemini 2.5 Flash Experimental Native Audio Thinking Dialog"
+
+#: templates/admin-settings.php:687
 msgid "Flash 2.5"
 msgstr "Flash 2.5"
 
-#: templates/admin-settings.php:332
+#: templates/admin-settings.php:688
 msgid "Pro 2.5"
 msgstr "Pro 2.5"
 
-#: templates/admin-settings.php:333
+#: templates/admin-settings.php:689
 msgid "Flash Lite 2.5"
 msgstr "Flash Lite 2.5"
 
-#: templates/admin-settings.php:334
-msgid "Live 2.5 Flash Preview"
-msgstr "Live 2.5 Flash Preview"
+#: templates/admin-settings.php:690
+msgid "Flash Preview 09-2025"
+msgstr "Flash Lite 2.5"
 
-#: templates/admin-settings.php:363
+#: templates/admin-settings.php:691
+msgid "Flash Lite Preview 09-2025"
+msgstr "Flash Lite 2.5"
+
+#: templates/admin-settings.php:705
+msgid ""
+"Choose from the latest Gemini 2.5 family. Flash is ideal for speed, Pro "
+"delivers the highest quality, Flash Lite optimizes for efficiency, and the "
+"preview or native audio variants provide access to the newest capabilities."
+msgstr ""
+"Choose from the latest Gemini 2.5 family. Flash is ideal for speed, Pro "
+"delivers the highest quality, Flash Lite optimizes for efficiency, and the "
+"preview or native audio variants provide access to the newest capabilities."
+
+#: templates/admin-settings.php:720
 msgid ""
 "Customize the instruction the AI uses to determine the best product keyword "
 "for your content."
@@ -488,11 +551,11 @@ msgstr ""
 "Customize the instruction the AI uses to determine the best product keyword "
 "for your content."
 
-#: templates/admin-settings.php:366
+#: templates/admin-settings.php:723
 msgid "Available placeholders:"
 msgstr "Available placeholders:"
 
-#: templates/admin-settings.php:369
+#: templates/admin-settings.php:726
 msgid ""
 "Use these placeholders to automatically inject the post title and body into "
 "your prompt."
@@ -500,55 +563,55 @@ msgstr ""
 "Use these placeholders to automatically inject the post title and body into "
 "your prompt."
 
-#: templates/admin-settings.php:373
+#: templates/admin-settings.php:730
 msgid "Reset to default prompt"
 msgstr "Reset to default prompt"
 
-#: templates/admin-settings.php:494 templates/admin-settings.php:651
-#: yadore-monetizer.php:7052
+#: templates/admin-settings.php:851 templates/admin-settings.php:1016
+#: yadore-monetizer.php:10305
 msgid "Overlay Template"
 msgstr "Overlay Template"
 
-#: templates/admin-settings.php:501 yadore-monetizer.php:7158
+#: templates/admin-settings.php:858 yadore-monetizer.php:10411
 msgid "Modern Overlay (Default)"
 msgstr "Modern overlay (default)"
 
-#: templates/admin-settings.php:509
+#: templates/admin-settings.php:866
 msgid "Choose which template renders the product overlay."
 msgstr "Choose which template renders the product overlay."
 
-#: templates/admin-settings.php:548
+#: templates/admin-settings.php:905
 msgid "Auto-Injection Template"
 msgstr "Auto-Injection Template"
 
-#: templates/admin-settings.php:556 templates/admin-settings.php:586
-#: yadore-monetizer.php:7164
+#: templates/admin-settings.php:913 templates/admin-settings.php:943
+#: yadore-monetizer.php:10417
 msgid "Product Grid (Default)"
 msgstr "Product Grid (Default)"
 
-#: templates/admin-settings.php:557 templates/admin-settings.php:587
-#: yadore-monetizer.php:7169
+#: templates/admin-settings.php:914 templates/admin-settings.php:944
+#: yadore-monetizer.php:10422
 msgid "Product List (Default)"
 msgstr "Product List (default)"
 
-#: templates/admin-settings.php:558 templates/admin-settings.php:588
-#: yadore-monetizer.php:7174
+#: templates/admin-settings.php:915 templates/admin-settings.php:945
+#: yadore-monetizer.php:10427
 msgid "Inline Highlight (Default)"
 msgstr "Inline highlight (default)"
 
-#: templates/admin-settings.php:567
+#: templates/admin-settings.php:924
 msgid "Template used when products are automatically inserted into posts."
 msgstr "Template used when products are automatically inserted into posts."
 
-#: templates/admin-settings.php:573
+#: templates/admin-settings.php:930
 msgid "Shortcode Display"
 msgstr "Shortcode Display"
 
-#: templates/admin-settings.php:578
+#: templates/admin-settings.php:935
 msgid "Default Shortcode Template"
 msgstr "Default Shortcode Template"
 
-#: templates/admin-settings.php:597
+#: templates/admin-settings.php:954
 msgid ""
 "Fallback template when using the shortcode without specifying a template "
 "attribute."
@@ -556,7 +619,7 @@ msgstr ""
 "Fallback template when using the shortcode without specifying a template "
 "attribute."
 
-#: templates/admin-settings.php:598
+#: templates/admin-settings.php:955
 msgid ""
 "Override in content with the template attribute, e.g. [yadore_products "
 "template=\"custom:my-template\"]."
@@ -564,11 +627,11 @@ msgstr ""
 "Override in content with the template attribute, e.g. [yadore_products "
 "template=\"custom:my-template\"]."
 
-#: templates/admin-settings.php:604
+#: templates/admin-settings.php:961
 msgid "Template Colors"
 msgstr "Template Colors"
 
-#: templates/admin-settings.php:605
+#: templates/admin-settings.php:962
 msgid ""
 "Fine-tune the colors used by the built-in templates. Select a tone from the "
 "palette or enter custom hex values."
@@ -576,165 +639,163 @@ msgstr ""
 "Fine-tune the colors used by the built-in templates. Select a tone from the "
 "palette or enter custom hex values."
 
-#: templates/admin-settings.php:608
+#: templates/admin-settings.php:965
 msgid "Shortcode Templates"
 msgstr "Shortcode Templates"
 
-#: templates/admin-settings.php:632 templates/admin-settings.php:675
+#: templates/admin-settings.php:997 templates/admin-settings.php:1048
 msgid "Available colors"
 msgstr "Available colors"
 
-#: templates/overlay-products-default.php:7 yadore-monetizer.php:7388
-#: yadore-monetizer.php:7469
-msgid "Zum Angebot →"
-msgstr "Zum Angebot →"
-
-#: templates/overlay-products-default.php:20 yadore-monetizer.php:7506
-msgid "No products found"
-msgstr "No products found"
-
-#: templates/overlay-products-default.php:21 yadore-monetizer.php:7508
-msgid "We couldn't find any relevant products for this content."
-msgstr "We couldn't find any relevant products for this content."
-
-#: templates/overlay-products-default.php:38 yadore-monetizer.php:7452
-msgid "Product"
-msgstr "Product"
-
-#: templates/overlay-products-default.php:39
-msgid "Online Store"
-msgstr "Online Store"
-
-#: templates/overlay-products-default.php:75
-#, php-format
-msgid "Available at %s"
-msgstr "Available at %s"
-
-#: yadore-monetizer.php:298
+#: yadore-monetizer.php:345
 msgid "Ocean Blue"
 msgstr "Ocean Blue"
 
-#: yadore-monetizer.php:299
+#: yadore-monetizer.php:346
 msgid "Deep Blue"
 msgstr "Deep Blue"
 
-#: yadore-monetizer.php:300
+#: yadore-monetizer.php:347
 msgid "Teal Breeze"
 msgstr "Teal Breeze"
 
-#: yadore-monetizer.php:301
+#: yadore-monetizer.php:348
 msgid "Fresh Green"
 msgstr "Fresh Green"
 
-#: yadore-monetizer.php:302
+#: yadore-monetizer.php:349
 msgid "Emerald"
 msgstr "Emerald"
 
-#: yadore-monetizer.php:303
+#: yadore-monetizer.php:350
 msgid "Golden Glow"
 msgstr "Golden Glow"
 
-#: yadore-monetizer.php:304
+#: yadore-monetizer.php:351
 msgid "Sunset Orange"
 msgstr "Sunset Orange"
 
-#: yadore-monetizer.php:305
+#: yadore-monetizer.php:352
 msgid "Crimson Red"
 msgstr "Crimson Red"
 
-#: yadore-monetizer.php:306
+#: yadore-monetizer.php:353
 msgid "Royal Purple"
 msgstr "Royal Purple"
 
-#: yadore-monetizer.php:307
+#: yadore-monetizer.php:354
 msgid "Plum"
 msgstr "Plum"
 
-#: yadore-monetizer.php:308
+#: yadore-monetizer.php:355
 msgid "Flamingo"
 msgstr "Flamingo"
 
-#: yadore-monetizer.php:309
+#: yadore-monetizer.php:356
 msgid "Cloud"
 msgstr "Cloud"
 
-#: yadore-monetizer.php:310
+#: yadore-monetizer.php:357
 msgid "Silver"
 msgstr "Silver"
 
-#: yadore-monetizer.php:311
+#: yadore-monetizer.php:358
 msgid "Slate Gray"
 msgstr "Slate Gray"
 
-#: yadore-monetizer.php:312
+#: yadore-monetizer.php:359
 msgid "Midnight"
 msgstr "Midnight"
 
-#: yadore-monetizer.php:313
+#: yadore-monetizer.php:360
 msgid "Deep Slate"
 msgstr "Deep Slate"
 
-#: yadore-monetizer.php:314
+#: yadore-monetizer.php:361
 msgid "Pure White"
 msgstr "Pure White"
 
-#: yadore-monetizer.php:315
+#: yadore-monetizer.php:362
 msgid "Jet Black"
 msgstr "Jet Black"
 
-#: yadore-monetizer.php:558
+#: yadore-monetizer.php:607
 msgid "Product Grid (Editable)"
 msgstr "Product Grid (Editable)"
 
-#: yadore-monetizer.php:593
+#: yadore-monetizer.php:642
 msgid "Product List (Editable)"
 msgstr "Product List (Editable)"
 
-#: yadore-monetizer.php:628
+#: yadore-monetizer.php:677
 msgid "Inline Highlight (Editable)"
 msgstr "Inline Highlight (Editable)"
 
-#: yadore-monetizer.php:669
+#: yadore-monetizer.php:718
 msgid "Modern Overlay (Editable)"
 msgstr "Modern Overlay (Editable)"
 
-#: yadore-monetizer.php:1079
+#: yadore-monetizer.php:1021
+msgid "Custom translations saved."
+msgstr "Custom translations saved."
+
+#: yadore-monetizer.php:1218
+msgid "JSON"
+msgstr "JSON"
+
+#: yadore-monetizer.php:1223
+msgid "CSV"
+msgstr "CSV"
+
+#: yadore-monetizer.php:1228
+msgid "XML"
+msgstr "XML"
+
+#: yadore-monetizer.php:1293
+msgid "German (de_DE)"
+msgstr "German (de_DE)"
+
+#: yadore-monetizer.php:1294
+msgid "English (en_US)"
+msgstr "English (en_US)"
+
+#: yadore-monetizer.php:1517
 msgid "Quick overview of your monetization activity."
 msgstr "Quick overview of your monetization activity."
 
-#: yadore-monetizer.php:1081
+#: yadore-monetizer.php:1519
 msgid "Products displayed:"
 msgstr "Products displayed:"
 
-#: yadore-monetizer.php:1082
+#: yadore-monetizer.php:1520
 msgid "Posts scanned:"
 msgstr "Posts scanned:"
 
-#: yadore-monetizer.php:1083
+#: yadore-monetizer.php:1521
 msgid "Overlay views:"
 msgstr "Overlay views:"
 
-#: yadore-monetizer.php:1084
+#: yadore-monetizer.php:1522
 msgid "Conversion rate:"
 msgstr "Conversion rate:"
 
-#: yadore-monetizer.php:1096
+#: yadore-monetizer.php:1534
 msgid "Yadore Monetizer"
 msgstr "Yadore Monetizer"
 
-#: yadore-monetizer.php:1104
+#: yadore-monetizer.php:1542
 msgid "Settings"
 msgstr "Settings"
 
-#: yadore-monetizer.php:1111
+#: yadore-monetizer.php:1549
 msgid "Debug"
 msgstr "Debug"
 
-#: yadore-monetizer.php:1133
+#: yadore-monetizer.php:1571
 msgid "Overview"
 msgstr "Overview"
 
-#: yadore-monetizer.php:1134
+#: yadore-monetizer.php:1572
 msgid ""
 "Manage monetization settings, AI analysis and product display options from "
 "the tabs on this screen."
@@ -742,11 +803,11 @@ msgstr ""
 "Manage monetization settings, AI analysis and product display options from "
 "the tabs on this screen."
 
-#: yadore-monetizer.php:1139
+#: yadore-monetizer.php:1577
 msgid "Support"
 msgstr "Support"
 
-#: yadore-monetizer.php:1140
+#: yadore-monetizer.php:1578
 msgid ""
 "Need help? Review the documentation in the API Docs section or contact "
 "support through your Yadore account."
@@ -754,47 +815,155 @@ msgstr ""
 "Need help? Review the documentation in the API Docs section or contact "
 "support through your Yadore account."
 
-#: yadore-monetizer.php:1143
+#: yadore-monetizer.php:1581
 msgid "Helpful Resources"
 msgstr "Helpful Resources"
 
-#: yadore-monetizer.php:1162
+#: yadore-monetizer.php:1600
 msgid "Items per page"
 msgstr "Items per page"
 
-#: yadore-monetizer.php:1376
+#: yadore-monetizer.php:1880
 msgid "Are you sure you want to delete this item?"
 msgstr "Are you sure you want to delete this item?"
 
-#: yadore-monetizer.php:1377
-msgid "Processing..."
+#: yadore-monetizer.php:1881
+msgid "Processing…"
 msgstr "Processing..."
 
-#: yadore-monetizer.php:1378
+#: yadore-monetizer.php:1882
 msgid "An error occurred. Please try again."
 msgstr "An error occurred. Please try again."
 
-#: yadore-monetizer.php:1379
+#: yadore-monetizer.php:1883
 msgid "Operation completed successfully."
 msgstr "Operation completed successfully."
 
-#: yadore-monetizer.php:1527
+#: yadore-monetizer.php:1884 yadore-monetizer.php:1887
+msgid "Copied!"
+msgstr "Copied!"
+
+#: yadore-monetizer.php:1885
+msgid "Copy shortcode"
+msgstr "Copy shortcode"
+
+#: yadore-monetizer.php:1886
+msgid "Copying…"
+msgstr "Copying…"
+
+#: yadore-monetizer.php:1888
+msgid "Copy failed"
+msgstr "Copy failed"
+
+#: yadore-monetizer.php:1889
+msgid "Shortcode copied to clipboard."
+msgstr "Shortcode copied to clipboard."
+
+#: yadore-monetizer.php:1890
+msgid "Copy failed. Press Ctrl+C to copy manually."
+msgstr "Copy failed. Press Ctrl+C to copy manually."
+
+#: yadore-monetizer.php:1892
+msgid "Hide key"
+msgstr "Hide key"
+
+#: yadore-monetizer.php:1893
+msgid "Refreshing…"
+msgstr "Refreshing…"
+
+#: yadore-monetizer.php:1894
+msgid "No data loaded yet"
+msgstr "No data loaded yet"
+
+#: yadore-monetizer.php:1895
+msgid "Just now"
+msgstr "Just now"
+
+#: yadore-monetizer.php:1896
+#, php-format
+msgid "%s seconds ago"
+msgstr "%s seconds ago"
+
+#: yadore-monetizer.php:1897
+#, php-format
+msgid "%s minutes ago"
+msgstr "%s minutes ago"
+
+#: yadore-monetizer.php:1898
+#, php-format
+msgid "%s hours ago"
+msgstr "%s hours ago"
+
+#: yadore-monetizer.php:1899
+#, php-format
+msgid "%s days ago"
+msgstr "%s days ago"
+
+#: yadore-monetizer.php:1900
+msgid "No activity logged yet."
+msgstr "No activity logged yet."
+
+#: yadore-monetizer.php:1901
+#, php-format
+msgid "Still <span id=\"scan-pending-count\">%s</span> posts pending"
+msgstr "Still <span id=\"scan-pending-count\">%s</span> posts pending"
+
+#: yadore-monetizer.php:1902
+msgid "All posts scanned!"
+msgstr "Posts scanned:"
+
+#: yadore-monetizer.php:1903
+#, php-format
+msgid "Page %s"
+msgstr "Page %s"
+
+#: yadore-monetizer.php:1904
+msgid "Next page"
+msgstr "Next page"
+
+#: yadore-monetizer.php:1905
+msgid "Previous page"
+msgstr "Previous page"
+
+#: yadore-monetizer.php:1906
+#, php-format
+msgid "%1$s–%2$s of %3$s"
+msgstr "%1$s–%2$s of %3$s"
+
+#: yadore-monetizer.php:1907
+msgid "No selection"
+msgstr "No selection"
+
+#: yadore-monetizer.php:1908
+#, php-format
+msgid "%s words"
+msgstr "%s words"
+
+#: yadore-monetizer.php:1909
+msgid "No minimum"
+msgstr "No minimum"
+
+#: yadore-monetizer.php:1910
+msgid "Standard scan"
+msgstr "Standard"
+
+#: yadore-monetizer.php:2058
 msgid "No suitable keyword detected for this page."
 msgstr "No suitable keyword detected for this page."
 
-#: yadore-monetizer.php:1578
+#: yadore-monetizer.php:2109
 msgid "Invalid product identifier received."
 msgstr "Invalid product identifier received."
 
-#: yadore-monetizer.php:1630
+#: yadore-monetizer.php:2161
 msgid "Gemini API did not return a keyword."
 msgstr "Gemini api did not return a keyword."
 
-#: yadore-monetizer.php:1662
+#: yadore-monetizer.php:2193
 msgid "No Yadore API key configured. Please add your key in the settings."
 msgstr "No Yadore API key configured. Please add your key in the settings."
 
-#: yadore-monetizer.php:1682
+#: yadore-monetizer.php:2213
 msgid ""
 "Yadore API connection successful, but no products were returned for the test"
 " keyword. Try another keyword or verify your account configuration."
@@ -802,70 +971,181 @@ msgstr ""
 "Yadore API connection successful, but no products were returned for the test"
 " keyword. Try another keyword or verify your account configuration."
 
-#: yadore-monetizer.php:1693
+#: yadore-monetizer.php:2224
 msgid "Yadore API connection successful"
 msgstr "Yadore API connection successful"
 
-#: yadore-monetizer.php:1711 yadore-monetizer.php:1728
-#: yadore-monetizer.php:1747 yadore-monetizer.php:1766
-#: yadore-monetizer.php:1822 yadore-monetizer.php:1886
-#: yadore-monetizer.php:1925 yadore-monetizer.php:1948
-#: yadore-monetizer.php:1982 yadore-monetizer.php:1999
-#: yadore-monetizer.php:2016 yadore-monetizer.php:2034
-#: yadore-monetizer.php:2056 yadore-monetizer.php:2078
-#: yadore-monetizer.php:2128 yadore-monetizer.php:2165
-#: yadore-monetizer.php:2189
+#: yadore-monetizer.php:2242 yadore-monetizer.php:2259
+#: yadore-monetizer.php:2278 yadore-monetizer.php:2297
+#: yadore-monetizer.php:2353 yadore-monetizer.php:2417
+#: yadore-monetizer.php:2456 yadore-monetizer.php:2479
+#: yadore-monetizer.php:2513 yadore-monetizer.php:2530
+#: yadore-monetizer.php:2547 yadore-monetizer.php:2565
+#: yadore-monetizer.php:2589 yadore-monetizer.php:2631
+#: yadore-monetizer.php:2751 yadore-monetizer.php:2782
+#: yadore-monetizer.php:2833 yadore-monetizer.php:2883
+#: yadore-monetizer.php:2905 yadore-monetizer.php:2925
+#: yadore-monetizer.php:2945 yadore-monetizer.php:2965
+#: yadore-monetizer.php:2985 yadore-monetizer.php:3005
+#: yadore-monetizer.php:3026 yadore-monetizer.php:3046
+#: yadore-monetizer.php:3066 yadore-monetizer.php:3086
+#: yadore-monetizer.php:3103 yadore-monetizer.php:3133
+#: yadore-monetizer.php:3153 yadore-monetizer.php:3197
+#: yadore-monetizer.php:3241 yadore-monetizer.php:3278
+#: yadore-monetizer.php:3302
 msgid "Insufficient permissions"
 msgstr "Insufficient permissions"
 
-#: yadore-monetizer.php:1775 yadore-monetizer.php:5440
+#: yadore-monetizer.php:2306 yadore-monetizer.php:7394
 msgid "No valid post types supplied for scanning."
 msgstr "No valid post types supplied for scanning."
 
-#: yadore-monetizer.php:1779 yadore-monetizer.php:5448
+#: yadore-monetizer.php:2310 yadore-monetizer.php:7402
 msgid "No valid post status supplied for scanning."
 msgstr "No valid post status supplied for scanning."
 
-#: yadore-monetizer.php:1785 yadore-monetizer.php:5421
+#: yadore-monetizer.php:2316 yadore-monetizer.php:7375
 msgid "No posts matched the selected criteria."
 msgstr "No posts matched the selected criteria."
 
-#: yadore-monetizer.php:1827
+#: yadore-monetizer.php:2358
 msgid "Invalid scan identifier."
 msgstr "Invalid scan identifier."
 
-#: yadore-monetizer.php:1953
+#: yadore-monetizer.php:2484
 msgid "Invalid post selected for scanning."
 msgstr "Invalid post selected for scanning."
 
-#: yadore-monetizer.php:2063
+#: yadore-monetizer.php:2593 yadore-monetizer.php:2635
+msgid "Data exports are disabled in the plugin settings."
+msgstr "Data exports are disabled in the plugin settings."
+
+#: yadore-monetizer.php:2601
+msgid "No data available for the selected export criteria."
+msgstr "No posts matched the selected criteria."
+
+#: yadore-monetizer.php:2606
+msgid "Failed to generate export file content."
+msgstr "Failed to generate export file content."
+
+#: yadore-monetizer.php:2648
+msgid "Please provide a valid schedule time (HH:MM)."
+msgstr "Please provide a valid schedule time (HH:MM)."
+
+#: yadore-monetizer.php:2765
+msgid "No import files provided."
+msgstr "No import files provided."
+
+#: yadore-monetizer.php:2789
 msgid "Cache cleared successfully."
 msgstr "Cache cleared successfully."
 
-#: yadore-monetizer.php:2090
+#: yadore-monetizer.php:2804
+msgid "Insufficient permissions to restore templates."
+msgstr "Insufficient permissions to resolve error logs."
+
+#: yadore-monetizer.php:2815
+msgid "Default templates restored successfully."
+msgstr "Operation completed successfully."
+
+#: yadore-monetizer.php:2845
 #, php-format
 msgid "last cleared %s ago"
 msgstr "last cleared %s ago"
 
-#: yadore-monetizer.php:2092
+#: yadore-monetizer.php:2847
 msgid "no recent clear recorded"
 msgstr "no recent clear recorded"
 
-#: yadore-monetizer.php:2096
+#: yadore-monetizer.php:2851
 #, php-format
 msgid "Cache health check: %1$d entries (~%2$s) with a %3$d%% hit rate, %4$s."
 msgstr ""
 "Cache health check: %1$d entries (~%2$s) with a %3$d%% hit rate, %4$s."
 
-#: yadore-monetizer.php:2133
+#: yadore-monetizer.php:2890
+msgid "Cache optimization completed successfully."
+msgstr "Operation completed successfully."
+
+#: yadore-monetizer.php:2911
+msgid "Database optimization completed."
+msgstr "Database diagnostics completed."
+
+#: yadore-monetizer.php:2931
+msgid "Old data cleanup completed."
+msgstr "Old data cleanup completed."
+
+#: yadore-monetizer.php:2951
+msgid "Logs archived successfully."
+msgstr "Error logs cleared successfully."
+
+#: yadore-monetizer.php:2971
+msgid "Old logs removed successfully."
+msgstr "Error logs cleared successfully."
+
+#: yadore-monetizer.php:2991
+msgid "System cleanup completed successfully."
+msgstr "Scan completed successfully."
+
+#: yadore-monetizer.php:3012
+msgid "Cleanup schedule updated."
+msgstr "Cleanup schedule updated."
+
+#: yadore-monetizer.php:3032
+msgid "Settings reset to defaults."
+msgstr "Reset to default prompt"
+
+#: yadore-monetizer.php:3052
+msgid "All plugin data removed."
+msgstr "All plugin data removed."
+
+#: yadore-monetizer.php:3072
+msgid "Factory reset completed successfully."
+msgstr "Operation completed successfully."
+
+#: yadore-monetizer.php:3108
+msgid "Please provide a valid source URL."
+msgstr "Please provide a valid source URL."
+
+#: yadore-monetizer.php:3113
+msgid "The remote site did not provide any settings."
+msgstr "The remote site did not provide any settings."
+
+#: yadore-monetizer.php:3119
+msgid "Settings cloned successfully."
+msgstr "Operation completed successfully."
+
+#: yadore-monetizer.php:3139
+msgid "Auto optimization completed."
+msgstr "Auto optimization completed."
+
+#: yadore-monetizer.php:3178
+msgid ""
+"Optimizer sync completed with warnings. Check the debug log for details."
+msgstr ""
+"Optimizer sync completed with warnings. Check the debug log for details."
+
+#: yadore-monetizer.php:3179 yadore-monetizer.php:9266
+msgid "Optimizer sync completed successfully."
+msgstr "Operation completed successfully."
+
+#: yadore-monetizer.php:3202
+msgid "Please provide text to analyze."
+msgstr "Please provide text to analyze."
+
+#: yadore-monetizer.php:3222
+msgid "AI analysis unavailable, showing local suggestions."
+msgstr "AI analysis unavailable, showing local suggestions."
+
+#: yadore-monetizer.php:3246
 msgid "Connectivity diagnostics completed successfully."
 msgstr "Connectivity diagnostics completed successfully."
 
-#: yadore-monetizer.php:2143
+#: yadore-monetizer.php:3256
 msgid "Connectivity issues detected. Review the service breakdown below."
 msgstr "Connectivity issues detected. Review the service breakdown below."
 
-#: yadore-monetizer.php:2145
+#: yadore-monetizer.php:3258
 msgid ""
 "Connectivity checks completed with warnings. Review the service breakdown "
 "below."
@@ -873,264 +1153,320 @@ msgstr ""
 "Connectivity checks completed with warnings. Review the service breakdown "
 "below."
 
-#: yadore-monetizer.php:2171
+#: yadore-monetizer.php:3284
 msgid "Database diagnostics completed."
 msgstr "Database diagnostics completed."
 
-#: yadore-monetizer.php:2195
+#: yadore-monetizer.php:3308
 msgid "Performance diagnostics completed."
 msgstr "Performance diagnostics completed."
 
-#: yadore-monetizer.php:2397
+#: yadore-monetizer.php:3634
 msgid "Product Templates"
 msgstr "Product Templates"
 
-#: yadore-monetizer.php:2398
+#: yadore-monetizer.php:3635
 msgid "Product Template"
 msgstr "Product Template"
 
-#: yadore-monetizer.php:3078
+#: yadore-monetizer.php:4326
 #, php-format
 msgid "Yadore API error: %s"
 msgstr "Yadore API error: %s"
 
-#: yadore-monetizer.php:3121
+#: yadore-monetizer.php:4369
 msgid "Unknown API error"
 msgstr "Unknown API error"
 
-#: yadore-monetizer.php:3648
+#: yadore-monetizer.php:4900
 msgid "Gemini API key not configured"
 msgstr "Gemini API key not configured"
 
-#: yadore-monetizer.php:3759
+#: yadore-monetizer.php:4916
+msgid "None"
+msgstr "None"
+
+#: yadore-monetizer.php:5020
 #, php-format
 msgid "Gemini API request failed: %s"
 msgstr "Gemini Api Request Failed: %s"
 
-#: yadore-monetizer.php:3767
+#: yadore-monetizer.php:5028
 msgid "Unexpected response from Gemini API."
 msgstr "Unexpected response from Gemini API."
 
-#: yadore-monetizer.php:3787
+#: yadore-monetizer.php:5048
 msgid "Gemini API returned an invalid response."
 msgstr "Gemini API returned an invalid response."
 
-#: yadore-monetizer.php:3797
+#: yadore-monetizer.php:5058
 #, php-format
 msgid "Gemini API blocked the request: %s"
 msgstr "Gemini API blocked the request: %s"
 
-#: yadore-monetizer.php:3811
+#: yadore-monetizer.php:5106
+msgid ""
+"Gemini API truncated the response before any data could be generated. "
+"Increase the maximum output tokens or choose a different model."
+msgstr ""
+"Gemini API truncated the response before any data could be generated. "
+"Increase the maximum output tokens or choose a different model."
+
+#: yadore-monetizer.php:5116
 msgid "Gemini API returned data that could not be parsed as JSON."
 msgstr "Gemini API returned data that could not be parsed as JSON."
 
-#: yadore-monetizer.php:3826
+#: yadore-monetizer.php:5157
 msgid "Gemini API returned data that did not match the expected schema."
 msgstr "Gemini API returned data that did not match the expected schema."
 
-#: yadore-monetizer.php:3836
+#: yadore-monetizer.php:5168
 msgid "Gemini API did not return a usable keyword."
 msgstr "Gemini API did not return a usable keyword."
 
-#: yadore-monetizer.php:4335
+#: yadore-monetizer.php:5583
+msgid "Gemini API response did not contain any candidates to parse."
+msgstr "Gemini API returned an invalid response."
+
+#: yadore-monetizer.php:5621
+msgid ""
+"Gemini API truncated the response before returning any structured data. "
+"Increase the output token limit or reduce the prompt length."
+msgstr ""
+"Gemini API truncated the response before returning any structured data. "
+"Increase the output token limit or reduce the prompt length."
+
+#: yadore-monetizer.php:5639
+msgid ""
+"Gemini API cut off the JSON payload mid-response. Try requesting fewer "
+"fields or increasing the maximum output tokens."
+msgstr ""
+"Gemini API cut off the JSON payload mid-response. Try requesting fewer "
+"fields or increasing the maximum output tokens."
+
+#: yadore-monetizer.php:5651
+msgid ""
+"Gemini API returned a response without any structured content. Please try "
+"again or adjust the prompt settings."
+msgstr ""
+"Gemini API returned a response without any structured content. Please try "
+"again or adjust the prompt settings."
+
+#: yadore-monetizer.php:5659
+msgid ""
+"Gemini API stopped generating before the structured JSON was completed. "
+"Increase the token limit and retry."
+msgstr ""
+"Gemini API stopped generating before the structured JSON was completed. "
+"Increase the token limit and retry."
+
+#: yadore-monetizer.php:5666
+msgid ""
+"Gemini API response could not be parsed. Enable JSON schema mode or review "
+"the raw output in the debug logs."
+msgstr ""
+"Gemini API response could not be parsed. Enable JSON schema mode or review "
+"the raw output in the debug logs."
+
+#: yadore-monetizer.php:6087
 msgid "No data"
 msgstr "No data"
 
-#: yadore-monetizer.php:4649
+#: yadore-monetizer.php:6453
 #, php-format
 msgid "Post #%d"
 msgstr "Post #%d"
 
-#: yadore-monetizer.php:4709
+#: yadore-monetizer.php:6513
 msgid "AI"
 msgstr "AI"
 
-#: yadore-monetizer.php:4710
+#: yadore-monetizer.php:6514
 msgid "Manual"
 msgstr "Manual"
 
-#: yadore-monetizer.php:5093
+#: yadore-monetizer.php:7047
 msgid "Overlay ausgeliefert"
 msgstr "Overlay delivered"
 
-#: yadore-monetizer.php:5096
+#: yadore-monetizer.php:7050
 #, php-format
 msgid "Produkt-Overlay für „%1$s“ mit %2$d Angeboten angezeigt."
 msgstr "Product overlay for “%1$s” displayed with %2$d offers."
 
-#: yadore-monetizer.php:5101
+#: yadore-monetizer.php:7055
 msgid "Produkt-Overlay erfolgreich ausgeliefert."
 msgstr "Product overlay delivered successfully."
 
-#: yadore-monetizer.php:5109
+#: yadore-monetizer.php:7063
 msgid "Shortcode ausgeliefert"
 msgstr "Shortcode rendered"
 
-#: yadore-monetizer.php:5112
+#: yadore-monetizer.php:7066
 #, php-format
 msgid "Shortcode-Ausgabe für „%1$s“ im %2$s-Layout generiert."
 msgstr "Shortcode output for “%1$s” generated in the %2$s layout."
 
-#: yadore-monetizer.php:5114
+#: yadore-monetizer.php:7068
 msgid "Standard"
 msgstr "Standard"
 
-#: yadore-monetizer.php:5117
+#: yadore-monetizer.php:7071
 msgid "Shortcode-Ausgabe erfolgreich generiert."
 msgstr "Shortcode output generated successfully."
 
-#: yadore-monetizer.php:5124
+#: yadore-monetizer.php:7078
 msgid "Automatische Produktempfehlung"
 msgstr "Automatic product recommendation"
 
-#: yadore-monetizer.php:5127
+#: yadore-monetizer.php:7081
 #, php-format
 msgid "Produktempfehlung für „%s“ wurde automatisch eingefügt."
 msgstr "A product recommendation for “%s” was inserted automatically."
 
-#: yadore-monetizer.php:5131
+#: yadore-monetizer.php:7085
 msgid "Automatische Produktempfehlung wurde eingefügt."
 msgstr "Automatic product recommendation inserted."
 
-#: yadore-monetizer.php:5139
+#: yadore-monetizer.php:7093
 msgid "Beitrag gescannt"
 msgstr "Post scanned"
 
-#: yadore-monetizer.php:5143
+#: yadore-monetizer.php:7097
 #, php-format
 msgid "Scan von „%1$s“ abgeschlossen (%2$s)."
 msgstr "Scan of “%1$s” completed (%2$s)."
 
-#: yadore-monetizer.php:5149
+#: yadore-monetizer.php:7103
 #, php-format
 msgid "Scan abgeschlossen (%s)."
 msgstr "Scan completed (%s)."
 
-#: yadore-monetizer.php:5159
+#: yadore-monetizer.php:7113
 msgid "Produktklick erfasst"
 msgstr "Product click recorded"
 
-#: yadore-monetizer.php:5162
+#: yadore-monetizer.php:7116
 #, php-format
 msgid "Ein Klick auf ein Angebot zu „%s“ wurde registriert."
 msgstr "A click on an offer for “%s” was recorded."
 
-#: yadore-monetizer.php:5166
+#: yadore-monetizer.php:7120
 msgid "Ein Produktklick wurde registriert."
 msgstr "A product click was registered."
 
-#: yadore-monetizer.php:5173
+#: yadore-monetizer.php:7127
 msgid "Conversion erfasst"
 msgstr "Conversion recorded"
 
-#: yadore-monetizer.php:5176
+#: yadore-monetizer.php:7130
 #, php-format
 msgid "Neue Conversion im Wert von %s."
 msgstr "New conversion worth %s."
 
-#: yadore-monetizer.php:5178
+#: yadore-monetizer.php:7132
 msgid "Neue Conversion registriert."
 msgstr "Neue Conversion registriert."
 
-#: yadore-monetizer.php:5185 yadore-monetizer.php:5198
+#: yadore-monetizer.php:7139 yadore-monetizer.php:7152
 msgid "Systemaktivität"
 msgstr "System activity"
 
-#: yadore-monetizer.php:5188
+#: yadore-monetizer.php:7142
 #, php-format
 msgid "Aktivität zu „%s“ aufgezeichnet."
 msgstr "Activity for “%s” recorded."
 
-#: yadore-monetizer.php:5192
+#: yadore-monetizer.php:7146
 msgid "Systemaktivität aufgezeichnet."
 msgstr "System activity recorded."
 
-#: yadore-monetizer.php:5215
+#: yadore-monetizer.php:7169
 msgid "Automatischer Scan"
 msgstr "Automatic scan"
 
-#: yadore-monetizer.php:5217
+#: yadore-monetizer.php:7171
 #, php-format
 msgid "Beitrag „%1$s“ wurde gescannt (%2$s)."
 msgstr "Post “%1$s” was scanned (%2$s)."
 
-#: yadore-monetizer.php:5218
+#: yadore-monetizer.php:7172
 msgid "Unbekannter Beitrag"
 msgstr "Unknown post"
 
-#: yadore-monetizer.php:5251
+#: yadore-monetizer.php:7205
 #, php-format
 msgid "vor %s"
 msgstr "%s ago"
 
-#: yadore-monetizer.php:5262
+#: yadore-monetizer.php:7216
 msgid "erfolgreich"
 msgstr "successful"
 
-#: yadore-monetizer.php:5265
+#: yadore-monetizer.php:7219
 msgid "fehlgeschlagen"
 msgstr "failed"
 
-#: yadore-monetizer.php:5268
+#: yadore-monetizer.php:7222
 msgid "übersprungen"
 msgstr "skipped"
 
-#: yadore-monetizer.php:5271
+#: yadore-monetizer.php:7225
 msgid "ausstehend"
 msgstr "pending"
 
-#: yadore-monetizer.php:5274
+#: yadore-monetizer.php:7228
 msgid "in Bearbeitung"
 msgstr "in progress"
 
-#: yadore-monetizer.php:5623
+#: yadore-monetizer.php:7635
 msgid "Post could not be found."
 msgstr "Post could not be found."
 
-#: yadore-monetizer.php:5644
+#: yadore-monetizer.php:7656
 #, php-format
 msgid "Skipped (%d words required)."
 msgstr "Skipped (%d words required)."
 
-#: yadore-monetizer.php:5669
+#: yadore-monetizer.php:7681
 msgid "Scan skipped (already up to date)."
 msgstr "Scan skipped (already up to date)."
 
-#: yadore-monetizer.php:5735 yadore-monetizer.php:5793
+#: yadore-monetizer.php:7756 yadore-monetizer.php:7814
 msgid "No keyword could be detected for this post."
 msgstr "No keyword could be detected for this post."
 
-#: yadore-monetizer.php:5891
+#: yadore-monetizer.php:7912
 msgid "Scan completed successfully."
 msgstr "Scan completed successfully."
 
-#: yadore-monetizer.php:6171
+#: yadore-monetizer.php:8192
 msgid "Completed (AI)"
 msgstr "Completed (AI)"
 
-#: yadore-monetizer.php:6172 yadore-monetizer.php:6173
+#: yadore-monetizer.php:8193 yadore-monetizer.php:8194
 msgid "Completed"
 msgstr "Completed"
 
-#: yadore-monetizer.php:6174 yadore-monetizer.php:6282
-#: yadore-monetizer.php:6340
+#: yadore-monetizer.php:8195 yadore-monetizer.php:8303
+#: yadore-monetizer.php:8361
 msgid "Failed"
 msgstr "Failed"
 
-#: yadore-monetizer.php:6175 yadore-monetizer.php:6283
-#: yadore-monetizer.php:6341
+#: yadore-monetizer.php:8196 yadore-monetizer.php:8304
+#: yadore-monetizer.php:8362
 msgid "Skipped"
 msgstr "Skipped"
 
-#: yadore-monetizer.php:6176
+#: yadore-monetizer.php:8197
 msgid "Pending"
 msgstr "Pending"
 
-#: yadore-monetizer.php:6281 yadore-monetizer.php:6339
+#: yadore-monetizer.php:8302 yadore-monetizer.php:8360
 msgid "Successful"
 msgstr "Successful"
 
-#: yadore-monetizer.php:6437
+#: yadore-monetizer.php:8478
 msgid ""
 "No keyword available for product search. Run the scanner or provide a "
 "keyword attribute."
@@ -1138,29 +1474,105 @@ msgstr ""
 "No keyword available for product search. Run the scanner or provide a "
 "keyword attribute."
 
-#: yadore-monetizer.php:6447
+#: yadore-monetizer.php:8488
 #, php-format
 msgid "No products found for \"%s\"."
 msgstr "No products found for \"%s\"."
 
-#: yadore-monetizer.php:6498
+#: yadore-monetizer.php:8547
 msgid "Error loading products. Please try again later."
 msgstr "Error loading products. Please try again later."
 
-#: yadore-monetizer.php:7030
+#: yadore-monetizer.php:9178
+msgid ""
+"Yadore API key is missing. Configure the integration before running the "
+"sync."
+msgstr ""
+"Yadore API key is missing. Configure the integration before running the "
+"sync."
+
+#: yadore-monetizer.php:9197
+msgid "Invalid start date provided. Using the previous day instead."
+msgstr "Invalid start date provided. Using the previous day instead."
+
+#: yadore-monetizer.php:9249
+msgid "Optimizer sync failed unexpectedly. See the error logs for details."
+msgstr "Optimizer sync failed unexpectedly. See the error logs for details."
+
+#: yadore-monetizer.php:9262
+msgid ""
+"Optimizer sync completed with warnings. Review the logs for more "
+"information."
+msgstr ""
+"Connectivity checks completed with warnings. Review the service breakdown "
+"below."
+
+#: yadore-monetizer.php:9264
+msgid "No dates were processed during the optimizer sync."
+msgstr "No dates were processed during the optimizer sync."
+
+#: yadore-monetizer.php:10100
+msgid "Yadore Monetizer Keyword"
+msgstr "Yadore Monetizer Pro"
+
+#: yadore-monetizer.php:10146
+msgid ""
+"Set a manual product keyword for this content. Leave empty to keep using the"
+" automatic scanner."
+msgstr ""
+"Set a manual product keyword for this content. Leave empty to keep using the"
+" automatic scanner."
+
+#: yadore-monetizer.php:10151
+msgid "Primary keyword"
+msgstr "Primary color"
+
+#: yadore-monetizer.php:10155
+msgid "e.g. Dyson V15 Vacuum"
+msgstr "e.g. Dyson V15 Vacuum"
+
+#: yadore-monetizer.php:10157
+msgid "Fallback keyword"
+msgstr "Fallback keyword"
+
+#: yadore-monetizer.php:10161
+msgid "Used when the primary keyword has no results"
+msgstr "Used when the primary keyword has no results"
+
+#: yadore-monetizer.php:10163
+msgid ""
+"The fallback keyword is used if no products are found for the primary "
+"keyword."
+msgstr ""
+"The fallback keyword is used if no products are found for the primary "
+"keyword."
+
+#. translators: %s: keyword status
+#: yadore-monetizer.php:10172
+#, php-format
+msgid "Current status: %s (validated)"
+msgstr "Current status: %s (validated)"
+
+#. translators: %s: keyword status
+#: yadore-monetizer.php:10177
+#, php-format
+msgid "Current status: %s"
+msgstr "Current status: %s"
+
+#: yadore-monetizer.php:10283
 msgid "Template Settings"
 msgstr "Template Settings"
 
-#: yadore-monetizer.php:7051
+#: yadore-monetizer.php:10304
 msgid "Shortcode Template"
 msgstr "Shortcode Template"
 
-#: yadore-monetizer.php:7055 yadore-monetizer.php:7100
-#: yadore-monetizer.php:7106
+#: yadore-monetizer.php:10308 yadore-monetizer.php:10353
+#: yadore-monetizer.php:10359
 msgid "Template Type"
 msgstr "Template Type"
 
-#: yadore-monetizer.php:7067
+#: yadore-monetizer.php:10320
 msgid ""
 "Wrap repeatable markup with [yadore_product_loop]...[/yadore_product_loop]. "
 "Available placeholders: {{title}}, {{description}}, {{price}}, "
@@ -1174,29 +1586,45 @@ msgstr ""
 "{{image_url}}, {{image_tag}}, {{promo_text}}, {{button_label}}, "
 "{{tracking_attributes}}, {{index}}, {{id}}."
 
-#: yadore-monetizer.php:7101 yadore-monetizer.php:7110
+#: yadore-monetizer.php:10354 yadore-monetizer.php:10363
 msgid "Template Key"
 msgstr "Template Key"
 
-#: yadore-monetizer.php:7121
+#: yadore-monetizer.php:10374
 msgid "Overlay"
 msgstr "Overlay"
 
-#: yadore-monetizer.php:7123
+#: yadore-monetizer.php:10376
 msgid "Shortcode"
 msgstr "Shortcode"
 
-#: yadore-monetizer.php:7513
+#: yadore-monetizer.php:10646 yadore-monetizer.php:10727
+msgid "Zum Angebot →"
+msgstr "Zum Angebot →"
+
+#: yadore-monetizer.php:10710
+msgid "Product"
+msgstr "Product"
+
+#: yadore-monetizer.php:10764
+msgid "No products found"
+msgstr "No products found"
+
+#: yadore-monetizer.php:10766
+msgid "We couldn't find any relevant products for this content."
+msgstr "We couldn't find any relevant products for this content."
+
+#: yadore-monetizer.php:10771
 msgid "No products available at the moment."
 msgstr "No products available at the moment."
 
-#: yadore-monetizer.php:7597
+#: yadore-monetizer.php:10855
 msgid ""
 "was activated successfully. Configure your API keys to start monetizing."
 msgstr ""
 "was activated successfully. Configure your API keys to start monetizing."
 
-#: yadore-monetizer.php:7603
+#: yadore-monetizer.php:10861
 msgid ""
 "Yadore Monetizer Pro requires a valid Yadore API key. Please enter your key "
 "in the plugin settings."
@@ -1204,7 +1632,7 @@ msgstr ""
 "Yadore Monetizer Pro requires a valid Yadore API key. Please enter your key "
 "in the plugin settings."
 
-#: yadore-monetizer.php:7607
+#: yadore-monetizer.php:10865
 msgid ""
 "Gemini AI analysis is enabled but no API key is configured. Add a Gemini API"
 " key to use AI-powered keyword detection."
@@ -1212,15 +1640,15 @@ msgstr ""
 "Gemini AI analysis is enabled but no API key is configured. Add a Gemini API"
 " key to use AI-powered keyword detection."
 
-#: yadore-monetizer.php:7619
+#: yadore-monetizer.php:10877
 msgid "Yadore Monetizer Pro Error"
 msgstr "Yadore Monetizer Pro Error"
 
-#: yadore-monetizer.php:7627
+#: yadore-monetizer.php:10885
 msgid "Mark as resolved"
 msgstr "Mark as resolved"
 
-#: yadore-monetizer.php:7629
+#: yadore-monetizer.php:10887
 msgid ""
 "Dismiss this alert after confirming the issue is fixed. The error log "
 "history is available in the Tools panel."
@@ -1228,149 +1656,145 @@ msgstr ""
 "Dismiss this alert after confirming the issue is fixed. The error log "
 "history is available in the Tools panel."
 
-#: yadore-monetizer.php:7766
+#: yadore-monetizer.php:11024
 msgid "Insufficient permissions to resolve error logs."
 msgstr "Insufficient permissions to resolve error logs."
 
-#: yadore-monetizer.php:7771
+#: yadore-monetizer.php:11029
 msgid "Invalid error reference supplied."
 msgstr "Invalid error reference supplied."
 
-#: yadore-monetizer.php:7778
+#: yadore-monetizer.php:11036
 msgid "Error log table not found."
 msgstr "Error log table not found."
 
-#: yadore-monetizer.php:7796
+#: yadore-monetizer.php:11054
 msgid "Failed to update error status. Please try again."
 msgstr "Failed to update error status. Please try again."
 
-#: yadore-monetizer.php:7802
+#: yadore-monetizer.php:11060
 msgid "Error entry marked as resolved."
 msgstr "Error entry marked as resolved."
 
-#: yadore-monetizer.php:7817
+#: yadore-monetizer.php:11075
 msgid "Insufficient permissions to view error logs."
 msgstr "Insufficient permissions to view error logs."
 
-#: yadore-monetizer.php:7935
+#: yadore-monetizer.php:11193
 msgid "Insufficient permissions to clear error logs."
 msgstr "Insufficient permissions to clear error logs."
 
-#: yadore-monetizer.php:7948
+#: yadore-monetizer.php:11206
 msgid "Error logs cleared successfully."
 msgstr "Error logs cleared successfully."
 
-#: yadore-monetizer.php:7962
+#: yadore-monetizer.php:11220
 msgid "Insufficient permissions to access debug information."
 msgstr "Insufficient permissions to access debug information."
 
-#: yadore-monetizer.php:8265
-msgid "Yadore API"
-msgstr "Yadore API"
-
-#: yadore-monetizer.php:8277
+#: yadore-monetizer.php:11586
 msgid "API key missing. Add your Yadore publisher key in the settings."
 msgstr "API key missing. Add your Yadore publisher key in the settings."
 
-#: yadore-monetizer.php:8295 yadore-monetizer.php:8388
+#: yadore-monetizer.php:11604 yadore-monetizer.php:11697
 #, php-format
 msgid "Connection failed: %s"
 msgstr "Connection failed: %s"
 
-#: yadore-monetizer.php:8320
+#: yadore-monetizer.php:11629
 #, php-format
 msgid "Online – %d markets available."
 msgstr "Online – %d markets available."
 
-#: yadore-monetizer.php:8324
+#: yadore-monetizer.php:11633
 msgid "Online – response received successfully."
 msgstr "Online – response received successfully."
 
-#: yadore-monetizer.php:8339 yadore-monetizer.php:8430
+#: yadore-monetizer.php:11648 yadore-monetizer.php:11739
 #, php-format
 msgid "HTTP %1$d: %2$s"
 msgstr "HTTP %1$d: %2$s"
 
-#: yadore-monetizer.php:8345
+#: yadore-monetizer.php:11654
 #, php-format
 msgid "HTTP %1$d %2$s"
 msgstr "HTTP %1$d %2$s"
 
-#: yadore-monetizer.php:8355
+#: yadore-monetizer.php:11664
 msgid "Gemini AI API"
 msgstr "Gemini ai api"
 
-#: yadore-monetizer.php:8367
+#: yadore-monetizer.php:11676
 msgid "API key missing. Configure your Gemini API key to enable AI features."
 msgstr "API key missing. Configure your Gemini API key to enable AI features."
 
-#: yadore-monetizer.php:8408
+#: yadore-monetizer.php:11717
 #, php-format
 msgid "Online – %1$s model reachable."
 msgstr "Online – %1$s model reachable."
 
-#: yadore-monetizer.php:8413
+#: yadore-monetizer.php:11722
 #, php-format
 msgid "Online – %1$s model verified."
 msgstr "Online – %1$s model verified."
 
-#: yadore-monetizer.php:8436
+#: yadore-monetizer.php:11745
 #, php-format
 msgid "HTTP %d response received."
 msgstr "HTTP %d response received."
 
-#: yadore-monetizer.php:8445
+#: yadore-monetizer.php:11754
 msgid "External Services"
 msgstr "External Services"
 
-#: yadore-monetizer.php:8455
+#: yadore-monetizer.php:11764
 msgid "WordPress.org API"
 msgstr "WordPress.org API"
 
-#: yadore-monetizer.php:8456
+#: yadore-monetizer.php:11765
 msgid "GitHub API"
 msgstr "GitHub API"
 
-#: yadore-monetizer.php:8485
+#: yadore-monetizer.php:11794
 #, php-format
 msgid "All monitored services reachable (%1$d/%2$d)."
 msgstr "All monitored services reachable (%1$d/%2$d)."
 
-#: yadore-monetizer.php:8496
+#: yadore-monetizer.php:11805
 #, php-format
 msgid "Partial connectivity – %1$d of %2$d services reachable. %3$s"
 msgstr "Partial connectivity – %1$d of %2$d services reachable. %3$s"
 
-#: yadore-monetizer.php:8504
+#: yadore-monetizer.php:11813
 #, php-format
 msgid "No external services reachable: %s"
 msgstr "No external services reachable: %s"
 
-#: yadore-monetizer.php:8589
+#: yadore-monetizer.php:11898
 #, php-format
 msgid "Missing tables: %s."
 msgstr "Missing tables: %s."
 
-#: yadore-monetizer.php:8600
+#: yadore-monetizer.php:11909
 #, php-format
 msgid "Table %1$s missing columns: %2$s."
 msgstr "Table %1$s missing columns: %2$s."
 
-#: yadore-monetizer.php:8614
+#: yadore-monetizer.php:11923
 #, php-format
 msgid "All %1$d plugin tables are healthy (%2$d records, %3$s storage)."
 msgstr "All %1$d plugin tables are healthy (%2$d records, %3$s storage)."
 
-#: yadore-monetizer.php:8621
+#: yadore-monetizer.php:11930
 #, php-format
 msgid "Current footprint: %1$d records using %2$s with %3$s overhead."
 msgstr "Current footprint: %1$d records using %2$s with %3$s overhead."
 
-#: yadore-monetizer.php:8652
+#: yadore-monetizer.php:11961
 msgid "Cache is empty – warm-up scans recommended for optimal performance."
 msgstr "Cache is empty – warm-up scans recommended for optimal performance."
 
-#: yadore-monetizer.php:8656
+#: yadore-monetizer.php:11965
 #, php-format
 msgid ""
 "Cache hit rate is %1$d%% across %2$d entries. Consider clearing stale caches"
@@ -1379,12 +1803,12 @@ msgstr ""
 "Cache hit rate is %1$d%% across %2$d entries. Consider clearing stale caches"
 " or running additional scans."
 
-#: yadore-monetizer.php:8662
+#: yadore-monetizer.php:11971
 #, php-format
 msgid "Cache hit rate at %1$d%% across %2$d entries."
 msgstr "Cache hit rate at %1$d%% across %2$d entries."
 
-#: yadore-monetizer.php:8690
+#: yadore-monetizer.php:11999
 #, php-format
 msgid ""
 "Database overhead is %1$s (%2$d%%). Run an optimize operation to reclaim "
@@ -1393,147 +1817,354 @@ msgstr ""
 "Database overhead is %1$s (%2$d%%). Run an optimize operation to reclaim "
 "space."
 
-#: yadore-monetizer.php:8696
+#: yadore-monetizer.php:12005
 #, php-format
 msgid "Database footprint %1$s across %2$d records with %3$s overhead."
 msgstr "Database footprint %1$s across %2$d records with %3$s overhead."
 
-#: yadore-monetizer.php:8728
+#: yadore-monetizer.php:12037
 msgid "Daily maintenance"
 msgstr "Daily maintenance"
 
-#: yadore-monetizer.php:8729
+#: yadore-monetizer.php:12038
 msgid "Weekly reports"
 msgstr "Weekly reports"
 
-#: yadore-monetizer.php:8761
+#: yadore-monetizer.php:12070
 #, php-format
 msgid "%1$s is overdue by %2$s."
 msgstr "%1$s is overdue by %2$s."
 
-#: yadore-monetizer.php:8768
+#: yadore-monetizer.php:12077
 #, php-format
 msgid "Next %1$s run in %2$s."
 msgstr "Next %1$s run in %2$s."
 
-#: yadore-monetizer.php:8779
+#: yadore-monetizer.php:12088
 #, php-format
 msgid "Missing schedules: %s."
 msgstr "Missing Schedules: %s."
 
-#: yadore-monetizer.php:8786
+#: yadore-monetizer.php:12095
 #, php-format
 msgid "Overdue schedules: %s."
 msgstr "Overdue Schedules: %s."
 
-#: yadore-monetizer.php:8792
+#: yadore-monetizer.php:12101
 msgid "All scheduled maintenance tasks are queued."
 msgstr "All scheduled maintenance tasks are queued."
 
-#: yadore-monetizer.php:8994
-msgid "Gemini 2.5 Flash - Fastest next-gen"
-msgstr "Gemini 2.5 Flash – fastest next-gen"
+#: yadore-monetizer.php:12396
+msgid "Please select at least one dataset to export."
+msgstr "Please select at least one dataset to export."
 
-#: yadore-monetizer.php:8997
-msgid "Gemini 2.5 Pro - Highest quality"
-msgstr "Gemini 2.5 Pro - Highest quality"
+#: yadore-monetizer.php:13032
+#, php-format
+msgid "Backup stored at %s"
+msgstr "Backup stored at %s"
 
-#: yadore-monetizer.php:9000
-msgid "Gemini 2.5 Flash Lite - Efficient"
-msgstr "Gemini 2.5 Flash Lite - Efficient"
+#: yadore-monetizer.php:13036
+msgid "Backup could not be created before import."
+msgstr "Backup could not be created before import."
 
-#: yadore-monetizer.php:9003
-msgid "Gemini Live 2.5 Flash Preview - Live preview capabilities"
-msgstr "Gemini Live 2.5 Flash Preview - Live preview capabilities"
+#: yadore-monetizer.php:13053 yadore-monetizer.php:13060
+#, php-format
+msgid "Unable to read import file %s."
+msgstr "Unable to read import file %s."
 
-#: templates/admin-settings.php:4
-msgid "Yadore Monetizer Pro Settings"
-msgstr "Yadore Monetizer Pro Settings"
+#: yadore-monetizer.php:13067
+#, php-format
+msgid "Import file %s does not contain valid JSON."
+msgstr "Import file %s does not contain valid JSON."
 
-#: templates/admin-settings.php:97
-msgid "Plugin settings navigation"
-msgstr "Plugin settings navigation"
+#: yadore-monetizer.php:13073
+#, php-format
+msgid "Import file %s does not contain valid XML."
+msgstr "Import file %s does not contain valid XML."
 
-#: templates/admin-settings.php:109
-msgid "General"
-msgstr "General"
+#: yadore-monetizer.php:13082
+#, php-format
+msgid "Unsupported import format: %s"
+msgstr "Unsupported import format: %s"
 
-#: templates/admin-settings.php:123
-msgid "AI Settings"
-msgstr "AI Settings"
+#: yadore-monetizer.php:13088
+msgid "Failed to open CSV import file."
+msgstr "Failed to open CSV import file."
 
-#: templates/admin-settings.php:136
-msgid "Display"
-msgstr "Display"
+#: yadore-monetizer.php:13094
+msgid "CSV import file is missing expected headers."
+msgstr "CSV import file is missing expected headers."
 
-#: templates/admin-settings.php:149
-msgid "Performance"
-msgstr "Performance"
+#: yadore-monetizer.php:13104
+msgid "CSV import file is missing required columns."
+msgstr "CSV import file is missing required columns."
 
-#: templates/admin-settings.php:161
-msgid "Advanced"
-msgstr "Advanced"
+#: yadore-monetizer.php:13236
+#, php-format
+msgid "Detected %1$d records for %2$s."
+msgstr "Detected %1$d records for %2$s."
 
-#: templates/admin-settings.php:171
-msgid "API Configuration"
-msgstr "API Configuration"
+#: yadore-monetizer.php:13241
+#, php-format
+msgid "Export originated from %s."
+msgstr "Export originated from %s."
 
-#: templates/admin-settings.php:185
-msgid "Enter your Yadore API key"
-msgstr "Enter your Yadore API key"
+#: yadore-monetizer.php:13263
+#, php-format
+msgid "Imported %d settings."
+msgstr "Imported %d settings."
 
-#: templates/admin-settings.php:193
-msgid "Show key"
-msgstr "Show key"
+#: yadore-monetizer.php:13268
+#, php-format
+msgid "Imported %d keyword rows."
+msgstr "Imported %d keyword rows."
 
-#: templates/admin-settings.php:196
-msgid "Test Connection"
-msgstr "Test Connection"
+#: yadore-monetizer.php:13273
+#, php-format
+msgid "Imported %d analytics records."
+msgstr "Imported %d analytics records."
 
-#: templates/admin-settings.php:200
-msgid "Your Yadore API key is required to fetch product data."
-msgstr "Your Yadore API key is required to fetch product data."
+#: yadore-monetizer.php:13279
+#, php-format
+msgid "Imported %d log entries."
+msgstr "Imported %d log entries."
 
-#: templates/admin-settings.php:201
-msgid "Get your API key here"
-msgstr "Get your API key here"
+#: yadore-monetizer.php:13286
+msgid "Cache metrics restored."
+msgstr "Cache metrics restored."
 
-#: templates/admin-settings.php:331
-msgid "Gemini AI Configuration"
-msgstr "Gemini AI Configuration"
+#: yadore-monetizer.php:13289
+#, php-format
+msgid "Imported %d cache entries."
+msgstr "Imported %d cache entries."
 
-#: templates/admin-settings.php:343
-msgid "Enter your Gemini API key"
-msgstr "Enter your Gemini API key"
+#: yadore-monetizer.php:13830
+msgid "Keyword Analyzer"
+msgstr "Keyword Analyzer"
 
-#: templates/admin-settings.php:352
-msgid "Test AI"
-msgstr "Test AI"
+#: yadore-monetizer.php:13833
+msgid "Unexpected response from AI service."
+msgstr "Unexpected response from AI service."
 
-#: templates/admin-dashboard.php:398
-msgid "Copy shortcode"
-msgstr "Copy shortcode"
+#: yadore-monetizer.php:13869
+msgid "Upload directory is not available."
+msgstr "Upload directory is not available."
 
-#: yadore-monetizer.php:1553
-msgid "Copying…"
-msgstr "Copying…"
+#: yadore-monetizer.php:13879
+msgid "Failed to prepare export directory."
+msgstr "Failed to prepare export directory."
 
-#: yadore-monetizer.php:1554
-msgid "Copied!"
-msgstr "Copied!"
+#: yadore-monetizer.php:13887
+msgid "Failed to write export file to disk."
+msgstr "Failed to write export file to disk."
 
-#: yadore-monetizer.php:1555
-msgid "Copy failed"
-msgstr "Copy failed"
+#~ msgid "Yadore Monetizer Pro – Übersicht"
+#~ msgstr "Yadore Monetizer Pro – Overview"
 
-#: yadore-monetizer.php:1556
-msgid "Shortcode copied to clipboard."
-msgstr "Shortcode copied to clipboard."
+#, php-format
+#~ msgid "Yadore Monetizer Pro v%s wurde erfolgreich aktiviert!"
+#~ msgstr "Yadore Monetizer Pro v%s was activated successfully!"
 
-#: yadore-monetizer.php:1557
-msgid "Copy failed. Press Ctrl+C to copy manually."
-msgstr "Copy failed. Press Ctrl+C to copy manually."
+#~ msgid "Alle Funktionen stehen jetzt zur Verfügung."
+#~ msgstr "All features are now available."
 
-#: yadore-monetizer.php:1559
-msgid "Hide key"
-msgstr "Hide key"
+#~ msgid "Wird geladen..."
+#~ msgstr "Loading..."
+
+#~ msgid "Ausgespielte Produkte"
+#~ msgstr "Displayed products"
+
+#~ msgid "Gescannte Beiträge"
+#~ msgstr "Scanned posts"
+
+#~ msgid "Overlay-Aufrufe"
+#~ msgstr "Overlay views"
+
+#~ msgid "Konversionsrate"
+#~ msgstr "Conversion rate"
+
+#~ msgid "Funktionsstatus"
+#~ msgstr "Feature status"
+
+#~ msgid "Aktualisieren"
+#~ msgstr "Aktualisieren"
+
+#~ msgid "WordPress-Integration"
+#~ msgstr "WordPress-Integration"
+
+#~ msgid "Umfassende WordPress-Integration mit sechs Admin-Seiten"
+#~ msgstr "Comprehensive WordPress integration with six admin pages"
+
+#~ msgid "Aktiv"
+#~ msgstr "Aktiv"
+
+#~ msgid "KI-Inhaltsanalyse"
+#~ msgstr "KI-Inhaltsanalyse"
+
+#~ msgid "Gemini-KI-Integration zur intelligenten Produkterkennung"
+#~ msgstr "Gemini AI integration for intelligent product detection"
+
+#~ msgid "Dynamische Produktempfehlungen als Overlay"
+#~ msgstr "Dynamic product recommendations as an overlay"
+
+#~ msgid "Automatische Inhaltsanalyse und Produkterkennung"
+#~ msgstr "Automatic content analysis and product detection"
+
+#~ msgid "Analysen & Tracking"
+#~ msgstr "Analysen & Tracking"
+
+#~ msgid "Umfassende Analysen und Leistungsüberwachung"
+#~ msgstr "Comprehensive analytics and performance monitoring"
+
+#~ msgid "Shortcode-System"
+#~ msgstr "Shortcode-System"
+
+#~ msgid "[yadore_products]-Shortcode mit erweiterten Funktionen"
+#~ msgstr "[yadore_products] shortcode with advanced features"
+
+#~ msgid "Erweiterter Shortcode-Generator"
+#~ msgstr "Advanced shortcode generator"
+
+#~ msgid "Produkt-Keyword *"
+#~ msgstr "Product keyword *"
+
+#~ msgid ""
+#~ "Gib die wichtigste Produktkategorie oder einen konkreten Produktnamen ein."
+#~ msgstr "Enter the primary product category or a specific product name."
+
+#~ msgid "Anzahl der Produkte"
+#~ msgstr "Number of products"
+
+#~ msgid "Produkte"
+#~ msgstr "Products"
+
+#~ msgid "Darstellungsformat"
+#~ msgstr "Darstellungsformat"
+
+#~ msgid "Rasterdarstellung"
+#~ msgstr "Grid layout"
+
+#~ msgid "Listenansicht"
+#~ msgstr "List view"
+
+#~ msgid "Inline-Integration"
+#~ msgstr "Inline-Integration"
+
+#~ msgid "Ja (empfohlen)"
+#~ msgstr "Yes (recommended)"
+
+#~ msgid "Nein"
+#~ msgstr "No"
+
+#~ msgid "Eigene CSS-Klasse"
+#~ msgstr "Custom CSS class"
+
+#~ msgid "Optional: Eigene CSS-Klasse für individuelles Styling hinzufügen."
+#~ msgstr "Optional: add a custom CSS class for individual styling."
+
+#~ msgid "Generierter Shortcode:"
+#~ msgstr "Generated shortcode:"
+
+#~ msgid "Kopieren"
+#~ msgstr "Copy"
+
+#~ msgid "Vorschau"
+#~ msgstr "Preview"
+
+#~ msgid "Vorschau wird erstellt..."
+#~ msgstr "Generating preview..."
+
+#~ msgid "Aktuelle Aktivitäten"
+#~ msgstr "Current activities"
+
+#~ msgid "Aktuelle Aktivitäten werden geladen..."
+#~ msgstr "Loading current activities..."
+
+#~ msgid "Schnellaktionen"
+#~ msgstr "Quick actions"
+
+#~ msgid "Alle Plugin-Optionen konfigurieren"
+#~ msgstr "Configure all plugin options"
+
+#~ msgid "Beitrags-Scanner"
+#~ msgstr "Post scanner"
+
+#~ msgid "Beiträge scannen und analysieren"
+#~ msgstr "Scan and analyse posts"
+
+#~ msgid "Analysen"
+#~ msgstr "Analysen"
+
+#~ msgid "Leistungsberichte anzeigen"
+#~ msgstr "View performance reports"
+
+#~ msgid "Debug & Fehler"
+#~ msgstr "Debug & errors"
+
+#~ msgid "Systemdiagnose"
+#~ msgstr "System diagnosis"
+
+#~ msgid "Werkzeuge"
+#~ msgstr "Tools"
+
+#~ msgid "Import/Export & Werkzeuge"
+#~ msgstr "Import/export & tools"
+
+#~ msgid "Systemstatus"
+#~ msgstr "System status"
+
+#, php-format
+#~ msgid "v%s – Alle Systeme betriebsbereit"
+#~ msgstr "v%s – all systems operational"
+
+#~ msgid "Yadore-API"
+#~ msgstr "Yadore-API"
+
+#~ msgid "API-Schlüssel erforderlich"
+#~ msgstr "API key required"
+
+#~ msgid "Gemini-KI"
+#~ msgstr "Gemini AI"
+
+#~ msgid "Nicht konfiguriert"
+#~ msgstr "Not configured"
+
+#~ msgid "Datenbank"
+#~ msgstr "Database"
+
+#~ msgid "Alle Tabellen funktionsfähig"
+#~ msgstr "All tables functional"
+
+#~ msgid "Video-Tutorial"
+#~ msgstr "Video-Tutorial"
+
+#~ msgid "Tastenkürzel"
+#~ msgstr "Keyboard shortcuts"
+
+#~ msgid "Kopiert!"
+#~ msgstr "Copied!"
+
+#~ msgid ""
+#~ "Dies ist eine vereinfachte Vorschau. Der tatsächliche Shortcode zeigt reale "
+#~ "Produkte."
+#~ msgstr ""
+#~ "This is a simplified preview. The actual shortcode shows live products."
+
+#~ msgid "Produkt"
+#~ msgstr "product"
+
+#~ msgid "Dashboard gestartet"
+#~ msgstr "Dashboard opened"
+
+#~ msgid "Online Store"
+#~ msgstr "Online Store"
+
+#, php-format
+#~ msgid "Available at %s"
+#~ msgstr "Available at %s"
+
+#~ msgid "Gemini Live 2.5 Flash Preview - Live preview capabilities"
+#~ msgstr "Gemini Live 2.5 Flash Preview - Live preview capabilities"
+
+#~ msgid "Yadore Monetizer Pro Settings"
+#~ msgstr "Yadore Monetizer Pro Settings"
