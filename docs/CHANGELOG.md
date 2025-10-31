@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.48.20 - 2025-12-02
+- Corrected the German call-to-action label for "Zum Angebot →" and synchronised the PHP and PO catalogues.
+- Bumped plugin metadata, documentation, and language headers to version 3.48.20.
+
 # 3.48.17 - 2025-10-31
 - Aktualisierte die POT-Datei mit sämtlichen neuen Admin-Strings aus `templates/admin-settings.php`, inklusive Setup-Checkliste und Navigationsstatus.
 - Synchronisierte die englischen und deutschen PO-Dateien, ergänzte fehlende `msgstr`-Einträge und hinterlegte konsistente Standardübersetzungen.
