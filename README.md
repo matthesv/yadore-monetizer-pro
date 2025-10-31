@@ -1,8 +1,8 @@
-# Yadore Monetizer Pro v3.48.16 - COMPLETE FEATURE SET
+# Yadore Monetizer Pro v3.48.17 - COMPLETE FEATURE SET
 
 Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY** and **ALL FEATURES INTEGRATED**.
 
-## 🚀 **YADORE MONETIZER PRO v3.48.16 - VOLLSTÄNDIGE VERSION:**
+## 🚀 **YADORE MONETIZER PRO v3.48.17 - VOLLSTÄNDIGE VERSION:**
 
 ### **🔥 ALLE FUNKTIONEN WIEDER INTEGRIERT:**
 ✅ **8 WordPress Admin Pages** - Vollständig funktional mit erweiterten Features
@@ -15,11 +15,11 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 ✅ **22 AJAX Endpoints** - Alle korrekt implementiert inkl. Produktions-Diagnostik & Cache-Tools
 ✅ **Enhanced Database** - 5 optimierte Tabellen mit Analytics-Support
 
-## 🌟 **NEU IN VERSION 3.48.16**
+## 🌟 **NEU IN VERSION 3.48.17**
 
-- 🗣️ **Custom Translation Manager** – Neue Admin-Seite „Translations“ zum Pflegen von Schlüssel-Wert-Übersetzungen für Deutsch und Englisch, inklusive dynamischer Formularzeilen.
-- 💾 **Optionen-Merge** – Speichert Anpassungen in der Option `yadore_custom_translations` und lädt sie vor den gettext-Filtern, sodass eigene Strings sofort greifen.
-- 🧩 **Asset-Update** – Frische JS- und Dokumentationsstände für Version 3.48.16 inklusive Übersetzungs-Helfer.
+- 🗂️ **Setup-Strings synchronisiert** – Die POT-Datei enthält jetzt die komplette Setup-Checkliste, Navigationsstatus-Badges und Meta-Beschreibungen der Einstellungsseiten.
+- 🗣️ **Standardtexte vereinheitlicht** – Englische und deutsche PO-Kataloge wurden abgeglichen, fehlende `msgstr`-Einträge ergänzt und konsistente Defaults hinterlegt.
+- ♻️ **Cache-Refresh** – PHP-Sprach-Caches aus den aktualisierten PO-Dateien regeneriert, damit WordPress sofort alle neuen Texte lädt.
 
 ## 🔌 **WORDPRESS INTEGRATION - 100% VOLLSTÄNDIG:**
 
@@ -66,7 +66,7 @@ Professional WordPress affiliate marketing plugin with **COMPLETE FUNCTIONALITY*
 📋 **List View** - Kompakte Listenansicht für Content-Integration  
 🔗 **Inline Display** - Nahtlose Content-Integration mit Disclaimer  
 
-## 🔧 **TECHNICAL SPECIFICATIONS - v3.48.16:**
+## 🔧 **TECHNICAL SPECIFICATIONS - v3.48.17:**
 
 ### **WordPress Environment:**
 - **WordPress Version:** 5.0+ (Getestet bis 6.4)
@@ -273,12 +273,12 @@ $settings = apply_filters('yadore_default_settings', $settings);
 
 ---
 
-## 🎉 **v3.48.16 - FUTURE-PROOF EXPERIENCE RELEASE!**
+## 🎉 **v3.48.17 - FUTURE-PROOF EXPERIENCE RELEASE!**
 
-### **Neue Highlights in v3.48.16:**
-- 🗣️ **Translations Admin Hub** – Eigenständige „Translations“-Seite mit dynamischen Formularzeilen für deutsch- und englischsprachige Overrides.
-- 🔄 **Runtime Merge** – Persistente Übersetzungen aus `yadore_custom_translations` werden vor den gettext-Filtern in die Kataloge injiziert.
-- 🧰 **Version Sync** – Aktualisierte Assets und Dokumentation spiegeln die neue Release-Version samt Übersetzungs-Workflow wider.
+### **Neue Highlights in v3.48.17:**
+- 🗂️ **Vollständige Admin-Strings** – Setup-Checkliste, Navigationszustände und Meta-Beschreibungen stehen jetzt zentral in der POT-Datei bereit.
+- 🗣️ **Verlässliche Defaults** – Alle Admin-Strings besitzen englische und deutsche `msgstr`-Werte, sodass Fallbacks ohne Lücken funktionieren.
+- ♻️ **Aktualisierte Sprach-Caches** – Regenerierte PHP-Dateien liefern die neuen Texte ohne zusätzliche Deploy-Schritte in WordPress aus.
 
 **Alle Features sind verfügbar und voll funktional – jetzt mit Premium-UX!**
 
@@ -294,11 +294,11 @@ $settings = apply_filters('yadore_default_settings', $settings);
 ✅ **Analytics:** ADVANCED REPORTING
 ✅ **Tools:** COMPREHENSIVE UTILITIES
 
-**Yadore Monetizer Pro v3.48.16 ist die vollständigste Version mit allen Features!** 🚀
+**Yadore Monetizer Pro v3.48.17 ist die vollständigste Version mit allen Features!** 🚀
 
 ---
 
-**Current Version: 3.48.16** - Production-Ready Market Release
+**Current Version: 3.48.17** - Production-Ready Market Release
 **Feature Status: ✅ ALL INTEGRATED**
 **WordPress Integration: ✅ 100% COMPLETE**
 **Production Status: ✅ ENTERPRISE READY**

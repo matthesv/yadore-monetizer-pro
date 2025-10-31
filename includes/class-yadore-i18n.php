@@ -50,8 +50,21 @@ if (!class_exists('Yadore_Monetizer_I18n')) {
                         $catalogue['plural'] = $data['plural'];
                     }
 
+                    if (empty($catalogue['singular']) && isset($data['messages']) && is_array($data['messages'])) {
+                        $messages = self::convert_messages_catalogue($data['messages']);
+                        if (!empty($messages['singular'])) {
+                            $catalogue['singular'] = $messages['singular'];
+                        }
+
+                        if (!empty($messages['plural'])) {
+                            $catalogue['plural'] = $messages['plural'];
+                        }
+                    }
+
                     if (isset($data['locale']) && is_string($data['locale']) && $data['locale'] !== '') {
                         self::$locale = $data['locale'];
+                    } elseif (isset($data['language']) && is_string($data['language']) && $data['language'] !== '') {
+                        self::$locale = $data['language'];
                     }
                 }
             }
@@ -240,6 +253,66 @@ if (!class_exists('Yadore_Monetizer_I18n')) {
             return array(
                 'singular' => $singular,
                 'plural' => $prepared_plural,
+            );
+        }
+
+        /**
+         * Converts WP-CLI style message catalogues into the legacy singular/plural structure.
+         *
+         * @param array<string, mixed> $messages
+         *
+         * @return array{singular: array<string, string>, plural: array<string, array<int, string>>}
+         */
+        private static function convert_messages_catalogue($messages) {
+            $singular = array();
+            $plural = array();
+
+            foreach ($messages as $original => $translation) {
+                if (!is_string($original) || $original === '') {
+                    continue;
+                }
+
+                if (is_string($translation)) {
+                    if ($translation !== '') {
+                        $singular[$original] = $translation;
+                    }
+
+                    continue;
+                }
+
+                if (!is_array($translation)) {
+                    continue;
+                }
+
+                $forms = array();
+
+                foreach ($translation as $index => $value) {
+                    if (!is_string($value) || $value === '') {
+                        continue;
+                    }
+
+                    if (is_int($index) || (is_string($index) && ctype_digit($index))) {
+                        $forms[(int) $index] = $value;
+                    } elseif ($index === 'singular') {
+                        $forms[0] = $value;
+                    } elseif ($index === 'plural') {
+                        $forms[1] = $value;
+                    }
+                }
+
+                if (!empty($forms)) {
+                    ksort($forms);
+                    $plural[$original] = $forms;
+
+                    if (!isset($singular[$original]) && isset($forms[0])) {
+                        $singular[$original] = $forms[0];
+                    }
+                }
+            }
+
+            return array(
+                'singular' => $singular,
+                'plural' => $plural,
             );
         }
 

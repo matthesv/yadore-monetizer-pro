@@ -2,7 +2,7 @@
 /*
 Plugin Name: Yadore Monetizer Pro
 Description: Professional Affiliate Marketing Plugin with Complete Feature Set
-Version: 3.48.16
+Version: 3.48.17
 Author: Matthes Vogel
 Text Domain: yadore-monetizer
 Domain Path: /languages
@@ -14,7 +14,7 @@ Network: false
 
 if (!defined('ABSPATH')) { exit; }
 
-define('YADORE_PLUGIN_VERSION', '3.48.16');
+define('YADORE_PLUGIN_VERSION', '3.48.17');
 define('YADORE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('YADORE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('YADORE_PLUGIN_FILE', __FILE__);
@@ -193,7 +193,7 @@ class YadoreMonetizer {
             // v2.7: Advanced admin features
             $this->setup_advanced_admin_features();
 
-            // v3.48.16: Custom translation handling
+            // v3.48.17: Custom translation handling
             $this->handle_translation_form();
 
             $this->log('Admin initialized successfully with advanced features', 'info');
@@ -1714,7 +1714,7 @@ HTML
                 array($this, 'admin_styleguide_page')
             );
 
-            // v3.48.16: Custom translation management
+            // v3.48.17: Custom translation management
             add_submenu_page(
                 'yadore-monetizer',
                 'Custom Translations',

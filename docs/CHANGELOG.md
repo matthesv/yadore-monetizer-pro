@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.48.17 - 2025-10-31
+- Aktualisierte die POT-Datei mit sämtlichen neuen Admin-Strings aus `templates/admin-settings.php`, inklusive Setup-Checkliste und Navigationsstatus.
+- Synchronisierte die englischen und deutschen PO-Dateien, ergänzte fehlende `msgstr`-Einträge und hinterlegte konsistente Standardübersetzungen.
+- Regenerierte die PHP-Sprach-Caches, damit WordPress die neuen Standardtexte unmittelbar laden kann, und hob die Plugin-Metadaten auf Version 3.48.17 an.
+
 # 3.48.16 - 2025-11-23
 - Introduced a dedicated translations admin page with nonce-protected forms for managing German and English string overrides.
 - Stored custom translations in the `yadore_custom_translations` option and merged them into the runtime catalogue before gettext filters run.
